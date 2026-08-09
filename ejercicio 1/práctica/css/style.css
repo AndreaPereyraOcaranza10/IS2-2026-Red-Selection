@@ -1,0 +1,52 @@
+
+
+/* 
+1px
+1 rem = 16px
+vh = alto de la pag
+vw = ancho de la pag
+*/
+
+/* 
+top
+left
+right
+bottom
+*/
+
+.lista-tareas{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1vh;
+    margin-top: 2vh;
+    border: 1px solid gray;
+    height: 50vh;
+}
+
+.tarea{
+    padding: 0.4rem;
+    border: 1px solid gray;
+    width: 80%;
+    text-align: center;
+}
+
+.completed{
+    background-color: lightseagreen;
+}
+
+.incompleted{
+    background-color: lightsalmon;
+}
+
+button{
+    padding: 0.4rem;
+    border: none;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    color: white;
+    background-color: rgb(112, 112, 164);
+    border-radius: 0.4rem;
+}
+
