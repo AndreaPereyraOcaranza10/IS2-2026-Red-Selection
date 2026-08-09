@@ -1,0 +1,42 @@
+¿Qué es Boostrap? 
+Bootstrap es un framework de código abierto para el desarrollo frontend, que provee un conjunto de plantillas y componentes prediseñados en HTML, CSS y JavaScript (clases CSS, componentes de interfaz, sistema de grillas, etc.) para facilitar la creación de sitios web responsivos, es decir, que se adaptan automáticamente a distintos tamaños de pantalla (celular, tablet, escritorio). 
+
+¿Para qué sirve? 
+Sirve para:
+- Agilizar el desarrollo del frontend, evitando escribir CSS desde cero para cosas comunes (botones, formularios, barras de navegación, tarjetas,      modales, etc.).
+- Lograr diseño responsivo de forma sencilla, mediante su sistema de grillas que se adapta a distintos dispositivos.
+- Mantener consistencia visual en el sitio, ya que todos los componentes siguen el mismo estilo de diseño.
+- Reducir el tiempo de desarrollo al reutilizar componentes ya probados y documentados.
+
+¿Cuáles son sus características?
+- Sistema de grillas (Grid System): divide el ancho de la pantalla en 12 columnas para organizar el contenido de forma flexible y responsiva.
+- Responsive por defecto: los componentes se adaptan automáticamente a distintos tamaños de pantalla (mobile-first).
+- Componentes predefinidos: botones, formularios, tarjetas (cards), barras de navegación (navbar), modales, alertas, carruseles, etc.
+- Basado en HTML, CSS y JavaScript: se integra directamente en el proyecto mediante clases CSS y, en algunos componentes, scripts JS (por ejemplo,     para modales o dropdowns).
+- Personalizable: permite modificar variables de diseño (colores, tipografías, espaciados) mediante Sass, o sobreescribir clases CSS.
+- Compatibilidad entre navegadores: está pensado para funcionar de forma consistente en los distintos navegadores modernos.
+- Documentación oficial extensa: cuenta con ejemplos y guías detalladas para cada componente.
+
+¿Cuáles son sus ventajas y desventajas?
+- Ventajas:
+    . Reduce significativamente el tiempo de desarrollo del frontend.
+    . No requiere ser experto en CSS para lograr un diseño prolijo y responsivo.
+    . Gran comunidad y documentación, fácil de encontrar ejemplos y soluciones.
+    . Se integra bien con frameworks backend (Spring Boot + Thymeleaf, por ejemplo) y también con librerías frontend como React.
+    . Existen numerosas plantillas gratuitas y de pago ya armadas con Bootstrap.
+
+- Desventajas:
+    . Los sitios pueden verse "genéricos" o parecidos entre sí si no se personaliza el diseño.
+    . Incluye muchas clases y componentes que tal vez no se usen todos, lo que puede aumentar el peso del CSS/JS si no se optimiza.
+    . Requiere aprender su sistema de clases y convenciones propias (aunque la curva de aprendizaje es baja).
+    . Al depender de una estructura de grillas y clases predefinidas, personalizaciones muy específicas de diseño pueden terminar peleando contra el       propio framework.
+
+Plantillas HTML: Investigar sitios de internet donde se puedan descargar plantillas HTML/CSS con Bootstrap por ejemplo https://themewagon.com/themeframework/bootstrap-5/ .
+- Plantillas:
+    . Start Bootstrap https://startbootstrap.com/
+    . Colorlib  colorlib.com
+    . Get bootstrap oficial getbootstrap.com/docs/5.3/examples
+    . HTML5 UP https://html5up.net/ 
+
+
+
