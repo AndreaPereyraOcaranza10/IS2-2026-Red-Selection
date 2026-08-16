@@ -10,6 +10,4 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface ProductoRepository extends JpaRepository<Producto, Long> {
-    // Podés agregar búsquedas personalizadas si lo necesitás en el futuro
-    // Ej: List<Producto> findByNombreContainingIgnoreCase(String nombre);
 }
