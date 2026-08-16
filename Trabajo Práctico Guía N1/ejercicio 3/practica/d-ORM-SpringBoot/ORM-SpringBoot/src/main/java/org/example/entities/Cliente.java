@@ -11,6 +11,8 @@ import java.util.List;
 
 @Entity
 @Table(name ="cliente")
+//@Table(name = "cliente", indexes = { @Index(name = "idx_cliente_dni", columnList = "dni", unique = true) })
+@NoArgsConstructor
 @AllArgsConstructor
 @Getter
 @Setter

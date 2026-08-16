@@ -21,6 +21,12 @@
 
             <!-- 'create' crea las tablas automáticamente desde cero cada vez que se ejecuta -->
             <property name="hibernate.hbm2ddl.auto" value="create" />
+
+            <!--Parte b del ejercicio, insertar posibilidad de cargar 50000 clientes y 50000 artículos -->
+            <!-- Tamaño del lote para inserciones masivas en JDBC -->
+            <property name="hibernate.jdbc.batch_size" value="50" />
+            <property name="hibernate.order_inserts" value="true" />
+
         </properties>
     </persistence-unit>
 </persistence>
