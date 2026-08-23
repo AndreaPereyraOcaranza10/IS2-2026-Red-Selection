@@ -1,0 +1,52 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="icon" href="favicon.ico">
+
+    <title>DEMO ABM</title>
+    <!-- Bootstrap core CSS -->
+    <link th:href="@{/bootstrap/css/bootstrap.min.css}" rel="stylesheet">
+    <link th:href="@{/bootstrap/css/jumbotron.css}" rel="stylesheet">
+    <link th:href="@{/bootstrap/css/sticky-footer-navbar.css}" rel="stylesheet">
+    <link href="https://use.fontawesome.com/releases/v5.5.0/css/all.css" rel="stylesheet">
+  </head>
+
+  <body>
+
+    <header th:insert="~{fragments/menubody :: menu-principal}"></header>
+
+    <main role="main">     
+      <hr>
+      <div class="container"> 
+
+        <div class="card">
+          <h4 class="card-header"><strong>DEMO ABM</strong></h4>              
+          <div class="card-body">
+			
+			<p>El siguiente demo posee dos ABM para conocer como es el intercambio de información entre las distintas capas.</p>
+			<p>El ABM País utiliza @PathVariable para recuperar los parámetros de la vista lo que permite utilizar el formato @GetMapping(“….. /{parametro}") Ej.: @PostMapping(“/usuario/baja/{id}”)al realizar una petición Get o Post Ej.: localhost:8080/usuario/baja/123456</p>
+			<p>El ABM Nacionalidad utiliza @RequestParam para recuperar los parámetros de la vista lo que permite utilizar el formato @GetMapping(“….. /") Ej.: @PostMapping(“/usuario/baja”)  al enviar parámetros en una petición Get o Post Ej.:localhost:8080/usuario/baja?id=123456.</p>  
+			<p>En las tablas que tiene las listas de País y Nacionalidad se puede observar la diferencias en las acciones para armar la URL y realizar las peticiones</p>
+			<p>En los formularios de alta, consulta y modificación de cada ABM se pueden observar dos formas de hacer las mismas acciones. Se deben observar los encabezados de los formularios, como se colocan los valores en los campos input y como se muestran los mensajes</p> 
+
+		</div>
+        </div>
+      </div> 
+
+    </main>
+
+    <footer th:insert="~{fragments/footer :: pie-pagina}" class="footer"></footer>
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+    <script th:src="@{/bootstrap/js/bootstrap.min.js}"></script>  
+    
+       
+  </body>
+</html>
