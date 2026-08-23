@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<body>
+
+    <div th:fragment="videojuego_card(videojuego)" class="col mb-4">
+        <div class="card h-100 shadow-sm border-0 videojuego-card">
+            <img th:src="${#strings.startsWith(videojuego.imagen, 'http')} ? ${videojuego.imagen} : @{'/imagenes/' + ${videojuego.imagen}}" class="card-img-top" alt="videojuego imagen" style="height: 300px; object-fit: cover;">
+            <div class="card-body d-flex flex-column">
+                <h5 class="card-title" th:text="${videojuego.titulo}">titulo</h5>
+                <p class="card-text text-success fw-bold mb-3">
+                    $<span th:text="${videojuego.precio}">1</span>
+                </p>
+                <a th:href="@{/detalle/{id}(id=${videojuego.id})}" class="btn btn-primary mt-auto" style="background-color: Olive; border: none; ">Ver más</a>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .videojuego-card {
+            transition: transform 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+        }
+        .videojuego-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.12) !important;
+        }
+    </style>
+
+</body>
+</html>

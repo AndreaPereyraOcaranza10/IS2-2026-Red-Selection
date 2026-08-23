@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css">
+
+    <title>Página de errores</title>
+</head>
+<body>
+    <nav th:replace="components/navbar :: nav_bar"></nav>
+    <div class="container">
+        <div class="row">
+            <div class="col">
+                <div class="alert alert-danger mt-5" role="alert" th:if="${error}">
+                    <span th:text="${error}"></span>
+                </div>
+                <div class="alert alert-danger mt-5" role="alert" th:unless="${error}">
+                    Ocurrió un error
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

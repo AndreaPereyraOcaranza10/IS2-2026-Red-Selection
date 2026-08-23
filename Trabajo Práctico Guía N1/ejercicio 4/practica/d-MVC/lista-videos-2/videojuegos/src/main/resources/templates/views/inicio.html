@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+    <title>Inicio</title>
+</head>
+<body>
+    <nav th:replace="components/navbar :: nav_bar"></nav>
+
+    <div class="container mt-5">
+        <div class="row">
+            <th:block th:each="videojuego : ${videojuegos}">
+                <div th:replace="~{components/card :: videojuego_card(videojuego=${videojuego})}"></div>
+            </th:block>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
