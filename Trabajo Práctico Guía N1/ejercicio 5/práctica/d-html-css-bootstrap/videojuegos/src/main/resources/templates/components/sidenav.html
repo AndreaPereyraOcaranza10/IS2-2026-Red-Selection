@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<nav th:fragment="sidenav" class="sb-sidenav accordion sb-sidenav-dark" id="sidenavAccordion">
+    <div class="sb-sidenav-menu">
+        <div class="nav">
+            <div class="sb-sidenav-menu-heading">Menú</div>
+
+            <a class="nav-link" th:href="@{/inicio}">
+                <div class="sb-nav-link-icon"><i class="fas fa-house"></i></div>
+                Inicio
+            </a>
+
+            <a class="nav-link" th:href="@{/abm}">
+                <div class="sb-nav-link-icon"><i class="fas fa-table"></i></div>
+                ABM
+            </a>
+        </div>
+    </div>
+
+    <div class="sb-sidenav-footer">
+        <div class="small">Panel de administración</div>
+        RedSelection
+    </div>
+</nav>
+
+</body>
+</html>
