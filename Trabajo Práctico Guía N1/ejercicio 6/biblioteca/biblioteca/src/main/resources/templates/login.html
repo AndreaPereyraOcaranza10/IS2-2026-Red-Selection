@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head('Ingresar')}"></head>
+
+<body>
+<nav th:replace="~{fragments/navbar :: nav}"></nav>
+
+<main class="app-content">
+<div class="login-wrapper">
+    <div class="login-bg-shape login-bg-shape-1"></div>
+    <div class="login-bg-shape login-bg-shape-2"></div>
+
+    <div class="login-card">
+        <a href="#" class="login-brand"><i class="bi bi-book-half"></i> Biblioteca</a>
+        <h1 class="login-title">Accedé a tu cuenta</h1>
+        <p class="login-subtitle">Ingresá tus datos para continuar</p>
+
+        <div th:if="${error != null}" class="alert-custom alert-custom-danger">
+            <i class="bi bi-exclamation-triangle-fill alert-custom-icon"></i>
+            <div class="alert-custom-content" th:text="${error}"></div>
+        </div>
+
+        <form th:action="@{/usuario/inicio}" method="post">
+
+            <div class="login-form-group">
+                <label class="login-form-label">Email</label>
+                <div class="login-input-group">
+                    <i class="bi bi-envelope input-icon"></i>
+                    <input type="email" class="login-input" name="email" placeholder="tu@email.com" required>
+                </div>
+            </div>
+
+            <div class="login-form-group">
+                <label class="login-form-label">Contraseña</label>
+                <div class="login-input-group">
+                    <i class="bi bi-lock input-icon"></i>
+                    <input type="password" class="login-input login-input-password" name="password" placeholder="••••••••" required>
+                </div>
+            </div>
+
+            <button type="submit" class="btn-login mt-2">
+                Ingresar <i class="bi bi-arrow-right"></i>
+            </button>
+        </form>
+
+        <p class="login-footer-text mt-4">
+            ¿No tenés cuenta? <a th:href="@{/usuario/registrar}">Registrate acá</a>
+        </p>
+        <p class="login-footer-text mt-2">
+            <a th:href="@{/}"><i class="bi bi-arrow-left"></i> Volver al inicio</a>
+        </p>
+    </div>
+</div>
+</main>
+
+<div th:replace="~{fragments/scripts :: scripts}"></div>
+</body>
+</html>

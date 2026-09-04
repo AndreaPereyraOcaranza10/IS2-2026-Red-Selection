@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head('Panel de administración')}"></head>
+
+<body>
+<nav th:replace="~{fragments/navbar :: nav}"></nav>
+
+<main class="app-content">
+    <div class="page-shell">
+
+        <div class="page-header">
+            <div>
+                <h1 class="page-title">Panel de administración</h1>
+                <p class="page-subtitle">Gestioná libros, autores, editoriales y usuarios</p>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-md-6 col-lg-3">
+                <a th:href="@{/libro/lista}" class="card quick-link-card">
+                    <div class="quick-link-icon"><i class="bi bi-journal-bookmark"></i></div>
+                    <div>
+                        <p class="quick-link-title">Libros</p>
+                        <p class="quick-link-desc">Ver y administrar</p>
+                    </div>
+                </a>
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <a th:href="@{/autor/lista}" class="card quick-link-card">
+                    <div class="quick-link-icon"><i class="bi bi-person-lines-fill"></i></div>
+                    <div>
+                        <p class="quick-link-title">Autores</p>
+                        <p class="quick-link-desc">Ver y administrar</p>
+                    </div>
+                </a>
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <a th:href="@{/editorial/lista}" class="card quick-link-card">
+                    <div class="quick-link-icon"><i class="bi bi-building"></i></div>
+                    <div>
+                        <p class="quick-link-title">Editoriales</p>
+                        <p class="quick-link-desc">Ver y administrar</p>
+                    </div>
+                </a>
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <a th:href="@{/usuario/lista}" class="card quick-link-card">
+                    <div class="quick-link-icon"><i class="bi bi-people"></i></div>
+                    <div>
+                        <p class="quick-link-title">Usuarios</p>
+                        <p class="quick-link-desc">Ver y administrar</p>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        <div class="row g-4 mt-1">
+            <div class="col-md-4">
+                <a th:href="@{/libro/registrar}" class="btn-custom btn-custom-primary w-100">
+                    <i class="bi bi-plus-circle"></i> Nuevo libro
+                </a>
+            </div>
+            <div class="col-md-4">
+                <a th:href="@{/autor/registrar}" class="btn-custom btn-custom-light w-100">
+                    <i class="bi bi-plus-circle"></i> Nuevo autor
+                </a>
+            </div>
+            <div class="col-md-4">
+                <a th:href="@{/editorial/registrar}" class="btn-custom btn-custom-light w-100">
+                    <i class="bi bi-plus-circle"></i> Nueva editorial
+                </a>
+            </div>
+        </div>
+
+    </div>
+</main>
+
+<div th:replace="~{fragments/footer :: footer}"></div>
+<div th:replace="~{fragments/scripts :: scripts}"></div>
+</body>
+</html>

@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head('Modificar libro')}"></head>
+
+<body>
+<nav th:replace="~{fragments/navbar :: nav}"></nav>
+
+<main class="app-content">
+    <div class="form-card-wrapper">
+        <div class="form-card" style="max-width: 620px;">
+            <h1 class="form-card-title">Modificar libro</h1>
+            <p class="form-card-subtitle">Actualizá los datos del libro</p>
+
+            <div th:if="${exito}!=null" class="alert-custom alert-custom-success">
+                <i class="bi bi-check-circle-fill alert-custom-icon"></i>
+                <div class="alert-custom-content" th:text="${exito}"></div>
+            </div>
+            <div th:if="${error}!=null" class="alert-custom alert-custom-danger">
+                <i class="bi bi-exclamation-triangle-fill alert-custom-icon"></i>
+                <div class="alert-custom-content" th:text="${error}"></div>
+            </div>
+
+            <form th:action="@{/libro/modificar/__${libro.isbn}__}" method="POST" enctype="multipart/form-data">
+                <input hidden th:value="${isbn}" name="isbn">
+
+                <div class="row g-3">
+                    <div class="col-12">
+                        <label class="form-label-custom">Título</label>
+                        <input th:value="${libro.titulo}" type="text" class="form-control-custom" name="titulo" placeholder="Título" required>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label-custom">Cant. ejemplares</label>
+                        <input th:value="${libro.ejemplares}" type="number" class="form-control-custom" name="ejemplares" placeholder="Cantidad">
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label-custom">Portada</label>
+                        <div class="d-flex align-items-center gap-3 mb-2" th:if="${libro.imagen != null}">
+                            <img class="cover-thumb" th:src="${'/imagen/' + libro.imagen.id}" alt="">
+                            <span class="quick-link-desc">Portada actual — subí un archivo para reemplazarla</span>
+                        </div>
+                        <input type="file" class="form-control-custom" name="archivo">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label-custom">Autor</label>
+                        <select name="idAutor" class="form-select-custom" required>
+                            <option value="">Seleccionar...</option>
+                            <option th:each="autor : ${autores}"
+                                    th:value="${autor.id}"
+                                    th:text="${autor.nombre}"
+                                    th:selected="${libro.autor != null and libro.autor.id == autor.id}"></option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label-custom">Editorial</label>
+                        <select name="idEditorial" class="form-select-custom" required>
+                            <option value="">Seleccionar...</option>
+                            <option th:each="editorial : ${editoriales}"
+                                    th:value="${editorial.id}"
+                                    th:text="${editorial.nombre}"
+                                    th:selected="${libro.editorial != null and libro.editorial.id == editorial.id}"></option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="d-flex gap-2 mt-4">
+                    <button type="submit" class="btn-custom btn-custom-primary flex-fill">
+                        <i class="bi bi-check2"></i> Actualizar
+                    </button>
+                    <a th:href="@{/regresoPage}" class="btn-custom btn-custom-light">Volver</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</main>
+
+<div th:replace="~{fragments/scripts :: scripts}"></div>
+</body>
+</html>
