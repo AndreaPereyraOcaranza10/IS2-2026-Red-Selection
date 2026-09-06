@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head('Registrate')}"></head>
+
+<body>
+<nav th:replace="~{fragments/navbar :: nav}"></nav>
+
+<main class="app-content">
+<div class="login-wrapper">
+    <div class="login-bg-shape login-bg-shape-1"></div>
+    <div class="login-bg-shape login-bg-shape-2"></div>
+
+    <div class="login-card" style="max-width: 500px;">
+        <a href="#" class="login-brand"><i class="bi bi-book-half"></i> Biblioteca</a>
+        <h1 class="login-title">Creá tu cuenta</h1>
+        <p class="login-subtitle">Registrate para acceder al catálogo completo</p>
+
+        <div th:if="${error != null}" class="alert-custom alert-custom-danger">
+            <i class="bi bi-exclamation-triangle-fill alert-custom-icon"></i>
+            <div class="alert-custom-content" th:text="${error}"></div>
+        </div>
+        <div th:if="${exito != null}" class="alert-custom alert-custom-success">
+            <i class="bi bi-check-circle-fill alert-custom-icon"></i>
+            <div class="alert-custom-content" th:text="${exito}"></div>
+        </div>
+
+        <form th:action="@{/usuario/registro}" method="POST" enctype="multipart/form-data">
+
+            <div class="login-form-group">
+                <label class="login-form-label">Nombre</label>
+                <div class="login-input-group">
+                    <i class="bi bi-person input-icon"></i>
+                    <input type="text" class="login-input" name="nombre" placeholder="Tu nombre" th:value="${nombre}" required>
+                </div>
+            </div>
+
+            <div class="login-form-group">
+                <label class="login-form-label">Email</label>
+                <div class="login-input-group">
+                    <i class="bi bi-envelope input-icon"></i>
+                    <input type="email" class="login-input" name="email" placeholder="tu@email.com" th:value="${email}" required>
+                </div>
+            </div>
+
+            <div class="login-form-group">
+                <label class="login-form-label">Foto de perfil (opcional)</label>
+                <input type="file" class="form-control-custom" name="archivo">
+            </div>
+
+            <div class="login-form-group">
+                <label class="login-form-label">Contraseña</label>
+                <div class="login-input-group">
+                    <i class="bi bi-lock input-icon"></i>
+                    <input type="password" class="login-input login-input-password" name="password" placeholder="••••••••" required>
+                </div>
+            </div>
+
+            <div class="login-form-group">
+                <label class="login-form-label">Repetir contraseña</label>
+                <div class="login-input-group">
+                    <i class="bi bi-lock-fill input-icon"></i>
+                    <input type="password" class="login-input login-input-password" name="password2" placeholder="••••••••" required>
+                </div>
+            </div>
+
+            <button type="submit" class="btn-login mt-2">
+                Registrarme <i class="bi bi-arrow-right"></i>
+            </button>
+        </form>
+
+        <p class="login-footer-text mt-4">
+            ¿Ya tenés cuenta? <a th:href="@{/usuario/login}">Ingresá acá</a>
+        </p>
+        <p class="login-footer-text mt-2">
+            <a th:href="@{/}"><i class="bi bi-arrow-left"></i> Volver al inicio</a>
+        </p>
+    </div>
+</div>
+</main>
+
+<div th:replace="~{fragments/scripts :: scripts}"></div>
+</body>
+</html>

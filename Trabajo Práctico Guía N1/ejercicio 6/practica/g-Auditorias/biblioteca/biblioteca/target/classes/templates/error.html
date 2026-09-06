@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head('Error')}"></head>
+
+<body>
+<nav th:replace="~{fragments/navbar :: nav}"></nav>
+
+<main class="app-content">
+    <div class="page-shell">
+        <div class="error-card-custom">
+            <div class="error-title-huge">
+                <i class="bi bi-asterisk"></i>
+                <span th:text="${codigo}">404</span>
+            </div>
+            <p class="error-subtitle" th:text="${mensaje}">Ocurrió un error</p>
+            <p class="error-desc">Podés volver al inicio o intentar la acción nuevamente.</p>
+            <div class="error-actions-group">
+                <a th:href="@{/regresoPage}" class="btn-custom btn-custom-primary">
+                    <i class="bi bi-arrow-left"></i> Volver
+                </a>
+                <a th:href="@{/}" class="btn-custom btn-custom-light">
+                    <i class="bi bi-house"></i> Ir al inicio
+                </a>
+            </div>
+        </div>
+    </div>
+</main>
+
+<div th:replace="~{fragments/footer :: footer}"></div>
+<div th:replace="~{fragments/scripts :: scripts}"></div>
+</body>
+</html>

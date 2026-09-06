@@ -1,0 +1,12 @@
+<div th:fragment="footer" class="page-shell">
+    <footer class="footer-custom">
+        <div class="footer-left">
+            <span class="footer-logo"><i class="bi bi-book-half"></i> Biblioteca</span>
+            <span class="footer-separator">|</span>
+            <span>Gestión de libros, autores y editoriales</span>
+        </div>
+        <div class="footer-right">
+            <span>&copy; <span th:text="${#dates.year(#dates.createNow())}">2026</span> Biblioteca</span>
+        </div>
+    </footer>
+</div>

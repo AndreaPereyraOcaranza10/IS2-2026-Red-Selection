@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/head :: head('Inicio')}"></head>
+
+<body>
+<nav th:replace="~{fragments/navbar :: nav}"></nav>
+
+<main class="app-content">
+    <div class="page-shell">
+
+        <div class="page-header">
+            <div>
+                <img th:if="${session.usuariosession.imagen != null}" class="app-navbar-avatar mb-2" style="width:56px;height:56px;font-size:1.4rem;" th:src="@{/imagen/perfil/__${session.usuariosession.id}__}" alt="">
+                <h1 class="page-title" th:text="'¡Hola, ' + ${session.usuariosession.nombre} + '!'">Hola</h1>
+                <p class="page-subtitle">¿Qué querés hacer hoy?</p>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-md-4">
+                <a th:href="@{/libro/lista}" class="card quick-link-card">
+                    <div class="quick-link-icon"><i class="bi bi-journal-bookmark"></i></div>
+                    <div>
+                        <p class="quick-link-title">Libros</p>
+                        <p class="quick-link-desc">Ver y buscar en el catálogo</p>
+                    </div>
+                </a>
+            </div>
+            <div class="col-md-4">
+                <a th:href="@{/autor/lista}" class="card quick-link-card">
+                    <div class="quick-link-icon"><i class="bi bi-person-lines-fill"></i></div>
+                    <div>
+                        <p class="quick-link-title">Autores</p>
+                        <p class="quick-link-desc">Consultar autores registrados</p>
+                    </div>
+                </a>
+            </div>
+            <div class="col-md-4">
+                <a th:href="@{/editorial/lista}" class="card quick-link-card">
+                    <div class="quick-link-icon"><i class="bi bi-building"></i></div>
+                    <div>
+                        <p class="quick-link-title">Editoriales</p>
+                        <p class="quick-link-desc">Consultar editoriales registradas</p>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+    </div>
+</main>
+
+<div th:replace="~{fragments/footer :: footer}"></div>
+<div th:replace="~{fragments/scripts :: scripts}"></div>
+</body>
+</html>
