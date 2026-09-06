@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head('Modificar usuario')}"></head>
+
+<body>
+<nav th:replace="~{fragments/navbar :: nav}"></nav>
+
+<main class="app-content">
+    <div class="form-card-wrapper">
+        <div class="form-card">
+            <h1 class="form-card-title">Modificar usuario</h1>
+            <p class="form-card-subtitle">Actualizá los datos del usuario</p>
+
+            <div th:if="${exito}!=null" class="alert-custom alert-custom-success">
+                <i class="bi bi-check-circle-fill alert-custom-icon"></i>
+                <div class="alert-custom-content" th:text="${exito}"></div>
+            </div>
+            <div th:if="${error}!=null" class="alert-custom alert-custom-danger">
+                <i class="bi bi-exclamation-triangle-fill alert-custom-icon"></i>
+                <div class="alert-custom-content" th:text="${error}"></div>
+            </div>
+
+            <form th:action="@{/usuario/perfil/__${id}__}" method="POST" enctype="multipart/form-data">
+                <input hidden th:value="${id}" name="id">
+
+                <div class="mb-3">
+                    <label class="form-label-custom">Nombre</label>
+                    <input type="text" class="form-control-custom" name="nombre" th:value="${usuario.nombre}" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label-custom">Email</label>
+                    <input type="email" class="form-control-custom" name="email" th:value="${usuario.email}" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label-custom">Foto de perfil</label>
+                    <input type="file" class="form-control-custom" name="archivo">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label-custom">Contraseña</label>
+                    <input type="password" class="form-control-custom" name="password" placeholder="Nueva contraseña">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label-custom">Repetir contraseña</label>
+                    <input type="password" class="form-control-custom" name="password2" placeholder="Repetir contraseña">
+                </div>
+                <p class="form-feedback-custom invalid-custom mb-3">
+                    <i class="bi bi-info-circle"></i> Por ahora hay que completar la contraseña para poder guardar cualquier cambio.
+                </p>
+
+                <div class="d-flex gap-2 mt-2">
+                    <button type="submit" class="btn-custom btn-custom-primary flex-fill">
+                        <i class="bi bi-check2"></i> Actualizar
+                    </button>
+                    <a th:href="@{/regresoPage}" class="btn-custom btn-custom-light">Volver</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</main>
+
+<div th:replace="~{fragments/scripts :: scripts}"></div>
+</body>
+</html>

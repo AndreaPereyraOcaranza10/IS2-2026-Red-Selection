@@ -1,0 +1,285 @@
+/*
+========================================================================
+   BIBLIOTECA — Estilos propios de la app
+   Complementa a main.css (Spark Admin design system): reutiliza sus
+   variables de color/tipografía/sombras para un navbar superior y
+   algunas piezas específicas de esta app (hero, quick-links, avatar).
+========================================================================
+*/
+
+body {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+.app-content {
+    flex: 1 0 auto;
+}
+
+/* ---------------------------------------------------------------------
+   Navbar superior
+--------------------------------------------------------------------- */
+.app-navbar {
+    background-color: var(--brand-forest-dark);
+    padding: 0.85rem 0;
+    box-shadow: var(--shadow-md);
+}
+
+.app-navbar .navbar-brand {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-weight: 800;
+    font-size: 1.25rem;
+    color: #FFFFFF;
+}
+
+.app-navbar .navbar-brand i {
+    color: var(--brand-lime);
+    font-size: 1.4rem;
+}
+
+.app-navbar .nav-link {
+    color: var(--text-sidebar-muted) !important;
+    font-weight: 600;
+    font-size: 0.9rem;
+    padding: 0.5rem 0.9rem !important;
+    border-radius: var(--radius-md);
+    transition: all 0.2s ease-in-out;
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+}
+
+.app-navbar .nav-link:hover,
+.app-navbar .nav-link.active {
+    color: #FFFFFF !important;
+    background-color: rgba(255, 255, 255, 0.06);
+}
+
+.app-navbar .btn-navbar-cta {
+    background-color: var(--brand-lime);
+    color: #072F1F;
+    font-weight: 700;
+    font-size: 0.85rem;
+    padding: 0.5rem 1.1rem;
+    border-radius: 50rem;
+    transition: all 0.2s ease-in-out;
+}
+
+.app-navbar .btn-navbar-cta:hover {
+    background-color: var(--brand-lime-hover);
+    color: #072F1F;
+}
+
+.app-navbar .navbar-toggler {
+    border: none;
+    color: #fff;
+}
+
+.app-navbar .navbar-toggler:focus {
+    box-shadow: none;
+}
+
+.app-navbar .dropdown-toggle::after {
+    display: none;
+}
+
+.app-navbar-profile-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border-dark-green);
+    border-radius: 50rem;
+    padding: 0.35rem 0.9rem 0.35rem 0.35rem;
+    color: #FFFFFF;
+    font-weight: 600;
+    font-size: 0.85rem;
+}
+
+.app-navbar-avatar {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    object-fit: cover;
+    background-color: var(--brand-forest-medium);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--brand-lime);
+    font-size: 0.9rem;
+}
+
+/* ---------------------------------------------------------------------
+   Hero de portada (usuarios sin sesión)
+--------------------------------------------------------------------- */
+.app-hero {
+    background: radial-gradient(circle at 15% 20%, var(--brand-lime-translucent) 0%, rgba(180,241,5,0) 55%),
+                linear-gradient(160deg, var(--brand-forest-dark) 0%, var(--brand-forest-medium) 100%);
+    color: #FFFFFF;
+    border-radius: var(--radius-xxl);
+    padding: 4rem 3rem;
+    margin: 2.5rem 0;
+    text-align: center;
+    box-shadow: var(--shadow-lg);
+}
+
+.app-hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    background-color: rgba(255, 255, 255, 0.08);
+    color: var(--brand-lime);
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    padding: 0.4rem 0.9rem;
+    border-radius: 50rem;
+    margin-bottom: 1.5rem;
+}
+
+.app-hero h1 {
+    color: #FFFFFF;
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+}
+
+.app-hero p {
+    color: var(--text-sidebar-muted);
+    font-size: 1.05rem;
+    max-width: 560px;
+    margin: 0 auto 2rem;
+}
+
+.app-hero .btn-custom {
+    min-width: 180px;
+}
+
+/* ---------------------------------------------------------------------
+   Tarjetas de accesos rápidos (home logueado / panel admin)
+--------------------------------------------------------------------- */
+.quick-link-card {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    text-decoration: none;
+    height: 100%;
+}
+
+.quick-link-icon {
+    width: 52px;
+    height: 52px;
+    flex-shrink: 0;
+    border-radius: var(--radius-lg);
+    background-color: var(--brand-lime-translucent);
+    color: var(--brand-forest-medium);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.4rem;
+    transition: all 0.25s ease-in-out;
+}
+
+.quick-link-card:hover .quick-link-icon {
+    background-color: var(--brand-forest-medium);
+    color: #FFFFFF;
+}
+
+.quick-link-title {
+    font-weight: 700;
+    color: var(--text-main);
+    margin-bottom: 0.15rem;
+}
+
+.quick-link-desc {
+    font-size: 0.8rem;
+    color: var(--text-muted-green);
+    margin-bottom: 0;
+}
+
+/* ---------------------------------------------------------------------
+   Avatares circulares chicos (tablas)
+--------------------------------------------------------------------- */
+.avatar-fallback {
+    width: 38px;
+    height: 38px;
+    border-radius: var(--radius-lg);
+    background-color: var(--brand-lime-translucent);
+    color: var(--brand-forest-medium);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+}
+
+.cover-thumb {
+    width: 42px;
+    height: 56px;
+    object-fit: cover;
+    border-radius: var(--radius-sm);
+    box-shadow: var(--shadow-sm);
+}
+
+.cover-fallback {
+    width: 42px;
+    height: 56px;
+    border-radius: var(--radius-sm);
+    background-color: #F8FAF9;
+    border: 1px dashed rgba(11, 19, 15, 0.15);
+    color: var(--text-muted-green);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+}
+
+/* ---------------------------------------------------------------------
+   Tarjeta de formulario centrada (login/registro/altas)
+--------------------------------------------------------------------- */
+.form-card-wrapper {
+    display: flex;
+    justify-content: center;
+    padding: 2.5rem 1rem;
+}
+
+.form-card {
+    background-color: var(--card-background);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-xxl);
+    padding: 2.5rem;
+    width: 100%;
+    max-width: 520px;
+    box-shadow: var(--shadow-lg);
+}
+
+.form-card-title {
+    font-size: 1.35rem;
+    text-align: center;
+    margin-bottom: 0.35rem;
+}
+
+.form-card-subtitle {
+    font-size: 0.875rem;
+    color: var(--text-muted-green);
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.page-shell {
+    max-width: 1160px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem 3rem;
+    width: 100%;
+}
+
+@media (max-width: 768px) {
+    .app-hero {
+        padding: 2.75rem 1.5rem;
+    }
+    .app-hero h1 {
+        font-size: 1.9rem;
+    }
+}

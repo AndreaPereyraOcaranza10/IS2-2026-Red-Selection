@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/head :: head('Usuarios')}"></head>
+
+<body>
+<nav th:replace="~{fragments/navbar :: nav}"></nav>
+
+<main class="app-content">
+    <div class="page-shell">
+
+        <div class="page-header">
+            <div>
+                <h1 class="page-title">Usuarios</h1>
+                <p class="page-subtitle">Usuarios registrados en la biblioteca</p>
+            </div>
+        </div>
+
+        <div th:if="${exito}!=null" class="alert-custom alert-custom-success">
+            <i class="bi bi-check-circle-fill alert-custom-icon"></i>
+            <div class="alert-custom-content" th:text="${exito}"></div>
+        </div>
+        <div th:if="${error}!=null" class="alert-custom alert-custom-danger">
+            <i class="bi bi-exclamation-triangle-fill alert-custom-icon"></i>
+            <div class="alert-custom-content" th:text="${error}"></div>
+        </div>
+
+        <div class="table-card-custom">
+            <table class="table-custom">
+                <thead>
+                <tr>
+                    <th>Usuario</th>
+                    <th>Rol</th>
+                    <th sec:authorize="hasRole('ADMIN')">Cambiar rol</th>
+                    <th sec:authorize="hasRole('ADMIN')">Modificar</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="usuario : ${usuarios}">
+                    <td>
+                        <div class="table-user-cell">
+                            <img th:if="${usuario.imagen != null}" class="table-user-avatar" th:src="@{/imagen/perfil/__${usuario.id}__}" alt="">
+                            <span th:if="${usuario.imagen == null}" class="avatar-fallback"><i class="bi bi-person-fill"></i></span>
+                            <div>
+                                <div class="table-user-name" th:text="${usuario.nombre}"></div>
+                                <div class="table-user-sub" th:text="${usuario.email}"></div>
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                        <span class="badge-table" th:classappend="${usuario.rol.toString() == 'ADMIN' ? 'success' : 'pending'}" th:text="${usuario.rol}"></span>
+                    </td>
+                    <td sec:authorize="hasRole('ADMIN')">
+                        <a class="table-btn-action" th:href="@{/admin/modificarRol/__${usuario.id}__}" title="Cambiar rol">
+                            <i class="bi bi-arrow-repeat"></i>
+                        </a>
+                    </td>
+                    <td sec:authorize="hasRole('ADMIN')">
+                        <a class="table-btn-action" th:href="@{/usuario/modificar/__${usuario.id}__}" title="Modificar">
+                            <i class="bi bi-pencil"></i>
+                        </a>
+                    </td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(usuarios)}">
+                    <td colspan="4" class="text-center text-muted py-4">No hay usuarios registrados.</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <a th:href="@{/regresoPage}" class="btn-custom btn-custom-light">
+            <i class="bi bi-arrow-left"></i> Volver
+        </a>
+
+    </div>
+</main>
+
+<div th:replace="~{fragments/footer :: footer}"></div>
+<div th:replace="~{fragments/scripts :: scripts}"></div>
+</body>
+</html>

@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/head :: head('Libros')}"></head>
+
+<body>
+<nav th:replace="~{fragments/navbar :: nav}"></nav>
+
+<main class="app-content">
+    <div class="page-shell">
+
+        <div class="page-header">
+            <div>
+                <h1 class="page-title">Libros</h1>
+                <p class="page-subtitle">Catálogo de libros de la biblioteca</p>
+            </div>
+            <a sec:authorize="hasRole('ADMIN')" th:href="@{/libro/registrar}" class="btn-custom btn-custom-primary">
+                <i class="bi bi-plus-circle"></i> Nuevo libro
+            </a>
+        </div>
+
+        <div class="table-header-control mb-4" style="border-radius: var(--radius-xl);">
+            <form th:action="@{/libro/buscar}" method="get" class="d-flex flex-wrap gap-2 align-items-center w-100">
+                <span class="fw-bold" style="font-size:0.85rem; color: var(--text-muted-green);">Buscar por</span>
+                <select name="tipo" class="form-select-custom" style="max-width: 160px;">
+                    <option value="autor">Autor</option>
+                    <option value="editorial">Editorial</option>
+                    <option value="anio">Año</option>
+                </select>
+                <input type="text" name="valor" class="form-control-custom" style="max-width: 220px;" placeholder="Ingresá el criterio" required>
+                <button type="submit" class="btn-custom btn-custom-primary btn-custom-sm">
+                    <i class="bi bi-search"></i> Buscar
+                </button>
+                <a th:href="@{/libro/lista}" class="btn-custom btn-custom-light btn-custom-sm">Mostrar todos</a>
+            </form>
+        </div>
+
+        <div th:if="${exito}!=null" class="alert-custom alert-custom-success">
+            <i class="bi bi-check-circle-fill alert-custom-icon"></i>
+            <div class="alert-custom-content" th:text="${exito}"></div>
+        </div>
+        <div th:if="${error}!=null" class="alert-custom alert-custom-danger">
+            <i class="bi bi-exclamation-triangle-fill alert-custom-icon"></i>
+            <div class="alert-custom-content" th:text="${error}"></div>
+        </div>
+
+        <div class="table-card-custom">
+            <table class="table-custom">
+                <thead>
+                <tr>
+                    <th>ISBN</th>
+                    <th>Portada</th>
+                    <th>Título</th>
+                    <th>Ejemplares</th>
+                    <th>Autor</th>
+                    <th>Editorial</th>
+                    <th sec:authorize="hasRole('ADMIN')">Acciones</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="libro : ${libros}">
+                    <td th:text="${libro.isbn}"></td>
+                    <td>
+                        <img th:if="${libro.imagen != null}" class="cover-thumb" th:src="${'/imagen/' + libro.imagen.id}" alt="">
+                        <span th:if="${libro.imagen == null}" class="cover-fallback"><i class="bi bi-image"></i></span>
+                    </td>
+                    <td class="table-user-name" th:text="${libro.titulo}"></td>
+                    <td th:text="${libro.ejemplares}"></td>
+                    <td th:text="${libro.autor.nombre}"></td>
+                    <td th:text="${libro.editorial.nombre}"></td>
+                    <td sec:authorize="hasRole('ADMIN')">
+                        <a class="table-btn-action" th:href="@{/libro/modificar/__${libro.isbn}__}" title="Modificar">
+                            <i class="bi bi-pencil"></i>
+                        </a>
+                    </td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(libros)}">
+                    <td colspan="7" class="text-center text-muted py-4">No se encontraron libros.</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <a th:href="@{/regresoPage}" class="btn-custom btn-custom-light">
+            <i class="bi bi-arrow-left"></i> Volver
+        </a>
+
+    </div>
+</main>
+
+<div th:replace="~{fragments/footer :: footer}"></div>
+<div th:replace="~{fragments/scripts :: scripts}"></div>
+</body>
+</html>

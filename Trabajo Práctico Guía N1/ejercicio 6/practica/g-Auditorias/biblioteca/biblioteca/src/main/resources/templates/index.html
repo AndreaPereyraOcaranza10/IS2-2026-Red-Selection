@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head('Inicio')}"></head>
+
+<body>
+<nav th:replace="~{fragments/navbar :: nav}"></nav>
+
+<main class="app-content">
+    <div class="page-shell">
+
+        <div th:if="${exito}!=null" class="alert-custom alert-custom-success">
+            <i class="bi bi-check-circle-fill alert-custom-icon"></i>
+            <div class="alert-custom-content" th:text="${exito}"></div>
+        </div>
+
+        <section class="app-hero">
+            <span class="app-hero-badge"><i class="bi bi-stars"></i> Gestión de biblioteca</span>
+            <h1>Todos tus libros, autores y editoriales en un solo lugar</h1>
+            <p th:if="${session.usuariosession == null}">
+                Registrate o iniciá sesión para consultar el catálogo, buscar por autor, editorial o año, y llevar el control de tus ejemplares.
+            </p>
+            <p th:if="${session.usuariosession != null}" th:text="'¡Hola de nuevo, ' + ${session.usuariosession.nombre} + '! Segui explorando el catálogo.'">
+            </p>
+            <div class="d-flex justify-content-center gap-3 flex-wrap">
+                <a th:if="${session.usuariosession == null}" th:href="@{/usuario/registrar}" class="btn-custom btn-custom-secondary btn-custom-lg">
+                    <i class="bi bi-person-plus"></i> Crear cuenta
+                </a>
+                <a th:if="${session.usuariosession == null}" th:href="@{/usuario/login}" class="btn-custom btn-custom-outline-secondary btn-custom-lg">
+                    <i class="bi bi-box-arrow-in-right"></i> Ingresar
+                </a>
+                <a th:if="${session.usuariosession != null}" th:href="@{/libro/lista}" class="btn-custom btn-custom-secondary btn-custom-lg">
+                    <i class="bi bi-journal-bookmark"></i> Ver catálogo
+                </a>
+            </div>
+        </section>
+
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="card h-100">
+                    <div class="quick-link-icon mb-3"><i class="bi bi-journal-bookmark"></i></div>
+                    <p class="quick-link-title">Catálogo de libros</p>
+                    <p class="quick-link-desc">Buscá por título, autor, editorial o año de publicación.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100">
+                    <div class="quick-link-icon mb-3"><i class="bi bi-person-lines-fill"></i></div>
+                    <p class="quick-link-title">Autores y editoriales</p>
+                    <p class="quick-link-desc">Consultá y administrá el catálogo de autores y editoriales.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100">
+                    <div class="quick-link-icon mb-3"><i class="bi bi-shield-check"></i></div>
+                    <p class="quick-link-title">Roles y permisos</p>
+                    <p class="quick-link-desc">Los administradores pueden dar de alta y modificar el contenido.</p>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</main>
+
+<div th:replace="~{fragments/footer :: footer}"></div>
+<div th:replace="~{fragments/scripts :: scripts}"></div>
+</body>
+</html>
