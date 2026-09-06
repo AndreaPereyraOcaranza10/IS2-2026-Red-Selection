@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<body>
+
+    <nav th:fragment="topnav" xmlns:sec="http://www.thymeleaf.org/extras/spring-security" class="sb-topnav navbar navbar-expand navbar-dark bg-dark">
+        <button class="btn btn-link btn-sm order-1 order-lg-0 me-4 me-lg-0" id="sidebarToggle" href="#!">
+            <i class="fas fa-bars"></i>
+        </button>
+
+        <a class="navbar-brand ps-3" th:href="@{/inicio}">VIDEOJUEGOS RS</a>
+
+        <form class="d-none d-md-inline-block form-inline ms-auto me-0 me-md-3 my-2 my-md-0"
+              th:action="@{/busqueda}" method="get">
+            <div class="input-group">
+                <input class="form-control" type="text" name="query" placeholder="Buscar juego..." aria-label="Buscar juego">
+                <button class="btn btn-primary" type="submit"><i class="fas fa-search"></i></button>
+            </div>
+        </form>
+
+        <!-- Si NO está logueado: botón de ingresar -->
+        <div sec:authorize="!isAuthenticated()" class="ms-3 pe-3">
+            <a th:href="@{/usuario/login}" class="btn btn-outline-light btn-sm">
+                <i class="fas fa-user"></i> Ingresar
+            </a>
+        </div>
+
+        <!-- Si SÍ está logueado: menú de usuario -->
+        <ul class="navbar-nav ms-3 pe-3" sec:authorize="isAuthenticated()">
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
+                   data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="fas fa-user"></i> <span sec:authentication="name">usuario</span>
+                </a>
+                <ul class="dropdown-menu dropdown-menu-end">
+                    <li>
+                        <a class="dropdown-item" th:href="@{/logout}">
+                            <i class="fas fa-sign-out-alt"></i> Cerrar sesión
+                        </a>
+                    </li>
+                </ul>
+            </li>
+        </ul>
+
+    </nav>
+
+    </body>
+</html>
+
