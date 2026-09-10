@@ -1,4 +1,4 @@
-package org.example.tiendaZero;
+package com.tienda.zero;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
