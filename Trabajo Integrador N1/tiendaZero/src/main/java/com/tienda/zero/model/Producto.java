@@ -38,10 +38,9 @@ public class Producto {
     @JoinColumn(name = "subcategoria_id", nullable = false)
     private SubCategoria subCategoria;
 
-    /*
-    Relación para la imágen
-     @ManyToOne
+    //Relación para la imágen
+    @ManyToOne
     @JoinColumn(name = "imagen_id")
     private Imagen imagen;
-    */
+
 }

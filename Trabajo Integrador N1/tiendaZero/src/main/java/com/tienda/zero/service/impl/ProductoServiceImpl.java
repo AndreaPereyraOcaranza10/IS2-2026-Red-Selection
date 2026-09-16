@@ -1,8 +1,10 @@
 package com.tienda.zero.service.impl;
 
+import com.tienda.zero.model.Imagen;
 import com.tienda.zero.model.Producto;
 import com.tienda.zero.model.SubCategoria;
 import com.tienda.zero.repository.ProductoRepository;
+import com.tienda.zero.service.ImagenService;
 import com.tienda.zero.service.ProductoService;
 import com.tienda.zero.service.SubCategoriaService;
 import org.springframework.stereotype.Service;
@@ -14,14 +16,14 @@ public class ProductoServiceImpl implements ProductoService {
 
     private final ProductoRepository productoRepository;
     private final SubCategoriaService subCategoriaService;
-    //private final ImagenService imagenService;
+    private final ImagenService imagenService;
 
     public ProductoServiceImpl(ProductoRepository productoRepository,
-                               SubCategoriaService subCategoriaService
-                               /*,ImagenService imagenService*/) {
+                               SubCategoriaService subCategoriaService,
+                               ImagenService imagenService) {
         this.productoRepository = productoRepository;
         this.subCategoriaService = subCategoriaService;
-        //this.imagenService = imagenService;
+        this.imagenService = imagenService;
     }
 
     @Override
@@ -29,6 +31,7 @@ public class ProductoServiceImpl implements ProductoService {
                                   boolean enOferta, String idImagen, String idSubCategoria) {
         validarProducto(codigo, nombre, descripcion, talle, enOferta, idImagen, idSubCategoria);
         SubCategoria subCategoria = subCategoriaService.buscarSubCategoria(idSubCategoria);
+        Imagen imagen = imagenService.buscarImagen(idImagen);
 
         Producto producto = Producto.builder()
                 .codigo(codigo)
@@ -37,7 +40,7 @@ public class ProductoServiceImpl implements ProductoService {
                 .talle(talle)
                 .enOferta(enOferta)
                 .subCategoria(subCategoria)
-                //.imagen(idImagen)
+                .imagen(imagen)
                 .build();
 
         return productoRepository.save(producto);
@@ -58,7 +61,6 @@ public class ProductoServiceImpl implements ProductoService {
         productoRepository.findByCodigoIgnoreCase(codigo).ifPresent(p -> {
             throw new IllegalArgumentException("Ya existe un producto con ese código");
         });
-        // Valida que la subcategoría exista
         subCategoriaService.buscarSubCategoria(idSubCategoria);
     }
 
@@ -67,14 +69,14 @@ public class ProductoServiceImpl implements ProductoService {
                                       boolean enOferta, String idImagen, String idSubCategoria) {
         Producto producto = buscarProducto(id);
         SubCategoria subCategoria = subCategoriaService.buscarSubCategoria(idSubCategoria);
-        //Imagen imagen = idImagen != null ? imagenService.buscarImagen(idImagen) : null;
+        Imagen imagen = idImagen != null ? imagenService.buscarImagen(idImagen) : producto.getImagen();
 
         producto.setNombre(nombre);
         producto.setDescripcion(descripcion);
         producto.setTalle(talle);
         producto.setEnOferta(enOferta);
         producto.setSubCategoria(subCategoria);
-        //producto.setImagen(imagen);
+        producto.setImagen(imagen);
 
         return productoRepository.save(producto);
     }
