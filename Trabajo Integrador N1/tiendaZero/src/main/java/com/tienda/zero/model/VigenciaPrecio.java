@@ -24,7 +24,7 @@ public class VigenciaPrecio {
     private Date fechaDesde;
 
     @DateTimeFormat(pattern = "dd-MM-yyyy")
-    @Column()
+    @Column
     private Date fechaHasta;
 
     @Column(nullable = false)
