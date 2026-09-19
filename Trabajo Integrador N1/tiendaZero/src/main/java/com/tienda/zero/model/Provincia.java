@@ -4,9 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
-@Table(name = "provincia", indexes = {
-        @Index(name = "idx_provincia_nombre", columnList = "nombre")
-})
+@Table(name = "provincia")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -18,7 +16,7 @@ public class Provincia {
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false)
     private String nombre;
 
     @Column(nullable = false)

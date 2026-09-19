@@ -16,7 +16,7 @@ public class Pais {
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false)
     private String nombre;
 
     @Column(nullable = false)
