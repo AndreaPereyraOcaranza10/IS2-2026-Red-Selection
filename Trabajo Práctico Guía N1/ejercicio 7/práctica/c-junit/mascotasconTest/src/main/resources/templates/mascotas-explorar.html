@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="es" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>Tinder de Mascota - Explorar</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Custom fonts for this template -->
+    <link href="https://fonts.googleapis.com/css?family=Catamaran:100,200,300,400,500,600,700,800,900" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Lato:100,100i,300,300i,400,400i,700,700i,900,900i" rel="stylesheet">
+
+    <!-- Custom styles for this template -->
+    <link href="/css/one-page-wonder.min.css" rel="stylesheet">
+
+</head>
+
+<body>
+
+<!-- Navigation -->
+<nav class="navbar navbar-expand-lg navbar-dark navbar-custom fixed-top">
+    <div class="container">
+        <a class="navbar-brand" href="/">Tinder de Mascota</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarResponsive">
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="/inicio">Inicio</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/mascota/mis-mascotas">Mis Mascotas</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/mascota/explorar-mascotas">Explorar</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/logout">Salir</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<header>
+    <h1 style="margin-top:80px; text-align: center;">🐾 Explorar Mascotas</h1>
+    <p style="text-align: center; color: #666;">Descubre las mascotas disponibles en tu zona</p>
+</header>
+
+<section>
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-12 order-lg-12">
+
+                <a th:href="@{/inicio}" class="btn btn-secondary btn-x rounded-pill mt-5" style="float:right; margin-bottom:5px; padding: 14px">← Volver al Inicio</a>
+                <br/>
+
+                <!-- Mensajes de éxito o error -->
+                <div th:if="${success}" class="alert alert-success alert-dismissible fade show mt-4" role="alert">
+                    <span th:text="${success}"></span>
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+
+                <div th:if="${error}" class="alert alert-danger alert-dismissible fade show mt-4" role="alert">
+                    <span th:text="${error}"></span>
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+
+                <!-- Selector de mascota propia -->
+                <div th:if="${mascotaSeleccionada == null}" class="card mt-4 shadow">
+                    <div class="card-body">
+                        <h3 class="card-title text-center mb-4">😼 Selecciona tu mascota para explorar 😼</h3>
+                        <div class="row">
+                            <div th:each="mascota : ${misMascotas}" class="col-md-4 col-lg-3 mb-3">
+                                <div class="card h-100 text-center">
+                                    <img th:if="${mascota.foto != null}"
+                                         th:src="@{/foto/mascota/{id}(id=${mascota.id})}"
+                                         class="card-img-top"
+                                         alt="Foto de mascota"
+                                         style="height: 200px; object-fit: cover;">
+                                    <img th:if="${mascota.foto == null}"
+                                         src="/img/m1.jpeg"
+                                         class="card-img-top"
+                                         alt="Foto por defecto"
+                                         style="height: 200px; object-fit: cover;">
+                                    <div class="card-body">
+                                        <h5 class="card-title" th:text="${mascota.nombre}">Nombre</h5>
+                                        <p class="card-text">
+                                            <span th:text="${mascota.sexo}">Sexo</span> -
+                                            <span th:text="${mascota.tipo}">Tipo</span>
+                                        </p>
+                                        <a th:href="@{/mascota/explorar-mascotas(idMascotaPropia=${mascota.id})}"
+                                           class="btn btn-primary btn-block">
+                                            Explorar con <span th:text="${mascota.nombre}">esta mascota</span>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Mostrar mascota seleccionada y opciones -->
+                <div th:if="${mascotaSeleccionada != null}">
+
+                    <!-- Banner de mascota seleccionada -->
+                    <div class="alert alert-info mt-4" role="alert">
+                        <div class="row align-items-center">
+                            <div class="col-auto">
+                                <img th:if="${mascotaSeleccionada.foto != null}"
+                                     th:src="@{/foto/mascota/{id}(id=${mascotaSeleccionada.id})}"
+                                     alt="Mascota seleccionada"
+                                     style="height: 50px; width: 50px; border-radius: 50%; object-fit: cover;">
+                                <img th:if="${mascotaSeleccionada.foto == null}"
+                                     src="/img/m1.jpeg"
+                                     alt="Foto por defecto"
+                                     style="height: 50px; width: 50px; border-radius: 50%; object-fit: cover;">
+                            </div>
+                            <div class="col">
+                                <strong>Explorando con: </strong>
+                                <span th:text="${mascotaSeleccionada.nombre}">Nombre</span>
+                            </div>
+                            <div class="col-auto">
+                                <a th:href="@{/mascota/explorar-mascotas}" class="btn btn-sm btn-outline-primary">
+                                    🔄 Cambiar mascota
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Mensaje si no hay mascotas -->
+                    <div th:if="${mascotas == null || mascotas.isEmpty()}" class="alert alert-warning text-center mt-4">
+                        <h4>😿 No hay mascotas disponibles en este momento</h4>
+                        <p>Vuelve más tarde para descubrir nuevas mascotas</p>
+                    </div>
+
+                    <!-- Tabla de mascotas -->
+                    <table th:if="${mascotas != null && !mascotas.isEmpty()}" class="table table-light table-hover mt-4">
+                        <thead>
+                        <tr class="bg-black text-white">
+                            <th>Foto</th>
+                            <th>Nombre</th>
+                            <th>Sexo</th>
+                            <th>Tipo</th>
+                            <th>Dueño</th>
+                            <th>Acciones</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="mascota : ${mascotas}">
+                            <td>
+                                <img th:if="${mascota.foto != null}"
+                                     th:src="@{/foto/mascota/{id}(id=${mascota.id})}"
+                                     alt="Foto de mascota"
+                                     style="max-height: 60px; border-radius: 100%">
+                                <img th:if="${mascota.foto == null}"
+                                     src="/img/m1.jpeg"
+                                     alt="Foto por defecto"
+                                     style="max-height: 60px; border-radius: 100%">
+                            </td>
+                            <td th:text="${mascota.nombre}">Nombre</td>
+                            <td th:text="${mascota.sexo}">Sexo</td>
+                            <td th:text="${mascota.tipo}">Tipo</td>
+                            <td th:text="${mascota.usuario.nombre + ' ' + mascota.usuario.apellido}">Dueño</td>
+                            <td>
+                                <form action="/votar" method="post" style="display: inline;">
+                                    <input type="hidden" name="idMascotaPropia" th:value="${mascotaSeleccionada.id}">
+                                    <input type="hidden" name="idMascotaVotada" th:value="${mascota.id}">
+                                    <button type="submit" class="btn btn-success btn-sm" title="Me gusta">
+                                        ❤️ Votar
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+
+                </div>
+
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- Footer -->
+<footer class="py-5 bg-black">
+    <div class="container">
+        <p class="m-0 text-center text-white small">Copyright &copy; Tinder de Mascotas 2025</p>
+    </div>
+</footer>
+
+<!-- Bootstrap core JavaScript -->
+<script src="/vendor/jquery/jquery.min.js"></script>
+<script src="/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+</body>
+
+</html>
