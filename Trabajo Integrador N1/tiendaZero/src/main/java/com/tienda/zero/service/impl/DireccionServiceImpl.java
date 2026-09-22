@@ -5,7 +5,9 @@ import com.tienda.zero.model.Localidad;
 import com.tienda.zero.repository.DireccionRepository;
 import com.tienda.zero.service.DireccionService;
 import com.tienda.zero.service.LocalidadService;
+import org.springframework.stereotype.Service;
 
+@Service
 public class DireccionServiceImpl implements DireccionService {
 
     private final DireccionRepository direccionRepository;

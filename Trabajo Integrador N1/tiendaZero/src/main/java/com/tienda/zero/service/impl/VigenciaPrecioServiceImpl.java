@@ -5,10 +5,12 @@ import com.tienda.zero.model.VigenciaPrecio;
 import com.tienda.zero.repository.VigenciaPrecioRepository;
 import com.tienda.zero.service.ProductoService;
 import com.tienda.zero.service.VigenciaPrecioService;
+import org.springframework.stereotype.Service;
 
 import java.sql.Date;
 import java.util.List;
 
+@Service
 public class VigenciaPrecioServiceImpl implements VigenciaPrecioService {
 
     private final VigenciaPrecioRepository vigenciaPrecioRepository;

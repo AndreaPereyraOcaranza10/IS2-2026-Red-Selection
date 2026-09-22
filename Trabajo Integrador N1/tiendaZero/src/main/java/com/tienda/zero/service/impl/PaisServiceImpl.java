@@ -3,9 +3,11 @@ package com.tienda.zero.service.impl;
 import com.tienda.zero.model.Pais;
 import com.tienda.zero.repository.PaisRepository;
 import com.tienda.zero.service.PaisService;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+@Service
 public class PaisServiceImpl implements PaisService {
 
     private final PaisRepository paisRepository;

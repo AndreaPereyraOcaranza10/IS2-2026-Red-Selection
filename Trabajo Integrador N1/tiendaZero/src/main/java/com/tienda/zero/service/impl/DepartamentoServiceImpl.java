@@ -5,9 +5,11 @@ import com.tienda.zero.model.Provincia;
 import com.tienda.zero.repository.DepartamentoRepository;
 import com.tienda.zero.service.DepartamentoService;
 import com.tienda.zero.service.ProvinciaService;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+@Service
 public class DepartamentoServiceImpl implements DepartamentoService {
 
     private final DepartamentoRepository departamentoRepository;

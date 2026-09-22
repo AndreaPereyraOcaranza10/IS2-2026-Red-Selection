@@ -5,9 +5,11 @@ import com.tienda.zero.model.Provincia;
 import com.tienda.zero.repository.ProvinciaRepository;
 import com.tienda.zero.service.PaisService;
 import com.tienda.zero.service.ProvinciaService;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+@Service
 public class ProvinciaServiceImpl implements ProvinciaService {
 
     private final ProvinciaRepository provinciaRepository;

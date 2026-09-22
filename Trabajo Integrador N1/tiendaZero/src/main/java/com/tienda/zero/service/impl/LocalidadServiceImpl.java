@@ -5,9 +5,11 @@ import com.tienda.zero.model.Localidad;
 import com.tienda.zero.repository.LocalidadRepository;
 import com.tienda.zero.service.DepartamentoService;
 import com.tienda.zero.service.LocalidadService;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+@Service
 public class LocalidadServiceImpl implements LocalidadService {
 
     private final LocalidadRepository localidadRepository;
