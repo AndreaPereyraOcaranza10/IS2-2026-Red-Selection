@@ -4,8 +4,8 @@ import com.tienda.zero.model.Direccion;
 
 public interface DireccionService {
 
-    void crearDireccion(String calle, String numeracion, String barrio, String manzanaPiso,
-                        String casaDepartamento, String referencia, String idLocalidad);
+    Direccion crearDireccion(String calle, String numeracion, String barrio, String manzanaPiso,
+                             String casaDepartamento, String referencia, String idLocalidad);
 
     void validar(String calle, String numeracion, String barrio, String manzanaPiso,
                  String casaDepartamento, String referencia, String idLocalidad);

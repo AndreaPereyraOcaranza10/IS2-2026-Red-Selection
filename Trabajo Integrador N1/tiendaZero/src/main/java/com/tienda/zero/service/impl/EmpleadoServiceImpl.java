@@ -3,8 +3,10 @@ package com.tienda.zero.service.impl;
 import com.tienda.zero.enums.TipoDocumento;
 import com.tienda.zero.enums.TipoEmpleado;
 import com.tienda.zero.model.Empleado;
+import com.tienda.zero.model.Empresa;
 import com.tienda.zero.repository.EmpleadoRepository;
 import com.tienda.zero.service.EmpleadoService;
+import com.tienda.zero.service.EmpresaService;
 import com.tienda.zero.service.PersonaService;
 import org.springframework.stereotype.Service;
 
@@ -16,16 +18,21 @@ public class EmpleadoServiceImpl implements EmpleadoService {
 
     private final EmpleadoRepository empleadoRepository;
     private final PersonaService personaService;
+    private final EmpresaService empresaService;
 
-    public EmpleadoServiceImpl(EmpleadoRepository empleadoRepository, PersonaService personaService) {
+    public EmpleadoServiceImpl(EmpleadoRepository empleadoRepository, PersonaService personaService,
+                               EmpresaService empresaService) {
         this.empleadoRepository = empleadoRepository;
         this.personaService = personaService;
+        this.empresaService = empresaService;
     }
 
     @Override
     public Empleado crearEmpleado(String nombre, String apellido, Date fechaNacimiento, TipoDocumento tipoDocumento,
-                                  String numeroDocumento, String telefono, String correoElectronico, TipoEmpleado tipoEmpleado) {
-        validar(nombre, apellido, fechaNacimiento, tipoDocumento, numeroDocumento, telefono, correoElectronico, tipoEmpleado);
+                                  String numeroDocumento, TipoEmpleado tipoEmpleado, String idEmpresa) {
+        validar(nombre, apellido, fechaNacimiento, tipoDocumento, numeroDocumento, tipoEmpleado, idEmpresa);
+
+        Empresa empresa = empresaService.buscarEmpresa(idEmpresa);
 
         Empleado empleado = Empleado.builder()
                 .nombre(nombre)
@@ -34,9 +41,8 @@ public class EmpleadoServiceImpl implements EmpleadoService {
                 .tipoDocumento(tipoDocumento)
                 .numeroDocumento(numeroDocumento)
                 .eliminado(false)
-                .telefono(telefono)
-                .correoElectronico(correoElectronico)
                 .tipoEmpleado(tipoEmpleado)
+                .empresa(empresa)
                 .build();
 
         return empleadoRepository.save(empleado);
@@ -44,17 +50,14 @@ public class EmpleadoServiceImpl implements EmpleadoService {
 
     @Override
     public void validar(String nombre, String apellido, Date fechaNacimiento, TipoDocumento tipoDocumento,
-                        String numeroDocumento, String telefono, String correoElectronico, TipoEmpleado tipoEmpleado) {
+                        String numeroDocumento, TipoEmpleado tipoEmpleado, String idEmpresa) {
         personaService.validar(nombre, apellido, fechaNacimiento, tipoDocumento, numeroDocumento);
 
-        if (telefono == null || telefono.isBlank()) {
-            throw new IllegalArgumentException("El teléfono es obligatorio");
-        }
-        if (correoElectronico == null || correoElectronico.isBlank()) {
-            throw new IllegalArgumentException("El correo electrónico es obligatorio");
-        }
         if (tipoEmpleado == null) {
             throw new IllegalArgumentException("El tipo de empleado es obligatorio");
+        }
+        if (idEmpresa == null || idEmpresa.isBlank()) {
+            throw new IllegalArgumentException("La empresa es obligatoria");
         }
     }
 
@@ -65,9 +68,25 @@ public class EmpleadoServiceImpl implements EmpleadoService {
     }
 
     @Override
-    public Empleado modificarEmpleado(String id, String nombre, String apellido, Date fechaNacimiento, TipoDocumento tipoDocumento,
-                                      String numeroDocumento, TipoEmpleado tipoEmpleado) {
+    public Empleado modificarEmpleado(String id, String nombre, String apellido, Date fechaNacimiento,
+                                      TipoDocumento tipoDocumento, String numeroDocumento,
+                                      TipoEmpleado tipoEmpleado, String idEmpresa) {
         Empleado empleado = buscarEmpleado(id);
+
+        if (empleado.isEliminado()) {
+            throw new IllegalArgumentException("No se puede modificar un empleado eliminado");
+        }
+
+        personaService.validarParaModificar(id, nombre, apellido, fechaNacimiento, tipoDocumento, numeroDocumento);
+
+        if (tipoEmpleado == null) {
+            throw new IllegalArgumentException("El tipo de empleado es obligatorio");
+        }
+        if (idEmpresa == null || idEmpresa.isBlank()) {
+            throw new IllegalArgumentException("La empresa es obligatoria");
+        }
+
+        Empresa empresa = empresaService.buscarEmpresa(idEmpresa);
 
         empleado.setNombre(nombre);
         empleado.setApellido(apellido);
@@ -75,9 +94,11 @@ public class EmpleadoServiceImpl implements EmpleadoService {
         empleado.setTipoDocumento(tipoDocumento);
         empleado.setNumeroDocumento(numeroDocumento);
         empleado.setTipoEmpleado(tipoEmpleado);
+        empleado.setEmpresa(empresa);
 
         return empleadoRepository.save(empleado);
     }
+
 
     @Override
     public void eliminarEmpleado(String id) {

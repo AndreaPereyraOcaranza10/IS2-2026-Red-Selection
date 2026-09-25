@@ -19,10 +19,7 @@ public class Empleado extends Persona {
     @Column(nullable = false)
     private TipoEmpleado tipoEmpleado;
 
-    @Column(nullable = false)
-    private String telefono;
-
-    @Column(nullable = false)
-    private String correoElectronico;
-
+    @ManyToOne
+    @JoinColumn(name = "empresa_id")
+    private Empresa empresa;
 }

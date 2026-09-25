@@ -5,6 +5,7 @@ import com.tienda.zero.model.Localidad;
 import com.tienda.zero.repository.DireccionRepository;
 import com.tienda.zero.service.DireccionService;
 import com.tienda.zero.service.LocalidadService;
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -19,8 +20,9 @@ public class DireccionServiceImpl implements DireccionService {
     }
 
     @Override
-    public void crearDireccion(String calle, String numeracion, String barrio, String manzanaPiso,
-                               String casaDepartamento, String referencia, String idLocalidad) {
+    @Transactional
+    public Direccion crearDireccion(String calle, String numeracion, String barrio, String manzanaPiso,
+                                    String casaDepartamento, String referencia, String idLocalidad) {
         validar(calle, numeracion, barrio, manzanaPiso, casaDepartamento, referencia, idLocalidad);
 
         Localidad localidad = localidadService.buscarLocalidad(idLocalidad);
@@ -36,7 +38,7 @@ public class DireccionServiceImpl implements DireccionService {
                 .eliminado(false)
                 .build();
 
-        direccionRepository.save(direccion);
+        return direccionRepository.save(direccion);
     }
 
     @Override

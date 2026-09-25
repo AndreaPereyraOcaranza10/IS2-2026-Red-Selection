@@ -7,6 +7,8 @@ import lombok.experimental.SuperBuilder;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.sql.Date;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "persona")
@@ -19,7 +21,7 @@ import java.sql.Date;
 @Getter
 @Setter
 @SuperBuilder
-public class Persona {
+public abstract class Persona {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -46,9 +48,18 @@ public class Persona {
     @Column(nullable = false)
     private boolean eliminado = false;
 
-    // Relación opcional con la foto de perfil de la persona
     @ManyToOne
     @JoinColumn(name = "imagen_id")
     private Imagen imagen;
+
+    @OneToMany
+    @JoinColumn(name = "persona_id")
+    @Builder.Default
+    private List<Contacto> contactos = new ArrayList<>();
+
+    @OneToMany
+    @JoinColumn(name = "persona_id")
+    @Builder.Default
+    private List<Direccion> direcciones = new ArrayList<>();
 
 }
