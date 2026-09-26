@@ -11,6 +11,5 @@ import java.util.Optional;
 public interface ProveedorRepository extends JpaRepository<Proveedor, String> {
 
     List<Proveedor> findByEliminadoFalse();
-
-    Optional<Proveedor> findByCuit(String cuit);
+    Optional<Proveedor> findByRazonSocialIgnoreCaseAndEliminadoFalse(String razonSocial);
 }

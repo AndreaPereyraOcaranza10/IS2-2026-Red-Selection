@@ -3,6 +3,9 @@ package com.tienda.zero.model;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @Table(name = "proveedor")
 @Getter
@@ -19,17 +22,11 @@ public class Proveedor {
     @Column(nullable = false)
     private String razonSocial;
 
-    @Column(nullable = false, unique = true)
-    private String cuit;
-
-    private String email;
-
-    private String telefono;
-
     @Column(nullable = false)
     private boolean eliminado;
 
-    @ManyToOne
-    @JoinColumn(name = "direccion_id")
-    private Direccion direccion;
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinTable(name = "proveedor_contacto", joinColumns = @JoinColumn(name = "proveedor_id"), inverseJoinColumns = @JoinColumn(name = "contacto_id"))
+    @Builder.Default
+    private List<Contacto> contactos = new ArrayList<>();
 }

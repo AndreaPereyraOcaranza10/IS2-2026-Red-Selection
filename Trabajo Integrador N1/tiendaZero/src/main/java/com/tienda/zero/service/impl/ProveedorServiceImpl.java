@@ -1,95 +1,96 @@
 package com.tienda.zero.service.impl;
 
+import com.tienda.zero.model.Contacto;
 import com.tienda.zero.model.Direccion;
 import com.tienda.zero.model.Proveedor;
 import com.tienda.zero.repository.ProveedorRepository;
 import com.tienda.zero.service.DireccionService;
 import com.tienda.zero.service.ProveedorService;
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class ProveedorServiceImpl implements ProveedorService {
 
     private final ProveedorRepository proveedorRepository;
-    private final DireccionService direccionService;
 
-    public ProveedorServiceImpl(ProveedorRepository proveedorRepository,
-                                DireccionService direccionService) {
+    public ProveedorServiceImpl(ProveedorRepository proveedorRepository) {
         this.proveedorRepository = proveedorRepository;
-        this.direccionService = direccionService;
     }
 
     @Override
-    public Proveedor crearProveedor(String razonSocial, String cuit, String email,
-                                    String telefono, String idDireccion) {
-        validar(razonSocial, cuit);
-        String cuitLimpio = normalizarCuit(cuit);
-        proveedorRepository.findByCuit(cuitLimpio).ifPresent(p -> {
-            throw new IllegalArgumentException("Ya existe un proveedor con ese CUIT");
-        });
+    @Transactional
+    public Proveedor crearProveedor(String razonSocial, List<Contacto> contactos) {
+        validar(razonSocial);
+        //trim se encarga de limpiar el formato cuando el usuario carga los datos, borra los espacios demás
+        String razonSocialLimpia = razonSocial.trim();
 
-        Proveedor proveedor = Proveedor.builder()
-                .razonSocial(razonSocial)
-                .cuit(cuitLimpio)
-                .email(email)
-                .telefono(telefono)
-                .direccion(buscarDireccionOpcional(idDireccion))
-                .eliminado(false)
-                .build();
+        if (proveedorRepository.findByRazonSocialIgnoreCaseAndEliminadoFalse(razonSocialLimpia).isPresent()){
+            throw new IllegalArgumentException("Ya existe un proveedor con esa razón social");
+        }
+
+        Proveedor proveedor = new Proveedor();
+        proveedor.setRazonSocial(razonSocialLimpia);
+        proveedor.setEliminado(false);
+        if (contactos != null){
+            proveedor.getContactos().addAll(contactos);
+        }
 
         return proveedorRepository.save(proveedor);
     }
 
     @Override
-    public void validar(String razonSocial, String cuit) {
+    public void validar(String razonSocial) {
         if (razonSocial == null || razonSocial.isBlank()) {
             throw new IllegalArgumentException("La razón social es obligatoria");
-        }
-        if (cuit == null || cuit.isBlank()) {
-            throw new IllegalArgumentException("El CUIT es obligatorio");
-        }
-        if (normalizarCuit(cuit).length() != 11) {
-            throw new IllegalArgumentException("El CUIT debe tener 11 dígitos");
         }
     }
 
     @Override
     public Proveedor buscarProveedor(String id) {
-        return proveedorRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("No existe el proveedor con id: " + id));
+        Optional<Proveedor> resultado = proveedorRepository.findById(id);
+        if (resultado.isEmpty()){
+            throw new IllegalArgumentException("No existe proveedor con id: " + id);
+        }
+        return resultado.get();
     }
 
     @Override
-    public Proveedor buscarProveedorPorCuit(String cuit) {
-        return proveedorRepository.findByCuit(normalizarCuit(cuit))
-                .orElseThrow(() -> new IllegalArgumentException("No existe el proveedor con CUIT: " + cuit));
+    public Proveedor buscarProveedorPorRazonSocial(String razonSocial) {
+        Optional<Proveedor> resultado = proveedorRepository.findByRazonSocialIgnoreCaseAndEliminadoFalse(razonSocial);
+        if (resultado.isEmpty()){
+            throw new IllegalArgumentException("No existe el proveedor con razón social: " + razonSocial);
+        }
+        return resultado.get();
     }
 
     @Override
-    public Proveedor modificarProveedor(String id, String razonSocial, String cuit, String email,
-                                        String telefono, String idDireccion) {
-        validar(razonSocial, cuit);
+    @Transactional
+    public Proveedor modificarProveedor(String id, String razonSocial, List<Contacto> contactos) {
+        validar(razonSocial);
         Proveedor proveedor = buscarProveedor(id);
-        String cuitLimpio = normalizarCuit(cuit);
+        String razonSocialLimpia = razonSocial.trim();
 
-        proveedorRepository.findByCuit(cuitLimpio)
-                .filter(p -> !p.getId().equals(id))
-                .ifPresent(p -> {
-                    throw new IllegalArgumentException("Ya existe otro proveedor con ese CUIT");
-                });
+        Optional<Proveedor> existente = proveedorRepository.findByRazonSocialIgnoreCaseAndEliminadoFalse(razonSocialLimpia);
 
-        proveedor.setRazonSocial(razonSocial);
-        proveedor.setCuit(cuitLimpio);
-        proveedor.setEmail(email);
-        proveedor.setTelefono(telefono);
-        proveedor.setDireccion(buscarDireccionOpcional(idDireccion));
+        if (existente.isPresent() && !existente.get().getId().equals(id)) {
+            throw new IllegalArgumentException("Ya existe otro proveedor con esa razón social");
+        }
+
+        proveedor.setRazonSocial(razonSocialLimpia);
+        if (contactos != null){
+            proveedor.getContactos().clear();
+            proveedor.getContactos().addAll(contactos);
+        }
 
         return proveedorRepository.save(proveedor);
     }
 
     @Override
+    @Transactional
     public void eliminarProveedor(String id) {
         Proveedor proveedor = buscarProveedor(id);
         proveedor.setEliminado(true);
@@ -106,14 +107,4 @@ public class ProveedorServiceImpl implements ProveedorService {
         return proveedorRepository.findByEliminadoFalse();
     }
 
-    private String normalizarCuit(String cuit) {
-        return cuit.replaceAll("\\D", "");
-    }
-
-    private Direccion buscarDireccionOpcional(String idDireccion) {
-        if (idDireccion == null || idDireccion.isBlank()) {
-            return null;
-        }
-        return direccionService.buscarDireccion(idDireccion);
-    }
 }
