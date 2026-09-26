@@ -1,20 +1,17 @@
 package com.tienda.zero.service.impl;
 
 import com.tienda.zero.enums.TipoDocumento;
-import com.tienda.zero.model.Contacto;
-import com.tienda.zero.model.Direccion;
-import com.tienda.zero.model.Imagen;
-import com.tienda.zero.model.Persona;
+import com.tienda.zero.enums.TipoUsuario;
+import com.tienda.zero.model.*;
 import com.tienda.zero.repository.PersonaRepository;
-import com.tienda.zero.service.ContactoService;
-import com.tienda.zero.service.DireccionService;
-import com.tienda.zero.service.ImagenService;
-import com.tienda.zero.service.PersonaService;
+import com.tienda.zero.service.*;
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.sql.Date;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class PersonaServiceImpl implements PersonaService {
@@ -23,13 +20,15 @@ public class PersonaServiceImpl implements PersonaService {
     private final ImagenService imagenService;
     private final ContactoService contactoService;
     private final DireccionService direccionService;
+    private final UsuarioService usuarioService;
 
     public PersonaServiceImpl(PersonaRepository personaRepository, ImagenService imagenService,
-                              ContactoService contactoService, DireccionService direccionService) {
+                              ContactoService contactoService, DireccionService direccionService, UsuarioService usuarioService) {
         this.personaRepository = personaRepository;
         this.imagenService = imagenService;
         this.contactoService = contactoService;
         this.direccionService = direccionService;
+        this.usuarioService = usuarioService;
     }
 
     @Override
@@ -52,9 +51,8 @@ public class PersonaServiceImpl implements PersonaService {
             throw new IllegalArgumentException("El número de documento es obligatorio");
         }
 
-        personaRepository.findByTipoDocumentoAndNumeroDocumento(tipoDocumento, numeroDocumento).ifPresent(p -> {
-            throw new IllegalArgumentException("Ya existe una persona con ese documento");
-        });
+        //ya no validamos si existe una persona con el mismo documento porque ahora lo haceoms en los roles
+
     }
 
 
@@ -76,11 +74,7 @@ public class PersonaServiceImpl implements PersonaService {
         if (numeroDocumento == null || numeroDocumento.isBlank()) {
             throw new IllegalArgumentException("El número de documento es obligatorio");
         }
-        personaRepository.findByTipoDocumentoAndNumeroDocumento(tipoDocumento, numeroDocumento)
-                .filter(p -> !p.getId().equals(id))
-                .ifPresent(p -> {
-                    throw new IllegalArgumentException("Ya existe otra persona con ese documento");
-                });
+        //ya no validamos si existe una persona con el mismo documento porque ahora lo haceoms en los roles
     }
 
     @Override
@@ -90,10 +84,14 @@ public class PersonaServiceImpl implements PersonaService {
     }
 
 
+    //ahora eliminar persona elimina usuario
     @Override
     public void eliminarPersona(String id) {
         Persona persona = buscarPersona(id);
         persona.setEliminado(true);
+        if (persona.getUsuario() != null) {
+            usuarioService.eliminarUsuario(persona.getUsuario().getId());
+        }
         personaRepository.save(persona);
     }
 
@@ -127,5 +125,42 @@ public class PersonaServiceImpl implements PersonaService {
         }
         persona.getDirecciones().add(direccion);
         return personaRepository.save(persona);
+    }
+
+    @Override
+    @Transactional
+    public Persona asociarUsuarioPersona(String id, String idUsuario) {
+        Persona persona = buscarPersona(id);
+        Usuario usuario = usuarioService.buscarUsuario(idUsuario);
+
+        if (persona.isEliminado()) {
+            throw new IllegalArgumentException("No se puede asociar un usuario a una persona eliminada");
+        }
+        if (usuario.isEliminado()) {
+            throw new IllegalArgumentException("No se puede asociar un usuario eliminado");
+        }
+        if (persona.getUsuario() != null) {
+            throw new IllegalArgumentException("La persona ya tiene un usuario asociado");
+        }
+
+        Optional<Persona> duenioActual = personaRepository.findByUsuarioId(idUsuario);
+        if (duenioActual.isPresent()) {
+            throw new IllegalArgumentException("El usuario ya está asociado a otra persona");
+        }
+
+        validarRolSegunTipoPersona(persona, usuario.getRol());
+
+        persona.setUsuario(usuario);
+        return personaRepository.save(persona);
+    }
+
+    private void validarRolSegunTipoPersona(Persona persona, TipoUsuario rol) {
+        if (persona instanceof Cliente && rol != TipoUsuario.CLIENTE) {
+            throw new IllegalArgumentException("Un cliente solo puede tener un usuario con rol CLIENTE");
+        }
+        if (persona instanceof Empleado empleado
+                && !rol.name().equals(empleado.getTipoEmpleado().name())) {
+            throw new IllegalArgumentException("El rol del usuario debe coincidir con el tipo de empleado");
+        }
     }
 }

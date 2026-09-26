@@ -62,4 +62,9 @@ public abstract class Persona {
     @Builder.Default
     private List<Direccion> direcciones = new ArrayList<>();
 
+    //Es correcta la cardinalidad?
+    @ManyToOne
+    @JoinColumn(name = "usuario_id", unique= true)
+    private Usuario usuario;
+
 }

@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import java.sql.Date;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class EmpleadoServiceImpl implements EmpleadoService {
@@ -53,6 +54,11 @@ public class EmpleadoServiceImpl implements EmpleadoService {
                         String numeroDocumento, TipoEmpleado tipoEmpleado, String idEmpresa) {
         personaService.validar(nombre, apellido, fechaNacimiento, tipoDocumento, numeroDocumento);
 
+        //ahora validamos acá si ya existe empleado con ese doc
+        if (empleadoRepository.findByTipoDocumentoAndNumeroDocumento(tipoDocumento, numeroDocumento).isPresent()) {
+            throw new IllegalArgumentException("Ya existe un empleado con ese documento");
+        }
+
         if (tipoEmpleado == null) {
             throw new IllegalArgumentException("El tipo de empleado es obligatorio");
         }
@@ -78,6 +84,11 @@ public class EmpleadoServiceImpl implements EmpleadoService {
         }
 
         personaService.validarParaModificar(id, nombre, apellido, fechaNacimiento, tipoDocumento, numeroDocumento);
+        //ahora validamos acá si ya existe empleado con ese doc
+        Optional<Empleado> existente = empleadoRepository.findByTipoDocumentoAndNumeroDocumento(tipoDocumento, numeroDocumento);
+        if (existente.isPresent() && !existente.get().getId().equals(id)) {
+            throw new IllegalArgumentException("Ya existe otro empleado con ese documento");
+        }
 
         if (tipoEmpleado == null) {
             throw new IllegalArgumentException("El tipo de empleado es obligatorio");
@@ -100,11 +111,11 @@ public class EmpleadoServiceImpl implements EmpleadoService {
     }
 
 
+    //modifico el eliminarCliente para poder borrar usuario al eliminarlo
     @Override
     public void eliminarEmpleado(String id) {
-        Empleado empleado = buscarEmpleado(id);
-        empleado.setEliminado(true);
-        empleadoRepository.save(empleado);
+        buscarEmpleado(id);
+        personaService.eliminarPersona(id);
     }
 
     @Override

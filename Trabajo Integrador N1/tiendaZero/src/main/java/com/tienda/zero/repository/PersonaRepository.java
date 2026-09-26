@@ -10,8 +10,7 @@ import java.util.Optional;
 
 @Repository
 public interface PersonaRepository extends JpaRepository<Persona, String> {
-
-    Optional<Persona> findByTipoDocumentoAndNumeroDocumento(TipoDocumento tipoDocumento, String numeroDocumento);
-
+    //borre findByTipoDocumentoAndNumeroDocumento porque lo dejamos de utilizar
     List<Persona> findByEliminadoFalse();
+    Optional<Persona> findByUsuarioId(String idUsuario);
 }

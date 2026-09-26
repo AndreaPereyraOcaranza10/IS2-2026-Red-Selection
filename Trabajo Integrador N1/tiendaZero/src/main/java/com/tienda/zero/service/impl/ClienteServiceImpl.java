@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import java.sql.Date;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class ClienteServiceImpl implements ClienteService {
@@ -53,6 +54,10 @@ public class ClienteServiceImpl implements ClienteService {
     public void validar(String nombre, String apellido, Date fechaNacimiento, TipoDocumento tipoDocumento,
                         String numeroDocumento, String direccionEstadia, String idNacionalidad) {
         personaService.validar(nombre, apellido, fechaNacimiento, tipoDocumento, numeroDocumento);
+        //ahora validamos acá si ya existe cliente con ese doc
+        if (clienteRepository.findByTipoDocumentoAndNumeroDocumento(tipoDocumento, numeroDocumento).isPresent()) {
+            throw new IllegalArgumentException("Ya existe un cliente con ese documento");
+        }
 
         if (direccionEstadia == null || direccionEstadia.isBlank()) {
             throw new IllegalArgumentException("La dirección de estadía es obligatoria");
@@ -73,6 +78,11 @@ public class ClienteServiceImpl implements ClienteService {
         }
 
         personaService.validarParaModificar(id, nombre, apellido, fechaNacimiento, tipoDocumento, numeroDocumento);
+        //ahora validamos acá si ya existe cliente con ese doc
+        Optional<Cliente> existente = clienteRepository.findByTipoDocumentoAndNumeroDocumento(tipoDocumento, numeroDocumento);
+        if (existente.isPresent() && !existente.get().getId().equals(id)) {
+            throw new IllegalArgumentException("Ya existe otro cliente con ese documento");
+        }
 
         if (direccionEstadia == null || direccionEstadia.isBlank()) {
             throw new IllegalArgumentException("La dirección de estadía es obligatoria");
@@ -100,11 +110,11 @@ public class ClienteServiceImpl implements ClienteService {
                 .orElseThrow(() -> new IllegalArgumentException("Cliente no encontrado: " + id));
     }
 
+    //modifico el eliminarCliente para poder borrar usuario al eliminarlo
     @Override
     public void eliminarCliente(String id) {
-        Cliente cliente = buscarCliente(id);
-        cliente.setEliminado(true);
-        clienteRepository.save(cliente);
+        buscarCliente(id);
+        personaService.eliminarPersona(id);
     }
 
     @Override

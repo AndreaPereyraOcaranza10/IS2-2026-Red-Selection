@@ -29,4 +29,6 @@ public interface PersonaService {
     Persona asociarContactoPersona(String id, String idContacto);
 
     Persona asociarDireccionPersona(String id, String idDireccion);
+
+    Persona asociarUsuarioPersona(String id, String idUsuario);
 }
