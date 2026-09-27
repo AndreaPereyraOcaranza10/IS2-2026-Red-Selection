@@ -1,0 +1,79 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <!-- Ojo: el original decía "Cart page" por error, lo corregí -->
+    <title th:text="'Register page'">Register page</title>
+    <th:block th:replace="~{fragments/fragments :: head-assets}"></th:block>
+</head>
+
+
+<body>
+    <div th:replace="~{fragments/fragments :: header}"></div>
+
+    <!-- Register and login -->
+    <section id="register-login-page" class="bg-white py-16">
+        <div class="container mx-auto px-4">
+            <div class="flex flex-col md:flex-row gap-4">
+                <div class="md:w-1/2 bg-white rounded-lg shadow-md p-4 md:p-10 md:m-10">
+                    <h2 class="text-2xl font-semibold mb-4">Login</h2>
+                    <!--
+                        Patrón típico de Spring Security: el form postea a /login con
+                        campos "username" y "password" (nombres configurables), y Spring
+                        agrega solo ?error / ?logout en la URL cuando corresponde.
+                    -->
+                    <form th:action="@{/login}" method="post">
+                        <p class="text-red-600 mb-3" th:if="${param.error}">Email o contraseña incorrectos.</p>
+                        <p class="text-green-600 mb-3" th:if="${param.logout}">Sesión cerrada correctamente.</p>
+                        <div class="mb-3">
+                            <label for="login-email" class="block ">Email</label>
+                            <input type="email" id="login-email" name="username" class="w-full px-3 py-1 border  rounded-full focus:border-transparent focus:outline-none focus:ring-2 focus:ring-primary" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="login-password" class="block ">Password</label>
+                            <input type="password" id="login-password" name="password" class="w-full px-3 py-1 border  rounded-full focus:border-transparent focus:outline-none focus:ring-2 focus:ring-primary" required>
+                        </div>
+                        <div class="flex items-center mb-3">
+                            <input type="checkbox" id="remember-me" name="remember-me" class="mr-2">
+                            <label for="remember-me" class="">Remember Me</label>
+                        </div>
+                        <div class="mb-3">
+                            <a th:href="@{/forgot-password}" href="#" class="text-primary hover:underline">Forgot Password?</a>
+                        </div>
+                        <button type="submit" class="bg-primary text-white border border-primary hover:bg-transparent hover:text-primary py-2 px-3 rounded-full w-full">Login</button>
+                    </form>
+                </div>
+                <div class="md:w-1/2 bg-white rounded-lg shadow-md p-4 md:p-10 md:m-10">
+                    <h2 class="text-2xl font-semibold mb-4">Register</h2>
+                    <!--
+                        th:object asume un command object en el modelo, ej:
+                        model.addAttribute("registrationForm", new RegistrationForm());
+                        La confirmación de contraseña normalmente se valida en el backend
+                        (Bean Validation / @AssertTrue), no en un campo del objeto por igual a otro.
+                    -->
+                    <form th:action="@{/register}" th:object="${registrationForm}" method="post">
+                        <div class="mb-3">
+                            <label for="register-email" class="block ">Email</label>
+                            <input type="email" id="register-email" name="email" th:field="*{email}" class="w-full px-3 py-1 border focus:border-transparent rounded-full focus:outline-none focus:ring-2 focus:ring-primary" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="register-password" class="block ">Password</label>
+                            <input type="password" id="register-password" name="password" th:field="*{password}" class="w-full px-3 py-1 border focus:border-transparent rounded-full focus:outline-none focus:ring-2 focus:ring-primary" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="register-confirm-password" class="block ">Confirm Password</label>
+                            <input type="password" id="register-confirm-password" name="confirmPassword" th:field="*{confirmPassword}" class="w-full px-3 py-1 border focus:border-transparent rounded-full focus:outline-none focus:ring-2 focus:ring-primary" required>
+                        </div>
+                        <button type="submit" class="bg-primary text-white border border-primary hover:bg-transparent hover:text-primary py-2 px-3 rounded-full w-full">Register</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <div th:replace="~{fragments/fragments :: footer}"></div>
+
+    <th:block th:replace="~{fragments/fragments :: scripts}"></th:block>
+</body>
+
+</html>
