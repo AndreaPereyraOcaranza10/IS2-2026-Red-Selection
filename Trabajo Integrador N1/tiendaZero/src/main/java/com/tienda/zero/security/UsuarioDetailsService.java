@@ -37,7 +37,7 @@ public class UsuarioDetailsService implements UserDetailsService {
         return User.withUsername(usuario.getNombreUsuario())
                 .password(usuario.getClave())
                 .roles(usuario.getRol().name())
-                .disabled(usuario.isEliminado())
+                .disabled(usuario.isEliminado() || !usuario.isCuentaActivada())
                 .build();
     }
 }

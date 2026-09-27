@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Completar perfil</title>
+    <link rel="stylesheet" th:href="@{/css/estilos.css}">
+</head>
+<body>
+<div class="tarjeta tarjeta--ancha">
+    <h1>Completá tu perfil</h1>
+    <p class="subtitulo">Necesitamos estos datos para terminar de crear tu cuenta</p>
+
+    <p class="mensaje mensaje--error" th:if="${error}" th:text="${error}"></p>
+
+    <form th:action="@{/completar-perfil}" method="post">
+        <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+
+        <fieldset>
+            <legend>Datos personales</legend>
+
+            <div class="fila">
+                <div>
+                    <label for="nombre">Nombre</label>
+                    <input type="text" id="nombre" name="nombre" required/>
+                </div>
+                <div>
+                    <label for="apellido">Apellido</label>
+                    <input type="text" id="apellido" name="apellido" required/>
+                </div>
+            </div>
+
+            <div class="fila">
+                <div>
+                    <label for="sexo">Sexo</label>
+                    <select id="sexo" name="sexo" required>
+                        <option value="" disabled selected>Seleccionar</option>
+                        <option value="MASCULINO">Masculino</option>
+                        <option value="FEMENINO">Femenino</option>
+                        <option value="OTRO">Otro</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="fechaNacimiento">Fecha de nacimiento</label>
+                    <input type="date" id="fechaNacimiento" name="fechaNacimiento" required/>
+                </div>
+            </div>
+
+            <div class="fila">
+                <div>
+                    <label for="tipoDocumento">Tipo de documento</label>
+                    <select id="tipoDocumento" name="tipoDocumento" required>
+                        <option value="DNI">DNI</option>
+                        <option value="PASAPORTE">Pasaporte</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="numeroDocumento">Número de documento</label>
+                    <input type="text" id="numeroDocumento" name="numeroDocumento" required/>
+                </div>
+            </div>
+
+            <label for="telefono">Número de teléfono</label>
+            <input type="tel" id="telefono" name="telefono" placeholder="11234567"/>
+
+            <label for="idNacionalidad">Nacionalidad</label>
+            <select id="idNacionalidad" name="idNacionalidad" required>
+                <option value="" disabled selected>Seleccionar</option>
+                <option th:each="n : ${nacionalidades}" th:value="${n.id}" th:text="${n.nombre}"></option>
+            </select>
+
+            <label for="direccionEstadia">Dirección de estadía</label>
+            <input type="text" id="direccionEstadia" name="direccionEstadia" required/>
+        </fieldset>
+
+        <fieldset>
+            <legend>Dirección</legend>
+
+            <div class="fila">
+                <div>
+                    <label for="idProvincia">Provincia</label>
+                    <select id="idProvincia" required>
+                        <option value="" disabled selected>Seleccionar</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="idDepartamento">Departamento</label>
+                    <select id="idDepartamento" required disabled>
+                        <option value="" disabled selected>Elegí una provincia primero</option>
+                    </select>
+                </div>
+            </div>
+
+            <label for="idLocalidad">Localidad</label>
+            <select id="idLocalidad" name="idLocalidad" required disabled>
+                <option value="" disabled selected>Elegí un departamento primero</option>
+            </select>
+
+            <div class="fila">
+                <div>
+                    <label for="calle">Calle</label>
+                    <input type="text" id="calle" name="calle" required/>
+                </div>
+                <div>
+                    <label for="numeracion">N° de calle</label>
+                    <input type="text" id="numeracion" name="numeracion" required/>
+                </div>
+            </div>
+
+            <div class="fila">
+                <div>
+                    <label for="manzanaPiso">Manzana / piso</label>
+                    <input type="text" id="manzanaPiso" name="manzanaPiso" placeholder="Manzana A"/>
+                </div>
+                <div>
+                    <label for="casaDepartamento">N° casa / depto</label>
+                    <input type="text" id="casaDepartamento" name="casaDepartamento" placeholder="123"/>
+                </div>
+            </div>
+
+            <label for="barrio">Barrio</label>
+            <input type="text" id="barrio" name="barrio" placeholder="Av. Siempre Viva"/>
+
+            <label for="referencia">Referencia</label>
+            <input type="text" id="referencia" name="referencia" placeholder="Es en muy muy lejano"/>
+        </fieldset>
+
+        <button type="submit">Guardar perfil</button>
+    </form>
+</div>
+
+<script th:inline="javascript">
+    const selectProvincia = document.getElementById('idProvincia');
+    const selectDepartamento = document.getElementById('idDepartamento');
+    const selectLocalidad = document.getElementById('idLocalidad');
+
+    function cargarOpciones(select, url, placeholder) {
+        select.disabled = true;
+        select.innerHTML = `<option value="" disabled selected>Cargando...</option>`;
+        fetch(url)
+            .then(r => r.json())
+            .then(datos => {
+                if (datos.length === 0) {
+                    select.innerHTML = `<option value="" disabled selected>Sin opciones cargadas</option>`;
+                    return;
+                }
+                select.innerHTML = `<option value="" disabled selected>${placeholder}</option>` +
+                    datos.map(d => `<option value="${d.id}">${d.nombre}</option>`).join('');
+                select.disabled = false;
+            });
+    }
+
+    cargarOpciones(selectProvincia, '/api/ubicacion/provincias', 'Seleccionar');
+
+    selectProvincia.addEventListener('change', () => {
+        // Le agregamos el name recién acá para que solo la provincia elegida
+        // viaje al backend si hiciera falta (no se usa en el service, pero queda prolijo).
+        cargarOpciones(selectDepartamento, `/api/ubicacion/departamentos?idProvincia=${selectProvincia.value}`, 'Seleccionar');
+        selectLocalidad.disabled = true;
+        selectLocalidad.innerHTML = `<option value="" disabled selected>Elegí un departamento primero</option>`;
+    });
+
+    selectDepartamento.addEventListener('change', () => {
+        cargarOpciones(selectLocalidad, `/api/ubicacion/localidades?idDepartamento=${selectDepartamento.value}`, 'Seleccionar');
+        selectLocalidad.name = 'idLocalidad';
+    });
+</script>
+</body>
+</html>

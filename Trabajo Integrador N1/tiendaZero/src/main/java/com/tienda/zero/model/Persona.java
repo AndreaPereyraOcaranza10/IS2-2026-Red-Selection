@@ -1,5 +1,6 @@
 package com.tienda.zero.model;
 
+import com.tienda.zero.enums.Sexo;
 import com.tienda.zero.enums.TipoDocumento;
 import jakarta.persistence.*;
 import lombok.*;
@@ -32,6 +33,10 @@ public abstract class Persona {
 
     @Column(nullable = false)
     private String apellido;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Sexo sexo;
 
     @DateTimeFormat(pattern = "dd-MM-yyyy")
     @Column(nullable = false)

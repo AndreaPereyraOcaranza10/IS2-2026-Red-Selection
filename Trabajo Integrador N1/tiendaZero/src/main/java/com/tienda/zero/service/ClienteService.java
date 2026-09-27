@@ -1,5 +1,6 @@
 package com.tienda.zero.service;
 
+import com.tienda.zero.enums.Sexo;
 import com.tienda.zero.enums.TipoDocumento;
 import com.tienda.zero.model.Cliente;
 import com.tienda.zero.model.Contacto;
@@ -10,13 +11,13 @@ import java.util.List;
 
 public interface ClienteService {
 
-    Cliente crearCliente(String nombre, String apellido, Date fechaNacimiento, TipoDocumento tipoDocumento,
+    Cliente crearCliente(String nombre, String apellido, Sexo sexo, Date fechaNacimiento, TipoDocumento tipoDocumento,
                          String numeroDocumento, String direccionEstadia, String idNacionalidad);
 
-    void validar(String nombre, String apellido, Date fechaNacimiento, TipoDocumento tipoDocumento,
+    void validar(String nombre, String apellido, Sexo sexo, Date fechaNacimiento, TipoDocumento tipoDocumento,
                  String numeroDocumento, String direccionEstadia, String idNacionalidad);
 
-    Cliente modificarCliente(String id, String nombre, String apellido, Date fechaNacimiento,
+    Cliente modificarCliente(String id, String nombre, String apellido, Sexo sexo, Date fechaNacimiento,
                              TipoDocumento tipoDocumento, String numeroDocumento,
                              String direccionEstadia, String idNacionalidad);
 

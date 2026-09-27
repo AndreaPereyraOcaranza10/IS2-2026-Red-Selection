@@ -17,8 +17,12 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.authorizeHttpRequests(auth -> auth
                         .requestMatchers("/admin/**").hasAnyRole("ADMINISTRATIVO", "JEFE")
-                .anyRequest().permitAll()
-        ).formLogin(Customizer.withDefaults())
+                        .requestMatchers("/completar-perfil", "/perfil-completo").authenticated()
+                        .anyRequest().permitAll()
+        ).formLogin(form -> form
+                        .loginPage("/login")
+                        .permitAll()
+                )
         .logout(Customizer.withDefaults());
         return http.build();
     }

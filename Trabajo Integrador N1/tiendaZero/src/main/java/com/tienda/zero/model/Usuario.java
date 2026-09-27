@@ -4,6 +4,8 @@ import com.tienda.zero.enums.TipoUsuario;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Table (name = "usuario")
 @NoArgsConstructor
@@ -30,5 +32,16 @@ public class Usuario {
     @Builder.Default
     @Column(nullable = false)
     private boolean Eliminado = false;
+
+    //prueba soporte para activación de cuenta
+    @Column
+    private String codigoActivacion;
+
+    @Column
+    private LocalDateTime fechaExpiracionCodigo;
+
+    @Builder.Default
+    @Column(nullable = false)
+    private boolean cuentaActivada = false;
 
 }

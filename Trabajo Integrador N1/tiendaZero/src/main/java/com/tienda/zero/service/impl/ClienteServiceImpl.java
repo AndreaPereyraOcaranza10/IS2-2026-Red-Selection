@@ -1,5 +1,6 @@
 package com.tienda.zero.service.impl;
 
+import com.tienda.zero.enums.Sexo;
 import com.tienda.zero.enums.TipoDocumento;
 import com.tienda.zero.model.Cliente;
 import com.tienda.zero.model.Contacto;
@@ -30,15 +31,16 @@ public class ClienteServiceImpl implements ClienteService {
     }
 
     @Override
-    public Cliente crearCliente(String nombre, String apellido, Date fechaNacimiento, TipoDocumento tipoDocumento,
+    public Cliente crearCliente(String nombre, String apellido, Sexo sexo, Date fechaNacimiento, TipoDocumento tipoDocumento,
                                 String numeroDocumento, String direccionEstadia, String idNacionalidad) {
-        validar(nombre, apellido, fechaNacimiento, tipoDocumento, numeroDocumento, direccionEstadia, idNacionalidad);
+        validar(nombre, apellido, sexo, fechaNacimiento, tipoDocumento, numeroDocumento, direccionEstadia, idNacionalidad);
 
         Nacionalidad nacionalidad = nacionalidadService.buscarNacionalidad(idNacionalidad);
 
         Cliente cliente = Cliente.builder()
                 .nombre(nombre)
                 .apellido(apellido)
+                .sexo(sexo)
                 .fechaNacimiento(fechaNacimiento)
                 .tipoDocumento(tipoDocumento)
                 .numeroDocumento(numeroDocumento)
@@ -51,9 +53,9 @@ public class ClienteServiceImpl implements ClienteService {
     }
 
     @Override
-    public void validar(String nombre, String apellido, Date fechaNacimiento, TipoDocumento tipoDocumento,
+    public void validar(String nombre, String apellido, Sexo sexo, Date fechaNacimiento, TipoDocumento tipoDocumento,
                         String numeroDocumento, String direccionEstadia, String idNacionalidad) {
-        personaService.validar(nombre, apellido, fechaNacimiento, tipoDocumento, numeroDocumento);
+        personaService.validar(nombre, apellido, sexo, fechaNacimiento, tipoDocumento, numeroDocumento);
         //ahora validamos acá si ya existe cliente con ese doc
         if (clienteRepository.findByTipoDocumentoAndNumeroDocumento(tipoDocumento, numeroDocumento).isPresent()) {
             throw new IllegalArgumentException("Ya existe un cliente con ese documento");
@@ -68,7 +70,7 @@ public class ClienteServiceImpl implements ClienteService {
     }
 
     @Override
-    public Cliente modificarCliente(String id, String nombre, String apellido, Date fechaNacimiento,
+    public Cliente modificarCliente(String id, String nombre, String apellido, Sexo sexo, Date fechaNacimiento,
                                     TipoDocumento tipoDocumento, String numeroDocumento,
                                     String direccionEstadia, String idNacionalidad) {
         Cliente cliente = buscarCliente(id);
@@ -77,7 +79,7 @@ public class ClienteServiceImpl implements ClienteService {
             throw new IllegalArgumentException("No se puede modificar un cliente eliminado");
         }
 
-        personaService.validarParaModificar(id, nombre, apellido, fechaNacimiento, tipoDocumento, numeroDocumento);
+        personaService.validar(nombre, apellido, sexo, fechaNacimiento, tipoDocumento, numeroDocumento);
         //ahora validamos acá si ya existe cliente con ese doc
         Optional<Cliente> existente = clienteRepository.findByTipoDocumentoAndNumeroDocumento(tipoDocumento, numeroDocumento);
         if (existente.isPresent() && !existente.get().getId().equals(id)) {
@@ -95,6 +97,7 @@ public class ClienteServiceImpl implements ClienteService {
 
         cliente.setNombre(nombre);
         cliente.setApellido(apellido);
+        cliente.setSexo(sexo);
         cliente.setFechaNacimiento(fechaNacimiento);
         cliente.setTipoDocumento(tipoDocumento);
         cliente.setNumeroDocumento(numeroDocumento);

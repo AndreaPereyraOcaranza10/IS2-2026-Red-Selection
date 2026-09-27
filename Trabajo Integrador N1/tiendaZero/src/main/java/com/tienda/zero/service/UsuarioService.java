@@ -25,4 +25,11 @@ public interface UsuarioService {
 
     List<Usuario> listarUsuarioActivo();
 
+    //prueba soporte de activación por código en correo
+    Usuario crearUsuarioPendienteActivacion(String nombreUsuario, String clave, TipoUsuario rol);
+
+    Usuario generarCodigoActivacion(String id);
+
+    Usuario activarCuenta(String nombreUsuario, String codigo);
+
 }

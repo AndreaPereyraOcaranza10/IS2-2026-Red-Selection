@@ -1,5 +1,6 @@
 package com.tienda.zero.service.impl;
 
+import com.tienda.zero.enums.Sexo;
 import com.tienda.zero.enums.TipoDocumento;
 import com.tienda.zero.enums.TipoEmpleado;
 import com.tienda.zero.model.Empleado;
@@ -29,15 +30,16 @@ public class EmpleadoServiceImpl implements EmpleadoService {
     }
 
     @Override
-    public Empleado crearEmpleado(String nombre, String apellido, Date fechaNacimiento, TipoDocumento tipoDocumento,
+    public Empleado crearEmpleado(String nombre, String apellido, Sexo sexo, Date fechaNacimiento, TipoDocumento tipoDocumento,
                                   String numeroDocumento, TipoEmpleado tipoEmpleado, String idEmpresa) {
-        validar(nombre, apellido, fechaNacimiento, tipoDocumento, numeroDocumento, tipoEmpleado, idEmpresa);
+        validar(nombre, apellido, sexo, fechaNacimiento, tipoDocumento, numeroDocumento, tipoEmpleado, idEmpresa);
 
         Empresa empresa = empresaService.buscarEmpresa(idEmpresa);
 
         Empleado empleado = Empleado.builder()
                 .nombre(nombre)
                 .apellido(apellido)
+                .sexo(sexo)
                 .fechaNacimiento(fechaNacimiento)
                 .tipoDocumento(tipoDocumento)
                 .numeroDocumento(numeroDocumento)
@@ -50,9 +52,9 @@ public class EmpleadoServiceImpl implements EmpleadoService {
     }
 
     @Override
-    public void validar(String nombre, String apellido, Date fechaNacimiento, TipoDocumento tipoDocumento,
+    public void validar(String nombre, String apellido, Sexo sexo, Date fechaNacimiento, TipoDocumento tipoDocumento,
                         String numeroDocumento, TipoEmpleado tipoEmpleado, String idEmpresa) {
-        personaService.validar(nombre, apellido, fechaNacimiento, tipoDocumento, numeroDocumento);
+        personaService.validar(nombre, apellido, sexo, fechaNacimiento, tipoDocumento, numeroDocumento);
 
         //ahora validamos acá si ya existe empleado con ese doc
         if (empleadoRepository.findByTipoDocumentoAndNumeroDocumento(tipoDocumento, numeroDocumento).isPresent()) {
@@ -74,7 +76,7 @@ public class EmpleadoServiceImpl implements EmpleadoService {
     }
 
     @Override
-    public Empleado modificarEmpleado(String id, String nombre, String apellido, Date fechaNacimiento,
+    public Empleado modificarEmpleado(String id, String nombre, String apellido, Sexo sexo, Date fechaNacimiento,
                                       TipoDocumento tipoDocumento, String numeroDocumento,
                                       TipoEmpleado tipoEmpleado, String idEmpresa) {
         Empleado empleado = buscarEmpleado(id);
@@ -83,7 +85,7 @@ public class EmpleadoServiceImpl implements EmpleadoService {
             throw new IllegalArgumentException("No se puede modificar un empleado eliminado");
         }
 
-        personaService.validarParaModificar(id, nombre, apellido, fechaNacimiento, tipoDocumento, numeroDocumento);
+        personaService.validar(nombre, apellido, sexo, fechaNacimiento, tipoDocumento, numeroDocumento);
         //ahora validamos acá si ya existe empleado con ese doc
         Optional<Empleado> existente = empleadoRepository.findByTipoDocumentoAndNumeroDocumento(tipoDocumento, numeroDocumento);
         if (existente.isPresent() && !existente.get().getId().equals(id)) {
@@ -101,6 +103,7 @@ public class EmpleadoServiceImpl implements EmpleadoService {
 
         empleado.setNombre(nombre);
         empleado.setApellido(apellido);
+        empleado.setSexo(sexo);
         empleado.setFechaNacimiento(fechaNacimiento);
         empleado.setTipoDocumento(tipoDocumento);
         empleado.setNumeroDocumento(numeroDocumento);

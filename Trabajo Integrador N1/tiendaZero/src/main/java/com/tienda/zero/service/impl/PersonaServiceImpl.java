@@ -1,5 +1,6 @@
 package com.tienda.zero.service.impl;
 
+import com.tienda.zero.enums.Sexo;
 import com.tienda.zero.enums.TipoDocumento;
 import com.tienda.zero.enums.TipoUsuario;
 import com.tienda.zero.model.*;
@@ -32,7 +33,7 @@ public class PersonaServiceImpl implements PersonaService {
     }
 
     @Override
-    public void validar(String nombre, String apellido, Date fechaNacimiento,
+    public void validar(String nombre, String apellido, Sexo sexo, Date fechaNacimiento,
                         TipoDocumento tipoDocumento, String numeroDocumento) {
 
         if (nombre == null || nombre.isBlank()) {
@@ -41,6 +42,9 @@ public class PersonaServiceImpl implements PersonaService {
         if (apellido == null || apellido.isBlank()) {
             throw new IllegalArgumentException("El apellido es obligatorio");
         }
+        if (sexo == null) {
+            throw new IllegalArgumentException("El sexo es obligatorio");
+        }
         if (fechaNacimiento == null) {
             throw new IllegalArgumentException("La fecha de nacimiento es obligatoria");
         }
@@ -55,27 +59,6 @@ public class PersonaServiceImpl implements PersonaService {
 
     }
 
-
-    @Override
-    public void validarParaModificar(String id, String nombre, String apellido, Date fechaNacimiento,
-                                     TipoDocumento tipoDocumento, String numeroDocumento) {
-        if (nombre == null || nombre.isBlank()) {
-            throw new IllegalArgumentException("El nombre es obligatorio");
-        }
-        if (apellido == null || apellido.isBlank()) {
-            throw new IllegalArgumentException("El apellido es obligatorio");
-        }
-        if (fechaNacimiento == null) {
-            throw new IllegalArgumentException("La fecha de nacimiento es obligatoria");
-        }
-        if (tipoDocumento == null) {
-            throw new IllegalArgumentException("El tipo de documento es obligatorio");
-        }
-        if (numeroDocumento == null || numeroDocumento.isBlank()) {
-            throw new IllegalArgumentException("El número de documento es obligatorio");
-        }
-        //ya no validamos si existe una persona con el mismo documento porque ahora lo haceoms en los roles
-    }
 
     @Override
     public Persona buscarPersona(String id) {
@@ -162,5 +145,10 @@ public class PersonaServiceImpl implements PersonaService {
                 && !rol.name().equals(empleado.getTipoEmpleado().name())) {
             throw new IllegalArgumentException("El rol del usuario debe coincidir con el tipo de empleado");
         }
+    }
+
+    @Override
+    public Optional<Persona> buscarPersonaPorUsuario(String idUsuario) {
+        return personaRepository.findByUsuarioId(idUsuario);
     }
 }

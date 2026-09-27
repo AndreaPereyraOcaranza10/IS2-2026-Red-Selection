@@ -8,16 +8,23 @@ import jakarta.transaction.Transactional;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.security.SecureRandom;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.regex.Pattern;
 
 @Service
 public class UsuarioServiceImpl implements UsuarioService {
 
     private static final int LONGITUD_MINIMA_CLAVE = 4;
 
+    private static final int MINUTOS_VIGENCIA_CODIGO = 30;
+
     private final UsuarioRepository usuarioRepository;
     private final PasswordEncoder passwordEncoder;
+
+    private final SecureRandom random = new SecureRandom();
 
     public UsuarioServiceImpl(UsuarioRepository usuarioRepository, PasswordEncoder passwordEncoder){
         this.usuarioRepository = usuarioRepository;
@@ -28,7 +35,7 @@ public class UsuarioServiceImpl implements UsuarioService {
     @Transactional
     public Usuario crearUsuario(String nombreUsuario, String clave, TipoUsuario rol) {
 
-        validar(nombreUsuario, clave, rol);
+       /* validar(nombreUsuario, clave, rol);
 
         String nombreLimpio = nombreUsuario.trim();
 
@@ -42,9 +49,74 @@ public class UsuarioServiceImpl implements UsuarioService {
         usuario.setRol(rol);
         usuario.setEliminado(false);
 
-        return usuarioRepository.save(usuario);
+        return usuarioRepository.save(usuario);*/
+        return construirYGuardarUsuario(nombreUsuario, clave, rol, true);
 
     }
+
+    @Override
+    @Transactional
+    public Usuario crearUsuarioPendienteActivacion(String nombreUsuario, String clave, TipoUsuario rol) {
+        return construirYGuardarUsuario(nombreUsuario, clave, rol, false);
+    }
+
+    private Usuario construirYGuardarUsuario(String nombreUsuario, String clave, TipoUsuario rol, boolean cuentaActivada) {
+        validar(nombreUsuario, clave, rol);
+
+        String nombreLimpio = nombreUsuario.trim().toLowerCase();
+
+        if (usuarioRepository.findByNombreUsuario(nombreLimpio).isPresent()){
+            throw new IllegalArgumentException("Ya existe un usuario con ese nombre");
+        }
+
+        Usuario usuario = new Usuario();
+        usuario.setNombreUsuario(nombreLimpio);
+        usuario.setClave(passwordEncoder.encode(clave));
+        usuario.setRol(rol);
+        usuario.setEliminado(false);
+        usuario.setCuentaActivada(cuentaActivada);
+
+        return usuarioRepository.save(usuario);
+    }
+
+    @Override
+    @Transactional
+    public Usuario generarCodigoActivacion(String id) {
+        Usuario usuario = buscarUsuario(id);
+
+        String codigo = String.format("%06d", random.nextInt(1_000_000));
+        usuario.setCodigoActivacion(codigo);
+        usuario.setFechaExpiracionCodigo(LocalDateTime.now().plusMinutes(MINUTOS_VIGENCIA_CODIGO));
+
+        return usuarioRepository.save(usuario);
+    }
+
+    @Override
+    @Transactional
+    public Usuario activarCuenta(String nombreUsuario, String codigo) {
+        Usuario usuario = buscarUsuarioPorNombreUsuario(nombreUsuario);
+
+        if (usuario.isCuentaActivada()) {
+            throw new IllegalArgumentException("La cuenta ya está activada");
+        }
+        if (codigo == null || usuario.getCodigoActivacion() == null
+                || !usuario.getCodigoActivacion().equals(codigo.trim())) {
+            throw new IllegalArgumentException("El código de activación es incorrecto");
+        }
+        if (usuario.getFechaExpiracionCodigo() == null
+                || usuario.getFechaExpiracionCodigo().isBefore(LocalDateTime.now())) {
+            throw new IllegalArgumentException("El código de activación expiró, solicitá uno nuevo");
+        }
+
+        usuario.setCuentaActivada(true);
+        usuario.setCodigoActivacion(null);
+        usuario.setFechaExpiracionCodigo(null);
+
+        return usuarioRepository.save(usuario);
+    }
+
+
+
 
     @Override
     public void validar(String nombreUsuario, String clave, TipoUsuario rol) {
