@@ -178,10 +178,6 @@ public class TiendaController {
         return "tienda/checkout";
     }
 
-    @GetMapping("/register")
-    public String register() {
-        return "tienda/auth/register";
-    }
 
     private ProductoCardDTO convertirAProductoCardDTO(Producto prod) {
         double precio = 0.0;

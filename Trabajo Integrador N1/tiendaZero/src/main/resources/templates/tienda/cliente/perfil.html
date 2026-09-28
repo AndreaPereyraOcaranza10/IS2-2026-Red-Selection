@@ -1,0 +1,245 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <title>Mi Perfil - Tienda Zero</title>
+    <th:block th:replace="~{tienda/fragments/fragments :: head-assets}"></th:block>
+</head>
+
+<body class="bg-gray-100 flex flex-col min-h-screen">
+    <div th:replace="~{tienda/fragments/fragments :: header}"></div>
+
+    <main class="flex-grow py-10">
+        <div class="container mx-auto px-4 max-w-4xl">
+            
+            <!-- Título de la página -->
+            <div class="mb-8 flex flex-col md:flex-row md:items-center md:justify-between">
+                <div>
+                    <h1 class="text-3xl font-extrabold text-gray-900">Información del Perfil</h1>
+                    <p class="text-gray-600 mt-1">Registra y administra tus datos personales, de contacto y dirección de entrega.</p>
+                </div>
+                <div class="mt-4 md:mt-0">
+                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-primary/10 text-primary">
+                        <i class="fas fa-user-check mr-1.5"></i> Cuenta Activa
+                    </span>
+                </div>
+            </div>
+
+            <!-- Banner de bienvenida inicial -->
+            <div th:if="${mensajeBienvenida}" class="mb-6 p-4 bg-amber-50 border-l-4 border-amber-500 text-amber-900 rounded-r-lg shadow-sm flex items-start">
+                <i class="fas fa-hand-sparkles text-amber-600 text-xl mr-3 mt-0.5"></i>
+                <div>
+                    <h4 class="font-bold text-sm">¡Bienvenido/a a Tienda Zero!</h4>
+                    <p class="text-sm mt-0.5" th:text="${mensajeBienvenida}">Por favor completa tus datos personales para finalizar el registro.</p>
+                </div>
+            </div>
+
+            <!-- Mensaje de Éxito -->
+            <div th:if="${mensajeExito}" class="mb-6 p-4 bg-green-50 border-l-4 border-green-500 text-green-900 rounded-r-lg shadow-sm flex items-center">
+                <i class="fas fa-check-circle text-green-600 text-xl mr-3"></i>
+                <span class="text-sm font-medium" th:text="${mensajeExito}">¡Datos guardados con éxito!</span>
+            </div>
+
+            <!-- Mensaje de Error -->
+            <div th:if="${mensajeError}" class="mb-6 p-4 bg-red-50 border-l-4 border-red-500 text-red-900 rounded-r-lg shadow-sm flex items-center">
+                <i class="fas fa-exclamation-triangle text-red-600 text-xl mr-3"></i>
+                <span class="text-sm font-medium" th:text="${mensajeError}">Error al guardar los datos.</span>
+            </div>
+
+            <!-- Formulario de Perfil Completo -->
+            <form th:action="@{/perfil}" th:object="${perfil}" method="post" class="space-y-6">
+                
+                <!-- SECCIÓN 1: Datos Personales -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 md:p-8">
+                    <div class="flex items-center mb-6 pb-3 border-b border-gray-100">
+                        <div class="w-10 h-10 rounded-lg bg-primary/10 text-primary flex items-center justify-center mr-3">
+                            <i class="fas fa-id-card text-lg"></i>
+                        </div>
+                        <div>
+                            <h2 class="text-lg font-bold text-gray-800">1. Datos Personales</h2>
+                            <p class="text-xs text-gray-500">Información básica de identificación personal</p>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label for="nombre" class="block text-sm font-semibold text-gray-700 mb-1">Nombre *</label>
+                            <input type="text" id="nombre" th:field="*{nombre}" required
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary focus:border-transparent"
+                                   placeholder="Ej: Juan">
+                        </div>
+
+                        <div>
+                            <label for="apellido" class="block text-sm font-semibold text-gray-700 mb-1">Apellido *</label>
+                            <input type="text" id="apellido" th:field="*{apellido}" required
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary focus:border-transparent"
+                                   placeholder="Ej: Pérez">
+                        </div>
+
+                        <div>
+                            <label for="sexo" class="block text-sm font-semibold text-gray-700 mb-1">Sexo *</label>
+                            <select id="sexo" th:field="*{sexo}" required
+                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary focus:border-transparent bg-white">
+                                <option value="" disabled th:selected="*{sexo == null}">Selecciona sexo</option>
+                                <option th:each="s : ${sexos}" th:value="${s}" th:text="${s}"></option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label for="fechaNacimiento" class="block text-sm font-semibold text-gray-700 mb-1">Fecha de Nacimiento *</label>
+                            <input type="date" id="fechaNacimiento" th:field="*{fechaNacimiento}" required
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary focus:border-transparent bg-white">
+                        </div>
+
+                        <div>
+                            <label for="tipoDocumento" class="block text-sm font-semibold text-gray-700 mb-1">Tipo de Documento *</label>
+                            <select id="tipoDocumento" th:field="*{tipoDocumento}" required
+                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary focus:border-transparent bg-white">
+                                <option th:each="td : ${tiposDocumento}" th:value="${td}" th:text="${td}"></option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label for="numeroDocumento" class="block text-sm font-semibold text-gray-700 mb-1">Número de Documento *</label>
+                            <input type="text" id="numeroDocumento" th:field="*{numeroDocumento}" required
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary focus:border-transparent"
+                                   placeholder="Ej: 38123456">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SECCIÓN 2: Contacto -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 md:p-8">
+                    <div class="flex items-center mb-6 pb-3 border-b border-gray-100">
+                        <div class="w-10 h-10 rounded-lg bg-green-50 text-green-600 flex items-center justify-center mr-3">
+                            <i class="fas fa-phone-alt text-lg"></i>
+                        </div>
+                        <div>
+                            <h2 class="text-lg font-bold text-gray-800">2. Información de Contacto</h2>
+                            <p class="text-xs text-gray-500">Medios de comunicación para notificaciones y pedidos</p>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div>
+                            <label for="email" class="block text-sm font-semibold text-gray-700 mb-1">Correo Electrónico (Usuario)</label>
+                            <input type="email" id="email" th:value="${perfil.email}" disabled
+                                   class="w-full px-4 py-2 border border-gray-200 bg-gray-50 text-gray-500 rounded-lg text-sm cursor-not-allowed">
+                            <span class="text-xs text-gray-400 mt-1 block">Tu identificador de acceso al sistema</span>
+                        </div>
+
+                        <div>
+                            <label for="telefono" class="block text-sm font-semibold text-gray-700 mb-1">Número de Teléfono *</label>
+                            <input type="text" id="telefono" th:field="*{telefono}" required
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary focus:border-transparent"
+                                   placeholder="Ej: +54 9 261 456-7890">
+                        </div>
+
+                        <div>
+                            <label for="tipoTelefono" class="block text-sm font-semibold text-gray-700 mb-1">Tipo de Teléfono *</label>
+                            <select id="tipoTelefono" th:field="*{tipoTelefono}" required
+                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary focus:border-transparent bg-white">
+                                <option th:each="tt : ${tiposTelefono}" th:value="${tt}" th:text="${tt}"></option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SECCIÓN 3: Dirección -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 md:p-8">
+                    <div class="flex items-center mb-6 pb-3 border-b border-gray-100">
+                        <div class="w-10 h-10 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center mr-3">
+                            <i class="fas fa-map-marker-alt text-lg"></i>
+                        </div>
+                        <div>
+                            <h2 class="text-lg font-bold text-gray-800">3. Dirección de Domicilio y Entrega</h2>
+                            <p class="text-xs text-gray-500">Ubicación geográfica para envíos y facturación</p>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                        <div class="md:col-span-2">
+                            <label for="provincia" class="block text-sm font-semibold text-gray-700 mb-1">Provincia *</label>
+                            <input type="text" id="provincia" th:field="*{provincia}" required
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary focus:border-transparent"
+                                   placeholder="Mendoza">
+                        </div>
+
+                        <div>
+                            <label for="departamento" class="block text-sm font-semibold text-gray-700 mb-1">Departamento *</label>
+                            <input type="text" id="departamento" th:field="*{departamento}" required
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary focus:border-transparent"
+                                   placeholder="Ej: Capital">
+                        </div>
+
+                        <div>
+                            <label for="codigoPostal" class="block text-sm font-semibold text-gray-700 mb-1">Código Postal *</label>
+                            <input type="text" id="codigoPostal" th:field="*{codigoPostal}" required
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary focus:border-transparent"
+                                   placeholder="Ej: 5500">
+                        </div>
+
+                        <div class="md:col-span-2">
+                            <label for="localidad" class="block text-sm font-semibold text-gray-700 mb-1">Localidad *</label>
+                            <input type="text" id="localidad" th:field="*{localidad}" required
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary focus:border-transparent"
+                                   placeholder="Ej: Ciudad de Mendoza">
+                        </div>
+
+                        <div class="md:col-span-2">
+                            <label for="calle" class="block text-sm font-semibold text-gray-700 mb-1">Calle *</label>
+                            <input type="text" id="calle" th:field="*{calle}" required
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary focus:border-transparent"
+                                   placeholder="Ej: Av. San Martín">
+                        </div>
+
+                        <div>
+                            <label for="numeroCalle" class="block text-sm font-semibold text-gray-700 mb-1">N° Calle *</label>
+                            <input type="text" id="numeroCalle" th:field="*{numeroCalle}" required
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary focus:border-transparent"
+                                   placeholder="Ej: 1450">
+                        </div>
+
+                        <div>
+                            <label for="manzanaPiso" class="block text-sm font-semibold text-gray-700 mb-1">Manzana / Piso</label>
+                            <input type="text" id="manzanaPiso" th:field="*{manzanaPiso}"
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary focus:border-transparent"
+                                   placeholder="Ej: Piso 3 o Mza B">
+                        </div>
+
+                        <div class="md:col-span-2">
+                            <label for="casaDepartamento" class="block text-sm font-semibold text-gray-700 mb-1">N° Casa / Departamento</label>
+                            <input type="text" id="casaDepartamento" th:field="*{casaDepartamento}"
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary focus:border-transparent"
+                                   placeholder="Ej: Dpto B o Casa 14">
+                        </div>
+
+                        <div class="md:col-span-4">
+                            <label for="referencia" class="block text-sm font-semibold text-gray-700 mb-1">Referencia adicional (Opcional)</label>
+                            <input type="text" id="referencia" th:field="*{referencia}"
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary focus:border-transparent"
+                                   placeholder="Ej: Entre calles Catamarca y Lavalle, portón negro">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Botón de guardar -->
+                <div class="flex items-center justify-end space-x-4 pt-4">
+                    <a th:href="@{/shop}" class="px-6 py-2.5 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-100 font-semibold text-sm transition">
+                        Ir a la Tienda
+                    </a>
+                    <button type="submit" 
+                            class="px-8 py-2.5 rounded-lg bg-primary hover:bg-primary/90 text-white font-semibold text-sm shadow-md transition flex items-center">
+                        <i class="fas fa-save mr-2"></i> Guardar Información Personal
+                    </button>
+                </div>
+            </form>
+
+        </div>
+    </main>
+
+    <div th:replace="~{tienda/fragments/fragments :: footer}"></div>
+    <th:block th:replace="~{tienda/fragments/fragments :: scripts}"></th:block>
+</body>
+
+</html>

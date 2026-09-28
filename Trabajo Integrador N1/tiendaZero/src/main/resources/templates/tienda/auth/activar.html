@@ -1,0 +1,106 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <title>Activar Cuenta - Tienda Zero</title>
+    <th:block th:replace="~{tienda/fragments/fragments :: head-assets}"></th:block>
+</head>
+
+<body class="bg-gray-50 flex flex-col min-h-screen">
+    <div th:replace="~{tienda/fragments/fragments :: header}"></div>
+
+    <main class="flex-grow flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+        <div class="max-w-md w-full bg-white p-8 rounded-2xl shadow-lg border border-gray-100">
+            
+            <div class="text-center mb-6">
+                <div class="inline-flex items-center justify-center w-16 h-16 bg-primary/10 text-primary rounded-full mb-4">
+                    <i class="fas fa-shield-alt text-3xl"></i>
+                </div>
+                <h1 class="text-2xl font-bold text-gray-900">Activar tu cuenta</h1>
+                <p class="text-sm text-gray-600 mt-2">
+                    Ingresa el código que enviamos a tu correo electrónico para verificar y activar tu cuenta en Tienda Zero.
+                </p>
+            </div>
+
+            <!-- Banner Informativo / Errores -->
+            <div th:if="${mensajeError}" class="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm flex items-center">
+                <i class="fas fa-exclamation-circle text-red-500 mr-2 text-base"></i>
+                <span th:text="${mensajeError}">Código incorrecto.</span>
+            </div>
+            <div th:if="${mensajeAlerta}" class="mb-4 p-3 bg-amber-50 border border-amber-200 text-amber-800 rounded-lg text-sm flex items-center">
+                <i class="fas fa-info-circle text-amber-600 mr-2 text-base"></i>
+                <span th:text="${mensajeAlerta}">Debes activar tu cuenta primero.</span>
+            </div>
+            <div th:if="${mensajeInfo}" class="mb-4 p-3 bg-blue-50 border border-blue-200 text-blue-700 rounded-lg text-sm flex items-center">
+                <i class="fas fa-paper-plane text-blue-500 mr-2 text-base"></i>
+                <span th:text="${mensajeInfo}">Código enviado a tu casilla.</span>
+            </div>
+            <div th:if="${mensajeExito}" class="mb-4 p-3 bg-green-50 border border-green-200 text-green-700 rounded-lg text-sm flex items-center">
+                <i class="fas fa-check-circle text-green-600 mr-2 text-base"></i>
+                <span th:text="${mensajeExito}">Nuevo código enviado.</span>
+            </div>
+
+            <!-- Ayuda para entorno de desarrollo y pruebas locales -->
+            <div th:if="${codigoSugeridoDev}" class="mb-4 p-3 bg-indigo-50 border border-indigo-200 text-indigo-900 rounded-lg text-xs">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <span class="font-bold">🔧 Modo Pruebas / Consola:</span>
+                        <span> Código generado: <code class="font-mono text-sm bg-indigo-100 px-1 py-0.5 rounded font-bold" th:text="${codigoSugeridoDev}">123456</code></span>
+                    </div>
+                    <button type="button" 
+                            th:onclick="'document.getElementById(\'codigo\').value = \'' + ${codigoSugeridoDev} + '\''"
+                            class="text-xs bg-indigo-600 text-white px-2 py-1 rounded hover:bg-indigo-700 transition">
+                        Pegar
+                    </button>
+                </div>
+            </div>
+
+            <!-- Formulario de Activación -->
+            <form th:action="@{/activar}" th:object="${activarForm}" method="post" class="space-y-4">
+                <div>
+                    <label for="email" class="block text-sm font-semibold text-gray-700 mb-1">Correo Electrónico</label>
+                    <input type="email" id="email" th:field="*{email}" required
+                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent text-sm"
+                           placeholder="tu@correo.com">
+                </div>
+
+                <div>
+                    <label for="codigo" class="block text-sm font-semibold text-gray-700 mb-1">Código de Activación (6 dígitos)</label>
+                    <input type="text" id="codigo" th:field="*{codigo}" required maxlength="10"
+                           class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent text-center font-mono text-xl tracking-widest uppercase font-bold"
+                           placeholder="123456" autofocus>
+                </div>
+
+                <button type="submit" 
+                        class="w-full bg-primary text-white font-semibold py-2.5 px-4 rounded-lg hover:bg-primary/90 transition duration-200 shadow-sm flex items-center justify-center">
+                    <i class="fas fa-check mr-2"></i> Activar Cuenta
+                </button>
+            </form>
+
+            <!-- Reenviar código -->
+            <div class="mt-6 pt-4 border-t border-gray-100 text-center">
+                <form th:action="@{/reenviar-codigo}" method="post" class="inline">
+                    <input type="hidden" name="email" th:value="${activarForm.email}">
+                    <p class="text-sm text-gray-600">
+                        ¿No recibiste el correo? 
+                        <button type="submit" class="text-primary font-semibold hover:underline bg-transparent border-0 p-0 cursor-pointer">
+                            Reenviar código
+                        </button>
+                    </p>
+                </form>
+            </div>
+
+            <div class="mt-4 text-center">
+                <a th:href="@{/login}" class="text-sm text-gray-500 hover:text-gray-800 transition">
+                    <i class="fas fa-arrow-left mr-1"></i> Volver al inicio de sesión
+                </a>
+            </div>
+
+        </div>
+    </main>
+
+    <div th:replace="~{tienda/fragments/fragments :: footer}"></div>
+    <th:block th:replace="~{tienda/fragments/fragments :: scripts}"></th:block>
+</body>
+
+</html>

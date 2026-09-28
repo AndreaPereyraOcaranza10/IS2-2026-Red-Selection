@@ -1,19 +1,21 @@
 package com.tienda.zero.config;
 
+import com.tienda.zero.dto.PerfilDTO;
+import com.tienda.zero.enums.Rol;
+import com.tienda.zero.enums.Sexo;
+import com.tienda.zero.enums.TipoDocumento;
 import com.tienda.zero.enums.TipoImagen;
-import com.tienda.zero.model.Categoria;
-import com.tienda.zero.model.Imagen;
-import com.tienda.zero.model.Producto;
-import com.tienda.zero.model.SubCategoria;
-import com.tienda.zero.repository.CategoriaRepository;
-import com.tienda.zero.repository.ProductoRepository;
-import com.tienda.zero.repository.SubCategoriaRepository;
+import com.tienda.zero.enums.TipoTelefono;
+import com.tienda.zero.model.*;
+import com.tienda.zero.repository.*;
 import com.tienda.zero.service.ImagenService;
+import com.tienda.zero.service.PerfilService;
 import com.tienda.zero.service.ProductoService;
 import com.tienda.zero.service.VigenciaPrecioService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import java.sql.Date;
@@ -29,14 +31,25 @@ public class DataInitializer implements CommandLineRunner {
     private final ProductoService productoService;
     private final VigenciaPrecioService vigenciaPrecioService;
     private final ImagenService imagenService;
+    private final UsuarioRepository usuarioRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final PaisRepository paisRepository;
+    private final ProvinciaRepository provinciaRepository;
+    private final DepartamentoRepository departamentoRepository;
+    private final LocalidadRepository localidadRepository;
+    private final NacionalidadRepository nacionalidadRepository;
+    private final PerfilService perfilService;
 
     @Override
     public void run(String... args) {
         System.out.println(">>> [DataInitializer] Iniciando verificación de datos iniciales...");
+        inicializarGeografia();
         inicializarCategorias();
         inicializarProductos();
+        inicializarUsuarios();
         System.out.println(">>> [DataInitializer] Proceso de inicialización finalizado.");
     }
+
 
     private void inicializarCategorias() {
         if (categoriaRepository.count() == 0 || subCategoriaRepository.count() == 0) {
@@ -194,5 +207,88 @@ public class DataInitializer implements CommandLineRunner {
         }
         System.out.println(">>> [DataInitializer] Verificación completada. Total de productos en BD: " + productoRepository.count());
     }
+
+    private void inicializarGeografia() {
+        if (paisRepository.count() == 0) {
+            Pais argentina = paisRepository.save(Pais.builder().nombre("Argentina").eliminado(false).build());
+
+            Provincia mendoza = provinciaRepository.save(Provincia.builder().nombre("Mendoza").pais(argentina).eliminado(false).build());
+            provinciaRepository.save(Provincia.builder().nombre("Buenos Aires").pais(argentina).eliminado(false).build());
+            provinciaRepository.save(Provincia.builder().nombre("Córdoba").pais(argentina).eliminado(false).build());
+            provinciaRepository.save(Provincia.builder().nombre("Santa Fe").pais(argentina).eliminado(false).build());
+            provinciaRepository.save(Provincia.builder().nombre("San Juan").pais(argentina).eliminado(false).build());
+
+            Departamento capital = departamentoRepository.save(Departamento.builder().nombre("Capital").provincia(mendoza).eliminado(false).build());
+            Departamento godoyCruz = departamentoRepository.save(Departamento.builder().nombre("Godoy Cruz").provincia(mendoza).eliminado(false).build());
+            Departamento guaymallen = departamentoRepository.save(Departamento.builder().nombre("Guaymallén").provincia(mendoza).eliminado(false).build());
+            departamentoRepository.save(Departamento.builder().nombre("Las Heras").provincia(mendoza).eliminado(false).build());
+            departamentoRepository.save(Departamento.builder().nombre("Luján de Cuyo").provincia(mendoza).eliminado(false).build());
+            departamentoRepository.save(Departamento.builder().nombre("Maipú").provincia(mendoza).eliminado(false).build());
+            departamentoRepository.save(Departamento.builder().nombre("San Rafael").provincia(mendoza).eliminado(false).build());
+
+            localidadRepository.save(Localidad.builder().nombre("Ciudad de Mendoza").codigoPostal("5500").departamento(capital).eliminado(false).build());
+            localidadRepository.save(Localidad.builder().nombre("Godoy Cruz").codigoPostal("5501").departamento(godoyCruz).eliminado(false).build());
+            localidadRepository.save(Localidad.builder().nombre("Villa Nueva").codigoPostal("5521").departamento(guaymallen).eliminado(false).build());
+
+            nacionalidadRepository.save(Nacionalidad.builder().nombre("Argentina").eliminado(false).build());
+            nacionalidadRepository.save(Nacionalidad.builder().nombre("Chilena").eliminado(false).build());
+            nacionalidadRepository.save(Nacionalidad.builder().nombre("Uruguaya").eliminado(false).build());
+            nacionalidadRepository.save(Nacionalidad.builder().nombre("Brasileña").eliminado(false).build());
+
+            System.out.println(">>> [DataInitializer] Datos geográficos base asegurados en BD.");
+        }
+    }
+
+    private void inicializarUsuarios() {
+        // 1. Usuario Administrador por defecto
+        if (!usuarioRepository.existsByEmailIgnoreCase("admin@tiendazero.com")) {
+            Usuario admin = Usuario.builder()
+                    .email("admin@tiendazero.com")
+                    .password(passwordEncoder.encode("admin123"))
+                    .rol(Rol.ADMIN)
+                    .activo(true)
+                    .eliminado(false)
+                    .build();
+            usuarioRepository.save(admin);
+            System.out.println(">>> [DataInitializer] Usuario Administrador creado: admin@tiendazero.com / admin123");
+        }
+
+        // 2. Usuario Cliente demo con perfil completo
+        if (!usuarioRepository.existsByEmailIgnoreCase("cliente@tiendazero.com")) {
+            Usuario clienteUser = Usuario.builder()
+                    .email("cliente@tiendazero.com")
+                    .password(passwordEncoder.encode("cliente123"))
+                    .rol(Rol.CLIENTE)
+                    .activo(true)
+                    .eliminado(false)
+                    .build();
+            clienteUser = usuarioRepository.save(clienteUser);
+
+            // Completar su perfil personal según requerimiento
+            PerfilDTO perfilDemo = PerfilDTO.builder()
+                    .nombre("Juan")
+                    .apellido("Pérez")
+                    .sexo(Sexo.MASCULINO)
+                    .fechaNacimiento("1995-05-15")
+                    .tipoDocumento(TipoDocumento.DNI)
+                    .numeroDocumento("38945123")
+                    .telefono("+54 9 261 456-7890")
+                    .tipoTelefono(TipoTelefono.CELULAR)
+                    .provincia("Mendoza")
+                    .departamento("Capital")
+                    .localidad("Ciudad de Mendoza")
+                    .codigoPostal("5500")
+                    .calle("Av. San Martín")
+                    .numeroCalle("1450")
+                    .manzanaPiso("Piso 3")
+                    .casaDepartamento("Dpto B")
+                    .referencia("Frente a la plaza")
+                    .build();
+
+            perfilService.guardarPerfilUsuario(clienteUser.getEmail(), perfilDemo);
+            System.out.println(">>> [DataInitializer] Usuario Cliente demo creado: cliente@tiendazero.com / cliente123");
+        }
+    }
 }
+
 

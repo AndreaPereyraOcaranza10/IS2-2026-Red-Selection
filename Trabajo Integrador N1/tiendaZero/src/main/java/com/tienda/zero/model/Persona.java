@@ -1,5 +1,6 @@
 package com.tienda.zero.model;
 
+import com.tienda.zero.enums.Sexo;
 import com.tienda.zero.enums.TipoDocumento;
 import jakarta.persistence.*;
 import lombok.*;
@@ -12,9 +13,10 @@ import java.util.List;
 
 @Entity
 @Table(name = "persona")
-//JOINED --> una tabla por clase, persona + cliente + empleado con FK compartida
+// JOINED --> una tabla por clase, persona + cliente + empleado con FK
+// compartida
 @Inheritance(strategy = InheritanceType.JOINED)
-//Agrega la columna a la tabla persona con el tipo de persona que es
+// Agrega la columna a la tabla persona con el tipo de persona que es
 @DiscriminatorColumn(name = "tipo_persona", discriminatorType = DiscriminatorType.STRING)
 @NoArgsConstructor
 @AllArgsConstructor
@@ -33,6 +35,13 @@ public abstract class Persona {
     @Column(nullable = false)
     private String apellido;
 
+    /**
+     * Sexo/Género requerido en la especificación del perfil personal.
+     */
+    @Enumerated(EnumType.STRING)
+    @Column
+    private Sexo sexo;
+
     @DateTimeFormat(pattern = "dd-MM-yyyy")
     @Column(nullable = false)
     private Date fechaNacimiento;
@@ -42,6 +51,7 @@ public abstract class Persona {
     private TipoDocumento tipoDocumento;
 
     @Column(nullable = false)
+
     private String numeroDocumento;
 
     @Builder.Default
