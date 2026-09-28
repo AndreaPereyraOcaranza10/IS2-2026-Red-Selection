@@ -4,44 +4,49 @@
 <head>
     <!-- Ojo: el original decía "404 - Page not found", lo corregí a un título de Shop -->
     <title th:text="'Shop page'">Shop page</title>
-    <th:block th:replace="~{fragments/fragments :: head-assets}"></th:block>
+    <th:block th:replace="~{tienda/fragments/fragments :: head-assets}"></th:block>
 </head>
 
 
 <body>
-    <div th:replace="~{fragments/fragments :: header}"></div>
+    <div th:replace="~{tienda/fragments/fragments :: header}"></div>
 
     <!-- Shop -->
     <section id="shop">
         <div class="container mx-auto">
             <!-- Top Filter -->
-            <div class="flex flex-col md:flex-row justify-between items-center py-4">
-                <div class="flex items-center space-x-4">
-                    <button
-                        class="bg-primary text-white hover:bg-transparent hover:text-primary border hover:border-primary py-2 px-4 rounded-full focus:outline-none">Show
-                        On
-                        Sale</button>
-                    <button
-                        class="bg-primary text-white hover:bg-transparent hover:text-primary border hover:border-primary py-2 px-4 rounded-full focus:outline-none">List
-                        View</button>
-                    <button
-                        class="bg-primary text-white hover:bg-transparent hover:text-primary border hover:border-primary py-2 px-4 rounded-full focus:outline-none">Grid
-                        View</button>
+            <div class="flex flex-col md:flex-row justify-between items-center py-4 gap-4">
+                <div class="flex items-center space-x-3">
+                    <a th:href="@{/shop(categoria=${selectedCategorias}, talle=${selectedTalles}, sort=${currentSort}, q=${query}, oferta=${currentOferta == true ? null : true})}"
+                       th:classappend="${currentOferta == true} ? 'bg-primary text-white border-primary shadow-sm' : 'bg-white text-gray-700 border-gray-300 hover:border-primary hover:text-primary'"
+                       class="border py-2 px-5 rounded-full font-medium transition text-sm flex items-center gap-1.5 focus:outline-none">
+                        <i class="ti ti-tag text-base" th:if="${currentOferta == true}"></i>
+                        <span>En Oferta</span>
+                    </a>
+                    <a th:if="${hasActiveFilters}" th:href="@{/shop}" 
+                       class="text-xs text-red-600 hover:text-red-800 font-semibold underline px-2 py-1">
+                        Limpiar Filtros
+                    </a>
                 </div>
-                <div class="flex mt-5 md:mt-0 space-x-4">
-                    <form th:action="@{/shop}" method="get" class="relative">
-                        <select name="sort"
-                            class="block appearance-none w-full bg-white border  hover:border-primary px-4 py-2 pr-8 rounded-full shadow leading-tight focus:outline-none focus:shadow-outline">
-                            <option value="latest">Sort by Latest</option>
-                            <option value="popularity">Sort by Popularity</option>
-                            <option value="az">Sort by A-Z</option>
+                <div class="flex items-center space-x-4">
+                    <form th:action="@{/shop}" method="get" class="relative flex items-center gap-2">
+                        <input type="hidden" name="categoria" th:each="c : ${selectedCategorias}" th:value="${c}">
+                        <input type="hidden" name="talle" th:each="t : ${selectedTalles}" th:value="${t}">
+                        <input type="hidden" name="oferta" th:value="${currentOferta}" th:if="${currentOferta != null}">
+                        <input type="hidden" name="q" th:value="${query}" th:if="${query != null}">
+
+                        <label for="sortSelect" class="text-sm text-gray-500 hidden sm:inline">Ordenar:</label>
+                        <select id="sortSelect" name="sort" onchange="this.form.submit()"
+                            class="block appearance-none bg-white border border-gray-300 hover:border-primary px-4 py-2 pr-8 rounded-full shadow-sm leading-tight focus:outline-none text-sm cursor-pointer">
+                            <option value="latest" th:selected="${currentSort == 'latest'}">Más recientes</option>
+                            <option value="price_asc" th:selected="${currentSort == 'price_asc'}">Precio: Menor a Mayor</option>
+                            <option value="price_desc" th:selected="${currentSort == 'price_desc'}">Precio: Mayor a Menor</option>
+                            <option value="az" th:selected="${currentSort == 'az'}">Nombre: A - Z</option>
+                            <option value="za" th:selected="${currentSort == 'za'}">Nombre: Z - A</option>
+                            <option value="popularity" th:selected="${currentSort == 'popularity'}">Populares</option>
                         </select>
-                        <div
-                            class="pointer-events-none absolute inset-y-0 right-0 flex items-center justify-center px-2">
-                            <img id="arrow-down" class="h-4 w-4" th:src="@{/assets/images/filter-down-arrow.svg}" src="/assets/images/filter-down-arrow.svg"
-                                alt="filter arrow">
-                            <img id="arrow-up" class="h-4 w-4 hidden" th:src="@{/assets/images/filter-up-arrow.svg}" src="/assets/images/filter-up-arrow.svg"
-                                alt="filter arrow">
+                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center justify-center px-2">
+                            <img class="h-4 w-4" th:src="@{/assets/images/filter-down-arrow.svg}" src="/assets/images/filter-down-arrow.svg" alt="arrow">
                         </div>
                     </form>
                 </div>
@@ -52,111 +57,52 @@
                     class="bg-primary text-white py-2 px-4 rounded-full focus:outline-none">Show Filters</button>
             </div>
             <div class="flex flex-col md:flex-row">
-                <!-- Filters -->
+                <!-- Filters Sidebar -->
                 <div id="filters" class="w-full md:w-1/4 p-4 hidden md:block">
-                    <!--
-                        Los 5 bloques de filtro (Category, Size, Color, Brand, Rating) siguen
-                        el mismo patrón: reemplazar los <label> fijos por un th:each sobre la
-                        lista de opciones que venga del Controller. Dejamos "Category" ya resuelto
-                        como ejemplo; el resto queda estático para que copies el mismo patrón.
-                    -->
-                    <!-- Category Filter -->
-                    <div class="mb-6 pb-8 border-b border-gray-line">
-                        <h3 class="text-lg font-semibold mb-6">Category</h3>
-                        <div class="space-y-2">
-                            <label class="flex items-center" th:each="category : ${categories}">
-                                <input type="checkbox" name="category" th:value="${category.slug}" class="form-checkbox custom-checkbox">
-                                <span class="ml-2" th:text="${category.name}">T-Shirts</span>
-                            </label>
-                            <!-- Fallback estático (se ve solo si "categories" todavía no está en el modelo) -->
-                            <th:block th:if="${categories == null}">
-                                <label class="flex items-center">
-                                    <input type="checkbox" class="form-checkbox custom-checkbox">
-                                    <span class="ml-2">T-Shirts</span>
+                    <form id="shopFilterForm" th:action="@{/shop}" method="get">
+                        <input type="hidden" name="sort" th:value="${currentSort}">
+                        <input type="hidden" name="oferta" th:value="${currentOferta}" th:if="${currentOferta != null}">
+                        <input type="hidden" name="q" th:value="${query}" th:if="${query != null}">
+
+                        <!-- Category Filter -->
+                        <div class="mb-6 pb-6 border-b border-gray-line">
+                            <div class="flex justify-between items-center mb-4">
+                                <h3 class="text-lg font-semibold text-gray-900">Categoría</h3>
+                                <span class="text-xs text-gray-400" th:text="${categories.size()} + ' categorías'"></span>
+                            </div>
+                            <div class="space-y-2.5">
+                                <label class="flex items-center cursor-pointer hover:text-primary transition" th:each="category : ${categories}">
+                                    <input type="checkbox" name="categoria" th:value="${category.nombre}"
+                                           th:checked="${selectedCategorias != null and #lists.contains(selectedCategorias, category.nombre)}"
+                                           onchange="document.getElementById('shopFilterForm').submit()"
+                                           class="form-checkbox custom-checkbox text-primary rounded h-4 w-4">
+                                    <span class="ml-2.5 text-sm" th:text="${category.nombre}">Hombres</span>
                                 </label>
-                                <label class="flex items-center">
-                                    <input type="checkbox" class="form-checkbox custom-checkbox">
-                                    <span class="ml-2">Hoodies</span>
+                            </div>
+                        </div>
+
+                        <!-- Size Filter -->
+                        <div class="mb-6 pb-6 border-b border-gray-line">
+                            <h3 class="text-lg font-semibold mb-4 text-gray-900">Talle</h3>
+                            <div class="grid grid-cols-2 gap-2">
+                                <label class="flex items-center cursor-pointer hover:text-primary transition" th:each="t : ${tallesDisponibles}">
+                                    <input type="checkbox" name="talle" th:value="${t}"
+                                           th:checked="${selectedTalles != null and #lists.contains(selectedTalles, t)}"
+                                           onchange="document.getElementById('shopFilterForm').submit()"
+                                           class="form-checkbox custom-checkbox text-primary rounded h-4 w-4">
+                                    <span class="ml-2 text-sm" th:text="${t}">M</span>
                                 </label>
-                                <label class="flex items-center">
-                                    <input type="checkbox" class="form-checkbox custom-checkbox">
-                                    <span class="ml-2">Accessories</span>
-                                </label>
-                            </th:block>
+                            </div>
                         </div>
-                    </div>
-                    <!-- Size Filter -->
-                    <div class="mb-6 pb-8 border-b border-gray-line">
-                        <h3 class="text-lg font-semibold mb-6">Size</h3>
-                        <div class="space-y-2">
-                            <label class="flex items-center">
-                                <input type="checkbox" class="form-checkbox custom-checkbox">
-                                <span class="ml-2">S (30)</span>
-                            </label>
-                            <label class="flex items-center">
-                                <input type="checkbox" class="form-checkbox custom-checkbox">
-                                <span class="ml-2">M (44)</span>
-                            </label>
-                            <label class="flex items-center">
-                                <input type="checkbox" class="form-checkbox custom-checkbox">
-                                <span class="ml-2">L (22)</span>
-                            </label>
+
+                        <!-- Botón Limpiar Filtros -->
+                        <div th:if="${hasActiveFilters}" class="pt-2">
+                            <a th:href="@{/shop}" 
+                               class="block w-full text-center py-2 px-4 rounded-full border border-red-500 text-red-600 hover:bg-red-500 hover:text-white text-xs font-semibold transition">
+                                Limpiar todos los filtros
+                            </a>
                         </div>
-                    </div>
-                    <!-- Color Filter -->
-                    <div class="mb-6 pb-8 border-b border-gray-line">
-                        <h3 class="text-lg font-semibold mb-6">Color</h3>
-                        <div class="space-y-2">
-                            <label class="flex items-center custom-color-checkbox" data-color="#ff0000">
-                                <input type="checkbox" class="form-checkbox custom-checkbox">
-                                <span class="ml-2">Red</span>
-                            </label>
-                            <label class="flex items-center custom-color-checkbox" data-color="#0000ff">
-                                <input type="checkbox" class="form-checkbox custom-checkbox">
-                                <span class="ml-2">Blue</span>
-                            </label>
-                            <label class="flex items-center custom-color-checkbox" data-color="#00ff00">
-                                <input type="checkbox" class="form-checkbox custom-checkbox">
-                                <span class="ml-2">Green</span>
-                            </label>
-                        </div>
-                    </div>
-                    <!-- Brand Filter -->
-                    <div class="mb-6 pb-8 border-b border-gray-line">
-                        <h3 class="text-lg font-semibold mb-6">Brand</h3>
-                        <div class="space-y-2">
-                            <label class="flex items-center">
-                                <input type="checkbox" class="form-checkbox custom-checkbox">
-                                <span class="ml-2">Nike</span>
-                            </label>
-                            <label class="flex items-center">
-                                <input type="checkbox" class="form-checkbox custom-checkbox">
-                                <span class="ml-2">Adidas</span>
-                            </label>
-                            <label class="flex items-center">
-                                <input type="checkbox" class="form-checkbox custom-checkbox">
-                                <span class="ml-2">Puma</span>
-                            </label>
-                        </div>
-                    </div>
-                    <!-- Rating Filter -->
-                    <div class="mb-6">
-                        <h3 class="text-lg font-semibold mb-6">Rating</h3>
-                        <div class="space-y-2">
-                            <label class="flex items-center">
-                                <input type="checkbox" class="form-checkbox custom-checkbox">
-                                <span class="ml-2">★★★★★</span>
-                            </label>
-                            <label class="flex items-center">
-                                <input type="checkbox" class="form-checkbox custom-checkbox">
-                                <span class="ml-2">★★★★☆</span>
-                            </label>
-                            <label class="flex items-center">
-                                <input type="checkbox" class="form-checkbox custom-checkbox">
-                                <span class="ml-2">★★★☆☆</span>
-                            </label>
-                        </div>
-                    </div>
+                    </form>
                 </div>
                 <!-- Products List -->
                 <div class="w-full md:w-3/4 p-4">
@@ -168,7 +114,13 @@
                         Reusamos el mismo fragment "productCard" que en la home para no duplicar markup.
                     -->
                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                        <div th:each="product : ${products}" th:replace="~{fragments/fragments :: productCard(product=${product})}"></div>
+                        <th:block th:each="product : ${products}">
+                            <div th:replace="~{tienda/fragments/fragments :: productCard(product=${product})}"></div>
+                        </th:block>
+                        <div class="col-span-full text-center py-12 text-gray-500" th:if="${products != null and #lists.isEmpty(products)}">
+                            <p class="text-xl font-semibold mb-2">No se encontraron productos disponibles en el catálogo.</p>
+                            <p class="text-sm text-gray-400">Pronto agregaremos nuevas prendas y calzado.</p>
+                        </div>
                     </div>
                     <!-- Fallback estático (se ve solo si "products" todavía no está en el modelo) -->
                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4" th:if="${products == null}">
@@ -250,32 +202,32 @@
                                 to Cart</button>
                         </div>
                     </div>
-                    <!-- Pagination -->
-                    <!--
-                        Ejemplo con th:each sobre una lista de páginas (opcional):
-                        <li th:each="p : ${#numbers.sequence(1, totalPages)}">
-                            <a th:href="@{/shop(page=${p})}" th:text="${p}"
-                               th:classappend="${p == currentPage} ? 'bg-primary text-white' : ''"
-                               class="w-10 h-10 flex items-center justify-center rounded-full">1</a>
-                        </li>
-                    -->
-                    <div class="flex justify-center mt-8">
+                    <!-- Pagination Dinámica -->
+                    <div class="flex justify-center mt-8" th:if="${totalPages != null and totalPages > 1}">
                         <nav aria-label="Page navigation">
-                            <ul class="inline-flex space-x-2">
-                                <li>
-                                    <a href="#"
-                                        class="bg-primary text-white w-10 h-10 flex items-center justify-center rounded-full">1</a>
+                            <ul class="inline-flex items-center space-x-2">
+                                <!-- Botón Anterior -->
+                                <li th:if="${currentPage > 1}">
+                                    <a th:href="@{/shop(page=${currentPage - 1}, categoria=${selectedCategorias}, talle=${selectedTalles}, sort=${currentSort}, oferta=${currentOferta}, q=${query})}"
+                                       class="w-10 h-10 flex items-center justify-center rounded-full border border-gray-300 hover:bg-primary hover:text-white hover:border-primary transition text-sm">
+                                        &lt;
+                                    </a>
                                 </li>
-                                <li>
-                                    <a href="#"
-                                        class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-primary hover:text-white">2</a>
+                                <!-- Botones de Páginas 1 .. totalPages -->
+                                <li th:each="p : ${#numbers.sequence(1, totalPages)}">
+                                    <a th:href="@{/shop(page=${p}, categoria=${selectedCategorias}, talle=${selectedTalles}, sort=${currentSort}, oferta=${currentOferta}, q=${query})}"
+                                       th:text="${p}"
+                                       th:classappend="${p == currentPage} ? 'bg-primary text-white font-bold border-primary shadow-sm' : 'border border-gray-300 hover:bg-primary hover:text-white hover:border-primary text-gray-700'"
+                                       class="w-10 h-10 flex items-center justify-center rounded-full border transition text-sm">
+                                        1
+                                    </a>
                                 </li>
-                                <li>
-                                    <a href="#"
-                                        class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-primary hover:text-white">3</a>
-                                </li>
-                                <li>
-                                    <a href="#" class="w-10 h-10 flex items-center justify-center rounded-full">Next</a>
+                                <!-- Botón Siguiente -->
+                                <li th:if="${currentPage < totalPages}">
+                                    <a th:href="@{/shop(page=${currentPage + 1}, categoria=${selectedCategorias}, talle=${selectedTalles}, sort=${currentSort}, oferta=${currentOferta}, q=${query})}"
+                                       class="w-10 h-10 flex items-center justify-center rounded-full border border-gray-300 hover:bg-primary hover:text-white hover:border-primary transition text-sm">
+                                        &gt;
+                                    </a>
                                 </li>
                             </ul>
                         </nav>
@@ -306,8 +258,8 @@
         </div>
     </section>
 
-    <div th:replace="~{fragments/fragments :: footer}"></div>
+    <div th:replace="~{tienda/fragments/fragments :: footer}"></div>
 
-    <th:block th:replace="~{fragments/fragments :: scripts}"></th:block>
+    <th:block th:replace="~{tienda/fragments/fragments :: scripts}"></th:block>
 </body>
 </html>

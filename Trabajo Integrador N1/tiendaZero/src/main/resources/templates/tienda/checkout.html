@@ -3,11 +3,11 @@
 
 <head>
     <title th:text="'Checkout page'">Checkout page</title>
-    <th:block th:replace="~{fragments/fragments :: head-assets}"></th:block>
+    <th:block th:replace="~{tienda/fragments/fragments :: head-assets}"></th:block>
 </head>
 
 <body>
-    <div th:replace="~{fragments/fragments :: header}"></div>
+    <div th:replace="~{tienda/fragments/fragments :: header}"></div>
 
     <!-- Checkout -->
     <section id="checkout-page" class="bg-white py-16">
@@ -85,9 +85,9 @@
         </div>
     </section>
     
-    <div th:replace="~{fragments/fragments :: footer}"></div>
+    <div th:replace="~{tienda/fragments/fragments :: footer}"></div>
 
-    <th:block th:replace="~{fragments/fragments :: scripts}"></th:block>
+    <th:block th:replace="~{tienda/fragments/fragments :: scripts}"></th:block>
 </body>
 
 </html>

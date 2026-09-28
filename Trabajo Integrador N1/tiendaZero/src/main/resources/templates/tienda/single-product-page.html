@@ -3,11 +3,11 @@
 
 <head>
     <title th:text="'Single product page'">Single product page</title>
-    <th:block th:replace="~{fragments/fragments :: head-assets}"></th:block>
+    <th:block th:replace="~{tienda/fragments/fragments :: head-assets}"></th:block>
 </head>
 
 <body>
-    <div th:replace="~{fragments/fragments :: header}"></div>
+    <div th:replace="~{tienda/fragments/fragments :: header}"></div>
 
     <!-- Breadcrumbs -->
     <!--
@@ -465,7 +465,7 @@
             <div class="flex flex-wrap -mx-4">
                 <!-- Mismo fragment "productCard" reutilizado en home / shop / esta página -->
                 <div class="w-full sm:w-1/2 lg:w-1/4 px-4 mb-8" th:each="relatedProduct : ${relatedProducts}">
-                    <div th:replace="~{fragments/fragments :: productCard(product=${relatedProduct})}"></div>
+                    <div th:replace="~{tienda/fragments/fragments :: productCard(product=${relatedProduct})}"></div>
                 </div>
                 <!-- Fallback estático (se ve solo si "relatedProducts" todavía no está en el modelo) -->
                 <th:block th:if="${relatedProducts == null}">
@@ -521,11 +521,11 @@
         </div>
     </section>
 
-    <div th:replace="~{fragments/fragments :: footer}"></div>
+    <div th:replace="~{tienda/fragments/fragments :: footer}"></div>
 
     <!-- Swiper (galeria de imagenes / relacionados) es especifico de esta pagina -->
     <script th:src="@{/node_modules/swiper/swiper-bundle.js}" src="node_modules/swiper/swiper-bundle.js"></script>
-    <th:block th:replace="~{fragments/fragments :: scripts}"></th:block>
+    <th:block th:replace="~{tienda/fragments/fragments :: scripts}"></th:block>
 
 </body>
 

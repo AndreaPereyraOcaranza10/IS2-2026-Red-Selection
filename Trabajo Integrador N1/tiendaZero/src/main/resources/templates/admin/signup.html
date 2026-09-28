@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+
+<head>
+  <title th:text="'Signup - InApp Inventory Dashboard'">Signup - InApp Inventory Dashboard</title>
+  <th:block th:replace="~{admin/fragments/fragments :: head-assets}"></th:block>
+</head>
+
+<body>
+
+
+<div class="container d-flex align-items-center justify-content-center min-vh-100">
+  <div class="card " style="max-width:420px; width:100%;">
+    <div class="card-body p-5">
+      <div class="text-center mb-3">
+     <a th:href="@{/}" href="index.html" class="mb-4 d-inline-block"><img th:src="@{/assets/images/logo-icon.svg}" src="./assets/images/logo-icon.svg" alt="" width="36">
+      <span class="ms-2"> <img th:src="@{/assets/images/logo.svg}" src="./assets/images/logo.svg" alt=""></span>
+      </a>
+        <h1 class="card-title mb-5 h5">Create your account</h1>
+
+      </div>
+
+      <!--
+          th:object asume un command object en el modelo, ej:
+          model.addAttribute("registrationForm", new RegistrationForm());
+          El POST llega a @PostMapping("/register") con @ModelAttribute RegistrationForm.
+          La confirmación de contraseña se valida mejor en el backend (Bean Validation).
+      -->
+      <form th:action="@{/register}" th:object="${registrationForm}" class="needs-validation mt-3" method="post" novalidate>
+        <div class="mb-3">
+          <label for="fullName" class="form-label">Full name</label>
+          <input id="fullName" name="fullName" th:field="*{fullName}" type="text" class="form-control" placeholder="Jane Doe" required>
+          <div class="invalid-feedback">Please enter your name.</div>
+        </div>
+
+        <div class="mb-3">
+          <label for="email" class="form-label">Email address</label>
+          <input id="email" name="email" th:field="*{email}" type="email" class="form-control" placeholder="name@example.com" required>
+          <div class="invalid-feedback">Please enter a valid email.</div>
+        </div>
+
+        <div class="mb-3">
+          <label for="password" class="form-label">Password</label>
+          <input id="password" name="password" th:field="*{password}" type="password" class="form-control" placeholder="Create a password" required minlength="6">
+          <div class="invalid-feedback">Please provide a password (min 6 characters).</div>
+        </div>
+
+        <div class="mb-3">
+          <label for="confirmPassword" class="form-label">Confirm password</label>
+          <input id="confirmPassword" name="confirmPassword" th:field="*{confirmPassword}" type="password" class="form-control" placeholder="Repeat password" required
+            oninput="this.setCustomValidity(document.getElementById('password').value !== this.value ? 'Passwords do not match.' : '')">
+          <div class="invalid-feedback">Passwords must match.</div>
+        </div>
+
+        <div class="mb-3 form-check">
+          <input id="terms" name="acceptedTerms" th:field="*{acceptedTerms}" class="form-check-input" type="checkbox" required>
+          <label class="form-check-label small" for="terms">I agree to the <a href="#" class="text-decoration-none">terms and privacy</a></label>
+          <div class="invalid-feedback">You must agree before continuing.</div>
+        </div>
+
+        <button class="btn btn-primary w-100" type="submit">Sign up</button>
+      </form>
+
+      <div class="text-center mt-3 small text-muted">
+        Already have an account? <a th:href="@{/login}" href="signin.html" class="link-primary">Sign in</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+  <th:block th:replace="~{admin/fragments/fragments :: scripts}"></th:block>
+
+
+</body>
+
+</html>

@@ -1,0 +1,71 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+
+<head>
+  <title th:text="'Signin - InApp Inventory Dashboard'">Signin - InApp Inventory Dashboard</title>
+  <th:block th:replace="~{admin/fragments/fragments :: head-assets}"></th:block>
+</head>
+
+<body>
+
+
+<div class="container d-flex align-items-center justify-content-center min-vh-100">
+  <div class="card " style="max-width:420px; width:100%;">
+    <div class="card-body p-5">
+      <div class="text-center mb-3">
+      <a th:href="@{/}" href="index.html" class="mb-4 d-inline-block"><img th:src="@{/assets/images/logo-icon.svg}" src="./assets/images/logo-icon.svg" alt="" width="36">
+      <span class=" ms-2"> <img th:src="@{/assets/images/logo.svg}" src="./assets/images/logo.svg" alt=""></span>
+      </a>
+        <h1 class="card-title mb-5 h5">Sign in to your account</h1>
+
+      </div>
+
+      <!--
+          Patrón típico de Spring Security: el form postea a /login con
+          campos "username" y "password", y Spring agrega ?error / ?logout
+          a la URL según corresponda. Ajustá el nombre de los campos si tu
+          configuración de Spring Security usa otros (usernameParameter, etc.).
+      -->
+      <form th:action="@{/login}" class="needs-validation mt-3" method="post" novalidate>
+        <p class="text-danger small" th:if="${param.error}">Email o contraseña incorrectos.</p>
+        <p class="text-success small" th:if="${param.logout}">Sesión cerrada correctamente.</p>
+        <div class="mb-3">
+          <label for="email" class="form-label">Email address</label>
+          <input id="email" name="username" type="email" class="form-control" placeholder="name@example.com" required autofocus>
+          <div class="invalid-feedback">Please enter a valid email.</div>
+        </div>
+
+        <div class="mb-3">
+          <label for="password" class="form-label d-flex justify-content-between">
+            <span>Password</span>
+            <a th:href="@{/forgot-password}" href="#" class="small link-primary">Forgot Password?</a>
+          </label>
+          <input id="password" name="password" type="password" class="form-control" placeholder="Password" required minlength="6">
+          <div class="invalid-feedback">Please provide a password (min 6 characters).</div>
+        </div>
+
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <div class="form-check">
+            <input id="remember" name="remember-me" class="form-check-input" type="checkbox">
+            <label class="form-check-label small" for="remember">Remember me</label>
+          </div>
+        </div>
+
+        <button class="btn btn-primary w-100" type="submit">Sign in</button>
+      </form>
+
+      <div class="text-center mt-3 small text-muted">
+        Don't have an account? <a th:href="@{/register}" href="signup.html"  class="link-primary">Sign up</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+  <th:block th:replace="~{admin/fragments/fragments :: scripts}"></th:block>
+
+
+</body>
+
+</html>""

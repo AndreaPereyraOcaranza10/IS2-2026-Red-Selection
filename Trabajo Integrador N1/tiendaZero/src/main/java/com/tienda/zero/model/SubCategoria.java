@@ -21,6 +21,7 @@ public class SubCategoria {
     private String nombre;
 
     @Column(nullable = false)
+    @Builder.Default
     private boolean eliminado = false;
 
     @ManyToOne
