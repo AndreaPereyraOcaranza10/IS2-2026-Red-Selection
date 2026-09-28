@@ -28,7 +28,8 @@ public class UsuarioDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String nombreUsuario) throws UsernameNotFoundException {
-        Optional<Usuario> resultado = usuarioRepository.findByNombreUsuario(nombreUsuario);
+        String nombreNormalizado = nombreUsuario.trim().toLowerCase();
+        Optional<Usuario> resultado = usuarioRepository.findByNombreUsuario(nombreNormalizado);
         if (resultado.isEmpty()) {
             throw new UsernameNotFoundException("Usuario no encontrado: " + nombreUsuario);
         }

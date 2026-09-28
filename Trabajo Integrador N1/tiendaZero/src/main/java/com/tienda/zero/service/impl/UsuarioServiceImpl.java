@@ -35,21 +35,6 @@ public class UsuarioServiceImpl implements UsuarioService {
     @Transactional
     public Usuario crearUsuario(String nombreUsuario, String clave, TipoUsuario rol) {
 
-       /* validar(nombreUsuario, clave, rol);
-
-        String nombreLimpio = nombreUsuario.trim();
-
-        if (usuarioRepository.findByNombreUsuario(nombreLimpio).isPresent()){
-            throw new IllegalArgumentException("Ya existe un usuario con ese nombre");
-        }
-
-        Usuario usuario = new Usuario();
-        usuario.setNombreUsuario(nombreLimpio);
-        usuario.setClave(passwordEncoder.encode(clave));
-        usuario.setRol(rol);
-        usuario.setEliminado(false);
-
-        return usuarioRepository.save(usuario);*/
         return construirYGuardarUsuario(nombreUsuario, clave, rol, true);
 
     }
@@ -142,7 +127,9 @@ public class UsuarioServiceImpl implements UsuarioService {
     @Override
     public Usuario buscarUsuarioPorNombreUsuario(String nombreUsuario) {
 
-        Optional<Usuario> resultado = usuarioRepository.findByNombreUsuario(nombreUsuario);
+        String nombreNormalizado = nombreUsuario.trim().toLowerCase();
+
+        Optional<Usuario> resultado = usuarioRepository.findByNombreUsuario(nombreNormalizado);
         if (resultado.isEmpty()){
             throw new IllegalArgumentException("No existe el usuario: " + nombreUsuario);
 
@@ -163,7 +150,7 @@ public class UsuarioServiceImpl implements UsuarioService {
         }
 
         Usuario usuario = buscarUsuario(id);
-        String nombreLimpio = nombreUsuario.trim();
+        String nombreLimpio = nombreUsuario.trim().toLowerCase();
 
         Optional <Usuario> existente = usuarioRepository.findByNombreUsuario(nombreLimpio);
         if (existente.isPresent() && !existente.get().getId().equals(id)){
@@ -212,7 +199,7 @@ public class UsuarioServiceImpl implements UsuarioService {
             throw new IllegalArgumentException("La clave es obligatoria");
         }
         if (clave.length() < LONGITUD_MINIMA_CLAVE) {
-            throw new IllegalArgumentException("La clave debe tener al menos " + LONGITUD_MINIMA_CLAVE + "caracteres");
+            throw new IllegalArgumentException("La clave debe tener al menos " + LONGITUD_MINIMA_CLAVE + " caracteres");
         }
     }
 
