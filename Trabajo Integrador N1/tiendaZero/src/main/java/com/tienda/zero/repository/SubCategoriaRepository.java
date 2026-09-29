@@ -12,4 +12,5 @@ public interface SubCategoriaRepository extends JpaRepository<SubCategoria, Stri
     Optional<SubCategoria> findByNombreIgnoreCase(String nombre);
     List<SubCategoria> findByCategoriaId(String idCategoria);
     List<SubCategoria> findByCategoriaIdAndEliminadoFalse(String idCategoria);
+    List<SubCategoria> findByEliminadoFalse();
 }

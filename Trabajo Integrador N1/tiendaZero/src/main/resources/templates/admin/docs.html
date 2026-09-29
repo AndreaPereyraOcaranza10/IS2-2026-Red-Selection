@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+
+<head>
+  <title th:text="'Documentation - InApp Inventory Dashboard'">Documentation - InApp Inventory Dashboard</title>
+  <th:block th:replace="~{admin/fragments/fragments :: head-assets}"></th:block>
+</head>
+
+<body>
+  <div th:replace="~{admin/fragments/fragments :: sidebarTopbar(activePage='docs')}"></div>
+<!-- MAIN CONTENT -->
+  <main id="content" class="content py-10">
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-12">
+          <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
+            <div class="">
+              <h1 class="fs-3 mb-1">Documentation</h1>
+             <p>
+          This documentation will guide you through the setup and usage of the InApp Inventory Dashboard template.
+        </p>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+        <div class="row">
+            <div class="col-12">
+                <div class="">
+    <div class="">
+
+
+
+      <!-- Prerequisites -->
+      <div class="mb-4">
+        <div class="mb-2">
+        <h2 class="h5 mb-1">Prerequisites</h2>
+        <p>Before you begin, ensure you have the following installed:</p>
+        </div>
+        <ul class="list-group list-group-flush">
+          <li class="list-group-item ps-0">Node.js (v14 or higher)</li>
+          <li class="list-group-item ps-0">npm or yarn package manager</li>
+          <li class="list-group-item ps-0">[Any other specific tools/dependencies]</li>
+        </ul>
+      </div>
+
+      <!-- Installation -->
+      <div class="mb-4">
+        <h2 class="h5 mb-2">Installation</h2>
+        <ol class="list-group list-group-numbered list-group-flush">
+          <li class="list-group-item ps-0" >Clone the repository or download the template</li>
+          <li class="list-group-item ps-0">Navigate to the project directory</li>
+          <li class="list-group-item ps-0">
+            Install dependencies:
+            <pre class="bg-light border rounded p-3 mt-2"><code>npm install</code></pre>
+          </li>
+        </ol>
+      </div>
+
+
+
+      <!-- Usage -->
+      <div class="mb-6">
+        <h2 class="h5 mb-2">Run the app</h2>
+        <p>To start the development server:</p>
+        <pre class="bg-light border rounded p-3"><code>npm run dev</code></pre>
+      </div>
+    <!-- Next Steps -->
+      <div class="mb-4">
+        <h2 class="h5 mb-2">Next Steps</h2>
+        <ol class="list-group list-group-numbered list-group-flush">
+          <li class="list-group-item ps-0">Review the main entry point in <code>src/js/main.js</code></li>
+          <li class="list-group-item ps-0">Customize components according to your needs</li>
+          <li class="list-group-item ps-0">
+            Build for production:
+            <pre class="bg-light border rounded p-3 mt-4"><code>npm run build</code></pre>
+          </li>
+        </ol>
+      </div>
+
+      <!-- Project Structure -->
+      <div class="mb-4">
+        <h2 class="h5 mb-0">Project Structure</h2>
+        <pre>
+     <code>
+inapp/
+├── src/
+│   ├── assest/         # Static assets
+│   │   ├── images/     # Images
+│   │   ├── js/         # JS
+│   │   ├── scss/       # CSS and styling
+│   └── Pages           # All Pages
+├── vite.config.js/     # Config Files
+├── package.json        # Project dependencies
+├── README.md           # Documentation
+└── .gitignore          # Git ignore file
+     </code>
+     </pre>
+      </div>
+
+
+      <!-- Support -->
+      <div class="mb-2">
+        <h2 class="h5">Support</h2>
+        <p>
+          For issues or questions, please refer to the documentation or create an issue in the repository. Also you can contact
+          us at <a href="#!" class="text-primary">CodesCandy</a>.
+        </p>
+      </div>
+
+    </div>
+  </div>
+
+            </div>
+            </div>
+<div class="row">
+        <div class="col-12">
+<div th:replace="~{admin/fragments/fragments :: pageFooter}"></div>
+        </div>
+
+      </div>
+
+    </div>
+  </main>
+
+  <th:block th:replace="~{admin/fragments/fragments :: scripts}"></th:block>
+
+
+
+</body>
+
+</html>

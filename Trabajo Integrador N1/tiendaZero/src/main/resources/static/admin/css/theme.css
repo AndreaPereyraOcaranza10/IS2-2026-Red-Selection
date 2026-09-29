@@ -1,0 +1,235 @@
+/* ========================================================
+   InApp Inventory Dashboard - Compiled Theme CSS
+   ======================================================== */
+
+:root {
+  --bs-primary: #E66239;
+  --bs-primary-rgb: 230, 98, 57;
+  --bs-primary-hover: #d2532c;
+  --bs-body-font-family: 'Poppins', sans-serif;
+  --bs-body-bg: #fafafa;
+}
+
+body {
+  font-family: var(--bs-body-font-family);
+  background-color: var(--bs-body-bg);
+  color: #262626;
+  margin: 0;
+  padding: 0;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Primary color overrides */
+.btn-primary {
+  background-color: var(--bs-primary) !important;
+  border-color: var(--bs-primary) !important;
+  color: #ffffff !important;
+}
+.btn-primary:hover, .btn-primary:focus, .btn-primary:active {
+  background-color: var(--bs-primary-hover) !important;
+  border-color: var(--bs-primary-hover) !important;
+}
+.text-primary {
+  color: var(--bs-primary) !important;
+}
+.bg-primary {
+  background-color: var(--bs-primary) !important;
+}
+.link-primary {
+  color: var(--bs-primary) !important;
+}
+.link-primary:hover {
+  color: var(--bs-primary-hover) !important;
+}
+
+/* Overlay */
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(1px);
+  display: none;
+  z-index: 1030;
+}
+.overlay.show {
+  display: block;
+}
+
+/* Sidebar */
+.sidebar {
+  width: 240px;
+  background: #ffffff;
+  transition: width 0.3s, left 0.3s;
+  border-right: 1px solid #e5e5e5;
+  height: 100vh;
+  position: fixed;
+  top: 0;
+  left: 0;
+  padding-top: 60px;
+  z-index: 1030;
+}
+.sidebar .nav-link {
+  color: #262626;
+  padding: 8px 12px;
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+  font-weight: 400;
+  gap: 12px;
+  white-space: nowrap;
+  margin: 2px 12px;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+.sidebar .nav-link:hover,
+.sidebar .nav-link.active {
+  color: var(--bs-primary) !important;
+  background-color: rgba(230, 98, 57, 0.095);
+}
+.sidebar .nav-link .ti {
+  font-size: 18px;
+}
+.sidebar .nav-text {
+  transition: opacity 0.2s;
+}
+.sidebar .logo-area {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 60px;
+  width: 100%;
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-left: 17px;
+  color: #262626;
+  border-bottom: 1px solid #e5e5e5;
+}
+.sidebar.collapsed {
+  width: 60px;
+}
+.sidebar.collapsed .nav-link {
+  margin: 0;
+  background-color: transparent;
+  padding: 8px 18px;
+  justify-content: center;
+}
+.sidebar.collapsed .nav-text,
+.sidebar.collapsed .logo-text {
+  display: none;
+}
+
+/* Topbar */
+.topbar {
+  height: 60px;
+  margin-left: 240px;
+  transition: margin-left 0.3s;
+  background-color: #ffffff;
+  border-bottom: 1px solid #e5e5e5;
+}
+.topbar.full {
+  margin-left: 60px;
+}
+
+/* Content Area */
+.content {
+  margin-left: 240px;
+  transition: margin-left 0.3s;
+  padding: 20px 24px;
+}
+.content.full {
+  margin-left: 60px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 992px) {
+  .sidebar {
+    left: -240px;
+  }
+  .sidebar.mobile-show {
+    left: 0;
+  }
+  .topbar {
+    margin-left: 0 !important;
+    width: 100% !important;
+  }
+  .content {
+    margin-left: 0 !important;
+  }
+}
+
+/* Avatars */
+.avatar {
+  position: relative;
+  display: inline-block;
+  width: 3rem;
+  height: 3rem;
+}
+.avatar-xs {
+  width: 1.5rem !important;
+  height: 1.5rem !important;
+}
+.avatar-sm {
+  width: 2rem !important;
+  height: 2rem !important;
+}
+.avatar-md {
+  width: 2.5rem !important;
+  height: 2.5rem !important;
+}
+.avatar-lg {
+  width: 3.5rem !important;
+  height: 3.5rem !important;
+}
+.avatar-xl {
+  width: 4.5rem !important;
+  height: 4.5rem !important;
+}
+.avatar-xxl {
+  width: 6rem !important;
+  height: 6rem !important;
+}
+.avatar img, .avatar > img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+/* Icon Shapes */
+.icon-shape {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  vertical-align: middle;
+  border-radius: 8px;
+}
+.icon-xs { width: 1.5rem; height: 1.5rem; font-size: 0.85rem; }
+.icon-sm { width: 2rem; height: 2rem; font-size: 1rem; }
+.icon-md { width: 2.75rem; height: 2.75rem; font-size: 1.25rem; }
+.icon-lg { width: 3.5rem; height: 3.5rem; font-size: 1.5rem; }
+.icon-xl { width: 4.5rem; height: 4.5rem; font-size: 2rem; }
+
+/* Button Icons */
+.btn-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+.btn-icon.btn-xs { width: 1.75rem; height: 1.75rem; font-size: 0.75rem; }
+.btn-icon.btn-sm { width: 2.2rem; height: 2.2rem; font-size: 0.875rem; }
+.btn-icon.btn-md { width: 2.5rem; height: 2.5rem; font-size: 1rem; }
+.btn-icon.btn-lg { width: 3.25rem; height: 3.25rem; font-size: 1.25rem; }
+
+/* Cards & Tables */
+.card {
+  border: 1px solid #e5e5e5;
+  border-radius: 10px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+.table > :not(caption) > * > * {
+  padding: 0.75rem 1rem;
+}
