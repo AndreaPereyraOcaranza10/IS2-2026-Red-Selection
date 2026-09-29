@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Activar cuenta</title>
+    <link rel="stylesheet" th:href="@{/css/estilos.css}">
+</head>
+<body>
+<div class="tarjeta">
+    <h1>Activa tu cuenta</h1>
+    <p class="subtitulo">Ingresá el código que te llegó por mail</p>
+
+    <p class="mensaje mensaje--error" th:if="${error}" th:text="${error}"></p>
+
+    <div th:if="${activada}">
+        <p class="mensaje mensaje--exito">¡Listo! Ya podés iniciar sesión y completar tu perfil</p>
+        <p class="enlace-secundario"><a th:href="@{/completar-perfil}">Iniciar sesión </a></p>
+    </div>
+
+    <form th:unless="${activada}" th:action="@{/activar-cuenta}" method="post">
+        <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+
+        <label for="correo">Correo electrónico</label>
+        <input type="email" id="correo" name="correo" th:value="${correo}" required autofocus/>
+
+        <label for="codigo">Código recibido por mail</label>
+        <input type="text" id="codigo" name="codigo" class="codigo-caja" maxlength="6" required/>
+
+        <button type="submit">Activar</button>
+    </form>
+</div>
+</body>
+</html>
