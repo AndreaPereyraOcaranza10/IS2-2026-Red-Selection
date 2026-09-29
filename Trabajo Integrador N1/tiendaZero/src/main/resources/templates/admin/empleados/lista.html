@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+  <title>Empleados</title>
+  <th:block th:replace="~{admin/fragments/fragments :: head-assets}"></th:block>
+</head>
+<body>
+<div th:replace="~{admin/fragments/fragments :: sidebarTopbar(activePage='empleados')}"></div>
+<main id="content" class="content py-10">
+  <div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h1>Empleados</h1>
+      <a th:href="@{/admin/empleados/nuevo}" class="btn btn-primary">Nuevo empleado</a>
+    </div>
+
+    <div class="card">
+      <div class="card-body">
+        <table class="table table-striped">
+          <thead>
+            <tr>
+              <th>Nombre</th>
+              <th>Apellido</th>
+              <th>Tipo</th>
+              <th>Empresa</th>
+              <th>Documento</th>
+              <th>Sexo</th>
+              <th>Fecha Nac.</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr th:each="emp : ${empleados}">
+              <td th:text="${emp.nombre}">Nombre</td>
+              <td th:text="${emp.apellido}">Apellido</td>
+              <td th:text="${emp.tipoEmpleado}">Tipo</td>
+              <td th:text="${emp.empresa != null ? emp.empresa.razonSocial : '-'}">Empresa</td>
+              <td th:text="${emp.tipoDocumento} + ' ' + ${emp.numeroDocumento}">DNI</td>
+              <td th:text="${emp.sexo}">Sexo</td>
+              <td th:text="${emp.fechaNacimiento}">dd-MM-yyyy</td>
+              <td>
+                <a th:href="@{/admin/empleados/{id}/editar(id=${emp.id})}" class="btn btn-sm btn-outline-primary">Editar</a>
+                <form th:action="@{/admin/empleados/{id}/eliminar(id=${emp.id})}" method="post" style="display:inline-block;" onsubmit="return confirm('¿Eliminar empleado?');">
+                  <button type="submit" class="btn btn-sm btn-outline-danger">Eliminar</button>
+                </form>
+              </td>
+            </tr>
+            <th:block th:if="${empleados == null or #lists.isEmpty(empleados)}">
+              <tr>
+                <td colspan="8" class="text-center">No hay empleados registrados</td>
+              </tr>
+            </th:block>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</main>
+<th:block th:replace="~{admin/fragments/fragments :: scripts}"></th:block>
+</body>
+</html>

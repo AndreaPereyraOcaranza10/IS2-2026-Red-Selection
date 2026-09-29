@@ -39,7 +39,7 @@ Se pueden cambiar agregando en `application.properties`: `app.demo.administrativ
 `AuthController`, `PerfilController`, `PerfilService(Impl)`, `EmailService(Impl)`, `CustomUserDetailsService`, `CustomAuthentication*Handler`, `DataInitializer`, `Rol`, `Usuario`/`Persona` de RT, DTOs de auth/perfil, plantillas `admin/signin`, `admin/signup`, `tienda/auth/*`, `tienda/cliente/perfil`. `pom.xml` y las claves existentes de `application.properties` no se tocaron.
 
 ## Pendiente / a tener en cuenta
-- `cart.html` y `checkout.html` son solo maquetas: no existen `Factura`, `DetalleFacturaRepository`, `OrdenCompra`, `Carrito` ni `Stock` en ninguno de los dos proyectos.
+- `cart.html` y `checkout.html` son solo maquetas: no existen `Factura`, `DetalleFacturaRepository`, `OrdenCompraProveedor`, `Carrito` ni `Stock` en ninguno de los dos proyectos.
 - Los productos de ejemplo se crean solos al arrancar. Para cargar más, usar `/products/new`; el precio se guarda como `VigenciaPrecio`.
 - Los estados de la home (`inStock`, `rating`, `reviewCount`) son valores fijos de RT, no datos reales.
 - `application.properties` de RG tiene la contraseña de Gmail en texto plano: pasarla a variable de entorno.

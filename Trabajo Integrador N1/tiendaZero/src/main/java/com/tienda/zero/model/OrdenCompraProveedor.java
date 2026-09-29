@@ -14,7 +14,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class OrdenCompra {
+public class OrdenCompraProveedor {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -33,5 +33,5 @@ public class OrdenCompra {
     @Builder.Default
     @OneToMany(cascade = CascadeType.ALL)
     @JoinColumn(name = "orden_compra_id")
-    private List<DetalleOrdenCompra> detalles = new ArrayList<>();
+    private List<DetalleOrdenCompraProveedor> detalles = new ArrayList<>();
 }

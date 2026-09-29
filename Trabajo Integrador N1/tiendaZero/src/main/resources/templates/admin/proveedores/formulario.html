@@ -18,6 +18,36 @@
             <input type="text" id="razonSocial" th:field="*{razonSocial}" class="form-control" required>
           </div>
 
+          <h5 class="mt-3">Contacto</h5>
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label for="email" class="form-label">Correo electrónico</label>
+              <input type="email" id="email" name="email" th:value="${email}" class="form-control" placeholder="contacto@empresa.com">
+            </div>
+            <div class="col-md-6 mb-3">
+              <label for="tipoContacto" class="form-label">Tipo de contacto</label>
+              <select id="tipoContacto" name="tipoContactoSelected" class="form-select">
+                <option th:selected="${tipoContactoSelected == 'EMPRESA'}" value="EMPRESA">Empresa</option>
+                <option th:selected="${tipoContactoSelected == 'LABORAL'}" value="LABORAL">Laboral</option>
+                <option th:selected="${tipoContactoSelected == 'PERSONAL'}" value="PERSONAL">Personal</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label for="telefono" class="form-label">Teléfono</label>
+              <input type="text" id="telefono" name="telefono" th:value="${telefono}" class="form-control" placeholder="341-1234567">
+            </div>
+            <div class="col-md-6 mb-3">
+              <label for="tipoTelefono" class="form-label">Tipo de teléfono</label>
+              <select id="tipoTelefono" name="tipoTelefonoSelected" class="form-select">
+                <option th:selected="${tipoTelefonoSelected == 'CELULAR'}" value="CELULAR">Celular</option>
+                <option th:selected="${tipoTelefonoSelected == 'FIJO'}" value="FIJO">Fijo</option>
+              </select>
+            </div>
+          </div>
+
           <div class="d-flex gap-2">
             <button type="submit" class="btn btn-primary">Guardar</button>
             <a th:href="@{/admin/proveedores}" class="btn btn-secondary">Cancelar</a>

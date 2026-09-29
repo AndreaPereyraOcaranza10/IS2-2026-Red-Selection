@@ -10,7 +10,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class DetalleOrdenCompra {
+public class DetalleOrdenCompraProveedor {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)

@@ -25,7 +25,7 @@ public class Proveedor {
     @Column(nullable = false)
     private boolean eliminado;
 
-    @OneToMany
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "proveedor_id")
     @Builder.Default
     private List<Contacto> contactos = new ArrayList<>();
