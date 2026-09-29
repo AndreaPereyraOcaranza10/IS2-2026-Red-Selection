@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+
+<head>
+    <title th:text="'Precios - InApp Inventory Dashboard'">Precios</title>
+    <th:block th:replace="~{admin/fragments/fragments :: head-assets}"></th:block>
+</head>
+
+<body>
+<div th:replace="~{admin/fragments/fragments :: sidebarTopbar(activePage='inventory')}"></div>
+<!-- MAIN CONTENT -->
+<main id="content" class="content py-10">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-12">
+                <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
+                    <div class="">
+                        <h1 class="fs-3 mb-1" th:text="'Precios: ' + ${producto.nombre}">Precios: Remera</h1>
+                        <p class="mb-0" th:text="'Código ' + ${producto.codigo} + ' · Historial y cambio de precio'">Código REM-001</p>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <a th:href="@{/products/{id}/edit(id=${producto.id})}" class="btn btn-outline-primary">Editar producto</a>
+                        <a th:href="@{/inventory}" href="inventory.html" class="btn btn-primary">Volver al Inventario</a>
+                    </div>
+                </div>
+
+                <!-- Mensajes Flash de Éxito o Error -->
+                <div class="alert alert-success alert-dismissible fade show mb-4" role="alert" th:if="${mensajeExito != null}">
+                    <i class="ti ti-check me-2 fs-5"></i>
+                    <span th:text="${mensajeExito}">Operación exitosa</span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                <div class="alert alert-danger alert-dismissible fade show mb-4" role="alert" th:if="${mensajeError != null}">
+                    <i class="ti ti-alert-circle me-2 fs-5"></i>
+                    <span th:text="${mensajeError}">Ocurrió un error</span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <!-- Historial de precios -->
+            <div class="col-lg-8">
+                <div class="card table-responsive shadow-sm">
+                    <table class="table mb-0 text-nowrap table-hover">
+                        <thead class="table-light border-light">
+                        <tr>
+                            <th>Vigente desde</th>
+                            <th>Hasta</th>
+                            <th>Precio</th>
+                            <th>Estado</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr class="align-middle" th:each="p : ${precios}">
+                            <td th:text="${#dates.format(p.fechaDesde, 'dd/MM/yyyy')}">01/01/2026</td>
+                            <td th:text="${p.fechaHasta != null} ? ${#dates.format(p.fechaHasta, 'dd/MM/yyyy')} : '—'">—</td>
+                            <td>
+                    <span class="fw-bold text-dark fs-6"
+                          th:text="'$' + ${#numbers.formatDecimal(p.precio, 1, 'POINT', 2, 'COMMA')}">$0,00</span>
+                            </td>
+                            <td>
+                                <span th:if="${p.fechaHasta == null}" class="badge bg-success-subtle text-success">Vigente</span>
+                                <span th:unless="${p.fechaHasta == null}" class="badge bg-light text-muted border">Histórico</span>
+                            </td>
+                        </tr>
+                        <tr th:if="${#lists.isEmpty(precios)}">
+                            <td colspan="4" class="text-center py-4 text-muted">Este producto todavía no tiene precios cargados.</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Cargar un precio nuevo -->
+            <div class="col-lg-4">
+                <div class="card shadow-sm">
+                    <div class="card-body p-4">
+                        <h2 class="fs-5 mb-3">Nuevo precio</h2>
+                        <form th:action="@{/products/{id}/prices(id=${producto.id})}" method="post">
+                            <div class="mb-3">
+                                <label for="newPrice" class="form-label font-semibold">Precio ($)</label>
+                                <input type="number" class="form-control" id="newPrice" name="price" placeholder="0.00"
+                                       step="0.01" min="0.01" required>
+                                <div class="form-text">Rige desde hoy. El precio anterior queda en el historial.</div>
+                            </div>
+                            <button type="submit" class="btn btn-primary w-100">Guardar nuevo precio</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-12">
+                <div th:replace="~{admin/fragments/fragments :: pageFooter}"></div>
+            </div>
+        </div>
+
+    </div>
+</main>
+
+<th:block th:replace="~{admin/fragments/fragments :: scripts}"></th:block>
+
+</body>
+
+</html>

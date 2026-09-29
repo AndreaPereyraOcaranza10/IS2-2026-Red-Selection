@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+
+<head>
+    <title th:text="'Editar Producto - InApp Inventory Dashboard'">Editar Producto</title>
+    <th:block th:replace="~{admin/fragments/fragments :: head-assets}"></th:block>
+</head>
+
+<body>
+<div th:replace="~{admin/fragments/fragments :: sidebarTopbar(activePage='inventory')}"></div>
+<!-- MAIN CONTENT -->
+<main id="content" class="content py-10">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-12">
+                <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
+                    <div class="">
+                        <h1 class="fs-3 mb-1">Editar Producto</h1>
+                        <p class="mb-0">Modificá los datos del producto</p>
+                    </div>
+                    <div>
+                        <a th:href="@{/inventory}" href="inventory.html" class="btn btn-primary">Volver al Inventario</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body p-4">
+
+                        <!-- Mensaje de error al guardar los cambios (lo envía el controlador) -->
+                        <div class="alert alert-danger alert-dismissible fade show mb-4" role="alert" th:if="${error != null}">
+                            <i class="ti ti-alert-circle me-2 fs-5"></i>
+                            <span th:text="${error}">Ocurrió un error</span>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+
+                        <!--
+                            Igual que el alta: el token CSRF va en la URL porque el formulario es multipart
+                            (Spring Security lo necesita antes de que se procese el archivo).
+                        -->
+                        <form id="editProductForm"
+                              th:action="@{/products/{id}/edit(id=${productForm.id},${_csrf.parameterName}=${_csrf.token})}"
+                              th:object="${productForm}" method="post" enctype="multipart/form-data">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="productName" class="form-label font-semibold">Nombre del Producto</label>
+                                    <input type="text" class="form-control" id="productName" th:field="*{name}"
+                                           placeholder="Ej. Remera Deportiva Zero Dry" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="productSKU" class="form-label font-semibold">Código / SKU</label>
+                                    <input type="text" class="form-control" id="productSKU" th:value="*{sku}" readonly>
+                                    <div class="form-text">El código no se puede modificar.</div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-4 mb-3">
+                                    <label for="productTalle" class="form-label font-semibold">Talle</label>
+                                    <select class="form-select" id="productTalle" th:field="*{talle}" required>
+                                        <option value="">Seleccione talle...</option>
+                                        <option value="S">S</option>
+                                        <option value="M">M</option>
+                                        <option value="L">L</option>
+                                        <option value="XL">XL</option>
+                                        <option value="XXL">XXL</option>
+                                        <option value="38">38 (Calzado)</option>
+                                        <option value="39">39 (Calzado)</option>
+                                        <option value="40">40 (Calzado)</option>
+                                        <option value="41">41 (Calzado)</option>
+                                        <option value="42">42 (Calzado)</option>
+                                        <option value="43">43 (Calzado)</option>
+                                        <option value="Único">Único (Accesorios)</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label font-semibold">Precio</label>
+                                    <div>
+                                        <a th:href="@{/products/{id}/prices(id=${productForm.id})}" class="btn btn-outline-secondary">
+                                            <i class="ti ti-currency-dollar me-1"></i>Ver historial y cambiar precio
+                                        </a>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 mb-3 d-flex align-items-center pt-3">
+                                    <div class="form-check form-switch mt-2">
+                                        <input class="form-check-input" type="checkbox" id="enOferta" th:field="*{enOferta}">
+                                        <label class="form-check-label font-semibold ms-2" for="enOferta">¿Está en Oferta?</label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="idSubCategoria" class="form-label font-semibold">Categoría y Subcategoría</label>
+                                <select class="form-select" id="idSubCategoria" th:field="*{idSubCategoria}" required>
+                                    <option value="">Seleccione la categoría correspondiente...</option>
+                                    <option th:each="sub : ${subcategorias}" th:value="${sub.id}"
+                                            th:text="${(sub.categoria != null ? sub.categoria.nombre + ' - ' : '') + sub.nombre}">
+                                        Hombres - Ropa
+                                    </option>
+                                </select>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="productImage" class="form-label font-semibold">Imagen del Producto</label>
+                                <div class="mb-2" th:if="${imagenActualUrl != null}">
+                                    <img th:src="@{${imagenActualUrl}}" alt="Imagen actual" class="rounded object-fit-cover"
+                                         style="width: 96px; height: 96px;">
+                                </div>
+                                <input type="file" class="form-control" id="productImage" name="image" accept="image/*">
+                                <div class="form-text">Dejalo vacío para conservar la imagen actual.</div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="productDescription" class="form-label font-semibold">Descripción</label>
+                                <textarea class="form-control" id="productDescription" th:field="*{description}" rows="3"
+                                          placeholder="Detalles sobre el material, uso, diseño, etc."></textarea>
+                            </div>
+
+                            <div class="d-flex gap-2 mt-4">
+                                <button type="submit" class="btn btn-primary px-4">Guardar Cambios</button>
+                                <a th:href="@{/inventory}" class="btn btn-secondary px-3">Cancelar</a>
+                            </div>
+
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-12">
+                <div th:replace="~{admin/fragments/fragments :: pageFooter}"></div>
+            </div>
+        </div>
+
+    </div>
+</main>
+
+<th:block th:replace="~{admin/fragments/fragments :: scripts}"></th:block>
+
+</body>
+
+</html>

@@ -28,6 +28,14 @@
         <div class="col-12">
           <div class="card">
             <div class="card-body p-4">
+
+              <!-- Mensaje de error al crear el producto (lo envía el controlador) -->
+              <div class="alert alert-danger alert-dismissible fade show mb-4" role="alert" th:if="${error != null}">
+                <i class="ti ti-alert-circle me-2 fs-5"></i>
+                <span th:text="${error}">Ocurrió un error</span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+              </div>
+
               <!--
                   th:object asume un command object en el modelo, ej:
                   model.addAttribute("productForm", new ProductForm());

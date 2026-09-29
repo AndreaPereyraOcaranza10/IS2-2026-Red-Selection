@@ -67,6 +67,7 @@
                   <th>Categoría</th>
                   <th>Talle</th>
                   <th>Precio</th>
+                  <th>Stock</th>
                   <th>Estado</th>
                   <th class="text-end">Acciones</th>
                 </tr>
@@ -94,6 +95,10 @@
                     <span class="fw-bold text-dark fs-6" th:text="${product.priceText}">$0.00</span>
                   </td>
                   <td>
+                    <span th:if="${product.stock > 0}" class="badge bg-success-subtle text-success" th:text="${product.stock}">10</span>
+                    <span th:unless="${product.stock > 0}" class="badge bg-danger-subtle text-danger">Sin stock</span>
+                  </td>
+                  <td>
                     <span th:if="${product.enOferta}" class="badge bg-success-subtle text-success">
                       <i class="ti ti-tag me-1"></i>En Oferta
                     </span>
@@ -103,6 +108,12 @@
                     <div class="d-inline-flex gap-2 align-items-center">
                       <a th:href="@{'/product/' + ${product.id}}" target="_blank" class="btn btn-sm btn-outline-info" title="Ver en Tienda">
                         <i class="ti ti-external-link"></i>
+                      </a>
+                      <a th:href="@{'/products/' + ${product.id} + '/edit'}" class="btn btn-sm btn-outline-primary" title="Editar">
+                        <i class="ti ti-pencil"></i>
+                      </a>
+                      <a th:href="@{'/products/' + ${product.id} + '/prices'}" class="btn btn-sm btn-outline-secondary" title="Precios">
+                        <i class="ti ti-currency-dollar"></i>
                       </a>
                       <form th:action="@{'/products/' + ${product.id} + '/delete'}" method="post" class="d-inline"
                             onsubmit="return confirm('¿Seguro que deseas eliminar este producto?');">

@@ -21,4 +21,5 @@ public class ProductoInventarioDTO {
     private String priceText;
     private boolean enOferta;
     private String imageUrl;
+    private int stock;
 }
