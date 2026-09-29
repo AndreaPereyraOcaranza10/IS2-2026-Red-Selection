@@ -1,38 +1,49 @@
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <title>Crear cuenta</title>
-    <link rel="stylesheet" th:href="@{/css/estilos.css}">
-</head>
+<head th:replace="~{tienda/fragmentos :: head('Crear cuenta')}"></head>
 <body>
-<div class="tarjeta">
-    <h1>Crea tu cuenta TiendaZero</h1>
-    <p class="subtitulo">Vas a recibir un código de activación por correo</p>
+<nav th:replace="~{tienda/fragmentos :: barraSuperior}"></nav>
+<nav th:replace="~{tienda/fragmentos :: menu}"></nav>
 
-    <p class="mensaje mensaje--error" th:if="${error}" th:text="${error}"></p>
+<section class="bg-light py-5">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-7 col-lg-5">
+                <div class="zero-tarjeta">
+                    <h1 class="h1">Creá tu cuenta</h1>
+                    <p class="zero-subtitulo">Vas a recibir un código de activación por correo</p>
 
-    <div th:if="${mensaje}">
-        <p class="mensaje mensaje--exito" th:text="${mensaje}"></p>
-        <p class="enlace-secundario"><a th:href="@{/activar-cuenta}">Ya tengo el código, activar cuenta</a></p>
+                    <p class="zero-mensaje zero-mensaje--error" th:if="${error}" th:text="${error}"></p>
+
+                    <div th:if="${mensaje}">
+                        <p class="zero-mensaje zero-mensaje--exito" th:text="${mensaje}"></p>
+                        <a class="btn btn-success btn-lg w-100" th:href="@{/activar-cuenta}">Ya tengo el código, activar cuenta</a>
+                    </div>
+
+                    <form th:unless="${mensaje}" th:action="@{/registro}" method="post">
+                        <div class="mb-3">
+                            <label for="correo" class="form-label">Correo electrónico</label>
+                            <input type="email" id="correo" name="correo" class="form-control" required autofocus/>
+                        </div>
+                        <div class="mb-3">
+                            <label for="clave" class="form-label">Contraseña</label>
+                            <input type="password" id="clave" name="clave" class="form-control" required minlength="4"/>
+                        </div>
+                        <div class="mb-4">
+                            <label for="repetirClave" class="form-label">Repetir contraseña</label>
+                            <input type="password" id="repetirClave" name="repetirClave" class="form-control" required minlength="4"/>
+                        </div>
+                        <button type="submit" class="btn btn-success btn-lg w-100">Registrarme</button>
+                    </form>
+
+                    <p class="zero-enlace">¿Ya tenés cuenta? <a th:href="@{/login}">Ingresá acá</a></p>
+                </div>
+            </div>
+        </div>
     </div>
+</section>
 
-    <form th:unless="${mensaje}" th:action="@{/registro}" method="post">
-        <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
-
-        <label for="correo">Correo electrónico</label>
-        <input type="email" id="correo" name="correo" required autofocus/>
-
-        <label for="clave">Contraseña</label>
-        <input type="password" id="clave" name="clave" required minlength="4"/>
-
-        <label for="repetirClave">Repetir contraseña</label>
-        <input type="password" id="repetirClave" name="repetirClave" required minlength="4"/>
-
-        <button type="submit">Registrarme</button>
-    </form>
-
-    <p class="enlace-secundario">¿Ya tenés cuenta? <a th:href="@{/login}">Ingresá acá</a></p>
-</div>
+<footer th:replace="~{tienda/fragmentos :: pie}"></footer>
+<th:block th:replace="~{tienda/fragmentos :: scripts}"></th:block>
 </body>
 </html>

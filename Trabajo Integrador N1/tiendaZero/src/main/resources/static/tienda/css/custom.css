@@ -1,3 +1,66 @@
-/*
-Custom Css
-*/
+/* Estilos propios de Zero que se suman a la plantilla Zay.
+   Usan solo las variables de /tema/zero-tema.css. */
+
+/* Tarjeta centrada de los formularios de cuenta (login, registro, activación, perfil) */
+.zero-tarjeta {
+    background: var(--zero-superficie);
+    border-radius: var(--zero-radio);
+    box-shadow: 0 5px 20px rgba(32, 33, 43, 0.08);
+    padding: 2.5rem;
+}
+.zero-tarjeta .h1 { color: var(--zero-texto); margin-bottom: .25rem; }
+.zero-subtitulo { color: var(--zero-texto-secundario); margin-bottom: 1.5rem; }
+
+/* Campos de formulario */
+.zero-tarjeta .form-label { font-weight: 500 !important; margin-bottom: .35rem; }
+.zero-tarjeta .form-control,
+.zero-tarjeta .form-select {
+    border: 1px solid var(--zero-borde);
+    border-radius: var(--zero-radio);
+    padding: .6rem .9rem;
+}
+.zero-tarjeta .form-control:focus,
+.zero-tarjeta .form-select:focus {
+    border-color: var(--zero-acento);
+    box-shadow: 0 0 0 .2rem rgba(158, 103, 82, 0.2);
+}
+.zero-tarjeta fieldset { margin-bottom: 1.5rem; }
+.zero-tarjeta legend {
+    font-family: var(--zero-fuente-titulos);
+    font-size: 26px !important;
+    color: var(--zero-texto);
+    letter-spacing: 0.02em;
+    border-bottom: 1px solid var(--zero-borde);
+    padding-bottom: .25rem;
+    margin-bottom: 1rem;
+}
+
+/* Caja del código de activación */
+.zero-codigo {
+    text-align: center;
+    letter-spacing: 0.5em;
+    font-size: 24px !important;
+    font-weight: 700 !important;
+}
+
+/* Mensajes de error y éxito con la paleta de Zero */
+.zero-mensaje {
+    border-radius: var(--zero-radio);
+    padding: .75rem 1rem;
+    margin-bottom: 1.25rem;
+}
+.zero-mensaje--error {
+    background: #F8E6E1;
+    color: #8A2E1C;
+    border-left: 4px solid #8A2E1C;
+}
+.zero-mensaje--exito {
+    background: var(--zero-crema);
+    color: var(--zero-texto);
+    border-left: 4px solid var(--zero-acento);
+}
+
+/* Enlaces secundarios debajo de los formularios */
+.zero-enlace { color: var(--zero-texto-secundario); text-align: center; margin-top: 1.25rem; }
+.zero-enlace a { color: var(--zero-acento); font-weight: 500 !important; }
+.zero-enlace a:hover { color: var(--zero-acento-hover); }

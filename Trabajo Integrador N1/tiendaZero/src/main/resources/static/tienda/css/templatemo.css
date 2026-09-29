@@ -61,11 +61,20 @@ body { color: var(--zero-texto); }
 }
 
 /* Nav */
-#templatemo_nav_top { min-height: 40px;}
-#templatemo_nav_top * { font-size: .9em !important;}
+#templatemo_nav_top {
+  min-height: 44px;
+  padding-top: .6rem;
+  padding-bottom: .6rem;
+}
+#templatemo_nav_top a,
+#templatemo_nav_top i { font-size: 15px !important;}
+#templatemo_nav_top .fab { margin-left: .5rem; }
 #templatemo_main_nav a { color: var(--zero-texto);}
 #templatemo_main_nav a:hover { color: var(--zero-acento);}
-#templatemo_main_nav .navbar .nav-icon { margin-right: 20px;}
+#templatemo_main_nav .nav-link { font-size: 19px !important; font-weight: 500 !important; }
+.navbar.shadow { padding-top: .75rem; padding-bottom: .75rem; }
+.navbar .logo { font-size: 64px !important; }
+#templatemo_main_nav .nav-icon { margin-left: 1.25rem; }
 
 /* Hero Carousel */
 #template-mo-zay-hero-carousel { background: var(--zero-fondo) !important;}

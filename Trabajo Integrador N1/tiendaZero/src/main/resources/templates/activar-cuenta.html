@@ -1,33 +1,43 @@
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <title>Activar cuenta</title>
-    <link rel="stylesheet" th:href="@{/css/estilos.css}">
-</head>
+<head th:replace="~{tienda/fragmentos :: head('Activar cuenta')}"></head>
 <body>
-<div class="tarjeta">
-    <h1>Activa tu cuenta</h1>
-    <p class="subtitulo">Ingresá el código que te llegó por mail</p>
+<nav th:replace="~{tienda/fragmentos :: barraSuperior}"></nav>
+<nav th:replace="~{tienda/fragmentos :: menu}"></nav>
 
-    <p class="mensaje mensaje--error" th:if="${error}" th:text="${error}"></p>
+<section class="bg-light py-5">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-7 col-lg-5">
+                <div class="zero-tarjeta">
+                    <h1 class="h1">Activá tu cuenta</h1>
+                    <p class="zero-subtitulo">Ingresá el código que te llegó por mail</p>
 
-    <div th:if="${activada}">
-        <p class="mensaje mensaje--exito">¡Listo! Ya podés iniciar sesión y completar tu perfil</p>
-        <p class="enlace-secundario"><a th:href="@{/completar-perfil}">Iniciar sesión </a></p>
+                    <p class="zero-mensaje zero-mensaje--error" th:if="${error}" th:text="${error}"></p>
+
+                    <div th:if="${activada}">
+                        <p class="zero-mensaje zero-mensaje--exito">¡Listo! Ya podés iniciar sesión y completar tu perfil</p>
+                        <a class="btn btn-success btn-lg w-100" th:href="@{/completar-perfil}">Iniciar sesión</a>
+                    </div>
+
+                    <form th:unless="${activada}" th:action="@{/activar-cuenta}" method="post">
+                        <div class="mb-3">
+                            <label for="correo" class="form-label">Correo electrónico</label>
+                            <input type="email" id="correo" name="correo" class="form-control" th:value="${correo}" required autofocus/>
+                        </div>
+                        <div class="mb-4">
+                            <label for="codigo" class="form-label">Código recibido por mail</label>
+                            <input type="text" id="codigo" name="codigo" class="form-control zero-codigo" maxlength="6" required/>
+                        </div>
+                        <button type="submit" class="btn btn-success btn-lg w-100">Activar</button>
+                    </form>
+                </div>
+            </div>
+        </div>
     </div>
+</section>
 
-    <form th:unless="${activada}" th:action="@{/activar-cuenta}" method="post">
-        <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
-
-        <label for="correo">Correo electrónico</label>
-        <input type="email" id="correo" name="correo" th:value="${correo}" required autofocus/>
-
-        <label for="codigo">Código recibido por mail</label>
-        <input type="text" id="codigo" name="codigo" class="codigo-caja" maxlength="6" required/>
-
-        <button type="submit">Activar</button>
-    </form>
-</div>
+<footer th:replace="~{tienda/fragmentos :: pie}"></footer>
+<th:block th:replace="~{tienda/fragmentos :: scripts}"></th:block>
 </body>
 </html>
