@@ -7,6 +7,11 @@ import com.tienda.zero.model.VigenciaPrecio;
 import com.tienda.zero.service.CategoriaService;
 import com.tienda.zero.service.ProductoService;
 import com.tienda.zero.service.VigenciaPrecioService;
+import com.tienda.zero.service.FlujoCompraService;
+import com.tienda.zero.service.StockService;
+import org.springframework.security.core.Authentication;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.web.bind.annotation.PostMapping;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -25,6 +30,8 @@ public class TiendaController {
     private final ProductoService productoService;
     private final CategoriaService categoriaService;
     private final VigenciaPrecioService vigenciaPrecioService;
+    private final FlujoCompraService flujoCompraService;
+    private final StockService stockService;
 
     @GetMapping("/shop")
     public String shop(
@@ -176,15 +183,66 @@ public class TiendaController {
     }
 
     @GetMapping("/cart")
-    public String cart() {
+    public String cart(Authentication auth, Model model) {
+        var carrito = flujoCompraService.verCarrito(auth.getName());
+        model.addAttribute("cartItems", carrito.get("items"));
+        model.addAttribute("cartSubtotal", carrito.get("total"));
+        model.addAttribute("cartTaxes", 0);
+        model.addAttribute("cartShipping", 0);
+        model.addAttribute("cartTotal", carrito.get("total"));
         return "tienda/cart";
     }
 
     @GetMapping("/checkout")
-    public String checkout() {
+    public String checkout(Authentication auth, Model model) {
+        model.addAttribute("cart", flujoCompraService.verCarrito(auth.getName()));
         return "tienda/checkout";
     }
 
+    @PostMapping("/cart/add")
+    public String agregarAlCarrito(@RequestParam String productId, @RequestParam(defaultValue = "1") int quantity, Authentication auth, RedirectAttributes flash) {
+        try { flujoCompraService.agregarAlCarrito(auth.getName(), productId, quantity); flash.addFlashAttribute("mensajeExito", "Producto agregado al carrito."); }
+        catch (RuntimeException e) { flash.addFlashAttribute("mensajeError", e.getMessage()); }
+        return "redirect:/cart";
+    }
+
+    @PostMapping("/cart/remove/{productId}")
+    public String quitarDelCarrito(@PathVariable String productId, Authentication auth) { flujoCompraService.quitarDelCarrito(auth.getName(), productId); return "redirect:/cart"; }
+
+    @PostMapping("/cart/update/{productId}")
+    public String actualizarCantidadCarrito(@PathVariable String productId, @RequestParam int quantity, Authentication auth, RedirectAttributes flash) {
+        try { flujoCompraService.actualizarCantidadCarrito(auth.getName(), productId, quantity); }
+        catch (RuntimeException e) { flash.addFlashAttribute("mensajeError", e.getMessage()); }
+        return "redirect:/cart";
+    }
+
+    @PostMapping("/cart/clear")
+    public String vaciarCarrito(Authentication auth) { flujoCompraService.vaciarCarrito(auth.getName()); return "redirect:/cart"; }
+
+    @PostMapping("/checkout")
+    public String confirmarCompra(@RequestParam String address, Authentication auth, RedirectAttributes flash) {
+        try {
+            var pedido = flujoCompraService.crearOrdenCliente(auth.getName(), address);
+            flash.addFlashAttribute("mensajeExito", "Orden creada y stock reservado. El pago y la factura quedan pendientes de integración. Número: " + pedido.getIdentificadorCompra());
+            return "redirect:/orders";
+        } catch (RuntimeException e) {
+            flash.addFlashAttribute("mensajeError", e.getMessage());
+            return "redirect:/checkout";
+        }
+    }
+
+    @GetMapping("/orders")
+    public String orders(Authentication auth, Model model) {
+        model.addAttribute("orders", flujoCompraService.listarPedidosCliente(auth.getName()));
+        return "tienda/orders";
+    }
+
+    @PostMapping("/orders/{id}/cancel")
+    public String cancelarPedido(@PathVariable String id, Authentication auth, RedirectAttributes flash) {
+        try { flujoCompraService.anularOrdenCliente(id, auth.getName()); flash.addFlashAttribute("mensajeExito", "La orden fue anulada y el stock reservado fue reintegrado."); }
+        catch (RuntimeException e) { flash.addFlashAttribute("mensajeError", e.getMessage()); }
+        return "redirect:/orders";
+    }
 
     private ProductoCardDTO convertirAProductoCardDTO(Producto prod) {
         double precio = 0.0;
@@ -220,7 +278,7 @@ public class TiendaController {
                 .sku(prod.getCodigo() != null ? prod.getCodigo() : "ZERO-001")
                 .brand("Zero")
                 .talle(prod.getTalle() != null ? prod.getTalle() : "-")
-                .inStock(true)
+                .inStock(stockService.calcularStockActual(prod.getId()) > 0)
                 .reviewCount(5)
                 .rating(5)
                 .price(precio)

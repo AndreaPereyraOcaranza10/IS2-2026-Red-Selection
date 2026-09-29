@@ -16,9 +16,9 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/admin/**", "/inventory/**", "/reports/**", "/docs/**", "/products/**")
+                        .requestMatchers("/admin/**", "/inventory/**", "/reports/**", "/docs/**", "/products/**", "/api/admin/**")
                                 .hasAnyRole("ADMINISTRATIVO", "JEFE")
-                        .requestMatchers("/completar-perfil", "/perfil-completo", "/checkout/**").authenticated()
+                        .requestMatchers("/completar-perfil", "/perfil-completo", "/cart/**", "/cart", "/checkout/**", "/orders/**", "/api/orders/**", "/api/orders", "/api/cart/**").authenticated()
                         .anyRequest().permitAll()
         ).formLogin(form -> form
                         .loginPage("/login")

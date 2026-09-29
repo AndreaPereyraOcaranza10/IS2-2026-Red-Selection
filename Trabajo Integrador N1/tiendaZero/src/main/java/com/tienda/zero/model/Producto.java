@@ -4,6 +4,9 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.*;
 import jakarta.persistence.Table;
 import lombok.*;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "producto", indexes = {
@@ -38,12 +41,20 @@ public class Producto {
     @Builder.Default
     private boolean eliminado = false;
 
+    @JsonIgnore
+    @OneToMany(mappedBy = "producto", cascade = CascadeType.ALL)
+    @Builder.Default
+    private List<Stock> stocks = new ArrayList<>();
+
+    @Transient
+    private int stockActual;
+
     @ManyToOne
     @JoinColumn(name = "subcategoria_id", nullable = false)
     private SubCategoria subCategoria;
 
     //Relación para la imágen
-    @ManyToOne
+    @JsonIgnore @ManyToOne
     @JoinColumn(name = "imagen_id")
     private Imagen imagen;
 

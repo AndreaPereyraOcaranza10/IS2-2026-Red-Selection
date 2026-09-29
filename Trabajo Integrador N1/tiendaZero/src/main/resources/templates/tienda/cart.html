@@ -13,6 +13,8 @@
     <section id="cart-page" class="bg-white py-16">
         <div class="container mx-auto px-4">
             <h1 class="text-2xl font-semibold mb-4">Shopping Cart</h1>
+            <p th:if="${mensajeExito}" class="text-green-700 mb-4" th:text="${mensajeExito}"></p>
+            <p th:if="${mensajeError}" class="text-red-600 mb-4" th:text="${mensajeError}"></p>
             <div class="flex flex-col md:flex-row gap-4">
                 <div class="md:w-3/4">
                     <div class="bg-white rounded-lg shadow-md p-6 mb-4">
@@ -47,9 +49,8 @@
                                                 <!-- Ojo: estos botones +/- hoy dependen del script.js original (data-index, etc.); si el carrito
                                                      pasa a manejarse en el backend, lo más simple es reemplazarlos por 2 <form method="post"> chicos
                                                      (uno a /cart/increment/{id} y otro a /cart/decrement/{id}) -->
-                                                <button type="button" class="cart-decrement border border-primary bg-primary text-white hover:bg-transparent hover:text-primary rounded-full w-10 h-10 flex items-center justify-center" th:attr="data-item-id=${item.id}">-</button>
-                                                <p class="quantity text-center w-8" th:text="${item.quantity}">1</p>
-                                                <button type="button" class="cart-increment border border-primary bg-primary text-white hover:bg-transparent hover:text-primary rounded-full w-10 h-10 flex items-center justify-center" th:attr="data-item-id=${item.id}">+</button>
+                                                <form th:action="@{'/cart/update/' + ${item.id}}" method="post" class="flex items-center"><input type="number" name="quantity" min="1" th:max="${item.stock}" th:value="${item.quantity}" class="w-16 border rounded px-2 py-1"><button type="submit" class="ml-2 text-primary underline">Actualizar</button></form>
+                                                <form th:action="@{'/cart/remove/' + ${item.id}}" method="post" class="ml-3"><button type="submit" class="border border-primary rounded-full w-10 h-10" aria-label="Quitar producto">×</button></form>
                                             </div>
                                         </td>
                                         <td class="px-1 py-4 text-right" th:text="${'$' + item.lineTotal}">$19.99</td>
@@ -99,8 +100,7 @@
                                     <button class="bg-primary text-white border border-primary hover:bg-transparent hover:text-primary rounded-r-full py-2 px-4">Apply Coupon</button>
                                 </div>
                                 <div class="mt-4 lg:mt-0 flex space-x-2">
-                                    <button class="bg-primary text-white border border-primary hover:bg-transparent hover:text-primary rounded-full py-2 px-4">Empty Cart</button>
-                                    <button class="bg-primary text-white border border-primary hover:bg-transparent hover:text-primary rounded-full py-2 px-4">Update Cart</button>
+                                    <form th:action="@{/cart/clear}" method="post"><button class="bg-primary text-white border border-primary rounded-full py-2 px-4">Vaciar carrito</button></form>
                                 </div>
                             </div>
                         </div>

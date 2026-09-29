@@ -1,0 +1,25 @@
+package com.tienda.zero.model;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.tienda.zero.enums.EstadoOrdenCompra;
+import jakarta.persistence.*;
+import lombok.*;
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+
+/** Orden de compra del cliente: funciona como carrito persistido, según el UML. */
+@Entity @Table(name = "orden_compra_cliente") @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
+public class OrdenCompra {
+    @Id @GeneratedValue(strategy = GenerationType.UUID) private String id;
+    @Column(nullable = false, unique = true) private String identificadorCompra;
+    @Column(nullable = false) private LocalDate fecha;
+    @Column(nullable = false) @Builder.Default private boolean eliminado = false;
+    @Column(nullable = false, precision = 12, scale = 2) @Builder.Default private BigDecimal total = BigDecimal.ZERO;
+    @Enumerated(EnumType.STRING) @Column(nullable = false) @Builder.Default private EstadoOrdenCompra estadoOrdenCompra = EstadoOrdenCompra.PENDIENTE_COMPLETAR;
+    @Column(nullable = false) private String direccionEntrega;
+    @JsonIgnore @ManyToOne(optional = false) @JoinColumn(name = "cliente_id") private Cliente cliente;
+    @JsonIgnore @ManyToOne @JoinColumn(name = "empleado_id") private Empleado empleado;
+    @OneToMany(mappedBy = "ordenCompra", cascade = CascadeType.ALL, orphanRemoval = true) @Builder.Default private List<DetalleCompra> detalles = new ArrayList<>();
+}

@@ -17,6 +17,9 @@ public class FormaDePago {
     @GeneratedValue(strategy = GenerationType.UUID )
     private String id;
 
+    @Column
+    private String numero;
+
     @Enumerated(EnumType.STRING)
     @Column (nullable = false)
     private TipoPago tipoPago;
