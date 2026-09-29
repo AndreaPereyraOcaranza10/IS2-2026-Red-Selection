@@ -1,11 +1,24 @@
 :root {
-    --color-primario: #2f6f4f;
-    --color-primario-oscuro: #234f38;
-    --color-fondo: #f4f6f5;
-    --color-texto: #26322c;
-    --color-error: #b3261e;
-    --color-exito: #2f6f4f;
-    --radio: 10px;
+    /* Paleta TailStore */
+    --color-primario: #f43f5e;           /* Frambuesa vibrante (Shop now / Register) */
+    --color-primario-hover: #e11d48;     /* Rojo frambuesa profundo */
+    --color-fondo: #0b0f19;              /* Azul noche / grafito profundo del navbar y hero */
+    --color-tarjeta: #111827;            /* Contenedor oscuro contrastado */
+    --color-texto: #f9fafb;              /* Blanco tiza nítido */
+    --color-texto-secundario: #9ca3af;   /* Gris neutro legible */
+    --color-borde: #1f2937;              /* Borde sutil oscuro */
+    --color-input-bg: #1e293b;           /* Fondo de campos oscuro y limpio */
+    --color-input-borde: #334155;        /* Borde de los campos */
+
+    /* Estados */
+    --color-error: #fb7185;
+    --color-error-bg: rgba(244, 63, 94, 0.12);
+    --color-error-borde: rgba(244, 63, 94, 0.35);
+    --color-exito: #34d399;
+    --color-exito-bg: rgba(52, 211, 153, 0.12);
+    --color-exito-borde: rgba(52, 211, 153, 0.35);
+
+    --radio: 14px;
 }
 
 * {
@@ -18,19 +31,24 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    background: var(--color-fondo);
-    font-family: "Segoe UI", Arial, sans-serif;
+    /* Fondo oscuro con un resplandor ambiental cálido detrás de la tarjeta */
+    background:
+            radial-gradient(circle at 50% 35%, rgba(244, 63, 94, 0.12) 0%, transparent 60%),
+            var(--color-fondo);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     color: var(--color-texto);
     padding: 24px;
 }
 
 .tarjeta {
-    background: #ffffff;
+    background: rgba(17, 24, 39, 0.95);
     width: 100%;
     max-width: 420px;
-    padding: 32px 28px;
+    padding: 38px 32px;
     border-radius: var(--radio);
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    border: 1px solid var(--color-borde);
+    box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(10px);
 }
 
 .tarjeta--ancha {
@@ -39,36 +57,43 @@ body {
 
 .tarjeta h1 {
     margin-top: 0;
-    font-size: 1.5rem;
-    color: var(--color-primario-oscuro);
+    margin-bottom: 6px;
+    font-size: 1.65rem;
+    font-weight: 700;
+    color: var(--color-texto);
+    letter-spacing: -0.5px;
 }
 
 .tarjeta p.subtitulo {
-    margin-top: -8px;
-    color: #6b756f;
-    font-size: 0.9rem;
+    margin-top: 0;
+    margin-bottom: 24px;
+    color: var(--color-texto-secundario);
+    font-size: 0.92rem;
 }
 
 label {
     display: block;
     font-size: 0.85rem;
     font-weight: 600;
-    margin: 14px 0 6px;
+    margin: 16px 0 6px;
+    color: #e2e8f0;
 }
 
 input, select {
     width: 100%;
-    padding: 10px 12px;
-    border: 1px solid #d5dbd7;
-    border-radius: 8px;
+    padding: 11px 14px;
+    border: 1px solid var(--color-input-borde);
+    border-radius: 9px;
     font-size: 0.95rem;
-    background: #fbfcfb;
+    background: var(--color-input-bg);
+    color: var(--color-texto);
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
 input:focus, select:focus {
     outline: none;
     border-color: var(--color-primario);
-    background: #ffffff;
+    box-shadow: 0 0 0 3px rgba(244, 63, 94, 0.25);
 }
 
 .fila {
@@ -78,69 +103,89 @@ input:focus, select:focus {
 }
 
 fieldset {
-    border: 1px solid #e2e6e3;
-    border-radius: 8px;
+    border: 1px solid var(--color-borde);
+    border-radius: 9px;
     margin-top: 20px;
-    padding: 4px 14px 14px;
+    padding: 10px 16px 16px;
+    background: rgba(30, 41, 59, 0.3);
 }
 
 legend {
-    font-size: 0.85rem;
+    font-size: 0.82rem;
     font-weight: 700;
-    color: var(--color-primario-oscuro);
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    color: var(--color-texto-secundario);
     padding: 0 6px;
 }
 
 button {
     width: 100%;
-    margin-top: 22px;
+    margin-top: 24px;
     padding: 12px;
     border: none;
-    border-radius: 8px;
+    border-radius: 30px; /* Bordes redondeados píldora como el botón 'Register' y 'Shop now' */
     background: var(--color-primario);
-    color: white;
-    font-size: 1rem;
+    color: #ffffff;
+    font-size: 0.96rem;
     font-weight: 600;
     cursor: pointer;
-    transition: background 0.15s ease;
+    box-shadow: 0 4px 14px rgba(244, 63, 94, 0.35);
+    transition: background 0.15s ease, transform 0.05s ease, box-shadow 0.15s ease;
 }
 
 button:hover {
-    background: var(--color-primario-oscuro);
+    background: var(--color-primario-hover);
+    box-shadow: 0 6px 18px rgba(244, 63, 94, 0.45);
+}
+
+button:active {
+    transform: scale(0.99);
 }
 
 .mensaje {
-    padding: 10px 12px;
-    border-radius: 8px;
+    padding: 12px 14px;
+    border-radius: 9px;
     font-size: 0.9rem;
-    margin-top: 4px;
+    margin-top: 12px;
+    border: 1px solid transparent;
 }
 
 .mensaje--error {
-    background: #fbe9e7;
+    background: var(--color-error-bg);
     color: var(--color-error);
+    border-color: var(--color-error-borde);
 }
 
 .mensaje--exito {
-    background: #e7f3ec;
+    background: var(--color-exito-bg);
     color: var(--color-exito);
+    border-color: var(--color-exito-borde);
 }
 
 .enlace-secundario {
     text-align: center;
-    margin-top: 18px;
+    margin-top: 22px;
     font-size: 0.9rem;
+    color: var(--color-texto-secundario);
 }
 
 .enlace-secundario a {
     color: var(--color-primario);
     font-weight: 600;
     text-decoration: none;
+    transition: color 0.15s ease;
+}
+
+.enlace-secundario a:hover {
+    color: #fda4af;
+    text-decoration: underline;
 }
 
 .codigo-caja {
     text-align: center;
     font-size: 1.6rem;
-    letter-spacing: 6px;
+    letter-spacing: 8px;
     font-weight: 700;
+    font-family: monospace;
 }

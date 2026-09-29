@@ -28,9 +28,9 @@ public class SecurityConfig {
                 )
         .logout(Customizer.withDefaults())
         .csrf(csrf -> csrf.csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()));
-        .logout(Customizer.withDefaults())
-        .sessionManagement(session -> session
-                .sessionCreationPolicy(SessionCreationPolicy.ALWAYS));
+
+        //.sessionManagement(session -> session
+               // .sessionCreationPolicy(SessionCreationPolicy.ALWAYS));
         return http.build();
     }
 
