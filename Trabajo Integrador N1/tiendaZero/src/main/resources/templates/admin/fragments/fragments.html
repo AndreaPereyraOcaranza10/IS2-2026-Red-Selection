@@ -212,6 +212,8 @@
             class="nav-text">Inventory</span></a></li>
       <li><a class="nav-link" th:classappend="${activePage == 'create-product'} ? 'active'" th:href="@{/products/new}" href="create-product.html"><i class="ti ti-plus"></i><span class="nav-text">Add
             Product</span></a></li>
+      <!-- Órdenes de compra -->
+      <li><a class="nav-link" th:classappend="${activePage == 'ordenes'} ? 'active'" th:href="@{/admin/ordenes}" href="/admin/ordenes"><i class="ti ti-truck"></i><span class="nav-text">Órdenes de compra</span></a></li>
     <li><a class="nav-link" th:classappend="${activePage == 'reports'} ? 'active'" th:href="@{/reports}" href="reports.html"><i class="ti ti-receipt"></i><span class="nav-text">Reports</span></a>
       </li>
     <li><a class="nav-link" th:href="@{/404}" href="404-error.html"><i class="ti ti-alert-circle"></i><span class="nav-text">404 Error</span></a>
