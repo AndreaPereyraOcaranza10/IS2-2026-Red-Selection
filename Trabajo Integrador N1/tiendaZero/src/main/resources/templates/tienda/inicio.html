@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{tienda/fragmentos :: head('Inicio')}"></head>
+
+<body>
+<nav th:replace="~{tienda/fragmentos :: barraSuperior}"></nav>
+<nav th:replace="~{tienda/fragmentos :: menu}"></nav>
+
+<!-- Banner principal -->
+<div id="template-mo-zay-hero-carousel" class="carousel slide" data-bs-ride="carousel">
+    <ol class="carousel-indicators">
+        <li data-bs-target="#template-mo-zay-hero-carousel" data-bs-slide-to="0" class="active"></li>
+        <li data-bs-target="#template-mo-zay-hero-carousel" data-bs-slide-to="1"></li>
+    </ol>
+    <div class="carousel-inner">
+        <div class="carousel-item active">
+            <div class="container">
+                <div class="row p-5">
+                    <div class="mx-auto col-md-8 col-lg-6 order-lg-last">
+                        <img class="img-fluid" th:src="@{/tienda/img/banner_img_01.jpg}" alt="">
+                    </div>
+                    <div class="col-lg-6 mb-0 d-flex align-items-center">
+                        <div class="text-align-left align-self-center">
+                            <h1 class="h1 text-success">Nueva colección</h1>
+                            <h3 class="h2">Ropa y calzado para entrenar</h3>
+                            <p>Prendas pensadas para moverte cómodo, del gimnasio a la calle.</p>
+                            <a class="btn btn-success btn-lg px-4" th:href="@{/tienda}">Ver productos</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="carousel-item">
+            <div class="container">
+                <div class="row p-5">
+                    <div class="mx-auto col-md-8 col-lg-6 order-lg-last">
+                        <img class="img-fluid" th:src="@{/tienda/img/banner_img_02.jpg}" alt="">
+                    </div>
+                    <div class="col-lg-6 mb-0 d-flex align-items-center">
+                        <div class="text-align-left">
+                            <h1 class="h1">Registrate en Zero</h1>
+                            <h3 class="h2">Comprá más rápido</h3>
+                            <p>Creá tu cuenta, activala con el código que te llega por mail y completá tu perfil una sola vez.</p>
+                            <a class="btn btn-success btn-lg px-4" th:href="@{/registro}">Crear cuenta</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <a class="carousel-control-prev text-decoration-none w-auto ps-3" href="#template-mo-zay-hero-carousel" role="button" data-bs-slide="prev">
+        <i class="fas fa-chevron-left"></i>
+    </a>
+    <a class="carousel-control-next text-decoration-none w-auto pe-3" href="#template-mo-zay-hero-carousel" role="button" data-bs-slide="next">
+        <i class="fas fa-chevron-right"></i>
+    </a>
+</div>
+
+<!-- Beneficios (contenido fijo por ahora) -->
+<section class="container py-5">
+    <div class="row text-center pt-3">
+        <div class="col-lg-6 m-auto">
+            <h1 class="h1">¿Por qué Zero?</h1>
+            <p>Todo lo que necesitás para entrenar, en un solo lugar.</p>
+        </div>
+    </div>
+    <div class="row text-center">
+        <div class="col-md-4 p-4">
+            <i class="fa fa-truck fa-3x text-success mb-3"></i>
+            <h2 class="h3">Envíos</h2>
+            <p>Recibí tu compra donde estés.</p>
+        </div>
+        <div class="col-md-4 p-4">
+            <i class="fa fa-credit-card fa-3x text-success mb-3"></i>
+            <h2 class="h3">Medios de pago</h2>
+            <p>Efectivo, transferencia o billetera virtual.</p>
+        </div>
+        <div class="col-md-4 p-4">
+            <i class="fa fa-exchange-alt fa-3x text-success mb-3"></i>
+            <h2 class="h3">Cambios</h2>
+            <p>Si el talle no te queda, lo cambiamos.</p>
+        </div>
+    </div>
+</section>
+
+<footer th:replace="~{tienda/fragmentos :: pie}"></footer>
+<th:block th:replace="~{tienda/fragmentos :: scripts}"></th:block>
+</body>
+</html>
