@@ -194,20 +194,20 @@ img.cursor-pointer:hover {
 /* single product tabs */
 .tab {
     padding: 0.5rem 1rem;
-    color: #010717; 
+    color: #010717;
     border-bottom-width: 2px;
     border-color: transparent;
     font-size: 1rem;
-    font-weight: 500; 
+    font-weight: 500;
     cursor: pointer;
     transition: all 0.3s ease;
 }
 .tab:hover {
-    color: #323232; 
-    border-color: #ff0042; 
+    color: #323232;
+    border-color: #ff0042;
 }
 .tab.active {
-    color: #ff0042; 
+    color: #ff0042;
     border-color: #ff0042;
 }
 .tab-content {

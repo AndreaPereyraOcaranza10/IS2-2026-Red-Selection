@@ -7,9 +7,7 @@ import com.tienda.zero.model.Imagen;
 import com.tienda.zero.model.Producto;
 import com.tienda.zero.model.VigenciaPrecio;
 import com.tienda.zero.repository.SubCategoriaRepository;
-import com.tienda.zero.service.ImagenService;
-import com.tienda.zero.service.ProductoService;
-import com.tienda.zero.service.VigenciaPrecioService;
+import com.tienda.zero.service.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -29,7 +27,9 @@ public class AdminController {
     private final ProductoService productoService;
     private final VigenciaPrecioService vigenciaPrecioService;
     private final SubCategoriaRepository subCategoriaRepository;
-    private final ImagenService imagenService;
+
+    private final StockService stockService;
+    private final GestionProductoService gestionProductoService;
 
     @GetMapping({"/admin", "/admin/dashboard", "/admin/index"})
     public String dashboard() {
@@ -82,6 +82,7 @@ public class AdminController {
                     .priceText(String.format(Locale.US, "$%.2f", precio))
                     .enOferta(p.isEnOferta())
                     .imageUrl(imagenUrl)
+                    .stock(stockService.calcularStockActual(p.getId()))
                     .build();
         }).collect(Collectors.toList());
 
@@ -104,41 +105,24 @@ public class AdminController {
                               RedirectAttributes redirectAttributes,
                               Model model) {
         try {
-            String idImagen = null;
+            String nombreImagen = null;
+            String mimeImagen = null;
+            byte[] contenidoImagen = null;
             if (image != null && !image.isEmpty()) {
-                Imagen imagenGuardada = imagenService.crearImagen(
-                        image.getOriginalFilename(),
-                        image.getContentType(),
-                        image.getBytes(),
-                        TipoImagen.PRODUCTO
-                );
-                idImagen = imagenGuardada.getId();
+                nombreImagen = image.getOriginalFilename();
+                mimeImagen = image.getContentType();
+                contenidoImagen = image.getBytes();
             }
-
-            Producto producto = productoService.crearProducto(
-                    form.getSku(),
-                    form.getName(),
-                    form.getDescription(),
-                    form.getTalle(),
-                    form.isEnOferta(),
-                    idImagen,
-                    form.getIdSubCategoria()
-            );
-
             double precio = (form.getPrice() != null) ? form.getPrice() : 0.0;
-            if (precio > 0) {
-                vigenciaPrecioService.crearVigenciaPrecio(
-                        new Date(System.currentTimeMillis()),
-                        null,
-                        precio,
-                        producto.getId()
-                );
-            }
+
+            Producto producto = gestionProductoService.crearProductoConPrecio(
+                    form.getSku(), form.getName(), form.getDescription(), form.getTalle(),
+                    form.isEnOferta(), form.getIdSubCategoria(), precio,
+                    nombreImagen, mimeImagen, contenidoImagen);
 
             redirectAttributes.addFlashAttribute("mensajeExito",
                     "El producto \"" + producto.getNombre() + "\" fue creado con éxito.");
             return "redirect:/inventory";
-
         } catch (Exception e) {
             model.addAttribute("error", "Error al crear producto: " + e.getMessage());
             model.addAttribute("productForm", form);

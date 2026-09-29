@@ -1,47 +1,32 @@
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{tienda/fragmentos :: head('Ingresar')}"></head>
+<head>
+    <meta charset="UTF-8">
+    <title>Ingresar TiendaZero</title>
+    <link rel="stylesheet" th:href="@{/css/estilos.css}">
+</head>
 <body>
-<nav th:replace="~{tienda/fragmentos :: barraSuperior}"></nav>
-<nav th:replace="~{tienda/fragmentos :: menu}"></nav>
+<div class="tarjeta">
+    <h1>Ingresa a TiendaZero</h1>
 
-<section class="bg-light py-5">
-    <div class="container">
-        <div class="row justify-content-center">
-            <div class="col-md-7 col-lg-5">
-                <div class="zero-tarjeta">
-                    <h1 class="h1">Ingresá a Zero</h1>
-                    <p class="zero-subtitulo">Con tu correo y tu contraseña</p>
+    <p class="mensaje mensaje--error" th:if="${param.error}">
+        Usuario, contraseña incorrectos o cuenta todavía no activada
+    </p>
+    <p class="mensaje mensaje--exito" th:if="${param.logout}">Sesión cerrada correctamente</p>
 
-                    <p class="zero-mensaje zero-mensaje--error" th:if="${param.error}">
-                        Usuario, contraseña incorrectos o cuenta todavía no activada
-                    </p>
-                    <p class="zero-mensaje zero-mensaje--exito" th:if="${param.logout}">
-                        Sesión cerrada correctamente
-                    </p>
+    <form th:action="@{/login}" method="post">
+        <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
 
-                    <!-- Spring Security espera POST a /login con los campos username y password.
-                         th:action agrega solo el token CSRF. -->
-                    <form th:action="@{/login}" method="post">
-                        <div class="mb-3">
-                            <label for="username" class="form-label">Correo electrónico</label>
-                            <input type="email" id="username" name="username" class="form-control" required autofocus/>
-                        </div>
-                        <div class="mb-4">
-                            <label for="password" class="form-label">Contraseña</label>
-                            <input type="password" id="password" name="password" class="form-control" required/>
-                        </div>
-                        <button type="submit" class="btn btn-success btn-lg w-100">Ingresar</button>
-                    </form>
+        <label for="username">Correo electrónico</label>
+        <input type="email" id="username" name="username" required autofocus/>
 
-                    <p class="zero-enlace">¿No tenés cuenta? <a th:href="@{/registro}">Registrate</a></p>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
+        <label for="password">Contraseña</label>
+        <input type="password" id="password" name="password" required/>
 
-<footer th:replace="~{tienda/fragmentos :: pie}"></footer>
-<th:block th:replace="~{tienda/fragmentos :: scripts}"></th:block>
+        <button type="submit">Ingresar</button>
+    </form>
+
+    <p class="enlace-secundario">¿No tenés cuenta? <a th:href="@{/registro}">Registrate</a></p>
+</div>
 </body>
 </html>
