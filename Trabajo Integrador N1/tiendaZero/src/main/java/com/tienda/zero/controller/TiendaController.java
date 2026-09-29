@@ -143,14 +143,21 @@ public class TiendaController {
         return "tienda/shop";
     }
 
-    @GetMapping({"/product", "/product/{id}"})
-    public String singleProduct(@PathVariable(required = false) String id, Model model) {
+    @GetMapping("/product")
+    public String productIndex() {
+        // Si alguien solicita /product sin id, redirigir al catálogo
+        return "redirect:/shop";
+    }
+
+    @GetMapping("/product/{id}")
+    public String singleProduct(@PathVariable String id, Model model) {
         try {
-            if (id != null) {
-                Producto prod = productoService.buscarProducto(id);
-                if (prod != null) {
-                    model.addAttribute("product", convertirAProductoCardDTO(prod));
-                }
+            Producto prod = productoService.buscarProducto(id);
+            if (prod != null) {
+                model.addAttribute("product", convertirAProductoCardDTO(prod));
+            } else {
+                // Si no se encuentra el producto, redirigir al shop
+                return "redirect:/shop";
             }
 
             List<Producto> productosActivos = productoService.listarProductoActivo();
@@ -163,6 +170,7 @@ public class TiendaController {
             }
         } catch (Exception e) {
             System.err.println("Advertencia al cargar producto: " + e.getMessage());
+            return "redirect:/shop";
         }
 
         return "tienda/single-product-page";
