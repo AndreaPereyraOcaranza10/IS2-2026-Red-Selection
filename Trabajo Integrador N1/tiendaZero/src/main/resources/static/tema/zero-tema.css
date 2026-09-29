@@ -1,0 +1,38 @@
+/* Tema de Zero: paleta y tipografía compartidas por la tienda y la administración.
+   Las plantillas usan las variables de "roles", nunca los colores directos,
+   así cambiar un color acá cambia todo el sitio. */
+
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;700&display=swap');
+
+:root {
+    /* Paleta */
+    --zero-negro: #20212B;
+    --zero-pizarra: #2D4354;
+    --zero-terracota: #9E6752;
+    --zero-terracota-oscuro: #86543F;
+    --zero-durazno: #FED7A5;
+    --zero-ciruela: #534145;
+    --zero-oliva: #73766A;
+    --zero-crema: #FFF8EF;
+    --zero-blanco: #FFFFFF;
+
+    /* Roles */
+    --zero-fondo: var(--zero-crema);
+    --zero-superficie: var(--zero-blanco);
+    --zero-superficie-oscura: var(--zero-negro);
+    --zero-superficie-oscura-2: var(--zero-ciruela);
+    --zero-texto: var(--zero-pizarra);
+    --zero-texto-secundario: var(--zero-oliva);
+    --zero-texto-sobre-oscuro: var(--zero-blanco);
+    --zero-acento: var(--zero-terracota);
+    --zero-acento-hover: var(--zero-terracota-oscuro);
+    --zero-resaltado: var(--zero-durazno);
+    --zero-borde: rgba(115, 118, 106, 0.25);
+
+    /* Tipografía */
+    --zero-fuente-titulos: 'Bebas Neue', sans-serif;
+    --zero-fuente-texto: 'DM Sans', sans-serif;
+
+    /* Formas */
+    --zero-radio: 10px;
+}

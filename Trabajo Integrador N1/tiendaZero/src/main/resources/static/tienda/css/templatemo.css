@@ -1,0 +1,187 @@
+/*
+TemplateMo 559 Zay Shop - adaptado a la paleta y tipografía de Zero.
+Todos los colores y fuentes salen de las variables de /tema/zero-tema.css,
+que tiene que cargarse ANTES que este archivo.
+Los colores fijos que quedan son solo los puntos de color de producto
+(rojo, azul, negro...), que representan colores reales de la prenda.
+*/
+
+/* Typography */
+body, ul, li, p, a, label, input, div {
+  font-family: var(--zero-fuente-texto);
+  font-size: 18px !important;
+  font-weight: 400 !important;
+}
+body { color: var(--zero-texto); }
+.h1 {
+  font-family: var(--zero-fuente-titulos);
+  font-size: 56px !important;
+  font-weight: 400 !important;
+  letter-spacing: 0.02em;
+}
+.h2 {
+  font-family: var(--zero-fuente-titulos);
+  font-size: 36px !important;
+  font-weight: 400;
+  letter-spacing: 0.02em;
+}
+.h3 {
+  font-family: var(--zero-fuente-texto);
+  font-size: 22px !important;
+  font-weight: 700;
+}
+
+/* General */
+.logo {
+  font-family: var(--zero-fuente-titulos);
+  font-weight: 400 !important;
+  letter-spacing: 0.04em;
+}
+.text-warning { color: var(--zero-acento) !important;}
+.text-muted { color: var(--zero-texto-secundario) !important;}
+.text-success { color: var(--zero-acento) !important;}
+.text-light { color: var(--zero-crema) !important;}
+.bg-dark { background-color: var(--zero-superficie-oscura) !important;}
+.bg-light { background-color: var(--zero-fondo) !important;}
+.bg-black { background-color: var(--zero-superficie-oscura-2) !important;}
+.bg-success { background-color: var(--zero-acento) !important;}
+.btn-success {
+  background-color: var(--zero-acento) !important;
+  border-color: var(--zero-acento) !important;
+  color: var(--zero-texto-sobre-oscuro) !important;
+}
+.btn-success:hover, .btn-success:focus {
+  background-color: var(--zero-acento-hover) !important;
+  border-color: var(--zero-acento-hover) !important;
+}
+.pagination .page-link { color: var(--zero-texto); }
+.pagination .page-link:hover, .pagination .page-link.active {
+  background-color: var(--zero-acento);
+  color: var(--zero-texto-sobre-oscuro);
+}
+
+/* Nav */
+#templatemo_nav_top { min-height: 40px;}
+#templatemo_nav_top * { font-size: .9em !important;}
+#templatemo_main_nav a { color: var(--zero-texto);}
+#templatemo_main_nav a:hover { color: var(--zero-acento);}
+#templatemo_main_nav .navbar .nav-icon { margin-right: 20px;}
+
+/* Hero Carousel */
+#template-mo-zay-hero-carousel { background: var(--zero-fondo) !important;}
+
+/* Accordion */
+.templatemo-accordion a { color: var(--zero-texto);}
+.templatemo-accordion a:hover { color: var(--zero-acento);}
+
+/* Shop */
+.shop-top-menu a:hover { color: var(--zero-acento) !important;}
+
+/* Product */
+.product-wap { box-shadow: 0px 5px 10px 0px rgba(32, 33, 43, 0.10);}
+.product-wap .product-color-dot.color-dot-red { background:#f71515;}
+.product-wap .product-color-dot.color-dot-blue { background:#6db4fe;}
+.product-wap .product-color-dot.color-dot-black { background:#000000;}
+.product-wap .product-color-dot.color-dot-light { background:#e0e0e0;}
+.product-wap .product-color-dot.color-dot-green { background:#0bff7e;}
+.card.product-wap .card .product-overlay {
+  background: rgba(32, 33, 43, .25);
+  visibility: hidden;
+  opacity: 0;
+  transition: .3s;
+}
+.card.product-wap:hover .card .product-overlay {
+  visibility: visible;
+  opacity: 1;
+}
+.card.product-wap a { color: var(--zero-texto);}
+#carousel-related-product .slick-slide:focus { outline: none !important;}
+#carousel-related-product .slick-dots li button:before {
+  font-size: 15px;
+  margin-top: 20px;
+}
+
+/* Brand */
+.brand-img {
+  filter: grayscale(100%);
+  opacity: 0.5;
+  transition: .5s;
+}
+.brand-img:hover {
+  filter: grayscale(0%);
+  opacity: 1;
+}
+
+/* Carousel Hero */
+#template-mo-zay-hero-carousel .carousel-indicators li {
+  margin-top: -50px;
+  background-color: var(--zero-acento);
+}
+#template-mo-zay-hero-carousel .carousel-control-next i,
+#template-mo-zay-hero-carousel .carousel-control-prev i {
+  color: var(--zero-acento) !important;
+  font-size: 2.8em !important;
+}
+
+/* Carousel Brand */
+.tempaltemo-carousel .h1 {
+  font-size: .5em !important;
+  color: var(--zero-texto) !important;
+}
+
+/* Services */
+.services-icon-wap {transition: .3s;}
+.services-icon-wap:hover, .services-icon-wap:hover i {color: var(--zero-texto-sobre-oscuro);}
+.services-icon-wap:hover {background: var(--zero-acento);}
+
+/* Contact map */
+.leaflet-control a, .leaflet-control { font-size: 10px !important;}
+.form-control { border: 1px solid var(--zero-borde);}
+
+/* Footer */
+#tempaltemo_footer a { color: var(--zero-crema);}
+#tempaltemo_footer a:hover { color: var(--zero-resaltado);}
+#tempaltemo_footer ul.footer-link-list li { padding-top: 10px;}
+#tempaltemo_footer ul.footer-icons li {
+  width: 2.6em;
+  height: 2.6em;
+  line-height: 2.6em;
+}
+#tempaltemo_footer ul.footer-icons li:hover {
+  background-color: var(--zero-resaltado);
+  transition: .5s;
+}
+#tempaltemo_footer ul.footer-icons li:hover i {
+  color: var(--zero-negro);
+  transition: .5s;
+}
+#tempaltemo_footer .border-light { border-color: var(--zero-superficie-oscura-2) !important;}
+
+/* Small devices (landscape phones, 576px and up) */
+.product-wap .h3, .product-wap li, .product-wap i, .product-wap p {
+  font-size: 12px !important;
+}
+.product-wap .product-color-dot {
+  width: 6px;
+  height: 6px;
+}
+
+@media (min-width: 576px) {
+  .tempaltemo-carousel .h1 { font-size: 1em !important;}
+}
+
+/* Medium devices (tablets, 768px and up) */
+@media (min-width: 768px) {
+  #templatemo_main_nav .navbar-nav {max-width: 450px;}
+}
+
+/* Large devices (desktops, 992px and up) */
+@media (min-width: 992px) {
+  #templatemo_main_nav .navbar-nav {max-width: 550px;}
+  #template-mo-zay-hero-carousel .carousel-item {min-height: 30rem !important;}
+  .product-wap .h3, .product-wap li, .product-wap i, .product-wap p {font-size: 18px !important;}
+  .product-wap .product-color-dot {
+    width: 12px;
+    height: 12px;
+  }
+}
