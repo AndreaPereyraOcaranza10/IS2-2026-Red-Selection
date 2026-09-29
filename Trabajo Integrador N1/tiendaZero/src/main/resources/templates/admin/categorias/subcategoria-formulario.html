@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{admin/fragmentos :: head('Modificar subcategoría')}"></head>
+<body>
+<div th:replace="~{admin/fragmentos :: barraLateral('categorias')}"></div>
+
+<div class="main-wrapper">
+    <header th:replace="~{admin/fragmentos :: barraSuperior}"></header>
+
+    <div class="page-header">
+        <div>
+            <h1 class="page-title">Modificar subcategoría</h1>
+            <p class="page-subtitle">Categoría: <span th:text="${categoria.nombre}">Ropa</span></p>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-7">
+            <div class="card border-light shadow-sm p-4">
+                <div class="alert alert-danger" th:if="${error}" th:text="${error}"></div>
+
+                <form th:action="@{${accion}}" method="post">
+                    <div class="mb-4">
+                        <label for="nombre" class="form-label-custom">Nombre *</label>
+                        <input type="text" id="nombre" name="nombre" class="form-control-custom w-100"
+                               th:value="${nombre}" autofocus>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary"><i class="bi bi-check-lg"></i> Guardar</button>
+                        <a th:href="@{/admin/categorias/{id}(id=${categoria.id})}" class="btn btn-outline-primary">Cancelar</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <footer th:replace="~{admin/fragmentos :: pie}"></footer>
+</div>
+<th:block th:replace="~{admin/fragmentos :: scripts}"></th:block>
+</body>
+</html>
