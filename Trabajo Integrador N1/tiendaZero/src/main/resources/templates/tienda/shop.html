@@ -1,0 +1,265 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <!-- Ojo: el original decía "404 - Page not found", lo corregí a un título de Shop -->
+    <title th:text="'Shop page'">Shop page</title>
+    <th:block th:replace="~{tienda/fragments/fragments :: head-assets}"></th:block>
+</head>
+
+
+<body>
+    <div th:replace="~{tienda/fragments/fragments :: header}"></div>
+
+    <!-- Shop -->
+    <section id="shop">
+        <div class="container mx-auto">
+            <!-- Top Filter -->
+            <div class="flex flex-col md:flex-row justify-between items-center py-4 gap-4">
+                <div class="flex items-center space-x-3">
+                    <a th:href="@{/shop(categoria=${selectedCategorias}, talle=${selectedTalles}, sort=${currentSort}, q=${query}, oferta=${currentOferta == true ? null : true})}"
+                       th:classappend="${currentOferta == true} ? 'bg-primary text-white border-primary shadow-sm' : 'bg-white text-gray-700 border-gray-300 hover:border-primary hover:text-primary'"
+                       class="border py-2 px-5 rounded-full font-medium transition text-sm flex items-center gap-1.5 focus:outline-none">
+                        <i class="ti ti-tag text-base" th:if="${currentOferta == true}"></i>
+                        <span>En Oferta</span>
+                    </a>
+                    <a th:if="${hasActiveFilters}" th:href="@{/shop}" 
+                       class="text-xs text-red-600 hover:text-red-800 font-semibold underline px-2 py-1">
+                        Limpiar Filtros
+                    </a>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <form th:action="@{/shop}" method="get" class="relative flex items-center gap-2">
+                        <input type="hidden" name="categoria" th:each="c : ${selectedCategorias}" th:value="${c}">
+                        <input type="hidden" name="talle" th:each="t : ${selectedTalles}" th:value="${t}">
+                        <input type="hidden" name="oferta" th:value="${currentOferta}" th:if="${currentOferta != null}">
+                        <input type="hidden" name="q" th:value="${query}" th:if="${query != null}">
+
+                        <label for="sortSelect" class="text-sm text-gray-500 hidden sm:inline">Ordenar:</label>
+                        <select id="sortSelect" name="sort" onchange="this.form.submit()"
+                            class="block appearance-none bg-white border border-gray-300 hover:border-primary px-4 py-2 pr-8 rounded-full shadow-sm leading-tight focus:outline-none text-sm cursor-pointer">
+                            <option value="latest" th:selected="${currentSort == 'latest'}">Más recientes</option>
+                            <option value="price_asc" th:selected="${currentSort == 'price_asc'}">Precio: Menor a Mayor</option>
+                            <option value="price_desc" th:selected="${currentSort == 'price_desc'}">Precio: Mayor a Menor</option>
+                            <option value="az" th:selected="${currentSort == 'az'}">Nombre: A - Z</option>
+                            <option value="za" th:selected="${currentSort == 'za'}">Nombre: Z - A</option>
+                            <option value="popularity" th:selected="${currentSort == 'popularity'}">Populares</option>
+                        </select>
+                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center justify-center px-2">
+                            <img class="h-4 w-4" th:src="@{/assets/images/filter-down-arrow.svg}" src="/assets/images/filter-down-arrow.svg" alt="arrow">
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <!-- Filter Toggle Button for Mobile -->
+            <div class="block md:hidden text-center mb-4">
+                <button id="products-toggle-filters"
+                    class="bg-primary text-white py-2 px-4 rounded-full focus:outline-none">Show Filters</button>
+            </div>
+            <div class="flex flex-col md:flex-row">
+                <!-- Filters Sidebar -->
+                <div id="filters" class="w-full md:w-1/4 p-4 hidden md:block">
+                    <form id="shopFilterForm" th:action="@{/shop}" method="get">
+                        <input type="hidden" name="sort" th:value="${currentSort}">
+                        <input type="hidden" name="oferta" th:value="${currentOferta}" th:if="${currentOferta != null}">
+                        <input type="hidden" name="q" th:value="${query}" th:if="${query != null}">
+
+                        <!-- Category Filter -->
+                        <div class="mb-6 pb-6 border-b border-gray-line">
+                            <div class="flex justify-between items-center mb-4">
+                                <h3 class="text-lg font-semibold text-gray-900">Categoría</h3>
+                                <span class="text-xs text-gray-400" th:text="${categories.size()} + ' categorías'"></span>
+                            </div>
+                            <div class="space-y-2.5">
+                                <label class="flex items-center cursor-pointer hover:text-primary transition" th:each="category : ${categories}">
+                                    <input type="checkbox" name="categoria" th:value="${category.nombre}"
+                                           th:checked="${selectedCategorias != null and #lists.contains(selectedCategorias, category.nombre)}"
+                                           onchange="document.getElementById('shopFilterForm').submit()"
+                                           class="form-checkbox custom-checkbox text-primary rounded h-4 w-4">
+                                    <span class="ml-2.5 text-sm" th:text="${category.nombre}">Hombres</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Size Filter -->
+                        <div class="mb-6 pb-6 border-b border-gray-line">
+                            <h3 class="text-lg font-semibold mb-4 text-gray-900">Talle</h3>
+                            <div class="grid grid-cols-2 gap-2">
+                                <label class="flex items-center cursor-pointer hover:text-primary transition" th:each="t : ${tallesDisponibles}">
+                                    <input type="checkbox" name="talle" th:value="${t}"
+                                           th:checked="${selectedTalles != null and #lists.contains(selectedTalles, t)}"
+                                           onchange="document.getElementById('shopFilterForm').submit()"
+                                           class="form-checkbox custom-checkbox text-primary rounded h-4 w-4">
+                                    <span class="ml-2 text-sm" th:text="${t}">M</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Botón Limpiar Filtros -->
+                        <div th:if="${hasActiveFilters}" class="pt-2">
+                            <a th:href="@{/shop}" 
+                               class="block w-full text-center py-2 px-4 rounded-full border border-red-500 text-red-600 hover:bg-red-500 hover:text-white text-xs font-semibold transition">
+                                Limpiar todos los filtros
+                            </a>
+                        </div>
+                    </form>
+                </div>
+                <!-- Products List -->
+                <div class="w-full md:w-3/4 p-4">
+                    <!-- Products grid -->
+                    <!--
+                        th:each reemplaza los 6 productos hardcodeados.
+                        "products" es la List<Product> paginada/filtrada que manda el Controller, ej:
+                        model.addAttribute("products", productService.search(filters, pageable));
+                        Reusamos el mismo fragment "productCard" que en la home para no duplicar markup.
+                    -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <th:block th:each="product : ${products}">
+                            <div th:replace="~{tienda/fragments/fragments :: productCard(product=${product})}"></div>
+                        </th:block>
+                        <div class="col-span-full text-center py-12 text-gray-500" th:if="${products != null and #lists.isEmpty(products)}">
+                            <p class="text-xl font-semibold mb-2">No se encontraron productos disponibles en el catálogo.</p>
+                            <p class="text-sm text-gray-400">Pronto agregaremos nuevas prendas y calzado.</p>
+                        </div>
+                    </div>
+                    <!-- Fallback estático (se ve solo si "products" todavía no está en el modelo) -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4" th:if="${products == null}">
+                        <div class="bg-white p-4 rounded-lg shadow">
+                            <img src="assets/images/products/5.jpg" alt="Product 1"
+                                class="w-full object-cover mb-4 rounded-lg">
+                            <a href="#" class="text-lg font-semibold mb-2">Blue women's suit</a>
+                            <p class=" my-2">Women</p>
+                            <div class="flex items-center mb-4">
+                                <span class="text-lg font-bold text-primary">$19.99</span>
+                                <span class="text-sm line-through ml-2">$24.99</span>
+                            </div>
+                            <button
+                                class="bg-primary border border-transparent hover:bg-transparent hover:border-primary text-white hover:text-primary font-semibold py-2 px-4 rounded-full w-full">Add
+                                to Cart</button>
+                        </div>
+                        <div class="bg-white p-4 rounded-lg shadow">
+                            <img src="assets/images/products/6.jpg" alt="Product 2"
+                                class="w-full object-cover mb-4 rounded-lg">
+                            <a href="#" class="text-lg font-semibold mb-2">White shirt with long sleeves</a>
+                            <p class=" my-2">Women</p>
+                            <div class="flex items-center mb-4">
+                                <span class="text-lg font-bold text-gray-900">$29.99</span>
+                            </div>
+                            <button
+                                class="bg-primary border border-transparent hover:bg-transparent hover:border-primary text-white hover:text-primary font-semibold py-2 px-4 rounded-full w-full">Add
+                                to Cart</button>
+                        </div>
+                        <div class="bg-white p-4 rounded-lg shadow">
+                            <img src="assets/images/products/7.jpg" alt="Product 3"
+                                class="w-full object-cover mb-4 rounded-lg">
+                            <a href="#" class="text-lg font-semibold mb-2">Yellow men's suit</a>
+                            <p class="my-2">Men</p>
+                            <div class="flex items-center mb-4">
+                                <span class="text-lg font-bold text-gray-900">$15.99</span>
+                                <span class="text-sm line-through  ml-2">$19.99</span>
+                            </div>
+                            <button
+                                class="bg-primary border border-transparent hover:bg-transparent hover:border-primary text-white hover:text-primary font-semibold py-2 px-4 rounded-full w-full">Add
+                                to Cart</button>
+                        </div>
+                        <div class="bg-white p-4 rounded-lg shadow">
+                            <img src="assets/images/products/8.jpg" alt="Product 4"
+                                class="w-full object-cover mb-4 rounded-lg">
+                            <a href="#" class="text-lg font-semibold mb-2">Red dress</a>
+                            <p class="my-2">Women</p>
+                            <div class="flex items-center mb-4">
+                                <span class="text-lg font-bold text-primary">$39.99</span>
+                                <span class="text-sm line-through ml-2">$49.99</span>
+                            </div>
+                            <button
+                                class="bg-primary border border-transparent hover:bg-transparent hover:border-primary text-white hover:text-primary font-semibold py-2 px-4 rounded-full w-full">Add
+                                to Cart</button>
+                        </div>
+                        <div class="bg-white p-4 rounded-lg shadow">
+                            <img src="assets/images/products/4.jpg" alt="Product 4"
+                                class="w-full object-cover mb-4 rounded-lg">
+                            <a href="#" class="text-lg font-semibold">Black leather jacket</a>
+                            <p class="my-2">Women</p>
+                            <div class="flex items-center mb-4">
+                                <span class="text-lg font-bold text-primary">$39.99</span>
+                                <span class="text-sm line-through ml-2">$49.99</span>
+                            </div>
+                            <button
+                                class="bg-primary border border-transparent hover:bg-transparent hover:border-primary text-white hover:text-primary font-semibold py-2 px-4 rounded-full w-full">Add
+                                to Cart</button>
+                        </div>
+                        <div class="bg-white p-4 rounded-lg shadow">
+                            <img src="assets/images/products/3.jpg" alt="Product 3"
+                                class="w-full object-cover mb-4 rounded-lg">
+                            <a href="#" class="text-lg font-semibold mb-2">Black long dress</a>
+                            <p class=" my-2">Women, Accessories</p>
+                            <div class="flex items-center mb-4">
+                                <span class="text-lg font-bold text-gray-900">$15.99</span>
+                                <span class="text-sm line-through  ml-2">$19.99</span>
+                            </div>
+                            <button
+                                class="bg-primary border border-transparent hover:bg-transparent hover:border-primary text-white hover:text-primary font-semibold py-2 px-4 rounded-full w-full">Add
+                                to Cart</button>
+                        </div>
+                    </div>
+                    <!-- Pagination Dinámica -->
+                    <div class="flex justify-center mt-8" th:if="${totalPages != null and totalPages > 1}">
+                        <nav aria-label="Page navigation">
+                            <ul class="inline-flex items-center space-x-2">
+                                <!-- Botón Anterior -->
+                                <li th:if="${currentPage > 1}">
+                                    <a th:href="@{/shop(page=${currentPage - 1}, categoria=${selectedCategorias}, talle=${selectedTalles}, sort=${currentSort}, oferta=${currentOferta}, q=${query})}"
+                                       class="w-10 h-10 flex items-center justify-center rounded-full border border-gray-300 hover:bg-primary hover:text-white hover:border-primary transition text-sm">
+                                        &lt;
+                                    </a>
+                                </li>
+                                <!-- Botones de Páginas 1 .. totalPages -->
+                                <li th:each="p : ${#numbers.sequence(1, totalPages)}">
+                                    <a th:href="@{/shop(page=${p}, categoria=${selectedCategorias}, talle=${selectedTalles}, sort=${currentSort}, oferta=${currentOferta}, q=${query})}"
+                                       th:text="${p}"
+                                       th:classappend="${p == currentPage} ? 'bg-primary text-white font-bold border-primary shadow-sm' : 'border border-gray-300 hover:bg-primary hover:text-white hover:border-primary text-gray-700'"
+                                       class="w-10 h-10 flex items-center justify-center rounded-full border transition text-sm">
+                                        1
+                                    </a>
+                                </li>
+                                <!-- Botón Siguiente -->
+                                <li th:if="${currentPage < totalPages}">
+                                    <a th:href="@{/shop(page=${currentPage + 1}, categoria=${selectedCategorias}, talle=${selectedTalles}, sort=${currentSort}, oferta=${currentOferta}, q=${query})}"
+                                       class="w-10 h-10 flex items-center justify-center rounded-full border border-gray-300 hover:bg-primary hover:text-white hover:border-primary transition text-sm">
+                                        &gt;
+                                    </a>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Shop category description -->
+    <section id="shop-category-description" class="py-8">
+        <div class="container mx-auto">
+            <div class="bg-white p-6 rounded-lg shadow-lg">
+                <h2 class="text-2xl font-bold mb-4">Shirts Category</h2>
+                <p class="mb-4">
+                    Discover our wide range of shirts, perfect for any occasion. Whether you're looking for something
+                    casual
+                    or formal, we have the perfect shirt for you. Our collection includes a variety of styles, colors,
+                    and
+                    sizes to suit everyone's taste.
+                </p>
+                <p>
+                    Browse through our selection and find your new favorite shirt today. All our shirts are made from
+                    high-quality materials and are designed to provide both comfort and style. Shop now and elevate your
+                    wardrobe with our premium shirts.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <div th:replace="~{tienda/fragments/fragments :: footer}"></div>
+
+    <th:block th:replace="~{tienda/fragments/fragments :: scripts}"></th:block>
+</body>
+</html>
