@@ -34,7 +34,7 @@
                   y el POST llega a @PostMapping("/products") con @ModelAttribute ProductForm.
                   enctype="multipart/form-data" es necesario por el <input type="file">.
               -->
-              <form id="addProductForm" th:action="@{/products(${_csrf.parameterName}=${_csrf.token})}" th:object="${productForm}" method="post"
+              <form id="addProductForm" th:action="@{/products}" th:object="${productForm}" method="post"
                 enctype="multipart/form-data">
                 <div class="row">
                   <div class="col-md-6 mb-3">
