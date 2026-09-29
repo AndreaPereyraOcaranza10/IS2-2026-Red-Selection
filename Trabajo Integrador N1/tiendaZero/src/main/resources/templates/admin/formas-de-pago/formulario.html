@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{admin/fragmentos :: head(${titulo})}"></head>
+<body>
+
+<div th:replace="~{admin/fragmentos :: barraLateral('formas-de-pago')}"></div>
+
+<div class="main-wrapper">
+    <header th:replace="~{admin/fragmentos :: barraSuperior}"></header>
+
+    <div class="page-header">
+        <div>
+            <h1 class="page-title" th:text="${titulo}">Forma de pago</h1>
+            <p class="page-subtitle">Los campos marcados con * son obligatorios</p>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-7">
+            <div class="card border-light shadow-sm p-4">
+
+                <div class="alert alert-danger" th:if="${error}" th:text="${error}"></div>
+
+                <!-- La misma plantilla sirve para alta y modificación: la ruta la decide el controlador -->
+                <form th:action="@{${accion}}" method="post">
+                    <div class="mb-3">
+                        <label for="tipoPago" class="form-label-custom">Tipo de pago *</label>
+                        <select id="tipoPago" name="tipoPago" class="form-select-custom w-100">
+                            <option value="" th:selected="${tipoSeleccionado == null}">Seleccionar</option>
+                            <option th:each="t : ${tipos}"
+                                    th:value="${t}"
+                                    th:text="${#strings.capitalize(#strings.toLowerCase(#strings.replace(t.name(), '_', ' ')))}"
+                                    th:selected="${t == tipoSeleccionado}">Efectivo</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="observacion" class="form-label-custom">Observación</label>
+                        <textarea id="observacion" name="observacion" rows="3" class="form-control-custom w-100"
+                                  placeholder="Ej.: Mercado Pago, cuenta del Banco Nación..."
+                                  th:text="${observacion}"></textarea>
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-lg"></i> Guardar
+                        </button>
+                        <a th:href="@{/admin/formas-de-pago}" class="btn btn-outline-primary">Cancelar</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <footer th:replace="~{admin/fragmentos :: pie}"></footer>
+</div>
+
+<th:block th:replace="~{admin/fragmentos :: scripts}"></th:block>
+</body>
+</html>
