@@ -32,8 +32,8 @@ public class ClienteServiceImpl implements ClienteService {
 
     @Override
     public Cliente crearCliente(String nombre, String apellido, Sexo sexo, Date fechaNacimiento, TipoDocumento tipoDocumento,
-                                String numeroDocumento, String direccionEstadia, String idNacionalidad) {
-        validar(nombre, apellido, sexo, fechaNacimiento, tipoDocumento, numeroDocumento, direccionEstadia, idNacionalidad);
+                                String numeroDocumento, String idNacionalidad) {
+        validar(nombre, apellido, sexo, fechaNacimiento, tipoDocumento, numeroDocumento, idNacionalidad);
 
         Nacionalidad nacionalidad = nacionalidadService.buscarNacionalidad(idNacionalidad);
 
@@ -45,7 +45,6 @@ public class ClienteServiceImpl implements ClienteService {
                 .tipoDocumento(tipoDocumento)
                 .numeroDocumento(numeroDocumento)
                 .eliminado(false)
-                .direccionEstadia(direccionEstadia)
                 .nacionalidad(nacionalidad)
                 .build();
 
@@ -54,16 +53,13 @@ public class ClienteServiceImpl implements ClienteService {
 
     @Override
     public void validar(String nombre, String apellido, Sexo sexo, Date fechaNacimiento, TipoDocumento tipoDocumento,
-                        String numeroDocumento, String direccionEstadia, String idNacionalidad) {
+                        String numeroDocumento, String idNacionalidad) {
         personaService.validar(nombre, apellido, sexo, fechaNacimiento, tipoDocumento, numeroDocumento);
         //ahora validamos acá si ya existe cliente con ese doc
         if (clienteRepository.findByTipoDocumentoAndNumeroDocumento(tipoDocumento, numeroDocumento).isPresent()) {
             throw new IllegalArgumentException("Ya existe un cliente con ese documento");
         }
 
-        if (direccionEstadia == null || direccionEstadia.isBlank()) {
-            throw new IllegalArgumentException("La dirección de estadía es obligatoria");
-        }
         if (idNacionalidad == null || idNacionalidad.isBlank()) {
             throw new IllegalArgumentException("La nacionalidad es obligatoria");
         }
@@ -72,7 +68,7 @@ public class ClienteServiceImpl implements ClienteService {
     @Override
     public Cliente modificarCliente(String id, String nombre, String apellido, Sexo sexo, Date fechaNacimiento,
                                     TipoDocumento tipoDocumento, String numeroDocumento,
-                                    String direccionEstadia, String idNacionalidad) {
+                                    String idNacionalidad) {
         Cliente cliente = buscarCliente(id);
 
         if (cliente.isEliminado()) {
@@ -86,9 +82,6 @@ public class ClienteServiceImpl implements ClienteService {
             throw new IllegalArgumentException("Ya existe otro cliente con ese documento");
         }
 
-        if (direccionEstadia == null || direccionEstadia.isBlank()) {
-            throw new IllegalArgumentException("La dirección de estadía es obligatoria");
-        }
         if (idNacionalidad == null || idNacionalidad.isBlank()) {
             throw new IllegalArgumentException("La nacionalidad es obligatoria");
         }
@@ -101,7 +94,6 @@ public class ClienteServiceImpl implements ClienteService {
         cliente.setFechaNacimiento(fechaNacimiento);
         cliente.setTipoDocumento(tipoDocumento);
         cliente.setNumeroDocumento(numeroDocumento);
-        cliente.setDireccionEstadia(direccionEstadia);
         cliente.setNacionalidad(nacionalidad);
 
         return clienteRepository.save(cliente);

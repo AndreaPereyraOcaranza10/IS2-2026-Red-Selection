@@ -12,14 +12,14 @@ import java.util.List;
 public interface ClienteService {
 
     Cliente crearCliente(String nombre, String apellido, Sexo sexo, Date fechaNacimiento, TipoDocumento tipoDocumento,
-                         String numeroDocumento, String direccionEstadia, String idNacionalidad);
+                         String numeroDocumento, String idNacionalidad);
 
     void validar(String nombre, String apellido, Sexo sexo, Date fechaNacimiento, TipoDocumento tipoDocumento,
-                 String numeroDocumento, String direccionEstadia, String idNacionalidad);
+                 String numeroDocumento, String idNacionalidad);
 
     Cliente modificarCliente(String id, String nombre, String apellido, Sexo sexo, Date fechaNacimiento,
                              TipoDocumento tipoDocumento, String numeroDocumento,
-                             String direccionEstadia, String idNacionalidad);
+                             String idNacionalidad);
 
     Cliente buscarCliente(String id);
 

@@ -95,7 +95,7 @@ public class RegistroController {
                                   @RequestParam String nombre, @RequestParam String apellido,
                                   @RequestParam Sexo sexo, @RequestParam String fechaNacimiento,
                                   @RequestParam TipoDocumento tipoDocumento, @RequestParam String numeroDocumento,
-                                  @RequestParam String direccionEstadia, @RequestParam String idNacionalidad,
+                                  @RequestParam String idNacionalidad,
                                   @RequestParam String calle, @RequestParam String numeracion,
                                   @RequestParam(required = false) String barrio,
                                   @RequestParam(required = false) String manzanaPiso,
@@ -110,7 +110,7 @@ public class RegistroController {
         try {
             registroService.completarPerfilCliente(usuario.getId(), nombre, apellido, sexo,
                     Date.valueOf(fechaNacimiento), tipoDocumento, numeroDocumento,
-                    direccionEstadia, idNacionalidad,
+                    idNacionalidad,
                     calle, numeracion, barrio, manzanaPiso, casaDepartamento, referencia, idLocalidad,
                     telefono);
             return "redirect:/perfil-completo";

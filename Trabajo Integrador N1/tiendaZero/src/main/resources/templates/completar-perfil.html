@@ -67,9 +67,6 @@
                 <option value="" disabled selected>Seleccionar</option>
                 <option th:each="n : ${nacionalidades}" th:value="${n.id}" th:text="${n.nombre}"></option>
             </select>
-
-            <label for="direccionEstadia">Dirección de estadía</label>
-            <input type="text" id="direccionEstadia" name="direccionEstadia" required/>
         </fieldset>
 
         <fieldset>

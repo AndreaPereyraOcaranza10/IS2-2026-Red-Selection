@@ -99,7 +99,7 @@ public class RegistroServiceImpl implements RegistroService {
     public Cliente completarPerfilCliente(String idUsuario,
                                           String nombre, String apellido, Sexo sexo, Date fechaNacimiento,
                                           TipoDocumento tipoDocumento, String numeroDocumento,
-                                          String direccionEstadia, String idNacionalidad,
+                                          String idNacionalidad,
                                           String calle, String numeracion, String barrio, String manzanaPiso,
                                           String casaDepartamento, String referencia, String idLocalidad,
                                           String telefono) {
@@ -114,7 +114,7 @@ public class RegistroServiceImpl implements RegistroService {
         }
 
         Cliente cliente = clienteService.crearCliente(nombre, apellido, sexo, fechaNacimiento, tipoDocumento,
-                numeroDocumento, direccionEstadia, idNacionalidad);
+                numeroDocumento, idNacionalidad);
 
         Direccion direccion = direccionService.crearDireccion(calle, numeracion, barrio, manzanaPiso,
                 casaDepartamento, referencia, idLocalidad);

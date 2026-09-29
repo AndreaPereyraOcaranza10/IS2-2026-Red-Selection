@@ -14,9 +14,6 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 public class Cliente extends Persona {
 
-    @Column(nullable = false)
-    private String direccionEstadia;
-
     @ManyToOne
     @JoinColumn(name = "nacionalidad_id", nullable = false)
     private Nacionalidad nacionalidad;

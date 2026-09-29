@@ -18,7 +18,7 @@ public interface RegistroService {
     Cliente completarPerfilCliente(String idUsuario,
                                    String nombre, String apellido, Sexo sexo, Date fechaNacimiento,
                                    TipoDocumento tipoDocumento, String numeroDocumento,
-                                   String direccionEstadia, String idNacionalidad,
+                                   String idNacionalidad,
                                    String calle, String numeracion, String barrio, String manzanaPiso,
                                    String casaDepartamento, String referencia, String idLocalidad,
                                    String telefono);
