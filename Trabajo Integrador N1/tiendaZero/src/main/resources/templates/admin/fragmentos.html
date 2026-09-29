@@ -1,10 +1,172 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>$Title$</title>
+<html lang="es" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<!--
+    Fragmentos comunes de la administración (plantilla Spark Admin adaptada a Zero).
+    Uso en cada página:
+      <head th:replace="~{admin/fragmentos :: head('Productos')}"></head>
+      <div th:replace="~{admin/fragmentos :: barraLateral('productos')}"></div>
+    El parámetro de barraLateral indica qué ítem del menú se marca como activo.
+-->
+
+<head th:fragment="head(titulo)">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${titulo} + ' | Administración Zero'">Administración Zero</title>
+    <link rel="icon" th:href="@{/tienda/img/favicon.ico}">
+
+    <link rel="stylesheet" th:href="@{/admin/libs/bootstrap/css/bootstrap.min.css}">
+    <link rel="stylesheet" th:href="@{/admin/libs/bootstrap-icons/bootstrap-icons.css}">
+    <link rel="stylesheet" th:href="@{/admin/libs/apexcharts/apexcharts.css}">
+    <link rel="stylesheet" th:href="@{/admin/libs/flatpickr/flatpickr.min.css}">
+    <!-- Orden: tema de Zero, CSS de Spark, y al final la adaptación que conecta los dos -->
+    <link rel="stylesheet" th:href="@{/tema/zero-tema.css}">
+    <link rel="stylesheet" th:href="@{/admin/css/main.css}">
+    <link rel="stylesheet" th:href="@{/admin/css/zero-admin.css}">
 </head>
+
 <body>
-$END$
+
+<!-- BARRA LATERAL: recibe el nombre del ítem activo -->
+<div th:fragment="barraLateral(activo)" class="sidebar-wrapper" id="sidebar">
+    <a th:href="@{/admin}" class="sidebar-brand">
+        <i class="bi bi-lightning-charge-fill"></i>
+        <span>Zero</span>
+    </a>
+
+    <div class="flex-grow-1 overflow-y-auto">
+        <div class="sidebar-menu-section">
+            <div class="sidebar-menu-title">General</div>
+            <ul class="sidebar-menu-list">
+                <li class="sidebar-menu-item">
+                    <a th:href="@{/admin}" class="sidebar-menu-link" th:classappend="${activo == 'inicio'} ? 'active'">
+                        <i class="bi bi-grid-fill"></i><span>Inicio</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+        <div class="sidebar-menu-section">
+            <div class="sidebar-menu-title">Catálogo</div>
+            <ul class="sidebar-menu-list">
+                <li class="sidebar-menu-item">
+                    <a th:href="@{/admin/productos}" class="sidebar-menu-link" th:classappend="${activo == 'productos'} ? 'active'">
+                        <i class="bi bi-box-seam"></i><span>Productos</span>
+                    </a>
+                </li>
+                <li class="sidebar-menu-item">
+                    <a th:href="@{/admin/categorias}" class="sidebar-menu-link" th:classappend="${activo == 'categorias'} ? 'active'">
+                        <i class="bi bi-tags"></i><span>Categorías</span>
+                    </a>
+                </li>
+                <li class="sidebar-menu-item">
+                    <a th:href="@{/admin/proveedores}" class="sidebar-menu-link" th:classappend="${activo == 'proveedores'} ? 'active'">
+                        <i class="bi bi-truck"></i><span>Proveedores</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+        <div class="sidebar-menu-section">
+            <div class="sidebar-menu-title">Ventas</div>
+            <ul class="sidebar-menu-list">
+                <li class="sidebar-menu-item">
+                    <a th:href="@{/admin/ordenes}" class="sidebar-menu-link" th:classappend="${activo == 'ordenes'} ? 'active'">
+                        <i class="bi bi-receipt"></i><span>Órdenes de compra</span>
+                    </a>
+                </li>
+                <li class="sidebar-menu-item">
+                    <a th:href="@{/admin/clientes}" class="sidebar-menu-link" th:classappend="${activo == 'clientes'} ? 'active'">
+                        <i class="bi bi-people"></i><span>Clientes</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+        <div class="sidebar-menu-section">
+            <div class="sidebar-menu-title">Configuración</div>
+            <ul class="sidebar-menu-list">
+                <li class="sidebar-menu-item">
+                    <a th:href="@{/admin/formas-de-pago}" class="sidebar-menu-link" th:classappend="${activo == 'formas-de-pago'} ? 'active'">
+                        <i class="bi bi-credit-card"></i><span>Formas de pago</span>
+                    </a>
+                </li>
+                <li class="sidebar-menu-item">
+                    <a th:href="@{/admin/usuarios}" class="sidebar-menu-link" th:classappend="${activo == 'usuarios'} ? 'active'">
+                        <i class="bi bi-person-gear"></i><span>Usuarios</span>
+                    </a>
+                </li>
+                <li class="sidebar-menu-item">
+                    <a th:href="@{/}" class="sidebar-menu-link">
+                        <i class="bi bi-shop"></i><span>Ver la tienda</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="sidebar-profile">
+        <div class="sidebar-profile-info">
+            <div class="sidebar-profile-name">Sesión iniciada</div>
+            <div class="sidebar-profile-email" sec:authentication="name">correo</div>
+        </div>
+    </div>
+</div>
+
+<!-- BARRA SUPERIOR -->
+<header th:fragment="barraSuperior" class="navbar-custom">
+    <div class="navbar-left">
+        <button class="btn-desktop-toggle d-none d-xl-flex align-items-center justify-content-center me-3"
+                id="desktop-sidebar-toggle" aria-label="Contraer menú">
+            <i class="bi bi-chevron-bar-left"></i>
+        </button>
+        <button class="sidebar-toggle-btn me-2" id="sidebar-toggle" aria-label="Abrir menú">
+            <i class="bi bi-list"></i>
+        </button>
+    </div>
+
+    <div class="navbar-actions">
+        <div class="dropdown ms-2">
+            <button class="navbar-profile-btn dropdown-toggle" type="button" data-bs-toggle="dropdown"
+                    aria-expanded="false" id="perfil-dropdown">
+                <i class="bi bi-person-circle fs-4"></i>
+                <span class="navbar-profile-name d-none d-md-inline" sec:authentication="name">correo</span>
+                <i class="bi bi-chevron-down navbar-profile-caret"></i>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end dropdown-menu-profile" aria-labelledby="perfil-dropdown">
+                <li class="dropdown-header">
+                    Rol: <span sec:authorize="hasRole('JEFE')">Jefe</span><span sec:authorize="hasRole('ADMINISTRATIVO')">Administrativo</span>
+                </li>
+                <li><a class="dropdown-item" th:href="@{/}"><i class="bi bi-shop"></i> Ver la tienda</a></li>
+                <li><hr class="dropdown-divider"></li>
+                <li>
+                    <form th:action="@{/logout}" method="post" class="m-0">
+                        <button type="submit" class="dropdown-item text-danger">
+                            <i class="bi bi-box-arrow-right"></i> Cerrar sesión
+                        </button>
+                    </form>
+                </li>
+            </ul>
+        </div>
+    </div>
+</header>
+
+<!-- PIE -->
+<footer th:fragment="pie" class="footer-custom">
+    <div class="footer-left">
+        <span class="footer-logo"><i class="bi bi-lightning-charge-fill"></i> Zero</span>
+        <span class="footer-separator">|</span>
+        <span class="footer-copy">&copy; <span th:text="${#dates.year(#dates.createNow())}">2026</span> Zero · Plantilla base: Spark Admin</span>
+    </div>
+</footer>
+
+<!-- SCRIPTS -->
+<th:block th:fragment="scripts">
+    <script th:src="@{/admin/libs/bootstrap/js/bootstrap.bundle.min.js}"></script>
+    <script th:src="@{/admin/libs/apexcharts/apexcharts.min.js}"></script>
+    <script th:src="@{/admin/libs/flatpickr/flatpickr.min.js}"></script>
+    <script th:src="@{/admin/js/dashboard.js}"></script>
+</th:block>
+
 </body>
 </html>

@@ -1,7 +1,7 @@
+@charset "UTF-8";
 /* Adaptación de Spark Admin a la identidad de Zero.
    Se carga DESPUÉS de /tema/zero-tema.css y de main.css, y redefine
    las variables de Spark usando las de Zero. No se edita main.css. */
-
 :root {
     /* Fondo y tipografía */
     --bs-body-bg: var(--zero-crema);

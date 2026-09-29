@@ -12,7 +12,6 @@ import java.security.SecureRandom;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
-import java.util.regex.Pattern;
 
 @Service
 public class UsuarioServiceImpl implements UsuarioService {

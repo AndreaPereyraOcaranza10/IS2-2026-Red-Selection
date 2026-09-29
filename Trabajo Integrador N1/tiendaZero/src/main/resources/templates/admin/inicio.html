@@ -1,10 +1,77 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>$Title$</title>
-</head>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{admin/fragmentos :: head('Inicio')}"></head>
 <body>
-$END$
+
+<div th:replace="~{admin/fragmentos :: barraLateral('inicio')}"></div>
+
+<div class="main-wrapper">
+    <header th:replace="~{admin/fragmentos :: barraSuperior}"></header>
+
+    <div class="page-header">
+        <div>
+            <h1 class="page-title">Inicio</h1>
+            <p class="page-subtitle">Resumen general de la tienda</p>
+        </div>
+    </div>
+
+    <!-- Tarjetas de resumen con datos reales de la base -->
+    <div class="row g-4 mb-4">
+        <div class="col-sm-6 col-xl-3">
+            <div class="card p-4 border-light shadow-sm h-100">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <p class="text-muted-green mb-2">Productos activos</p>
+                        <div class="zero-resumen-numero" th:text="${cantidadProductos}">0</div>
+                    </div>
+                    <div class="zero-resumen-icono"><i class="bi bi-box-seam"></i></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-xl-3">
+            <div class="card p-4 border-light shadow-sm h-100">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <p class="text-muted-green mb-2">Clientes</p>
+                        <div class="zero-resumen-numero" th:text="${cantidadClientes}">0</div>
+                    </div>
+                    <div class="zero-resumen-icono"><i class="bi bi-people"></i></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-xl-3">
+            <div class="card p-4 border-light shadow-sm h-100">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <p class="text-muted-green mb-2">Proveedores</p>
+                        <div class="zero-resumen-numero" th:text="${cantidadProveedores}">0</div>
+                    </div>
+                    <div class="zero-resumen-icono"><i class="bi bi-truck"></i></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-xl-3">
+            <div class="card p-4 border-light shadow-sm h-100">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <p class="text-muted-green mb-2">Usuarios</p>
+                        <div class="zero-resumen-numero" th:text="${cantidadUsuarios}">0</div>
+                    </div>
+                    <div class="zero-resumen-icono"><i class="bi bi-person-gear"></i></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card p-4 border-light shadow-sm text-center">
+        <div class="mb-3 text-lime" style="font-size: 2.5rem;"><i class="bi bi-lightning-charge-fill"></i></div>
+        <h3 class="mb-2">Bienvenido/a a la administración de Zero</h3>
+        <p class="text-muted-green mb-0">Desde el menú lateral vas a poder gestionar el catálogo, las ventas y la configuración de la tienda.</p>
+    </div>
+
+    <footer th:replace="~{admin/fragmentos :: pie}"></footer>
+</div>
+
+<th:block th:replace="~{admin/fragmentos :: scripts}"></th:block>
 </body>
 </html>
