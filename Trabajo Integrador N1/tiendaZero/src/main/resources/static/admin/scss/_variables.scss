@@ -1,0 +1,137 @@
+// Example: override Bootstrap color variables
+
+$gray-50: #fafafa !default;
+$gray-100: #f5f5f5 !default;
+$gray-200: #e5e5e5 !default;
+$gray-300: #d4d4d4 !default;
+$gray-400: #a3a3a3 !default;
+$gray-500: #737373 !default;
+$gray-600: #525252 !default;
+$gray-700: #404040 !default;
+$gray-800: #262626 !default;
+$gray-900: #171717 !default;
+$gray-950: #0a0a0a !default;
+
+$orange:       #E66239 !default;
+$red:          #FB2C36 !default;
+$green:        #00C951 !default;
+$cyan:         #00B8DB !default;
+$yellow:       #F0B100 !default;
+
+
+$primary:       $orange !default;
+$secondary:     $gray-600 !default;
+$success:       $green !default;
+$info:          $cyan !default;
+$warning:       $yellow !default;
+$danger:        $red !default;
+
+$min-contrast-ratio:   2.5 !default;
+$link-hover-decoration:                   none !default;
+$link-color:                              $gray-700 !default;
+$link-hover-color:                        $primary !default;
+
+
+$light: $gray-100 !default;
+$border-color: $gray-200 !default;
+$border-color-translucent:   $gray-200 !default;
+
+$enable-negative-margins: true !default;
+$enable-rounded:              true !default;
+
+$headings-font-weight: 400 !default;
+$grid-gutter-width:           2.5rem !default;
+
+// scss-docs-start position-map
+$position-values: (
+   0: 0,
+   10: 10%,
+   25: 25%,
+   50: 50%,
+    60: 60%,
+    65:65%,
+    70: 70%,
+   75: 75%,
+   100: 100%,
+   auto: auto
+) !default;
+// scss-docs-end position-map
+
+
+// scss-docs-start spacer-variables-maps
+$spacer: 1rem !default;
+$spacers: (
+   0: 0,
+   1: $spacer * 0.25,
+   // 4px
+   2: $spacer * 0.5,
+   // 8px
+   3: $spacer,
+   // 16px
+   4: $spacer * 1.5,
+   // 24px
+   5: $spacer * 2,
+   // 32px
+   6: $spacer * 2.5,
+   // 40px
+   7: $spacer * 3,
+   // 48px
+   8: $spacer * 4,
+   // 64px
+   9: $spacer * 5,
+   // 80px
+   10: $spacer * 6,
+   // 96px
+   11: $spacer * 8,
+   // 128px
+) !default;
+// scss-docs-end spacer-variables-maps
+
+$font-family-base: 'Poppins', sans-serif !default;
+$font-size-root:              null !default;
+$font-size-base:              .875rem !default; // Assumes the browser default, typically `16px`
+$font-size-sm:                $font-size-base * .85 !default;
+$font-size-lg:                $font-size-base * 1.25 !default;
+
+$font-xs: 0.75rem !default;
+
+$h1-font-size:                $font-size-base * 2.5 !default;
+$h2-font-size:                $font-size-base * 2 !default;
+$h3-font-size:                $font-size-base * 1.75 !default;
+$h4-font-size:                $font-size-base * 1.5 !default;
+$h5-font-size:                $font-size-base * 1.25 !default;
+$h6-font-size:                $font-size-base !default;
+
+// scss-docs-start border-radius-variables
+
+
+
+
+$input-btn-padding-y: 0.5rem !default;
+$input-btn-padding-x: .875rem !default;
+$table-th-font-weight:         400!default;
+
+
+
+$link-decoration:                         none !default;
+
+$link-hover-decoration:                   underline !default;
+
+
+// Icon
+$icon-size-xxs: 1rem !default;
+$icon-size-xs: 1.5rem !default;
+$icon-size-sm: 2rem !default;
+$icon-size-md: 2.5rem !default;
+$icon-size-lg: 3rem !default;
+$icon-size-xl: 3.5rem !default;
+$icon-size-xxl: 4rem !default;
+$icon-size-xxxl: 7rem !default;
+
+// Avatar
+$avatar-size-xs: 1.5rem !default;
+$avatar-size-sm: 2rem !default;
+$avatar-size-md: 2.5rem !default;
+$avatar-size-lg: 3.5rem !default;
+$avatar-size-xl: 5rem !default;
+$avatar-size-xxl: 7.5rem !default;

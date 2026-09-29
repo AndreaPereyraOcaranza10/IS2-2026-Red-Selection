@@ -31,7 +31,7 @@ public class ProductoServiceImpl implements ProductoService {
                                   boolean enOferta, String idImagen, String idSubCategoria) {
         validarProducto(codigo, nombre, descripcion, talle, enOferta, idImagen, idSubCategoria);
         SubCategoria subCategoria = subCategoriaService.buscarSubCategoria(idSubCategoria);
-        Imagen imagen = imagenService.buscarImagen(idImagen);
+        Imagen imagen = (idImagen != null && !idImagen.isBlank()) ? imagenService.buscarImagen(idImagen) : null;
 
         Producto producto = Producto.builder()
                 .codigo(codigo)

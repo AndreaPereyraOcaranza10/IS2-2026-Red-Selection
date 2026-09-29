@@ -31,9 +31,11 @@ public class Producto {
     private String talle;
 
     @Column(nullable = false)
+    @Builder.Default
     private boolean enOferta = false;
 
     @Column(nullable = false)
+    @Builder.Default
     private boolean eliminado = false;
 
     @ManyToOne
