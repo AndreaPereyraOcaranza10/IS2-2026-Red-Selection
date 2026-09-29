@@ -75,6 +75,33 @@ a {
     color: var(--color-primario);
 }
 
+.acciones-cuenta {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.form-cerrar-sesion {
+    margin: 0;
+}
+
+.boton-cerrar-sesion {
+    width: auto;
+    min-height: 40px;
+    margin: 0;
+    padding: 8px 16px;
+    border-color: #ffffff;
+    background: transparent;
+    font-size: 0.85rem;
+}
+
+.boton-cerrar-sesion:hover,
+.boton-cerrar-sesion:focus-visible {
+    border-color: var(--color-primario);
+    background: var(--color-primario);
+    color: #ffffff;
+}
+
 .contenido-cuenta {
     width: 100%;
     flex: 1;
@@ -174,6 +201,13 @@ select:disabled {
     color: #777c86;
 }
 
+.ayuda-campo {
+    display: block;
+    margin-top: 6px;
+    color: var(--color-texto-suave);
+    font-size: 0.78rem;
+}
+
 .fila {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -219,6 +253,14 @@ button:focus-visible,
 .boton:focus-visible {
     background: #ffffff;
     color: var(--color-primario);
+}
+
+button:disabled,
+button:disabled:hover {
+    border-color: #cfd2d8;
+    background: #e2e4e8;
+    color: #777c86;
+    cursor: not-allowed;
 }
 
 .boton {
@@ -286,6 +328,16 @@ button:focus-visible,
 
     .volver-tienda {
         font-size: 0.8rem;
+    }
+
+    .acciones-cuenta {
+        gap: 10px;
+    }
+
+    .boton-cerrar-sesion {
+        min-height: 36px;
+        padding: 7px 11px;
+        font-size: 0.75rem;
     }
 
     .contenido-cuenta {

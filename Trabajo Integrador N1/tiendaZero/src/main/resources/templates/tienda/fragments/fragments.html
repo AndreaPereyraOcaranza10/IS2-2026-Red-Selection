@@ -163,15 +163,15 @@
 
                     <th:block sec:authorize="isAuthenticated()">
                         <a sec:authorize="hasAnyRole('ADMINISTRATIVO','JEFE')" th:href="@{/admin}"
-                            class="bg-amber-500/20 border border-amber-500 hover:bg-amber-500 text-amber-300 hover:text-black font-semibold px-3 py-1.5 rounded-full inline-flex items-center text-xs transition">
-                            <i class="fas fa-cog mr-1.5"></i> Admin
+                            class="bg-amber-500/20 border border-amber-500 hover:bg-amber-500 text-white hover:text-white font-semibold px-3 py-1.5 rounded-full inline-flex items-center text-xs transition">
+                            <i class="fas fa-cog mr-1.5"></i> Panel administrador
                         </a>
                         <a sec:authorize="hasRole('CLIENTE')" th:href="@{/completar-perfil}"
                             class="bg-white/10 hover:bg-white/20 text-white font-semibold px-3.5 py-1.5 rounded-full inline-flex items-center text-sm transition">
                             <i class="fas fa-user-circle mr-1.5"></i> Mi Perfil
                         </a>
                         <form th:action="@{/logout}" method="post" class="inline">
-                            <button type="submit" class="text-gray-300 hover:text-red-400 p-2 transition cursor-pointer"
+                            <button type="submit" class="text-white hover:text-white p-2 transition cursor-pointer"
                                 title="Cerrar Sesión">
                                 <i class="fas fa-sign-out-alt text-lg"></i>
                             </button>
@@ -309,8 +309,8 @@
                 </div>
                 <div sec:authorize="isAuthenticated()" class="flex flex-col space-y-2 w-full items-center">
                     <a sec:authorize="hasAnyRole('ADMINISTRATIVO','JEFE')" th:href="@{/admin}"
-                        class="bg-amber-500 text-black font-semibold px-4 py-2 rounded-full flex items-center justify-center w-full max-w-[200px]">Panel
-                        Admin</a>
+                        class="bg-amber-500 text-white font-semibold px-4 py-2 rounded-full flex items-center justify-center w-full max-w-[200px]">Panel
+                        administrador</a>
                     <a sec:authorize="hasRole('CLIENTE')" th:href="@{/completar-perfil}"
                         class="bg-white/20 text-white font-semibold px-4 py-2 rounded-full flex items-center justify-center w-full max-w-[200px]">Mi
                         Perfil</a>

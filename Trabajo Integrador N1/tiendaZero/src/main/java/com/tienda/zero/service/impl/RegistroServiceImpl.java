@@ -30,13 +30,15 @@ public class RegistroServiceImpl implements RegistroService {
     private final PersonaService personaService;
     private final DireccionService direccionService;
     private final ContactoTelefonicoService contactoTelefonicoService;
+    private final ContactoService contactoService;
     private final CorreoService correoService;
     private final ConfiguracionCorreoEmpresaService configuracionCorreoEmpresaService;
     private final String linkActivacion;
 
     public RegistroServiceImpl(UsuarioService usuarioService, ClienteService clienteService,
                                PersonaService personaService, DireccionService direccionService,
-                               ContactoTelefonicoService contactoTelefonicoService, CorreoService correoService,
+                               ContactoTelefonicoService contactoTelefonicoService, ContactoService contactoService,
+                               CorreoService correoService,
                                ConfiguracionCorreoEmpresaService configuracionCorreoEmpresaService,
                                @Value("${app.activacion.url}") String linkActivacion) {
         this.usuarioService = usuarioService;
@@ -44,6 +46,7 @@ public class RegistroServiceImpl implements RegistroService {
         this.personaService = personaService;
         this.direccionService = direccionService;
         this.contactoTelefonicoService = contactoTelefonicoService;
+        this.contactoService = contactoService;
         this.correoService = correoService;
         this.configuracionCorreoEmpresaService = configuracionCorreoEmpresaService;
         this.linkActivacion = linkActivacion;
@@ -111,6 +114,50 @@ public class RegistroServiceImpl implements RegistroService {
         }
         if (usuario.getRol() != TipoUsuario.CLIENTE) {
             throw new IllegalArgumentException("Este usuario no es un cliente");
+        }
+
+        var personaExistente = personaService.buscarPersonaPorUsuario(usuario.getId());
+        if (personaExistente.isPresent()) {
+            if (!(personaExistente.get() instanceof Cliente cliente)) {
+                throw new IllegalArgumentException("El perfil asociado no corresponde a un cliente");
+            }
+
+            cliente = clienteService.modificarCliente(cliente.getId(), nombre, apellido, sexo, fechaNacimiento,
+                    tipoDocumento, numeroDocumento, direccionEstadia, idNacionalidad);
+
+            Direccion direccion = cliente.getDirecciones().stream()
+                    .filter(item -> !item.isEliminado())
+                    .findFirst()
+                    .orElse(null);
+            if (direccion == null) {
+                direccion = direccionService.crearDireccion(calle, numeracion, barrio, manzanaPiso,
+                        casaDepartamento, referencia, idLocalidad);
+                personaService.asociarDireccionPersona(cliente.getId(), direccion.getId());
+            } else {
+                direccionService.modificarDireccion(direccion.getId(), calle, numeracion, barrio, manzanaPiso,
+                        casaDepartamento, referencia, idLocalidad);
+            }
+
+            ContactoTelefonico contacto = cliente.getContactos().stream()
+                    .filter(item -> !item.isEliminado())
+                    .filter(ContactoTelefonico.class::isInstance)
+                    .map(ContactoTelefonico.class::cast)
+                    .findFirst()
+                    .orElse(null);
+            if (telefono == null || telefono.isBlank()) {
+                if (contacto != null) {
+                    contactoService.eliminarContacto(contacto.getId());
+                }
+            } else if (contacto == null) {
+                contacto = contactoTelefonicoService.crearContactoTelefonico(
+                        telefono, TipoTelefono.CELULAR, TipoContacto.PERSONAL, null);
+                personaService.asociarContactoPersona(cliente.getId(), contacto.getId());
+            } else {
+                contactoTelefonicoService.modificarContactoTelefonico(contacto.getId(), telefono,
+                        TipoTelefono.CELULAR, TipoContacto.PERSONAL, null);
+            }
+
+            return clienteService.buscarCliente(cliente.getId());
         }
 
         Cliente cliente = clienteService.crearCliente(nombre, apellido, sexo, fechaNacimiento, tipoDocumento,

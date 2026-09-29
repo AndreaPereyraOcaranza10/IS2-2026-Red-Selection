@@ -1,8 +1,11 @@
 package com.tienda.zero.controller;
 
-import com.tienda.zero.enums.Sexo;
-import com.tienda.zero.enums.TipoDocumento;
+import com.tienda.zero.dto.PerfilClienteDTO;
 import com.tienda.zero.enums.TipoUsuario;
+import com.tienda.zero.model.Cliente;
+import com.tienda.zero.model.ContactoTelefonico;
+import com.tienda.zero.model.Direccion;
+import com.tienda.zero.model.Persona;
 import com.tienda.zero.model.Usuario;
 import com.tienda.zero.service.NacionalidadService;
 import com.tienda.zero.service.PersonaService;
@@ -12,10 +15,12 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.sql.Date;
+import java.util.Optional;
 
 @Controller
 public class RegistroController {
@@ -82,41 +87,30 @@ public class RegistroController {
         if (usuario.getRol() != TipoUsuario.CLIENTE) {
             return "redirect:/";
         }
-        if (personaService.buscarPersonaPorUsuario(usuario.getId()).isPresent()) {
-            return "redirect:/perfil-completo";
-        }
-
-        model.addAttribute("nacionalidades", nacionalidadService.listarNacionalidadActiva());
+        Optional<Persona> persona = personaService.buscarPersonaPorUsuario(usuario.getId());
+        cargarFormularioPerfil(model, persona, crearPerfilDto(usuario, persona));
         return "completar-perfil";
     }
 
     @PostMapping("/completar-perfil")
     public String completarPerfil(Authentication authentication,
-                                  @RequestParam String nombre, @RequestParam String apellido,
-                                  @RequestParam Sexo sexo, @RequestParam String fechaNacimiento,
-                                  @RequestParam TipoDocumento tipoDocumento, @RequestParam String numeroDocumento,
-                                  @RequestParam String direccionEstadia, @RequestParam String idNacionalidad,
-                                  @RequestParam String calle, @RequestParam String numeracion,
-                                  @RequestParam(required = false) String barrio,
-                                  @RequestParam(required = false) String manzanaPiso,
-                                  @RequestParam(required = false) String casaDepartamento,
-                                  @RequestParam(required = false) String referencia,
-                                  @RequestParam String idLocalidad,
-                                  @RequestParam(required = false) String telefono,
+                                  @ModelAttribute("perfil") PerfilClienteDTO perfil,
                                   Model model) {
 
         Usuario usuario = usuarioService.buscarUsuarioPorNombreUsuario(authentication.getName());
 
         try {
-            registroService.completarPerfilCliente(usuario.getId(), nombre, apellido, sexo,
-                    Date.valueOf(fechaNacimiento), tipoDocumento, numeroDocumento,
-                    direccionEstadia, idNacionalidad,
-                    calle, numeracion, barrio, manzanaPiso, casaDepartamento, referencia, idLocalidad,
-                    telefono);
+            registroService.completarPerfilCliente(usuario.getId(), perfil.getNombre(), perfil.getApellido(),
+                    perfil.getSexo(), Date.valueOf(perfil.getFechaNacimiento()), perfil.getTipoDocumento(),
+                    perfil.getNumeroDocumento(), perfil.getDireccionEstadia(), perfil.getIdNacionalidad(),
+                    perfil.getCalle(), perfil.getNumeracion(), perfil.getBarrio(), perfil.getManzanaPiso(),
+                    perfil.getCasaDepartamento(), perfil.getReferencia(), perfil.getIdLocalidad(),
+                    perfil.getTelefono());
             return "redirect:/perfil-completo";
-        } catch (IllegalArgumentException e) {
+        } catch (IllegalArgumentException | ClassCastException e) {
             model.addAttribute("error", e.getMessage());
-            model.addAttribute("nacionalidades", nacionalidadService.listarNacionalidadActiva());
+            perfil.setCorreo(usuario.getNombreUsuario());
+            cargarFormularioPerfil(model, personaService.buscarPersonaPorUsuario(usuario.getId()), perfil);
             return "completar-perfil";
         }
     }
@@ -124,5 +118,59 @@ public class RegistroController {
     @GetMapping("/perfil-completo")
     public String perfilCompleto() {
         return "perfil-completo";
+    }
+
+    private void cargarFormularioPerfil(Model model, Optional<Persona> persona, PerfilClienteDTO perfil) {
+        model.addAttribute("perfil", perfil);
+        model.addAttribute("modoEdicion", persona.isPresent());
+        model.addAttribute("nacionalidades", nacionalidadService.listarNacionalidadActiva());
+    }
+
+    private PerfilClienteDTO crearPerfilDto(Usuario usuario, Optional<Persona> personaOptional) {
+        PerfilClienteDTO.PerfilClienteDTOBuilder builder = PerfilClienteDTO.builder()
+                .correo(usuario.getNombreUsuario());
+
+        if (personaOptional.isEmpty()) {
+            return builder.build();
+        }
+
+        if (!(personaOptional.get() instanceof Cliente cliente)) {
+            throw new IllegalArgumentException("El perfil asociado no corresponde a un cliente");
+        }
+
+        builder.nombre(cliente.getNombre())
+                .apellido(cliente.getApellido())
+                .sexo(cliente.getSexo())
+                .fechaNacimiento(cliente.getFechaNacimiento().toString())
+                .tipoDocumento(cliente.getTipoDocumento())
+                .numeroDocumento(cliente.getNumeroDocumento())
+                .direccionEstadia(cliente.getDireccionEstadia())
+                .idNacionalidad(cliente.getNacionalidad().getId());
+
+        cliente.getDirecciones().stream()
+                .filter(direccion -> !direccion.isEliminado())
+                .findFirst()
+                .ifPresent(direccion -> completarDireccion(builder, direccion));
+
+        cliente.getContactos().stream()
+                .filter(contacto -> !contacto.isEliminado())
+                .filter(ContactoTelefonico.class::isInstance)
+                .map(ContactoTelefonico.class::cast)
+                .findFirst()
+                .ifPresent(contacto -> builder.telefono(contacto.getTelefono()));
+
+        return builder.build();
+    }
+
+    private void completarDireccion(PerfilClienteDTO.PerfilClienteDTOBuilder builder, Direccion direccion) {
+        builder.calle(direccion.getCalle())
+                .numeracion(direccion.getNumeracion())
+                .barrio(direccion.getBarrio())
+                .manzanaPiso(direccion.getManzanaPiso())
+                .casaDepartamento(direccion.getCasaDepartamento())
+                .referencia(direccion.getReferencia())
+                .idLocalidad(direccion.getLocalidad().getId())
+                .idDepartamento(direccion.getLocalidad().getDepartamento().getId())
+                .idProvincia(direccion.getLocalidad().getDepartamento().getProvincia().getId());
     }
 }

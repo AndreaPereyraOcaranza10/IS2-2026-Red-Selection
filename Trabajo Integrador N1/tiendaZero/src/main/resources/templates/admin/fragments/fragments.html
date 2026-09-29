@@ -70,9 +70,16 @@
     <button id="mobileBtn" class="btn btn-light btn-icon btn-sm d-lg-none me-2">
       <i class="ti ti-layout-sidebar-left-expand"></i>
     </button>
-    <div>
+    <div class="ms-auto d-flex align-items-center gap-2">
       <!-- Navbar nav -->
       <ul class="list-unstyled d-flex align-items-center mb-0 gap-1">
+        <li>
+          <a th:href="@{/}" class="btn btn-outline-primary btn-sm d-inline-flex align-items-center gap-1">
+            <i class="ti ti-arrow-left"></i>
+            <span class="d-none d-sm-inline">Salir del panel</span>
+            <span class="d-sm-none">Home</span>
+          </a>
+        </li>
         <!-- Pages link -->
 
         <!-- Bell icon -->
@@ -163,7 +170,7 @@
                 </div>
               </div>
               <div class="p-3 d-flex flex-column gap-1 small lh-lg">
-                <a href="#!" class="">
+                <a th:href="@{/}" href="/" class="">
 
                   <span>Home</span>
                 </a>
@@ -207,7 +214,7 @@
     </div>
     <ul class="nav flex-column">
       <li class="px-4 py-2"><small class="nav-text">Main</small></li>
-      <li><a class="nav-link" th:classappend="${activePage == 'dashboard'} ? 'active'" th:href="@{/}" href="index.html"><i class="ti ti-home"></i><span
+      <li><a class="nav-link" th:classappend="${activePage == 'dashboard'} ? 'active'" th:href="@{/admin}" href="index.html"><i class="ti ti-home"></i><span
             class="nav-text">Dashboard</span></a></li>
       <li><a class="nav-link" th:classappend="${activePage == 'inventory'} ? 'active'" th:href="@{/inventory}" href="inventory.html"><i class="ti ti-box-seam"></i><span
             class="nav-text">Inventory</span></a></li>
