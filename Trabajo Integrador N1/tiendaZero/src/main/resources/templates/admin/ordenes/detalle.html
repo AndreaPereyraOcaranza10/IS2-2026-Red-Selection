@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+  <title>Detalle Orden</title>
+  <th:block th:replace="~{admin/fragments/fragments :: head-assets}"></th:block>
+</head>
+<body>
+<div th:replace="~{admin/fragments/fragments :: sidebarTopbar(activePage='ordenes')}"></div>
+<main id="content" class="content py-10">
+  <div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h1>Orden #<span th:text="${orden.id}">ID</span></h1>
+      <div>
+        <a th:if="${!orden.entregada}" th:href="@{/admin/ordenes/{id}/entregar(id=${orden.id})}"
+           th:onclick="|event.preventDefault();document.getElementById('entregarForm').submit();|" class="btn btn-success">Marcar entregada</a>
+        <form id="entregarForm" th:action="@{/admin/ordenes/{id}/entregar(id=${orden.id})}" method="post" style="display:none"></form>
+        <a th:href="@{/admin/ordenes}" class="btn btn-secondary">Volver</a>
+      </div>
+    </div>
+
+    <div class="card mb-4">
+      <div class="card-body">
+        <p><strong>Proveedor:</strong> <span th:text="${orden.proveedor != null ? orden.proveedor.razonSocial : 'N/A'}">Proveedor</span></p>
+        <p><strong>Fecha creación:</strong> <span th:text="${orden.fechaCreacion}">2026-01-01</span></p>
+        <p><strong>Estado:</strong> <span th:text="${orden.entregada} ? 'Entregada' : 'Pendiente'">Pendiente</span></p>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-body">
+        <h5>Items</h5>
+        <table class="table">
+          <thead>
+          <tr>
+            <th>Producto</th>
+            <th>Cantidad</th>
+            <th>Precio unitario</th>
+            <th>Subtotal</th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr th:each="d : ${orden.detalles}">
+            <td th:text="${d.producto != null ? d.producto.nombre : 'N/A'}">Producto</td>
+            <td th:text="${d.cantidad}">1</td>
+            <td th:text="${d.precioUnitario}">$0.00</td>
+            <td th:text="${d.cantidad * d.precioUnitario}">$0.00</td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</main>
+<th:block th:replace="~{admin/fragments/fragments :: scripts}"></th:block>
+</body>
+</html>

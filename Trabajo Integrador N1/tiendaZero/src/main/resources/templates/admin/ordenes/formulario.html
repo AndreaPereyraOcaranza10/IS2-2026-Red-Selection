@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+  <title>Nueva Orden de Compra</title>
+  <th:block th:replace="~{admin/fragments/fragments :: head-assets}"></th:block>
+</head>
+<body>
+<div th:replace="~{admin/fragments/fragments :: sidebarTopbar(activePage='ordenes')}"></div>
+<main id="content" class="content py-10">
+  <div class="container-fluid">
+    <h1>Nueva orden de compra</h1>
+    <div class="card">
+      <div class="card-body">
+        <form th:action="@{/admin/ordenes/nueva}" method="post">
+          <div class="mb-3">
+            <label for="proveedor">Proveedor</label>
+            <select id="proveedor" name="proveedor.id" class="form-select" required>
+              <option value="">Seleccione proveedor...</option>
+              <option th:each="p : ${proveedores}" th:value="${p.id}" th:text="${p.razonSocial}">Proveedor</option>
+            </select>
+          </div>
+
+          <h5>Items</h5>
+          <p class="text-muted">Agregá hasta 5 líneas. Dejar vacío el Producto para ignorar la línea.</p>
+
+          <div th:each="i : ${#numbers.sequence(0,4)}">
+            <div class="row mb-2">
+              <div class="col-md-6">
+                <select th:name="productoId" class="form-select">
+                  <option value="">-- Producto (opcional) --</option>
+                  <option th:each="prod : ${productos}" th:value="${prod.id}" th:text="${prod.nombre}">Producto</option>
+                </select>
+              </div>
+              <div class="col-md-3">
+                <input type="number" name="cantidad" class="form-control" placeholder="Cantidad" min="1">
+              </div>
+              <div class="col-md-3">
+                <input type="number" step="0.01" name="precioUnitario" class="form-control" placeholder="Precio unitario">
+              </div>
+            </div>
+          </div>
+
+          <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-primary">Crear orden</button>
+            <a th:href="@{/admin/ordenes}" class="btn btn-secondary">Cancelar</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</main>
+<th:block th:replace="~{admin/fragments/fragments :: scripts}"></th:block>
+</body>
+</html>
