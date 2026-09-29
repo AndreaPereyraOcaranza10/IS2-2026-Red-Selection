@@ -62,6 +62,11 @@
 		color: $gray-800;
     border-bottom: 1px solid $gray-200;
 	}
+	.admin-brand-logo {
+		width: 42px;
+		height: 42px;
+		object-fit: contain;
+	}
 }
 .sidebar.collapsed {
 	width: 60px;

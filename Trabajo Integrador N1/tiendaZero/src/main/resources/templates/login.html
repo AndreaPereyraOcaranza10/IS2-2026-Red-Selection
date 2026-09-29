@@ -2,12 +2,26 @@
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Ingresar TiendaZero</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ingresar a Zero</title>
+    <link rel="icon" type="image/png" th:href="@{/assets/images/favicon.png}">
     <link rel="stylesheet" th:href="@{/css/estilos.css}">
 </head>
 <body>
-<div class="tarjeta">
-    <h1>Ingresa a TiendaZero</h1>
+<header class="barra-superior">
+    <div class="barra-superior__contenido">
+        <a class="marca" th:href="@{/}" aria-label="Ir al inicio">
+            <img th:src="@{/assets/images/logo-zero-white.png}" alt="Zero">
+        </a>
+        <a class="volver-tienda" th:href="@{/}">&larr; Volver a la tienda</a>
+    </div>
+</header>
+
+<main class="contenido-cuenta">
+<section class="tarjeta">
+    <p class="etiqueta">Mi cuenta</p>
+    <h1>Ingresá a Zero</h1>
+    <p class="subtitulo">Accedé a tu cuenta para continuar con tus compras.</p>
 
     <p class="mensaje mensaje--error" th:if="${param.error}">
         Usuario, contraseña incorrectos o cuenta todavía no activada
@@ -18,15 +32,16 @@
         <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
 
         <label for="username">Correo electrónico</label>
-        <input type="email" id="username" name="username" required autofocus/>
+        <input type="email" id="username" name="username" placeholder="nombre@correo.com" autocomplete="email" required autofocus/>
 
         <label for="password">Contraseña</label>
-        <input type="password" id="password" name="password" required/>
+        <input type="password" id="password" name="password" placeholder="Ingresá tu contraseña" autocomplete="current-password" required/>
 
         <button type="submit">Ingresar</button>
     </form>
 
     <p class="enlace-secundario">¿No tenés cuenta? <a th:href="@{/registro}">Registrate</a></p>
-</div>
+</section>
+</main>
 </body>
 </html>

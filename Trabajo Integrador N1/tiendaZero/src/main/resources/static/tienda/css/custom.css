@@ -13,6 +13,16 @@ button:hover {
   cursor: pointer;
 }
 
+.product-image-square {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 1 / 1;
+    object-fit: contain;
+    object-position: center;
+    background-color: #f8fafc;
+}
+
 .mobile-menu {
     padding: 2rem;
 }

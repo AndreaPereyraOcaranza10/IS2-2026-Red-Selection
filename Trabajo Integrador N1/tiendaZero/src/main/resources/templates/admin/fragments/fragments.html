@@ -1,6 +1,6 @@
 <!doctype html>
 <!--
-    FRAGMENTOS THYMELEAF REUTILIZABLES — InApp Inventory Dashboard
+    FRAGMENTOS THYMELEAF REUTILIZABLES — Zero
     ===============================================================
     Igual que en el otro template: acá vive una sola vez el topbar, el
     sidebar, los favicons y el <script> final, que antes estaban
@@ -200,8 +200,9 @@
   <!-- SIDEBAR -->
   <aside id="sidebar" class="sidebar">
     <div class="logo-area">
-     <a th:href="@{/}" href="index.html" class="d-inline-flex"><img th:src="@{/assets/images/logo-icon.svg}" src="./assets/images/logo-icon.svg" alt="" width="24">
-        <span class="logo-text ms-2"> <img th:src="@{/assets/images/logo.svg}" src="./assets/images/logo.svg" alt=""></span>
+      <a th:href="@{/}" href="index.html" class="d-inline-flex align-items-center" aria-label="Ir a Zero">
+        <img th:src="@{/admin/images/logo-zero-black.png}" src="/admin/images/logo-zero-black.png"
+          alt="Zero" class="admin-brand-logo">
       </a>
     </div>
     <ul class="nav flex-column">
@@ -230,7 +231,7 @@
 <!-- ======================================================= -->
 <th:block th:fragment="pageFooter">
   <footer class="text-center py-2 mt-6 text-secondary ">
-    <p class="mb-0">Copyright © <span th:text="${#calendars.format(#calendars.createNow(),'yyyy')} ?: '2026'">2026</span> InApp Inventory Dashboard. Developed by <a href="https://codescandy.com/" target="_blank" class="text-primary">CodesCandy</a> • Distributed by <a href="https://themewagon.com/" target="_blank" class="text-primary">ThemeWagon</a> </p>
+    <p class="mb-0">Copyright © <span th:text="${#calendars.format(#calendars.createNow(),'yyyy')} ?: '2026'">2026</span> Zero. Panel de administración.</p>
   </footer>
 </th:block>
 

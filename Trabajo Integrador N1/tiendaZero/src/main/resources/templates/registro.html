@@ -2,12 +2,25 @@
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Crear cuenta</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crear cuenta - Zero</title>
+    <link rel="icon" type="image/png" th:href="@{/assets/images/favicon.png}">
     <link rel="stylesheet" th:href="@{/css/estilos.css}">
 </head>
 <body>
-<div class="tarjeta">
-    <h1>Crea tu cuenta TiendaZero</h1>
+<header class="barra-superior">
+    <div class="barra-superior__contenido">
+        <a class="marca" th:href="@{/}" aria-label="Ir al inicio">
+            <img th:src="@{/assets/images/logo-zero-white.png}" alt="Zero">
+        </a>
+        <a class="volver-tienda" th:href="@{/}">&larr; Volver a la tienda</a>
+    </div>
+</header>
+
+<main class="contenido-cuenta">
+<section class="tarjeta">
+    <p class="etiqueta">Mi cuenta</p>
+    <h1>Creá tu cuenta</h1>
     <p class="subtitulo">Vas a recibir un código de activación por correo</p>
 
     <p class="mensaje mensaje--error" th:if="${error}" th:text="${error}"></p>
@@ -21,18 +34,19 @@
         <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
 
         <label for="correo">Correo electrónico</label>
-        <input type="email" id="correo" name="correo" required autofocus/>
+        <input type="email" id="correo" name="correo" placeholder="nombre@correo.com" autocomplete="email" required autofocus/>
 
         <label for="clave">Contraseña</label>
-        <input type="password" id="clave" name="clave" required minlength="4"/>
+        <input type="password" id="clave" name="clave" placeholder="Mínimo 4 caracteres" autocomplete="new-password" required minlength="4"/>
 
         <label for="repetirClave">Repetir contraseña</label>
-        <input type="password" id="repetirClave" name="repetirClave" required minlength="4"/>
+        <input type="password" id="repetirClave" name="repetirClave" placeholder="Repetí tu contraseña" autocomplete="new-password" required minlength="4"/>
 
         <button type="submit">Registrarme</button>
     </form>
 
     <p class="enlace-secundario">¿Ya tenés cuenta? <a th:href="@{/login}">Ingresá acá</a></p>
-</div>
+</section>
+</main>
 </body>
 </html>

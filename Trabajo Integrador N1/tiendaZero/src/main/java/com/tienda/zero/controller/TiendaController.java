@@ -10,6 +10,7 @@ import com.tienda.zero.service.VigenciaPrecioService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.security.web.csrf.CsrfToken;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -34,9 +35,12 @@ public class TiendaController {
             @RequestParam(value = "sort", required = false, defaultValue = "latest") String sort,
             @RequestParam(value = "q", required = false) String query,
             @RequestParam(value = "page", required = false, defaultValue = "1") int page,
-            @RequestParam(value = "size", required = false, defaultValue = "6") int size,
+            @RequestParam(value = "size", required = false) Integer size,
+            CsrfToken csrfToken,
             Model model
     ) {
+        csrfToken.getToken();
+
         try {
             // Unificar categorías (soporta tanto 'categoria' como 'category')
             List<String> categoriasFiltro = new java.util.ArrayList<>();
@@ -106,10 +110,11 @@ public class TiendaController {
 
             // 6. Paginación
             int totalItems = allCards.size();
-            int totalPages = Math.max(1, (int) Math.ceil((double) totalItems / size));
+            int pageSize = size != null && size > 0 ? size : Math.max(totalItems, 1);
+            int totalPages = Math.max(1, (int) Math.ceil((double) totalItems / pageSize));
             int validPage = Math.max(1, Math.min(page, totalPages));
-            int fromIndex = (validPage - 1) * size;
-            int toIndex = Math.min(fromIndex + size, totalItems);
+            int fromIndex = (validPage - 1) * pageSize;
+            int toIndex = Math.min(fromIndex + pageSize, totalItems);
 
             List<ProductoCardDTO> pageProducts = (fromIndex < totalItems)
                     ? allCards.subList(fromIndex, toIndex)
@@ -144,7 +149,9 @@ public class TiendaController {
     }
 
     @GetMapping({"/product", "/product/{id}"})
-    public String singleProduct(@PathVariable(required = false) String id, Model model) {
+    public String singleProduct(@PathVariable(required = false) String id, CsrfToken csrfToken, Model model) {
+        csrfToken.getToken();
+
         try {
             if (id != null) {
                 Producto prod = productoService.buscarProducto(id);
@@ -209,9 +216,9 @@ public class TiendaController {
                 .categorySlug(categoria.toLowerCase().replace(" ", "-"))
                 .description(prod.getDescripcion() != null && !prod.getDescripcion().isBlank() 
                         ? prod.getDescripcion() 
-                        : "Indumentaria deportiva oficial Tienda Zero. Diseño de alto rendimiento, confeccionado con materiales de primera calidad.")
+                        : "Indumentaria deportiva oficial Zero. Diseño de alto rendimiento, confeccionado con materiales de primera calidad.")
                 .sku(prod.getCodigo() != null ? prod.getCodigo() : "ZERO-001")
-                .brand("Tienda Zero")
+                .brand("Zero")
                 .talle(prod.getTalle() != null ? prod.getTalle() : "-")
                 .inStock(true)
                 .reviewCount(5)

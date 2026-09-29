@@ -64,8 +64,8 @@
                 <!-- Left section: Logo -->
                 <a th:href="@{/}" href="index.html" class="flex items-center">
                     <div>
-                        <img th:src="@{/assets/images/template-white-logo.png}"
-                            src="assets/images/template-white-logo.png" alt="Logo" class="h-14 w-auto mr-4">
+                        <img th:src="@{/assets/images/logo-zero-white.png}"
+                            src="assets/images/logo-zero-white.png" alt="Zero" class="h-14 w-auto mr-4">
                     </div>
                 </a>
 
@@ -85,7 +85,7 @@
                         <li><a th:href="@{/}" href="index.html" class="hover:text-secondary font-semibold">Home</a></li>
 
                         <!-- Men Dropdown -->
-                        <li class="relative group" x-data="{ open: false }">
+                        <li class="relative group hidden" x-data="{ open: false }">
                             <a th:href="@{/shop}" href="shop.html" @mouseover="open = true" @mouseleave="open = false"
                                 class="hover:text-secondary font-semibold flex items-center">
                                 Men
@@ -120,7 +120,7 @@
                         </li>
 
                         <!-- Women Dropdown -->
-                        <li class="relative group" x-data="{ open: false }">
+                        <li class="relative group hidden" x-data="{ open: false }">
                             <a th:href="@{/shop}" href="shop.html" @mouseover="open = true" @mouseleave="open = false"
                                 class="hover:text-secondary font-semibold flex items-center">
                                 Women
@@ -149,12 +149,6 @@
 
                         <li><a th:href="@{/shop}" href="shop.html" class="hover:text-secondary font-semibold">Shop</a>
                         </li>
-                        <li><a th:href="@{/product}" href="single-product-page.html"
-                                class="hover:text-secondary font-semibold">Product</a></li>
-                        <li><a th:href="@{/404}" href="404.html" class="hover:text-secondary font-semibold">404 page</a>
-                        </li>
-                        <li><a th:href="@{/checkout}" href="checkout.html"
-                                class="hover:text-secondary font-semibold">Checkout</a></li>
                     </ul>
                 </nav>
 
@@ -260,7 +254,7 @@
                 <li><a th:href="@{/}" href="index.html" class="hover:text-secondary font-bold block py-2">Home</a></li>
 
                 <!-- Men Dropdown -->
-                <li class="relative group" x-data="{ open: false }">
+                <li class="relative group hidden" x-data="{ open: false }">
                     <a @click="open = !open; $event.preventDefault()"
                         class="hover:text-secondary font-bold  py-2 flex justify-center items-center cursor-pointer">
                         <span>Men</span>
@@ -282,7 +276,7 @@
                 </li>
 
                 <!-- Women Dropdown -->
-                <li class="relative group" x-data="{ open: false }">
+                <li class="relative group hidden" x-data="{ open: false }">
                     <a @click="open = !open; $event.preventDefault()"
                         class="hover:text-secondary font-bold py-2 flex justify-center items-center cursor-pointer">
                         <span>Women</span>
@@ -305,12 +299,6 @@
 
                 <li><a th:href="@{/shop}" href="shop.html" class="hover:text-secondary font-bold block py-2">Shop</a>
                 </li>
-                <li><a th:href="@{/product}" href="single-product-page.html"
-                        class="hover:text-secondary font-bold block py-2">Product</a></li>
-                <li><a th:href="@{/404}" href="404.html" class="hover:text-secondary font-bold block py-2">404 page</a>
-                </li>
-                <li><a th:href="@{/checkout}" href="checkout.html"
-                        class="hover:text-secondary font-bold block py-2">Checkout</a></li>
             </ul>
             <div class="flex flex-col mt-6 space-y-2 items-center w-full px-4">
                 <div sec:authorize="isAnonymous()" class="flex flex-col space-y-2 w-full items-center">
@@ -429,8 +417,8 @@
                     <!-- Contact Information -->
                     <div class="w-full sm:w-2/6 px-4 mb-8">
                         <h3 class="text-lg font-semibold mb-4">Contact Us</h3>
-                        <p><img th:src="@{/assets/images/template-logo.png}" src="assets/images/template-logo.png"
-                                alt="Logo" class="h-[60px] mb-4"></p>
+                        <p><img th:src="@{/assets/images/logo-zero-black.png}" src="assets/images/logo-zero-black.png"
+                                alt="Zero" class="h-[60px] mb-4"></p>
                         <p>123 Street Name, Paris, France</p>
                         <p class="text-xl font-bold my-4">Phone: (123) 456-7890</p>
                         <a href="mailto:info@company.com" class="underline">Email: info@company.com</a>
@@ -481,7 +469,7 @@
     <!-- ======================================================= -->
     <div th:fragment="productCard(product)" class="bg-white p-3 rounded-lg shadow-lg" th:if="${product != null}">
         <img th:src="@{${product.imageUrl}}" src="/assets/images/products/1.jpg" th:alt="${product.name}" alt="Product"
-            class="w-full object-cover mb-4 rounded-lg">
+            class="product-image-square mb-4 rounded-lg">
         <a th:href="@{'/product/' + ${product.id}}" href="single-product-page.html" th:text="${product.name}"
             class="text-lg font-semibold mb-2">Product name</a>
         <p class="my-2" th:text="${product.category}">Category</p>

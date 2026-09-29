@@ -12,11 +12,11 @@ import java.sql.Date;
 @Service
 public class RegistroServiceImpl implements RegistroService {
 
-    private static final String ASUNTO_POR_DEFECTO = "Activá tu cuenta en TiendaZero";
+    private static final String ASUNTO_POR_DEFECTO = "Activá tu cuenta en Zero";
     private static final String CUERPO_POR_DEFECTO = """
             <html>
               <body style="font-family: Arial, sans-serif;">
-                <h2>¡Bienvenido/a a TiendaZero!</h2>
+                <h2>¡Bienvenido/a a Zero!</h2>
                 <p>Para activar tu cuenta ingresá el siguiente código en la página de activación:</p>
                 <h1 style="letter-spacing: 4px;">{{CODIGO}}</h1>
                 <p>Página de activación: <a href="{{LINK}}">{{LINK}}</a></p>

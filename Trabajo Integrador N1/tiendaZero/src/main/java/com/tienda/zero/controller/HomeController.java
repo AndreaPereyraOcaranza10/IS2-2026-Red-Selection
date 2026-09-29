@@ -6,6 +6,7 @@ import com.tienda.zero.model.VigenciaPrecio;
 import com.tienda.zero.service.ProductoService;
 import com.tienda.zero.service.VigenciaPrecioService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.web.csrf.CsrfToken;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -21,7 +22,9 @@ public class HomeController {
     private final VigenciaPrecioService vigenciaPrecioService;
 
     @GetMapping({"/", "/index", "/index.html"})
-    public String index(Model model) {
+    public String index(CsrfToken csrfToken, Model model) {
+        csrfToken.getToken();
+
         try {
             List<Producto> productosActivos = productoService.listarProductoActivo();
 
@@ -73,9 +76,9 @@ public class HomeController {
                 .categorySlug(categoria.toLowerCase().replace(" ", "-"))
                 .description(prod.getDescripcion() != null && !prod.getDescripcion().isBlank() 
                         ? prod.getDescripcion() 
-                        : "Indumentaria deportiva oficial Tienda Zero.")
+                        : "Indumentaria deportiva oficial Zero.")
                 .sku(prod.getCodigo() != null ? prod.getCodigo() : "ZERO-001")
-                .brand("Tienda Zero")
+                .brand("Zero")
                 .talle(prod.getTalle() != null ? prod.getTalle() : "-")
                 .inStock(true)
                 .reviewCount(5)

@@ -2,7 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org">
 
 <head>
-    <title th:text="'Single product page'">Single product page</title>
+    <title th:text="'Producto - Zero'">Producto - Zero</title>
     <th:block th:replace="~{tienda/fragments/fragments :: head-assets}"></th:block>
 </head>
 
@@ -39,7 +39,7 @@
                             <!-- Big Image -->
                             <div id="main-image-container">
                                 <img id="main-image"
-                                    class="h-auto w-full max-w-full rounded-lg object-cover object-center md:h-[480px]"
+                                    class="product-image-square rounded-lg"
                                     th:src="@{${product.mainImageUrl}}"
                                     src="/assets/images/products/1.jpg"
                                     alt="Main Product Image" />
@@ -51,49 +51,50 @@
                                 de imagen principal, así que no hace falta tocar el JS.
                             -->
                             <div class="grid grid-cols-5 gap-4">
-                                <div th:each="imageUrl : ${product.galleryImages}">
+                                <div class="aspect-square overflow-hidden rounded-lg bg-gray-50 p-1"
+                                    th:each="imageUrl : ${product.galleryImages}">
                                     <img onclick="changeImage(this)"
                                     th:attr="data-full=@{${imageUrl}}"
                                     th:src="@{${imageUrl}}"
                                     src="/assets/images/single-product/1.jpg"
-                                    class="object-cover object-center max-h-30 max-w-full rounded-lg cursor-pointer"
+                                    class="product-image-square cursor-pointer rounded-lg"
                                     alt="Gallery Image" />
                                 </div>
                                 <!-- Fallback estático (se ve solo si "product" todavía no está en el modelo) -->
                                 <th:block th:if="${product == null}">
-                                    <div>
+                                    <div class="aspect-square overflow-hidden rounded-lg bg-gray-50 p-1">
                                         <img onclick="changeImage(this)"
                                         data-full="/assets/images/single-product/1.jpg"
                                         src="/assets/images/single-product/1.jpg"
-                                        class="object-cover object-center max-h-30 max-w-full rounded-lg cursor-pointer"
+                                        class="product-image-square cursor-pointer rounded-lg"
                                         alt="Gallery Image 1" />
                                     </div>
-                                    <div>
+                                    <div class="aspect-square overflow-hidden rounded-lg bg-gray-50 p-1">
                                         <img onclick="changeImage(this)"
                                         data-full="/assets/images/single-product/2.jpg"
                                         src="/assets/images/single-product/2.jpg"
-                                        class="object-cover object-center max-h-30 max-w-full rounded-lg cursor-pointer"
+                                        class="product-image-square cursor-pointer rounded-lg"
                                         alt="Gallery Image 2" />
                                     </div>
-                                    <div>
+                                    <div class="aspect-square overflow-hidden rounded-lg bg-gray-50 p-1">
                                         <img onclick="changeImage(this)"
                                         data-full="/assets/images/single-product/3.jpg"
                                         src="/assets/images/single-product/3.jpg"
-                                        class="object-cover object-center max-h-30 max-w-full rounded-lg cursor-pointer"
+                                        class="product-image-square cursor-pointer rounded-lg"
                                         alt="Gallery Image 3" />
                                     </div>
-                                    <div>
+                                    <div class="aspect-square overflow-hidden rounded-lg bg-gray-50 p-1">
                                         <img onclick="changeImage(this)"
                                         data-full="/assets/images/single-product/4.jpg"
                                         src="/assets/images/single-product/4.jpg"
-                                        class="object-cover object-center max-h-30 max-w-full rounded-lg cursor-pointer"
+                                        class="product-image-square cursor-pointer rounded-lg"
                                         alt="Gallery Image 4" />
                                     </div>
-                                    <div>
+                                    <div class="aspect-square overflow-hidden rounded-lg bg-gray-50 p-1">
                                         <img onclick="changeImage(this)"
                                         data-full="/assets/images/single-product/5.jpg"
                                         src="/assets/images/single-product/5.jpg"
-                                        class="object-cover object-center max-h-30 max-w-full rounded-lg cursor-pointer"
+                                        class="product-image-square cursor-pointer rounded-lg"
                                         alt="Gallery Image 5" />
                                     </div>
                                 </th:block>
@@ -362,10 +363,10 @@
                                 <h3 class="text-lg font-semibold mb-4">Customer Reviews</h3>
                                 <div id="reviews-list">
                                     <!--
-                                        th:each sobre product.reviews (List<Review>: authorName, rating, comment).
+                                        Si el controlador incorpora una lista "reviews", se renderiza aquí.
                                         El separador "border-t" se agrega a todos menos al primero con th:classappend.
                                     -->
-                                    <div th:each="review, iterStat : ${product.reviews}"
+                                    <div th:each="review, iterStat : ${reviews}"
                                          th:classappend="${iterStat.first} ? '' : 'border-t border-gray-line'"
                                          class="py-4">
                                         <div class="flex items-center mb-2">
@@ -471,7 +472,7 @@
                 <th:block th:if="${relatedProducts == null}">
                     <div class="w-full sm:w-1/2 lg:w-1/4 px-4 mb-8">
                       <div class="bg-white p-3 rounded-lg shadow-lg">
-                        <img src="assets/images/products/5.jpg" alt="Product 1" class="w-full object-cover mb-4 rounded-lg">
+                        <img src="assets/images/products/5.jpg" alt="Product 1" class="product-image-square mb-4 rounded-lg">
                         <a href="#" class="text-lg font-semibold mb-2">Blue women's suit</a>
                         <p class=" my-2">Women</p>
                         <div class="flex items-center mb-4">
@@ -483,7 +484,7 @@
                     </div>
                     <div class="w-full sm:w-1/2 lg:w-1/4 px-4 mb-8">
                       <div class="bg-white p-3 rounded-lg shadow-lg">
-                        <img src="assets/images/products/6.jpg" alt="Product 2" class="w-full object-cover mb-4 rounded-lg">
+                        <img src="assets/images/products/6.jpg" alt="Product 2" class="product-image-square mb-4 rounded-lg">
                         <a href="#" class="text-lg font-semibold mb-2">White shirt with long sleeves</a>
                         <p class=" my-2">Women</p>
                         <div class="flex items-center mb-4">
@@ -494,7 +495,7 @@
                     </div>
                     <div class="w-full sm:w-1/2 lg:w-1/4 px-4 mb-8">
                       <div class="bg-white p-3 rounded-lg shadow-lg">
-                        <img src="assets/images/products/7.jpg" alt="Product 3" class="w-full object-cover mb-4 rounded-lg">
+                        <img src="assets/images/products/7.jpg" alt="Product 3" class="product-image-square mb-4 rounded-lg">
                         <a href="#" class="text-lg font-semibold mb-2">Yellow men's suit</a>
                         <p class="my-2">Men</p>
                         <div class="flex items-center mb-4">
@@ -506,7 +507,7 @@
                     </div>
                     <div class="w-full sm:w-1/2 lg:w-1/4 px-4 mb-8">
                       <div class="bg-white p-3 rounded-lg shadow-lg">
-                        <img src="assets/images/products/8.jpg" alt="Product 4" class="w-full object-cover mb-4 rounded-lg">
+                        <img src="assets/images/products/8.jpg" alt="Product 4" class="product-image-square mb-4 rounded-lg">
                         <a href="#" class="text-lg font-semibold mb-2">Red dress</a>
                         <p class="my-2">Women</p>
                         <div class="flex items-center mb-4">
