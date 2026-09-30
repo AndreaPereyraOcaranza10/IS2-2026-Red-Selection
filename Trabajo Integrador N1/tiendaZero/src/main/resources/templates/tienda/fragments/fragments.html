@@ -82,13 +82,13 @@
                 <!-- Center section: Menu -->
                 <nav class="store-header__nav hidden lg:flex md:flex-grow justify-center">
                     <ul class="flex justify-center space-x-4 text-white">
-                        <li><a th:href="@{/}" href="index.html" class="hover:text-secondary font-semibold">Home</a></li>
+                        <li><a th:href="@{/}" href="index.html" class="hover:text-secondary font-semibold">Inicio</a></li>
 
                         <!-- Men Dropdown -->
                         <li class="relative group hidden" x-data="{ open: false }">
                             <a th:href="@{/shop}" href="shop.html" @mouseover="open = true" @mouseleave="open = false"
                                 class="hover:text-secondary font-semibold flex items-center">
-                                Men
+                                Hombres
                                 <i
                                     :class="open ? 'fas fa-chevron-up ml-1 text-xs' : 'fas fa-chevron-down ml-1 text-xs'"></i>
                             </a>
@@ -104,18 +104,15 @@
                               Sugerencia: si tenés categorías dinámicas, reemplazá estos 3 <li>
                               por un th:each, ej:
                               <li th:each="cat : ${menCategories}">
-                                  <a th:href="@{/shop(category=${cat.slug})}" th:text="${cat.name}">Men Item</a>
+                                  <a th:href="@{/shop(categoria=${cat.name})}" th:text="${cat.name}">Categoría</a>
                               </li>
                           -->
                                 <li><a th:href="@{/shop}" href="shop.html"
-                                        class="min-w-40 block px-4 py-2 hover:bg-primary hover:text-white rounded">Men
-                                        Item 1</a></li>
+                                        class="min-w-40 block px-4 py-2 hover:bg-primary hover:text-white rounded">Novedades</a></li>
                                 <li><a th:href="@{/shop}" href="shop.html"
-                                        class="min-w-40 block px-4 py-2 hover:bg-primary hover:text-white rounded">Men
-                                        Item 2</a></li>
+                                        class="min-w-40 block px-4 py-2 hover:bg-primary hover:text-white rounded">Indumentaria</a></li>
                                 <li><a th:href="@{/shop}" href="shop.html"
-                                        class="min-w-40 block px-4 py-2 hover:bg-primary hover:text-white rounded">Men
-                                        Item 3</a></li>
+                                        class="min-w-40 block px-4 py-2 hover:bg-primary hover:text-white rounded">Accesorios</a></li>
                             </ul>
                         </li>
 
@@ -123,7 +120,7 @@
                         <li class="relative group hidden" x-data="{ open: false }">
                             <a th:href="@{/shop}" href="shop.html" @mouseover="open = true" @mouseleave="open = false"
                                 class="hover:text-secondary font-semibold flex items-center">
-                                Women
+                                Mujeres
                                 <i
                                     :class="open ? 'fas fa-chevron-up ml-1 text-xs' : 'fas fa-chevron-down ml-1 text-xs'"></i>
                             </a>
@@ -136,18 +133,15 @@
                                 x-transition:leave-start="opacity-100 scale-100"
                                 x-transition:leave-end="opacity-0 scale-90">
                                 <li><a th:href="@{/shop}" href="shop.html"
-                                        class="min-w-40 block px-4 py-2 hover:bg-primary hover:text-white rounded">Women
-                                        Item 1</a></li>
+                                        class="min-w-40 block px-4 py-2 hover:bg-primary hover:text-white rounded">Novedades</a></li>
                                 <li><a th:href="@{/shop}" href="shop.html"
-                                        class="min-w-40 block px-4 py-2 hover:bg-primary hover:text-white rounded">Women
-                                        Item 2</a></li>
+                                        class="min-w-40 block px-4 py-2 hover:bg-primary hover:text-white rounded">Indumentaria</a></li>
                                 <li><a th:href="@{/shop}" href="shop.html"
-                                        class="min-w-40 block px-4 py-2 hover:bg-primary hover:text-white rounded">Women
-                                        Item 3</a></li>
+                                        class="min-w-40 block px-4 py-2 hover:bg-primary hover:text-white rounded">Accesorios</a></li>
                             </ul>
                         </li>
 
-                        <li><a th:href="@{/shop}" href="shop.html" class="hover:text-secondary font-semibold">Shop</a>
+                        <li><a th:href="@{/shop}" href="shop.html" class="hover:text-secondary font-semibold">Tienda</a>
                         </li>
                     </ul>
                 </nav>
@@ -156,9 +150,9 @@
                 <div class="store-header__actions hidden lg:flex items-center gap-2 relative">
                     <th:block sec:authorize="isAnonymous()">
                         <a th:href="@{/registro}"
-                            class="bg-primary border border-primary hover:bg-transparent text-white hover:text-primary font-semibold px-4 py-2 rounded-full inline-block text-sm">Register</a>
+                            class="bg-primary border border-primary hover:bg-transparent text-white hover:text-primary font-semibold px-4 py-2 rounded-full inline-block text-sm">Crear cuenta</a>
                         <a th:href="@{/login}"
-                            class="bg-transparent border border-white hover:bg-white text-white hover:text-gray-900 font-semibold px-4 py-2 rounded-full inline-block text-sm">Login</a>
+                            class="bg-transparent border border-white hover:bg-white text-white hover:text-gray-900 font-semibold px-4 py-2 rounded-full inline-block text-sm">Ingresar</a>
                     </th:block>
 
                     <th:block sec:authorize="isAuthenticated()">
@@ -197,8 +191,8 @@
                                         <img th:src="@{${cartItem.imageUrl}}" src="/assets/images/single-product/1.jpg"
                                             alt="Product" class="h-12 w-12 object-cover rounded mr-2">
                                         <div>
-                                            <p class="font-semibold" th:text="${cartItem.name}">Summer black dress</p>
-                                            <p class="text-sm">Quantity: <span th:text="${cartItem.quantity}">1</span>
+                                            <p class="font-semibold" th:text="${cartItem.name}">Vestido negro de verano</p>
+                                            <p class="text-sm">Cantidad: <span th:text="${cartItem.quantity}">1</span>
                                             </p>
                                         </div>
                                     </div>
@@ -211,8 +205,8 @@
                                         <img src="/assets/images/single-product/1.jpg" alt="Product"
                                             class="h-12 w-12 object-cover rounded mr-2">
                                         <div>
-                                            <p class="font-semibold">Summer black dress</p>
-                                            <p class="text-sm">Quantity: 1</p>
+                                            <p class="font-semibold">Vestido negro de verano</p>
+                                            <p class="text-sm">Cantidad: 1</p>
                                         </div>
                                     </div>
                                     <p class="font-semibold">$25.00</p>
@@ -222,27 +216,26 @@
                                         <img src="/assets/images/single-product/2.jpg" alt="Product"
                                             class="h-12 w-12 object-cover rounded mr-2">
                                         <div>
-                                            <p class="font-semibold">Black suit</p>
-                                            <p class="text-sm">Quantity: 1</p>
+                                            <p class="font-semibold">Conjunto negro</p>
+                                            <p class="text-sm">Cantidad: 1</p>
                                         </div>
                                     </div>
                                     <p class="font-semibold">$125.00</p>
                                 </div>
                             </div>
                             <a th:href="@{/cart}" href="/cart.html"
-                                class="block text-center mt-4 border border-primary bg-primary hover:bg-transparent text-white hover:text-primary py-2 rounded-full font-semibold">Go
-                                to Cart</a>
+                                class="block text-center mt-4 border border-primary bg-primary hover:bg-transparent text-white hover:text-primary py-2 rounded-full font-semibold">Ver carrito</a>
                         </div>
                     </div>
                     <a id="search-icon" href="javascript:void(0);" aria-label="Buscar" class="store-header__icon-button group">
-                        <img th:src="@{/assets/images/search-icon.svg}" src="assets/images/search-icon.svg" alt="Search"
+                        <img th:src="@{/assets/images/search-icon.svg}" src="assets/images/search-icon.svg" alt="Buscar"
                             class="h-6 w-6 transition-transform transform group-hover:scale-120">
                     </a>
                     <!-- Search field -->
                     <div id="search-field"
                         class="hidden absolute top-full right-0 mt-2 w-full bg-white shadow-lg p-2 rounded">
                         <input type="text" name="q" class="w-full p-2 border border-gray-300 rounded"
-                            placeholder="Search for products...">
+                            placeholder="Buscar productos...">
                     </div>
                 </div>
             </div>
@@ -251,13 +244,13 @@
         <!-- Mobile menu -->
         <nav id="mobile-menu-placeholder" class="mobile-menu hidden flex-col items-center space-y-8 lg:hidden">
             <ul class="w-full">
-                <li><a th:href="@{/}" href="index.html" class="hover:text-secondary font-bold block py-2">Home</a></li>
+                <li><a th:href="@{/}" href="index.html" class="hover:text-secondary font-bold block py-2">Inicio</a></li>
 
                 <!-- Men Dropdown -->
                 <li class="relative group hidden" x-data="{ open: false }">
                     <a @click="open = !open; $event.preventDefault()"
                         class="hover:text-secondary font-bold  py-2 flex justify-center items-center cursor-pointer">
-                        <span>Men</span>
+                        <span>Hombres</span>
                         <span @click.stop="open = !open">
                             <i
                                 :class="open ? 'fas fa-chevron-up text-xs ml-2' : 'fas fa-chevron-down text-xs ml-2'"></i>
@@ -265,13 +258,13 @@
                     </a>
                     <ul class="mobile-dropdown-menu space-y-2" x-show="open" x-transition>
                         <li><a th:href="@{/shop}" href="shop.html"
-                                class="hover:text-secondary font-bold block pt-2 pb-3">Shop Men</a></li>
+                                class="hover:text-secondary font-bold block pt-2 pb-3">Ver colección</a></li>
                         <li><a th:href="@{/product}" href="single-product-page.html"
-                                class="hover:text-secondary font-bold block py-2">Men item 1</a></li>
+                                class="hover:text-secondary font-bold block py-2">Novedades para hombre</a></li>
                         <li><a th:href="@{/product}" href="single-product-page.html"
-                                class="hover:text-secondary font-bold block py-2">Men item 2</a></li>
+                                class="hover:text-secondary font-bold block py-2">Indumentaria</a></li>
                         <li><a th:href="@{/product}" href="single-product-page.html"
-                                class="hover:text-secondary font-bold block py-2">Men item 3</a></li>
+                                class="hover:text-secondary font-bold block py-2">Accesorios</a></li>
                     </ul>
                 </li>
 
@@ -279,7 +272,7 @@
                 <li class="relative group hidden" x-data="{ open: false }">
                     <a @click="open = !open; $event.preventDefault()"
                         class="hover:text-secondary font-bold py-2 flex justify-center items-center cursor-pointer">
-                        <span>Women</span>
+                        <span>Mujeres</span>
                         <span @click.stop="open = !open">
                             <i
                                 :class="open ? 'fas fa-chevron-up text-xs ml-2' : 'fas fa-chevron-down text-xs ml-2'"></i>
@@ -287,25 +280,25 @@
                     </a>
                     <ul class="mobile-dropdown-menu pl-4 space-y-2" x-show="open" x-transition>
                         <li><a th:href="@{/shop}" href="shop.html"
-                                class="hover:text-secondary font-bold block py-2">Shop Women</a></li>
+                                class="hover:text-secondary font-bold block py-2">Ver colección</a></li>
                         <li><a th:href="@{/product}" href="single-product-page.html"
-                                class="hover:text-secondary font-bold block py-2">Women item 1</a></li>
+                                class="hover:text-secondary font-bold block py-2">Novedades para mujer</a></li>
                         <li><a th:href="@{/product}" href="single-product-page.html"
-                                class="hover:text-secondary font-bold block py-2">Women item 2</a></li>
+                                class="hover:text-secondary font-bold block py-2">Indumentaria</a></li>
                         <li><a th:href="@{/product}" href="single-product-page.html"
-                                class="hover:text-secondary font-bold block py-2">Women item 3</a></li>
+                                class="hover:text-secondary font-bold block py-2">Accesorios</a></li>
                     </ul>
                 </li>
 
-                <li><a th:href="@{/shop}" href="shop.html" class="hover:text-secondary font-bold block py-2">Shop</a>
+                <li><a th:href="@{/shop}" href="shop.html" class="hover:text-secondary font-bold block py-2">Tienda</a>
                 </li>
             </ul>
             <div class="flex flex-col mt-6 space-y-2 items-center w-full px-4">
                 <div sec:authorize="isAnonymous()" class="flex flex-col space-y-2 w-full items-center">
                     <a th:href="@{/registro}"
-                        class="bg-primary hover:bg-transparent text-white hover:text-primary border border-primary font-semibold px-4 py-2 rounded-full flex items-center justify-center w-full max-w-[200px]">Register</a>
+                        class="bg-primary hover:bg-transparent text-white hover:text-primary border border-primary font-semibold px-4 py-2 rounded-full flex items-center justify-center w-full max-w-[200px]">Crear cuenta</a>
                     <a th:href="@{/login}"
-                        class="bg-transparent hover:bg-white text-white hover:text-gray-900 border border-white font-semibold px-4 py-2 rounded-full flex items-center justify-center w-full max-w-[200px]">Login</a>
+                        class="bg-transparent hover:bg-white text-white hover:text-gray-900 border border-white font-semibold px-4 py-2 rounded-full flex items-center justify-center w-full max-w-[200px]">Ingresar</a>
                 </div>
                 <div sec:authorize="isAuthenticated()" class="flex flex-col space-y-2 w-full items-center">
                     <a sec:authorize="hasAnyRole('ADMINISTRATIVO','JEFE')" th:href="@{/admin}"
@@ -319,13 +312,12 @@
                     </form>
                 </div>
                 <a th:href="@{/cart}"
-                    class="bg-primary hover:bg-transparent text-white hover:text-primary border border-primary font-semibold px-4 py-2 rounded-full flex items-center justify-center w-full max-w-[200px]">Cart
-                    -&nbsp;<span th:text="${cartItemCount ?: 0}">0</span>&nbsp;items</a>
+                    class="bg-primary hover:bg-transparent text-white hover:text-primary border border-primary font-semibold px-4 py-2 rounded-full flex items-center justify-center w-full max-w-[200px]">Carrito ·&nbsp;<span th:text="${cartItemCount ?: 0}">0</span>&nbsp;productos</a>
             </div>
             <!-- Search field -->
             <div class="  top-full right-0 mt-2 w-full bg-white shadow-lg p-2 rounded">
                 <input type="text" name="q" class="w-full p-2 border border-gray-300 rounded"
-                    placeholder="Search for products...">
+                    placeholder="Buscar productos...">
             </div>
         </nav>
 
@@ -343,44 +335,44 @@
                 <div class="flex flex-wrap -mx-4">
                     <!-- Menu 1 -->
                     <div class="w-full sm:w-1/6 px-4 mb-8">
-                        <h3 class="text-lg font-semibold mb-4">Shop</h3>
+                        <h3 class="text-lg font-semibold mb-4">Tienda</h3>
                         <ul>
-                            <li><a th:href="@{/shop}" href="/shop.html" class="hover:text-primary">Shop</a></li>
+                            <li><a th:href="@{/shop}" href="/shop.html" class="hover:text-primary">Ver todos</a></li>
                             <li><a th:href="@{/product}" href="/single-product-page.html"
-                                    class="hover:text-primary">Women</a></li>
-                            <li><a th:href="@{/shop}" href="/shop.html" class="hover:text-primary">Men</a></li>
+                                    class="hover:text-primary">Mujeres</a></li>
+                            <li><a th:href="@{/shop}" href="/shop.html" class="hover:text-primary">Hombres</a></li>
                             <li><a th:href="@{/product}" href="/single-product-page.html"
-                                    class="hover:text-primary">Shoes</a></li>
+                                    class="hover:text-primary">Calzado</a></li>
                             <li><a th:href="@{/product}" href="/single-product-page.html"
-                                    class="hover:text-primary">Accessories</a></li>
+                                    class="hover:text-primary">Accesorios</a></li>
                         </ul>
                     </div>
                     <!-- Menu 2 -->
                     <div class="w-full sm:w-1/6 px-4 mb-8">
-                        <h3 class="text-lg font-semibold mb-4">Pages</h3>
+                        <h3 class="text-lg font-semibold mb-4">Enlaces</h3>
                         <ul>
-                            <li><a th:href="@{/shop}" href="/shop.html" class="hover:text-primary">Shop</a></li>
+                            <li><a th:href="@{/shop}" href="/shop.html" class="hover:text-primary">Tienda</a></li>
                             <li><a th:href="@{/product}" href="/single-product-page.html"
-                                    class="hover:text-primary">Product</a></li>
-                            <li><a th:href="@{/checkout}" href="/checkout.html" class="hover:text-primary">Checkout</a>
+                                    class="hover:text-primary">Productos</a></li>
+                            <li><a th:href="@{/checkout}" href="/checkout.html" class="hover:text-primary">Finalizar compra</a>
                             </li>
                             <li><a th:href="@{/404}" href="/404.html" class="hover:text-primary">404</a></li>
                         </ul>
                     </div>
                     <!-- Menu 3 -->
                     <div class="w-full sm:w-1/6 px-4 mb-8">
-                        <h3 class="text-lg font-semibold mb-4">Account</h3>
+                        <h3 class="text-lg font-semibold mb-4">Mi cuenta</h3>
                         <ul>
-                            <li><a th:href="@{/cart}" href="/cart.html" class="hover:text-primary">Cart</a></li>
+                            <li><a th:href="@{/cart}" href="/cart.html" class="hover:text-primary">Carrito</a></li>
                             <li><a th:href="@{/registro}" href="/registro"
-                                    class="hover:text-primary">Registration</a></li>
-                            <li><a th:href="@{/registro}" href="/registro" class="hover:text-primary">Login</a>
+                                    class="hover:text-primary">Crear cuenta</a></li>
+                            <li><a th:href="@{/login}" href="/login" class="hover:text-primary">Ingresar</a>
                             </li>
                         </ul>
                     </div>
                     <!-- Social Media -->
                     <div class="w-full sm:w-1/6 px-4 mb-8">
-                        <h3 class="text-lg font-semibold mb-4">Follow Us</h3>
+                        <h3 class="text-lg font-semibold mb-4">Seguinos</h3>
                         <ul>
                             <li class="flex items-center mb-2">
                                 <img th:src="@{/assets/images/social_icons/facebook.svg}"
@@ -402,13 +394,13 @@
                             </li>
                             <li class="flex items-center mb-2">
                                 <img th:src="@{/assets/images/social_icons/pinterest.svg}"
-                                    src="/assets/images/social_icons/pinterest.svg" alt="Instagram"
+                                    src="/assets/images/social_icons/pinterest.svg" alt="Pinterest"
                                     class="w-4 h-4 transition-transform transform hover:scale-110 mr-2">
                                 <a href="#" class="hover:text-primary">Pinterest</a>
                             </li>
                             <li class="flex items-center mb-2">
                                 <img th:src="@{/assets/images/social_icons/youtube.svg}"
-                                    src="/assets/images/social_icons/youtube.svg" alt="Instagram"
+                                    src="/assets/images/social_icons/youtube.svg" alt="YouTube"
                                     class="w-4 h-4 transition-transform transform hover:scale-110 mr-2">
                                 <a href="#" class="hover:text-primary">YouTube</a>
                             </li>
@@ -416,12 +408,11 @@
                     </div>
                     <!-- Contact Information -->
                     <div class="w-full sm:w-2/6 px-4 mb-8">
-                        <h3 class="text-lg font-semibold mb-4">Contact Us</h3>
+                        <h3 class="text-lg font-semibold mb-4">Zero, en movimiento</h3>
                         <p><img th:src="@{/assets/images/logo-zero-black.png}" src="assets/images/logo-zero-black.png"
                                 alt="Zero" class="h-[60px] mb-4"></p>
-                        <p>123 Street Name, Paris, France</p>
-                        <p class="text-xl font-bold my-4">Phone: (123) 456-7890</p>
-                        <a href="mailto:info@company.com" class="underline">Email: info@company.com</a>
+                        <p>Indumentaria deportiva para acompañarte todos los días.</p>
+                        <p class="my-4">Comodidad, movimiento y estilo en una sola colección.</p>
                     </div>
                 </div>
             </div>
@@ -432,17 +423,13 @@
                     <!-- Copyright and Links -->
                     <div class="w-full lg:w-3/4 text-center lg:text-left mb-4 lg:mb-0">
                         <p class="mb-2 font-bold">&copy; <span
-                                th:text="${#calendars.format(#calendars.createNow(),'yyyy')} ?: '2024'">2024</span> Your
-                            Company. All rights reserved by <a href="https://github.com/spacemadev" target="_blank"
-                                style="color: green;">Maksim M</a> • Distributed by <a href="https://themewagon.com/"
-                                target="_blank" style="color: green;font-weight: bold;">ThemeWagon</a></p>
+                                th:text="${#calendars.format(#calendars.createNow(),'yyyy')} ?: '2024'">2024</span> Zero. Todos los derechos reservados.</p>
                         <ul class="flex justify-center lg:justify-start space-x-4 mb-4 lg:mb-0">
-                            <li><a href="#" class="hover:text-primary">Privacy Policy</a></li>
-                            <li><a href="#" class="hover:text-primary">Terms of Service</a></li>
-                            <li><a href="#" class="hover:text-primary">FAQ</a></li>
+                            <li><a th:href="@{/}" href="/" class="hover:text-primary">Privacidad</a></li>
+                            <li><a th:href="@{/}" href="/" class="hover:text-primary">Términos y condiciones</a></li>
+                            <li><a th:href="@{/shop}" href="/shop" class="hover:text-primary">Ayuda</a></li>
                         </ul>
-                        <p class="text-sm mt-4">Your shop's description goes here. This is a brief introduction to your
-                            shop and what you offer.</p>
+                        <p class="text-sm mt-4">Descubrí prendas y accesorios deportivos diseñados para moverse con vos.</p>
                     </div>
                     <!-- Payment Icons -->
                     <div class="w-full lg:w-1/4 text-center lg:text-right">
@@ -468,11 +455,11 @@
     <!-- (product.oldPrice puede ser null si no hay descuento)      -->
     <!-- ======================================================= -->
     <div th:fragment="productCard(product)" class="store-product-card bg-white p-3 rounded-lg shadow-lg" th:if="${product != null}">
-        <img th:src="@{${product.imageUrl}}" src="/assets/images/products/1.jpg" th:alt="${product.name}" alt="Product"
+        <img th:src="@{${product.imageUrl}}" src="/assets/images/products/1.jpg" th:alt="${product.name}" alt="Producto"
             class="store-product-card__image product-image-square mb-4 rounded-lg">
         <a th:href="@{'/product/' + ${product.id}}" href="single-product-page.html" th:text="${product.name}"
-            class="store-product-card__title text-lg font-semibold mb-2">Product name</a>
-        <p class="store-product-card__category my-2" th:text="${product.category}">Category</p>
+            class="store-product-card__title text-lg font-semibold mb-2">Nombre del producto</a>
+        <p class="store-product-card__category my-2" th:text="${product.category}">Categoría</p>
         <div class="store-product-card__price flex items-center mb-4">
             <span class="text-lg font-bold text-primary" th:text="${'$' + product.price}">$19.99</span>
             <span class="text-sm line-through ml-2" th:if="${product.oldPrice != null}"
@@ -482,8 +469,7 @@
         <form class="store-product-card__form" th:action="@{/cart/add}" method="post">
             <input type="hidden" name="productId" th:value="${product.id}">
             <button type="submit"
-                class="bg-primary border border-transparent hover:bg-transparent hover:border-primary text-white hover:text-primary font-semibold py-2 px-4 rounded-full w-full">Add
-                to Cart</button>
+                class="bg-primary border border-transparent hover:bg-transparent hover:border-primary text-white hover:text-primary font-semibold py-2 px-4 rounded-full w-full">Agregar al carrito</button>
         </form>
     </div>
 

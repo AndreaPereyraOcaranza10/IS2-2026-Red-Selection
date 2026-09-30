@@ -15,7 +15,15 @@
         <article th:each="pedido : ${orders}" class="border rounded-lg p-5 mb-4">
             <div class="flex flex-wrap justify-between gap-2">
                 <strong>Orden <span th:text="${pedido.identificadorCompra}">id</span></strong>
-                <span class="rounded bg-gray-100 px-3 py-1" th:text="${pedido.estadoOrdenCompra}">PENDIENTE_ENVIO</span>
+                <span class="rounded bg-gray-100 px-3 py-1" th:switch="${pedido.estadoOrdenCompra.name()}">
+                    <span th:case="'PENDIENTE_COMPLETAR'">Pendiente de completar</span>
+                    <span th:case="'PENDIENTE_PAGO'">Pendiente de pago</span>
+                    <span th:case="'PENDIENTE_ENVIO'">Pendiente de envío</span>
+                    <span th:case="'PENDIENTE_ENTREGA'">Pendiente de entrega</span>
+                    <span th:case="'ENTREGADO'">Entregado</span>
+                    <span th:case="'ANULADA'">Anulada</span>
+                    <span th:case="*">Estado actualizado</span>
+                </span>
             </div>
             <p class="mt-2">Fecha: <span th:text="${pedido.fecha}"></span></p>
             <p>Total: $<span th:text="${pedido.total}"></span></p>

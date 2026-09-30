@@ -22,7 +22,7 @@
     <!-- Cart -->
     <section id="cart-page" class="bg-gray-50 py-10 md:py-16 min-h-[60vh]">
         <div class="container mx-auto px-4 max-w-7xl">
-            <h1 class="text-2xl md:text-3xl font-semibold mb-6">Shopping Cart</h1>
+            <h1 class="text-2xl md:text-3xl font-semibold mb-6">Mi carrito</h1>
             <p th:if="${mensajeExito}" class="text-green-700 mb-4" th:text="${mensajeExito}"></p>
             <p th:if="${mensajeError}" class="text-red-600 mb-4" th:text="${mensajeError}"></p>
             <div class="flex flex-col md:flex-row gap-4">
@@ -32,11 +32,11 @@
                             <table class="cart-table w-full min-w-[680px]">
                                 <thead>
                                     <tr>
-                                        <th class="text-left font-semibold pb-3">Product</th>
-                                        <th class="text-center font-semibold pb-3">Price</th>
-                                        <th class="text-center font-semibold pb-3">Quantity</th>
-                                        <th class="text-right font-semibold pb-3">Total</th>
-                                        <th class="pb-3"><span class="sr-only">Actions</span></th>
+                                        <th class="text-left font-semibold pb-3">Producto</th>
+                                        <th class="text-center font-semibold pb-3">Precio</th>
+                                        <th class="text-center font-semibold pb-3">Cantidad</th>
+                                        <th class="text-right font-semibold pb-3">Importe</th>
+                                        <th class="pb-3"><span class="sr-only">Acciones</span></th>
                                     </tr>
                                 </thead>
                                 <tbody id="cart-items">
@@ -50,8 +50,8 @@
                                         th:classappend="${iterStat.last} ? '' : 'border-b border-gray-100'">
                                         <td class="px-1 py-5">
                                             <div class="flex items-center gap-3 md:gap-5">
-                                                <img class="h-16 w-16 md:h-24 md:w-24 object-cover rounded-md bg-gray-50" th:src="@{${item.imageUrl}}" src="/assets/images/single-product/1.jpg" th:alt="${item.name}" alt="Product image">
-                                                <p class="text-sm md:text-base font-semibold" th:text="${item.name}">Summer black dress</p>
+                                                <img class="h-16 w-16 md:h-24 md:w-24 object-cover rounded-md bg-gray-50" th:src="@{${item.imageUrl}}" src="/assets/images/single-product/1.jpg" th:alt="${item.name}" alt="Imagen del producto">
+                                                <p class="text-sm md:text-base font-semibold" th:text="${item.name}">Vestido negro de verano</p>
                                             </div>
                                         </td>
                                         <td class="px-1 py-5 text-center whitespace-nowrap" th:text="${'$' + #numbers.formatDecimal(item.price, 1, 2)}">$19.99</td>
@@ -69,7 +69,7 @@
                                         <td class="px-1 py-5 text-right font-medium whitespace-nowrap" th:text="${'$' + #numbers.formatDecimal(item.lineTotal, 1, 2)}">$19.99</td>
                                         <td class="px-1 py-5 text-right">
                                             <form th:action="@{'/cart/remove/' + ${item.id}}" method="post">
-                                                <button type="submit" aria-label="Remove product" class="h-9 w-9 rounded-full border border-gray-200 text-gray-500 hover:border-red-500 hover:text-red-600">×</button>
+                                                <button type="submit" aria-label="Quitar producto" class="h-9 w-9 rounded-full border border-gray-200 text-gray-500 hover:border-red-500 hover:text-red-600">×</button>
                                             </form>
                                         </td>
                                     </tr>
@@ -78,8 +78,8 @@
                                         <tr class="pb-4 border-b border-gray-line">
                                             <td class="px-1 py-4">
                                                 <div class="flex items-center flex-col sm:flex-row text-center sm:text-left">
-                                                    <img class="h-16 w-16 md:h-24 md:w-24 sm:mr-8 mb-4 sm:mb-0" src="/assets/images/single-product/1.jpg" alt="Product image">
-                                                    <p class="text-sm md:text-base md:font-semibold">Summer black dress</p>
+                                                    <img class="h-16 w-16 md:h-24 md:w-24 sm:mr-8 mb-4 sm:mb-0" src="/assets/images/single-product/1.jpg" alt="Imagen del producto">
+                                                    <p class="text-sm md:text-base md:font-semibold">Vestido negro de verano</p>
                                                 </div>
                                             </td>
                                             <td class="px-1 py-4 text-center">$19.99</td>
@@ -95,8 +95,8 @@
                                         <tr class="pb-4">
                                             <td class="px-1 py-4">
                                                 <div class="flex items-center flex-col sm:flex-row text-center sm:text-left">
-                                                    <img class="h-16 w-16 md:h-24 md:w-24 sm:mr-8 mb-4 sm:mb-0" src="/assets/images/single-product/2.jpg" alt="Product image">
-                                                    <p class="text-sm md:text-base md:font-semibold">Black suit</p>
+                                                    <img class="h-16 w-16 md:h-24 md:w-24 sm:mr-8 mb-4 sm:mb-0" src="/assets/images/single-product/2.jpg" alt="Imagen del producto">
+                                                    <p class="text-sm md:text-base md:font-semibold">Conjunto negro</p>
                                                 </div>
                                             </td>
                                             <td class="px-1 py-4 text-center">$19.99</td>
@@ -112,7 +112,7 @@
                                     </th:block>
                                 </tbody>
                             </table>
-                            <p th:if="${cartItems != null and #lists.isEmpty(cartItems)}" class="py-8 text-center text-gray-500">Your cart is empty. Browse the shop to add products.</p>
+                            <p th:if="${cartItems != null and #lists.isEmpty(cartItems)}" class="py-8 text-center text-gray-500">Tu carrito está vacío. Explorá la tienda para agregar productos.</p>
                             <div class="px-1 flex flex-col sm:flex-row justify-end items-center mt-6">
                                 <div class="flex items-center">
                                     <form th:if="${cartItems != null and !#lists.isEmpty(cartItems)}" th:action="@{/cart/clear}" method="post">
@@ -125,24 +125,24 @@
                 </div>
                 <div class="md:w-1/4 p-2">
                     <div class="bg-white rounded-xl shadow-md p-5 md:p-6 md:sticky md:top-24">
-                        <h2 class="text-lg font-semibold mb-4">Summary</h2>
+                        <h2 class="text-lg font-semibold mb-4">Resumen de compra</h2>
                         <div class="flex justify-between mb-4">
                             <p>Subtotal</p>
                             <p th:text="${'$' + #numbers.formatDecimal(cartSubtotal, 1, 2)}">$0.00</p>
                         </div>
                         <div class="flex justify-between mb-4">
-                            <p>Taxes</p>
+                            <p>Impuestos</p>
                             <p th:text="${'$' + #numbers.formatDecimal(cartTaxes, 1, 2)}">$0.00</p>
                         </div>
                         <div class="flex justify-between mb-4 pb-4 border-b border-gray-line">
-                            <p>Shipping</p>
+                            <p>Envío</p>
                             <p th:text="${'$' + #numbers.formatDecimal(cartShipping, 1, 2)}">$0.00</p>
                         </div>
                         <div class="flex justify-between mb-2">
                             <p class="font-semibold">Total</p>
                             <p class="font-semibold" th:text="${'$' + #numbers.formatDecimal(cartTotal, 1, 2)}">$0.00</p>
                         </div>
-                        <a th:href="@{/checkout}" href="/checkout" th:classappend="${cartItems == null or #lists.isEmpty(cartItems)} ? ' opacity-50 pointer-events-none' : ''" class="bg-primary text-white border hover:border-primary hover:bg-transparent hover:text-primary py-2 px-4 rounded-full mt-4 w-full text-center block transition">Proceed to checkout</a>
+                        <a th:href="@{/checkout}" href="/checkout" th:classappend="${cartItems == null or #lists.isEmpty(cartItems)} ? ' opacity-50 pointer-events-none' : ''" class="bg-primary text-white border hover:border-primary hover:bg-transparent hover:text-primary py-2 px-4 rounded-full mt-4 w-full text-center block transition">Continuar con la compra</a>
                     </div>
                 </div>
             </div>

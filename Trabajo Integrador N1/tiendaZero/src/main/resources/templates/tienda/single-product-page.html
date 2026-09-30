@@ -17,13 +17,13 @@
     <section id="breadcrumbs" class="pt-6 bg-gray-50">
         <div class="container mx-auto px-4">
             <ol class="list-reset flex">
-                <li><a th:href="@{/}" href="index.html" class="font-semibold hover:text-primary">Home</a></li>
+                <li><a th:href="@{/}" href="index.html" class="font-semibold hover:text-primary">Inicio</a></li>
                 <li><span class="mx-2">&gt;</span></li>
-                <li><a th:href="@{/shop}" href="shop.html" class="font-semibold hover:text-primary">Shop</a></li>
+                <li><a th:href="@{/shop}" href="shop.html" class="font-semibold hover:text-primary">Tienda</a></li>
                 <li><span class="mx-2">&gt;</span></li>
                 <li><a th:href="@{/shop(category=${product.categorySlug})}" href="category.html" th:text="${product.category}" class="font-semibold hover:text-primary">T-shirts</a></li>
                 <li><span class="mx-2">&gt;</span></li>
-                <li th:text="${product.name}">Preppy T-shirt</li>
+                <li th:text="${product.name}">Remera deportiva</li>
             </ol>
         </div>
     </section>
@@ -58,7 +58,7 @@
                                     th:src="@{${imageUrl}}"
                                     src="/assets/images/single-product/1.jpg"
                                     class="product-image-square cursor-pointer rounded-lg"
-                                    alt="Gallery Image" />
+                                    alt="Imagen principal del producto" />
                                 </div>
                                 <!-- Fallback estático (se ve solo si "product" todavía no está en el modelo) -->
                                 <th:block th:if="${product == null}">
@@ -67,35 +67,35 @@
                                         data-full="/assets/images/single-product/1.jpg"
                                         src="/assets/images/single-product/1.jpg"
                                         class="product-image-square cursor-pointer rounded-lg"
-                                        alt="Gallery Image 1" />
+                                        alt="Vista del producto 1" />
                                     </div>
                                     <div class="aspect-square overflow-hidden rounded-lg bg-gray-50 p-1">
                                         <img onclick="changeImage(this)"
                                         data-full="/assets/images/single-product/2.jpg"
                                         src="/assets/images/single-product/2.jpg"
                                         class="product-image-square cursor-pointer rounded-lg"
-                                        alt="Gallery Image 2" />
+                                        alt="Vista del producto 2" />
                                     </div>
                                     <div class="aspect-square overflow-hidden rounded-lg bg-gray-50 p-1">
                                         <img onclick="changeImage(this)"
                                         data-full="/assets/images/single-product/3.jpg"
                                         src="/assets/images/single-product/3.jpg"
                                         class="product-image-square cursor-pointer rounded-lg"
-                                        alt="Gallery Image 3" />
+                                        alt="Vista del producto 3" />
                                     </div>
                                     <div class="aspect-square overflow-hidden rounded-lg bg-gray-50 p-1">
                                         <img onclick="changeImage(this)"
                                         data-full="/assets/images/single-product/4.jpg"
                                         src="/assets/images/single-product/4.jpg"
                                         class="product-image-square cursor-pointer rounded-lg"
-                                        alt="Gallery Image 4" />
+                                        alt="Vista del producto 4" />
                                     </div>
                                     <div class="aspect-square overflow-hidden rounded-lg bg-gray-50 p-1">
                                         <img onclick="changeImage(this)"
                                         data-full="/assets/images/single-product/5.jpg"
                                         src="/assets/images/single-product/5.jpg"
                                         class="product-image-square cursor-pointer rounded-lg"
-                                        alt="Gallery Image 5" />
+                                        alt="Vista del producto 5" />
                                     </div>
                                 </th:block>
                             </div>
@@ -109,14 +109,14 @@
                                 <!-- Ej. de estrellas dinámicas con #numbers, opcional:
                                      <span th:each="i : ${#numbers.sequence(1,5)}" th:text="${i <= product.rating} ? '★' : '☆'"></span> -->
                                 <span>★★★★★</span>
-                                <span class="ml-2" th:text="'(' + ${product.reviewCount} + ' Reviews)'">(0 Reviews)</span>
-                                <a href="#reviews" class="ml-4 text-primary font-semibold">Write a review</a>
+                                <span class="ml-2" th:text="'(' + ${product.reviewCount} + ' reseñas)'">(0 reseñas)</span>
+                                <a href="#reviews" class="ml-4 text-primary font-semibold">Dejá tu opinión</a>
                             </div>
                             <div class="mb-4 pb-4 border-b border-gray-line">
-                                <p class="mb-2">Brand:<strong><a href="#" class="hover:text-primary" th:text="${product.brand}"> Nike</a></strong>
+                                <p class="mb-2">Marca: <strong><span class="hover:text-primary" th:text="${product.brand}">Zero</span></strong>
                                 </p>
-                                <p class="mb-2">Product code:<strong th:text="${product.sku}"> 00123</strong></p>
-                                <p class="mb-2">Availability:<strong th:text="${product.inStock} ? 'In Stock' : 'Out of Stock'"> In Stock</strong></p>
+                                <p class="mb-2">Código de producto: <strong th:text="${product.sku}">00123</strong></p>
+                                <p class="mb-2">Disponibilidad: <strong th:text="${product.inStock} ? 'Disponible' : 'Sin stock'">Disponible</strong></p>
                             </div>
                             <div class="text-2xl font-semibold mb-8" th:text="${'$' + product.price}">$40.00</div>
                             <!-- Form de "agregar al carrito": ajustá la action al endpoint real -->
@@ -132,8 +132,7 @@
                                         class="bg-primary hover:bg-transparent border border-transparent hover:border-primary text-white hover:text-primary font-semibold  w-10 h-10 rounded-full focus:outline-none">+</button>
                                 </div>
                                 <button type="submit"
-                                    class="bg-primary border border-transparent hover:bg-transparent hover:border-primary text-white hover:text-primary font-semibold py-2 px-4 rounded-full">Add
-                                    to Cart</button>
+                                    class="bg-primary border border-transparent hover:bg-transparent hover:border-primary text-white hover:text-primary font-semibold py-2 px-4 rounded-full">Agregar al carrito</button>
                             </form>
                         </div>
                         <!-- Social sharing -->
@@ -161,9 +160,8 @@
                         </div>
                         <!-- Additional Information -->
                         <div>
-                            <h3 class="text-lg font-semibold mb-2">Product Description</h3>
-                            <p th:text="${product.description}">This is a premium quality t-shirt perfect for casual wear. Made with high-quality fabric
-                                to ensure comfort and durability.</p>
+                            <h3 class="text-lg font-semibold mb-2">Descripción del producto</h3>
+                            <p th:text="${product.description}">Una prenda cómoda y versátil, confeccionada para acompañarte en tus actividades de todos los días.</p>
                         </div>
                     </div>
                 </div>
@@ -178,78 +176,71 @@
                 <div class="mt-10">
                     <div class="flex space-x-4" role="tablist">
                         <button id="description-tab" role="tab" aria-controls="description-content" aria-selected="true"
-                            class="tab active">Description</button>
+                            class="tab active">Descripción</button>
                         <button id="additional-info-tab" role="tab" aria-controls="additional-info-content"
-                            aria-selected="false" class="tab">Additional information</button>
+                            aria-selected="false" class="tab">Información adicional</button>
                         <button id="size-shape-tab" role="tab" aria-controls="size-shape-content" aria-selected="false"
-                            class="tab">Size & Shape</button>
+                            class="tab">Talles y calce</button>
                         <button id="reviews-tab" role="tab" aria-controls="reviews-content" aria-selected="false"
-                            class="tab">Reviews (3)</button>
+                            class="tab">Reseñas (3)</button>
                     </div>
                     <div class="mt-8">
                         <div id="description-content" role="tabpanel" aria-labelledby="description-tab"
                             class="tab-content">
                             <div class="flex flex-col lg:flex-row lg:space-x-8">
                                 <div class="w-full lg:w-1/2">
-                                    <h3 class="text-xl font-semibold mb-2">With the new fashion trends and all the
-                                        available shopping options, you can order your clothes online and make money
-                                        without even leaving your house.</h3>
-                                    <p class="mb-4">These days, you can take your own inspiration and create something
-                                        new for yourself. All you need to do is read books and magazines about fashion,
-                                        watch videos on YouTube, keep yourself updated on social media, and, of course,
-                                        shop online!</p>
+                                    <h3 class="text-xl font-semibold mb-2">Comodidad y estilo para acompañar tu ritmo.</h3>
+                                    <p class="mb-4">Conocé los detalles de esta prenda y elegí el talle que mejor se adapte a vos. Sumala a tu equipo y disfrutá de una propuesta versátil para todos los días.</p>
                                 </div>
                                 <div class="w-full lg:w-1/4">
-                                    <h3 class="text-xl font-semibold mb-5">Material & Washing</h3>
+                                    <h3 class="text-xl font-semibold mb-5">Material y cuidados</h3>
                                     <p class="mb-2 pb-2 border-b border-gray-line">Material: <span
-                                            class="font-semibold">100% cotton</span></p>
-                                    <p class="mb-2 pb-2 border-b border-gray-line">Fabric: <span
-                                            class="font-semibold">Soft jersey</span></p>
-                                    <p class="mb-2">Care instructions: <span class="font-semibold">Machine wash at 30°C,
-                                            do not tumble dry, iron on low heat, do not bleach</span></p>
+                                            class="font-semibold">100 % algodón</span></p>
+                                    <p class="mb-2 pb-2 border-b border-gray-line">Tejido: <span
+                                            class="font-semibold">Jersey suave</span></p>
+                                    <p class="mb-2">Cuidados: <span class="font-semibold">Lavar a máquina a 30 °C, no usar secadora, planchar a baja temperatura y no usar blanqueador.</span></p>
                                 </div>
                                 <div class="w-full lg:w-1/4">
-                                    <h3 class="text-xl font-semibold mb-5">Size & Shape</h3>
-                                    <p class="mb-2 pb-2 border-b border-gray-line">Model height: <span
-                                            class="font-semibold">Our model is 180 cm tall and is wearing size M</span>
+                                    <h3 class="text-xl font-semibold mb-5">Talles y calce</h3>
+                                    <p class="mb-2 pb-2 border-b border-gray-line">Altura de referencia: <span
+                                            class="font-semibold">180 cm, talle M</span>
                                     </p>
-                                    <p class="mb-2 pb-2 border-b border-gray-line">Fit: <span
+                                    <p class="mb-2 pb-2 border-b border-gray-line">Calce: <span
                                             class="font-semibold">Regular</span></p>
-                                    <p class="mb-2 pb-2 border-b border-gray-line">Length: <span
-                                            class="font-semibold">Standard</span></p>
-                                    <p class="mb-2">Sleeve length: <span class="font-semibold">Short sleeves</span></p>
+                                    <p class="mb-2 pb-2 border-b border-gray-line">Largo: <span
+                                            class="font-semibold">Estándar</span></p>
+                                    <p class="mb-2">Mangas: <span class="font-semibold">Cortas</span></p>
                                 </div>
                             </div>
                         </div>
                         <div id="additional-info-content" role="tabpanel" aria-labelledby="additional-info-tab"
                             class="tab-content hidden">
-                            <p>Additional information about the product.</p>
+                            <p>Información adicional sobre el producto.</p>
                             <div class="flex flex-col space-y-8">
                                 <div>
-                                    <h3 class="text-lg font-semibold mb-2">Colors</h3>
+                                    <h3 class="text-lg font-semibold mb-2">Colores</h3>
                                     <p class="text-base text-gray-700">
-                                        Available colors:
-                                        <a href="#" class="text-primary hover:underline">Red</a>,
-                                        <a href="#" class="text-primary hover:underline">Blue</a>,
-                                        <a href="#" class="text-primary hover:underline">Green</a>,
-                                        <a href="#" class="text-primary hover:underline">Black</a>,
-                                        <a href="#" class="text-primary hover:underline">White</a>.
+                                        Colores disponibles:
+                                        <span class="text-primary">Rojo</span>,
+                                        <span class="text-primary">Azul</span>,
+                                        <span class="text-primary">Verde</span>,
+                                        <span class="text-primary">Negro</span> y
+                                        <span class="text-primary">Blanco</span>.
                                     </p>
                                 </div>
                                 <div>
-                                    <h3 class="text-lg font-semibold mb-2">Brand</h3>
+                                    <h3 class="text-lg font-semibold mb-2">Marca</h3>
                                     <p class="text-base text-gray-700">
-                                        This t-shirt is made by
-                                        <a href="#" class="text-primary hover:underline">Nike</a>.
+                                        Producto de
+                                        <span class="text-primary">Zero</span>.
                                     </p>
                                 </div>
                                 <div>
-                                    <h3 class="text-lg font-semibold mb-2">Material & Care</h3>
+                                    <h3 class="text-lg font-semibold mb-2">Material y cuidados</h3>
                                     <p class="text-base text-gray-700">
-                                        Material: 100% Cotton
+                                        Material: 100 % algodón
                                         <br>
-                                        Care instructions: Machine wash at 40 °C, do not tumble dry, iron at medium
-                                        temperature, do not bleach.
+                                        Cuidados: lavar a máquina a 40 °C, no usar secadora, planchar a temperatura media y no usar blanqueador.
                                     </p>
                                 </div>
                             </div>
@@ -262,19 +253,19 @@
                                         <tr>
                                             <th
                                                 class="px-6 py-3 border-b border-gray-line bg-gray-100 text-left text-xs leading-4 font-medium text-gray-700 uppercase tracking-wider">
-                                                Size
+                                                Talle
                                             </th>
                                             <th
                                                 class="px-6 py-3 border-b border-gray-line bg-gray-100 text-left text-xs leading-4 font-medium text-gray-700 uppercase tracking-wider">
-                                                Chest (inches)
+                                                Pecho (pulgadas)
                                             </th>
                                             <th
                                                 class="px-6 py-3 border-b border-gray-line bg-gray-100 text-left text-xs leading-4 font-medium text-gray-700 uppercase tracking-wider">
-                                                Waist (inches)
+                                                Cintura (pulgadas)
                                             </th>
                                             <th
                                                 class="px-6 py-3 border-b border-gray-line bg-gray-100 text-left text-xs leading-4 font-medium text-gray-700 uppercase tracking-wider">
-                                                Sleeve Length (inches)
+                                                Largo de manga (pulgadas)
                                             </th>
                                         </tr>
                                     </thead>
@@ -282,7 +273,7 @@
                                         <tr>
                                             <td
                                                 class="px-6 py-4 whitespace-no-wrap border-b border-gray-line text-sm leading-5 text-gray-700">
-                                                Small
+                                                Chico
                                             </td>
                                             <td
                                                 class="px-6 py-4 whitespace-no-wrap border-b border-gray-line text-sm leading-5 text-gray-700">
@@ -300,7 +291,7 @@
                                         <tr>
                                             <td
                                                 class="px-6 py-4 whitespace-no-wrap border-b border-gray-line text-sm leading-5 text-gray-700">
-                                                Medium
+                                                Mediano
                                             </td>
                                             <td
                                                 class="px-6 py-4 whitespace-no-wrap border-b border-gray-line text-sm leading-5 text-gray-700">
@@ -318,7 +309,7 @@
                                         <tr>
                                             <td
                                                 class="px-6 py-4 whitespace-no-wrap border-b border-gray-line text-sm leading-5 text-gray-700">
-                                                Large
+                                                Grande
                                             </td>
                                             <td
                                                 class="px-6 py-4 whitespace-no-wrap border-b border-gray-line text-sm leading-5 text-gray-700">
@@ -336,7 +327,7 @@
                                         <tr>
                                             <td
                                                 class="px-6 py-4 whitespace-no-wrap border-b border-gray-line text-sm leading-5 text-gray-700">
-                                                X-Large
+                                                Extra grande
                                             </td>
                                             <td
                                                 class="px-6 py-4 whitespace-no-wrap border-b border-gray-line text-sm leading-5 text-gray-700">
@@ -360,7 +351,7 @@
                             class="tab-content hidden">
                             <!-- Reviews List -->
                             <div class="space-y-6">
-                                <h3 class="text-lg font-semibold mb-4">Customer Reviews</h3>
+                                <h3 class="text-lg font-semibold mb-4">Opiniones de clientes</h3>
                                 <div id="reviews-list">
                                     <!--
                                         Si el controlador incorpora una lista "reviews", se renderiza aquí.
@@ -370,37 +361,33 @@
                                          th:classappend="${iterStat.first} ? '' : 'border-t border-gray-line'"
                                          class="py-4">
                                         <div class="flex items-center mb-2">
-                                            <span class="text-lg font-semibold text-gray-700" th:text="${review.authorName}">John Doe</span>
+                                            <span class="text-lg font-semibold text-gray-700" th:text="${review.authorName}">Cliente Zero</span>
                                             <span class="ml-2 text-primary" th:text="${'★'.repeat(review.rating)}">★★★★★</span>
                                         </div>
-                                        <p th:text="${review.comment}">Great quality! Fits perfectly and the material feels premium. Highly
-                                            recommend this t-shirt.</p>
+                                        <p th:text="${review.comment}">Muy buena calidad, cómodo y con un calce excelente.</p>
                                     </div>
                                     <!-- Fallback estático (se ve solo si "product" todavía no está en el modelo) -->
                                     <th:block th:if="${product == null}">
                                         <div class="py-4">
                                             <div class="flex items-center mb-2">
-                                                <span class="text-lg font-semibold text-gray-700">John Doe</span>
+                                                <span class="text-lg font-semibold text-gray-700">Cliente Zero</span>
                                                 <span class="ml-2 text-primary">★★★★★</span>
                                             </div>
-                                            <p>Great quality! Fits perfectly and the material feels premium. Highly
-                                                recommend this t-shirt.</p>
+                                            <p>Muy buena calidad, cómodo y con un calce excelente.</p>
                                         </div>
                                         <div class="border-t border-gray-line py-4">
                                             <div class="flex items-center mb-2">
-                                                <span class="text-lg font-semibold text-gray-700">Jane Smith</span>
+                                                <span class="text-lg font-semibold text-gray-700">Cliente Zero</span>
                                                 <span class="ml-2 text-primary">★★★★☆</span>
                                             </div>
-                                            <p>I love the design and the fabric is very comfortable. However, I wish it came
-                                                in more colors.</p>
+                                            <p>Me gustó el diseño y la tela es muy cómoda. La volvería a elegir.</p>
                                         </div>
                                         <div class="border-t border-gray-line py-4">
                                             <div class="flex items-center mb-2">
-                                                <span class="text-lg font-semibold text-gray-700">Alice Johnson</span>
+                                                <span class="text-lg font-semibold text-gray-700">Cliente Zero</span>
                                                 <span class="ml-2 text-primary">★★★★★</span>
                                             </div>
-                                            <p>Excellent t-shirt! The size is perfect and it looks great. Will definitely
-                                                buy again.</p>
+                                            <p>Excelente prenda, el talle me quedó perfecto. Sin dudas volvería a comprar.</p>
                                         </div>
                                     </th:block>
                                 </div>
@@ -408,25 +395,25 @@
 
                             <!-- Submit Review Form -->
                             <div class="mt-8">
-                                <h3 class="text-lg font-semibold mb-4">Write a Review</h3>
+                                <h3 class="text-lg font-semibold mb-4">Dejá tu opinión</h3>
                                 <form id="review-form" th:action="@{'/product/' + ${product.id} + '/reviews'}" method="post" class="space-y-4">
                                     <input type="hidden" name="productId" th:value="${product.id}">
                                     <div class="space-y-4 md:flex md:space-x-4 md:space-y-0">
                                         <div class="md:flex-1">
                                             <label for="review-name"
-                                                class="block text-sm font-medium text-gray-700">Name</label>
+                                                class="block text-sm font-medium text-gray-700">Nombre</label>
                                             <input type="text" id="review-name" name="review-name"
                                                 class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary sm:text-sm">
                                         </div>
                                         <div class="md:flex-1">
                                             <label for="review-email"
-                                                class="block text-sm font-medium text-gray-700">Email</label>
+                                                class="block text-sm font-medium text-gray-700">Correo electrónico</label>
                                             <input type="email" id="review-email" name="review-email"
                                                 class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary sm:text-sm">
                                         </div>
                                         <div class="md:flex-1">
                                             <label for="review-rating"
-                                                class="block text-sm font-medium text-gray-700">Rating</label>
+                                                class="block text-sm font-medium text-gray-700">Calificación</label>
                                             <select id="review-rating" name="review-rating"
                                                 class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary sm:text-sm">
                                                 <option value="5">★★★★★</option>
@@ -439,14 +426,13 @@
                                     </div>
                                     <div>
                                         <label for="review-text"
-                                            class="block text-sm font-medium text-gray-700">Review</label>
+                                            class="block text-sm font-medium text-gray-700">Reseña</label>
                                         <textarea id="review-text" name="review-text" rows="4"
                                             class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary sm:text-sm"></textarea>
                                     </div>
                                     <div>
                                         <button type="submit"
-                                            class="bg-primary hover:bg-transparent border border-transparent hover:border-primary text-white hover:text-primary font-semibold py-2 px-4 rounded-full focus:outline-none">Submit
-                                            Review</button>
+                                            class="bg-primary hover:bg-transparent border border-transparent hover:border-primary text-white hover:text-primary font-semibold py-2 px-4 rounded-full focus:outline-none">Enviar opinión</button>
                                     </div>
                                 </form>
 
@@ -462,7 +448,7 @@
     <!-- Related products -->
     <section id="latest-products" class="py-10">
         <div class="container mx-auto px-4">
-            <h2 class="text-2xl font-bold mb-8">Related products</h2>
+            <h2 class="text-2xl font-bold mb-8">Productos relacionados</h2>
             <div class="flex flex-wrap -mx-4">
                 <!-- Mismo fragment "productCard" reutilizado en home / shop / esta página -->
                 <div class="w-full sm:w-1/2 lg:w-1/4 px-4 mb-8" th:each="relatedProduct : ${relatedProducts}">
@@ -473,48 +459,48 @@
                     <div class="w-full sm:w-1/2 lg:w-1/4 px-4 mb-8">
                       <div class="bg-white p-3 rounded-lg shadow-lg">
                         <img src="assets/images/products/5.jpg" alt="Product 1" class="product-image-square mb-4 rounded-lg">
-                        <a href="#" class="text-lg font-semibold mb-2">Blue women's suit</a>
-                        <p class=" my-2">Women</p>
+                        <a th:href="@{/shop}" href="/shop" class="text-lg font-semibold mb-2">Conjunto azul para mujer</a>
+                        <p class=" my-2">Mujeres</p>
                         <div class="flex items-center mb-4">
                           <span class="text-lg font-bold text-primary">$19.99</span>
                           <span class="text-sm line-through ml-2">$24.99</span>
                         </div>
-                        <button class="bg-primary border border-transparent hover:bg-transparent hover:border-primary text-white hover:text-primary font-semibold py-2 px-4 rounded-full w-full">Add to Cart</button>
+                        <button class="bg-primary border border-transparent hover:bg-transparent hover:border-primary text-white hover:text-primary font-semibold py-2 px-4 rounded-full w-full">Agregar al carrito</button>
                       </div>
                     </div>
                     <div class="w-full sm:w-1/2 lg:w-1/4 px-4 mb-8">
                       <div class="bg-white p-3 rounded-lg shadow-lg">
                         <img src="assets/images/products/6.jpg" alt="Product 2" class="product-image-square mb-4 rounded-lg">
-                        <a href="#" class="text-lg font-semibold mb-2">White shirt with long sleeves</a>
-                        <p class=" my-2">Women</p>
+                        <a th:href="@{/shop}" href="/shop" class="text-lg font-semibold mb-2">Camisa blanca de manga larga</a>
+                        <p class=" my-2">Mujeres</p>
                         <div class="flex items-center mb-4">
                           <span class="text-lg font-bold text-gray-900">$29.99</span>
                         </div>
-                        <button class="bg-primary border border-transparent hover:bg-transparent hover:border-primary text-white hover:text-primary font-semibold py-2 px-4 rounded-full w-full">Add to Cart</button>
+                        <button class="bg-primary border border-transparent hover:bg-transparent hover:border-primary text-white hover:text-primary font-semibold py-2 px-4 rounded-full w-full">Agregar al carrito</button>
                       </div>
                     </div>
                     <div class="w-full sm:w-1/2 lg:w-1/4 px-4 mb-8">
                       <div class="bg-white p-3 rounded-lg shadow-lg">
                         <img src="assets/images/products/7.jpg" alt="Product 3" class="product-image-square mb-4 rounded-lg">
-                        <a href="#" class="text-lg font-semibold mb-2">Yellow men's suit</a>
-                        <p class="my-2">Men</p>
+                        <a th:href="@{/shop}" href="/shop" class="text-lg font-semibold mb-2">Conjunto amarillo para hombre</a>
+                        <p class="my-2">Hombres</p>
                         <div class="flex items-center mb-4">
                           <span class="text-lg font-bold text-gray-900">$15.99</span>
                           <span class="text-sm line-through  ml-2">$19.99</span>
                         </div>
-                        <button class="bg-primary border border-transparent hover:bg-transparent hover:border-primary text-white hover:text-primary font-semibold py-2 px-4 rounded-full w-full">Add to Cart</button>
+                        <button class="bg-primary border border-transparent hover:bg-transparent hover:border-primary text-white hover:text-primary font-semibold py-2 px-4 rounded-full w-full">Agregar al carrito</button>
                       </div>
                     </div>
                     <div class="w-full sm:w-1/2 lg:w-1/4 px-4 mb-8">
                       <div class="bg-white p-3 rounded-lg shadow-lg">
                         <img src="assets/images/products/8.jpg" alt="Product 4" class="product-image-square mb-4 rounded-lg">
-                        <a href="#" class="text-lg font-semibold mb-2">Red dress</a>
-                        <p class="my-2">Women</p>
+                        <a th:href="@{/shop}" href="/shop" class="text-lg font-semibold mb-2">Vestido rojo</a>
+                        <p class="my-2">Mujeres</p>
                         <div class="flex items-center mb-4">
                             <span class="text-lg font-bold text-primary">$39.99</span>
                             <span class="text-sm line-through ml-2">$49.99</span>
                         </div>
-                        <button class="bg-primary border border-transparent hover:bg-transparent hover:border-primary text-white hover:text-primary font-semibold py-2 px-4 rounded-full w-full">Add to Cart</button>
+                        <button class="bg-primary border border-transparent hover:bg-transparent hover:border-primary text-white hover:text-primary font-semibold py-2 px-4 rounded-full w-full">Agregar al carrito</button>
                       </div>
                     </div>
                 </th:block>
