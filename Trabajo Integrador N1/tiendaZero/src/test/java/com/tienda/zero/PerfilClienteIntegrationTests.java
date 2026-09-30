@@ -9,6 +9,7 @@ import com.tienda.zero.model.Direccion;
 import com.tienda.zero.model.Localidad;
 import com.tienda.zero.model.Nacionalidad;
 import com.tienda.zero.model.Usuario;
+import com.tienda.zero.model.Empleado;
 import com.tienda.zero.repository.LocalidadRepository;
 import com.tienda.zero.service.NacionalidadService;
 import com.tienda.zero.service.PersonaService;
@@ -154,6 +155,44 @@ class PerfilClienteIntegrationTests {
                 .andExpect(status().isOk())
                 .andExpect(content().string(containsString("Salir del panel")))
                 .andExpect(content().string(containsString("href=\"/admin\"")))
-                .andExpect(content().string(containsString("action=\"/logout\"")));
+                .andExpect(content().string(containsString("href=\"/admin/perfil\"")))
+                .andExpect(content().string(containsString("Modificar datos personales")));
+    }
+
+    @Test
+    void elEmpleadoPuedeAbrirYCompletarSuPerfilDesdeElPanel() throws Exception {
+        String sufijo = UUID.randomUUID().toString().substring(0, 8);
+        String correo = "empleado-" + sufijo + "@zero.test";
+        Usuario usuario = usuarioService.crearUsuario(correo, "clave123", TipoUsuario.ADMINISTRATIVO);
+
+        mockMvc.perform(get("/admin/perfil")
+                        .with(user(correo).roles("ADMINISTRATIVO")))
+                .andExpect(status().isOk())
+                .andExpect(model().attribute("perfilEmpleado", true))
+                .andExpect(model().attribute("modoEdicion", false))
+                .andExpect(content().string(containsString("action=\"/admin/perfil\"")))
+                .andExpect(content().string(containsString("value=\"" + correo + "\" disabled")));
+
+        mockMvc.perform(post("/admin/perfil")
+                        .with(user(correo).roles("ADMINISTRATIVO"))
+                        .with(csrf())
+                        .param("nombre", "Ana")
+                        .param("apellido", "Administrativa")
+                        .param("sexo", "FEMENINO")
+                        .param("fechaNacimiento", "1992-04-10")
+                        .param("tipoDocumento", "DNI")
+                        .param("numeroDocumento", "EMP-" + sufijo))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/admin/perfil"));
+
+        Empleado empleado = (Empleado) personaService.buscarPersonaPorUsuario(usuario.getId()).orElseThrow();
+        assertEquals("Ana", empleado.getNombre());
+        assertEquals("Administrativa", empleado.getApellido());
+
+        mockMvc.perform(get("/admin/perfil")
+                        .with(user(correo).roles("ADMINISTRATIVO")))
+                .andExpect(status().isOk())
+                .andExpect(model().attribute("modoEdicion", true))
+                .andExpect(content().string(containsString("value=\"Administrativa\"")));
     }
 }

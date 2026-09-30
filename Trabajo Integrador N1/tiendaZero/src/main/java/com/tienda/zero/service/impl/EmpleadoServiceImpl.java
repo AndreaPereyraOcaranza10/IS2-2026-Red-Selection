@@ -9,6 +9,7 @@ import com.tienda.zero.repository.EmpleadoRepository;
 import com.tienda.zero.service.EmpleadoService;
 import com.tienda.zero.service.EmpresaService;
 import com.tienda.zero.service.PersonaService;
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.sql.Date;
@@ -49,6 +50,31 @@ public class EmpleadoServiceImpl implements EmpleadoService {
                 .build();
 
         return empleadoRepository.save(empleado);
+    }
+
+    @Override
+    @Transactional
+    public Empleado crearPerfilEmpleado(String idUsuario, String nombre, String apellido, Sexo sexo,
+                                         Date fechaNacimiento, TipoDocumento tipoDocumento,
+                                         String numeroDocumento, TipoEmpleado tipoEmpleado) {
+        personaService.validar(nombre, apellido, sexo, fechaNacimiento, tipoDocumento, numeroDocumento);
+        validarDocumentoDisponible(null, tipoDocumento, numeroDocumento);
+        if (tipoEmpleado == null) {
+            throw new IllegalArgumentException("El tipo de empleado es obligatorio");
+        }
+
+        Empleado empleado = empleadoRepository.save(Empleado.builder()
+                .nombre(nombre)
+                .apellido(apellido)
+                .sexo(sexo)
+                .fechaNacimiento(fechaNacimiento)
+                .tipoDocumento(tipoDocumento)
+                .numeroDocumento(numeroDocumento)
+                .eliminado(false)
+                .tipoEmpleado(tipoEmpleado)
+                .build());
+        personaService.asociarUsuarioPersona(empleado.getId(), idUsuario);
+        return empleado;
     }
 
     @Override
@@ -111,6 +137,33 @@ public class EmpleadoServiceImpl implements EmpleadoService {
         empleado.setEmpresa(empresa);
 
         return empleadoRepository.save(empleado);
+    }
+
+    @Override
+    public Empleado modificarDatosPersonales(String id, String nombre, String apellido, Sexo sexo,
+                                              Date fechaNacimiento, TipoDocumento tipoDocumento,
+                                              String numeroDocumento) {
+        Empleado empleado = buscarEmpleado(id);
+        if (empleado.isEliminado()) {
+            throw new IllegalArgumentException("No se puede modificar un empleado eliminado");
+        }
+
+        personaService.validar(nombre, apellido, sexo, fechaNacimiento, tipoDocumento, numeroDocumento);
+        validarDocumentoDisponible(id, tipoDocumento, numeroDocumento);
+        empleado.setNombre(nombre);
+        empleado.setApellido(apellido);
+        empleado.setSexo(sexo);
+        empleado.setFechaNacimiento(fechaNacimiento);
+        empleado.setTipoDocumento(tipoDocumento);
+        empleado.setNumeroDocumento(numeroDocumento);
+        return empleadoRepository.save(empleado);
+    }
+
+    private void validarDocumentoDisponible(String idEmpleado, TipoDocumento tipoDocumento, String numeroDocumento) {
+        Optional<Empleado> existente = empleadoRepository.findByTipoDocumentoAndNumeroDocumento(tipoDocumento, numeroDocumento);
+        if (existente.isPresent() && !existente.get().getId().equals(idEmpleado)) {
+            throw new IllegalArgumentException("Ya existe otro empleado con ese documento");
+        }
     }
 
 

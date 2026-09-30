@@ -154,50 +154,10 @@
             </ul>
           </div>
         </li>
-        <!-- Dropdown -->
-        <li class="ms-3 dropdown">
-          <a href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+        <li class="ms-2 me-3 flex-shrink-0">
+          <a class="d-inline-flex" th:href="@{/admin/perfil}" href="/admin/perfil" aria-label="Modificar datos personales">
             <img th:src="${currentUser != null ? currentUser.avatarUrl : '/assets/images/avatar/avatar-1.jpg'}" src="./assets/images/avatar/avatar-1.jpg" alt="" class="avatar avatar-sm rounded-circle" />
           </a>
-          <div class="dropdown-menu dropdown-menu-end p-0" style="min-width: 200px;">
-            <div>
-              <div class="d-flex gap-3 align-items-center border-dashed border-bottom px-3 py-3">
-                <img th:src="${currentUser != null ? currentUser.avatarUrl : '/assets/images/avatar/avatar-1.jpg'}" src="./assets/images/avatar/avatar-1.jpg" alt="" class="avatar avatar-md rounded-circle" />
-                <div>
-                  <!-- "currentUser" = usuario logueado, ej. Spring Security Authentication/Principal -->
-                  <h4 class="mb-0 small" th:text="${currentUser != null ? currentUser.fullName : 'Shrina Tesla'}">Shrina Tesla</h4>
-                  <p class="mb-0  small" th:text="${currentUser != null ? '@' + currentUser.username : '@imshrina'}">@imshrina</p>
-                </div>
-              </div>
-              <div class="p-3 d-flex flex-column gap-1 small lh-lg">
-                <a th:href="@{/}" href="/" class="">
-
-                  <span>Home</span>
-                </a>
-                <a href="#!" class="">
-
-                  <span> Inbox</span>
-                </a>
-                <a href="#!" class="">
-
-                  <span> Chat</span>
-                </a>
-                <a href="#!" class="">
-
-                  <span> Activity</span>
-                </a>
-                <a href="#!" class="">
-
-                  <span> Account Settings</span>
-                </a>
-                <!-- Logout real (Spring Security): un mini-form POST a /logout -->
-                <form th:action="@{/logout}" method="post">
-                    <button type="submit" class="btn btn-link p-0 text-start">Log out</button>
-                </form>
-              </div>
-
-            </div>
-          </div>
         </li>
       </ul>
     </div>
@@ -222,9 +182,6 @@
             Product</span></a></li>
     <li><a class="nav-link" th:classappend="${activePage == 'reports'} ? 'active'" th:href="@{/reports}" href="reports.html"><i class="ti ti-receipt"></i><span class="nav-text">Reports</span></a>
       </li>
-    <li><a class="nav-link" th:href="@{/404}" href="404-error.html"><i class="ti ti-alert-circle"></i><span class="nav-text">404 Error</span></a>
-      </li>
-      <li><a class="nav-link" th:classappend="${activePage == 'docs'} ? 'active'" th:href="@{/docs}" href="docs.html"><i class="ti ti-file-text"></i><span class="nav-text">Docs</span></a></li>
     </ul>
 
   </aside>

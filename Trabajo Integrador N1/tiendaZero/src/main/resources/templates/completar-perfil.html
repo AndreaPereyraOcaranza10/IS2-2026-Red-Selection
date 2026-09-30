@@ -14,7 +14,7 @@
             <img th:src="@{/assets/images/logo-zero-white.png}" alt="Zero">
         </a>
         <div class="acciones-cuenta">
-            <a class="volver-tienda" th:href="@{/}">&larr; Volver a la tienda</a>
+            <a class="volver-tienda" th:href="${perfilEmpleado} ? @{/admin} : @{/}">&larr; <span th:text="${perfilEmpleado} ? 'Volver al panel' : 'Volver a la tienda'">Volver a la tienda</span></a>
             <form class="form-cerrar-sesion" th:action="@{/logout}" method="post">
                 <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
                 <button class="boton-cerrar-sesion" type="submit">Cerrar sesión</button>
@@ -34,7 +34,7 @@
 
     <p class="mensaje mensaje--error" th:if="${error}" th:text="${error}"></p>
 
-    <form id="perfil-form" th:action="@{/completar-perfil}" th:object="${perfil}" method="post">
+    <form id="perfil-form" th:action="${perfilEmpleado} ? @{/admin/perfil} : @{/completar-perfil}" th:object="${perfil}" method="post">
         <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
 
         <fieldset>
@@ -85,6 +85,7 @@
                 </div>
             </div>
 
+            <th:block th:unless="${perfilEmpleado}">
             <label for="telefono">Número de teléfono</label>
             <input type="tel" id="telefono" th:field="*{telefono}" placeholder="11234567"/>
 
@@ -96,9 +97,10 @@
 
             <label for="direccionEstadia">Dirección de estadía</label>
             <input type="text" id="direccionEstadia" th:field="*{direccionEstadia}" required/>
+            </th:block>
         </fieldset>
 
-        <fieldset>
+        <fieldset th:unless="${perfilEmpleado}">
             <legend>Dirección</legend>
 
             <div class="fila">
@@ -156,7 +158,27 @@
 </section>
 </main>
 
-<script th:inline="javascript">
+<script th:if="${perfilEmpleado}">
+    const formulario = document.getElementById('perfil-form');
+    const botonGuardar = document.getElementById('guardar-perfil');
+    let estadoInicial = Array.from(formulario.elements)
+        .filter(campo => campo.name && campo.name !== '_csrf' && !campo.disabled)
+        .map(campo => `${campo.name}:${campo.value}`)
+        .join('|');
+
+    function actualizarBotonGuardar() {
+        const estadoActual = Array.from(formulario.elements)
+            .filter(campo => campo.name && campo.name !== '_csrf' && !campo.disabled)
+            .map(campo => `${campo.name}:${campo.value}`)
+            .join('|');
+        botonGuardar.disabled = estadoActual === estadoInicial;
+    }
+
+    formulario.addEventListener('input', actualizarBotonGuardar);
+    formulario.addEventListener('change', actualizarBotonGuardar);
+</script>
+
+<script th:unless="${perfilEmpleado}" th:inline="javascript">
     const selectProvincia = document.getElementById('idProvincia');
     const selectDepartamento = document.getElementById('idDepartamento');
     const selectLocalidad = document.getElementById('idLocalidad');

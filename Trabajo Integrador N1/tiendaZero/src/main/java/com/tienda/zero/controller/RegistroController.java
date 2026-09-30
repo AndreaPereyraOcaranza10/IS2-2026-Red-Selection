@@ -2,11 +2,14 @@ package com.tienda.zero.controller;
 
 import com.tienda.zero.dto.PerfilClienteDTO;
 import com.tienda.zero.enums.TipoUsuario;
+import com.tienda.zero.enums.TipoEmpleado;
 import com.tienda.zero.model.Cliente;
 import com.tienda.zero.model.ContactoTelefonico;
 import com.tienda.zero.model.Direccion;
+import com.tienda.zero.model.Empleado;
 import com.tienda.zero.model.Persona;
 import com.tienda.zero.model.Usuario;
+import com.tienda.zero.service.EmpleadoService;
 import com.tienda.zero.service.NacionalidadService;
 import com.tienda.zero.service.PersonaService;
 import com.tienda.zero.service.RegistroService;
@@ -29,13 +32,16 @@ public class RegistroController {
     private final UsuarioService usuarioService;
     private final PersonaService personaService;
     private final NacionalidadService nacionalidadService;
+    private final EmpleadoService empleadoService;
 
     public RegistroController(RegistroService registroService, UsuarioService usuarioService,
-                              PersonaService personaService, NacionalidadService nacionalidadService) {
+                              PersonaService personaService, NacionalidadService nacionalidadService,
+                              EmpleadoService empleadoService) {
         this.registroService = registroService;
         this.usuarioService = usuarioService;
         this.personaService = personaService;
         this.nacionalidadService = nacionalidadService;
+        this.empleadoService = empleadoService;
     }
 
     @GetMapping("/login")
@@ -115,6 +121,54 @@ public class RegistroController {
         }
     }
 
+    @GetMapping("/admin/perfil")
+    public String mostrarPerfilEmpleado(Authentication authentication, Model model) {
+        Usuario usuario = usuarioService.buscarUsuarioPorNombreUsuario(authentication.getName());
+        Optional<Persona> persona = personaService.buscarPersonaPorUsuario(usuario.getId());
+
+        if (persona.isPresent() && !(persona.get() instanceof Empleado)) {
+            return "redirect:/admin";
+        }
+
+        Empleado empleado = persona.map(Empleado.class::cast).orElse(null);
+        PerfilClienteDTO perfil = empleado == null
+                ? PerfilClienteDTO.builder().correo(usuario.getNombreUsuario()).build()
+                : crearPerfilEmpleadoDto(usuario, empleado);
+        cargarFormularioPerfilEmpleado(model, perfil, empleado != null);
+        return "completar-perfil";
+    }
+
+    @PostMapping("/admin/perfil")
+    public String actualizarPerfilEmpleado(Authentication authentication,
+                                           @ModelAttribute("perfil") PerfilClienteDTO perfil,
+                                           Model model) {
+        Usuario usuario = usuarioService.buscarUsuarioPorNombreUsuario(authentication.getName());
+        Optional<Persona> persona = personaService.buscarPersonaPorUsuario(usuario.getId());
+
+        if (persona.isPresent() && !(persona.get() instanceof Empleado)) {
+            return "redirect:/admin";
+        }
+
+        try {
+            if (persona.isPresent()) {
+                Empleado empleado = (Empleado) persona.get();
+                empleadoService.modificarDatosPersonales(empleado.getId(), perfil.getNombre(),
+                        perfil.getApellido(), perfil.getSexo(), Date.valueOf(perfil.getFechaNacimiento()),
+                        perfil.getTipoDocumento(), perfil.getNumeroDocumento());
+            } else {
+                empleadoService.crearPerfilEmpleado(usuario.getId(), perfil.getNombre(), perfil.getApellido(),
+                        perfil.getSexo(), Date.valueOf(perfil.getFechaNacimiento()), perfil.getTipoDocumento(),
+                        perfil.getNumeroDocumento(), TipoEmpleado.valueOf(usuario.getRol().name()));
+            }
+            return "redirect:/admin/perfil";
+        } catch (IllegalArgumentException e) {
+            model.addAttribute("error", e.getMessage());
+            perfil.setCorreo(usuario.getNombreUsuario());
+            cargarFormularioPerfilEmpleado(model, perfil, persona.isPresent());
+            return "completar-perfil";
+        }
+    }
+
     @GetMapping("/perfil-completo")
     public String perfilCompleto() {
         return "perfil-completo";
@@ -124,6 +178,12 @@ public class RegistroController {
         model.addAttribute("perfil", perfil);
         model.addAttribute("modoEdicion", persona.isPresent());
         model.addAttribute("nacionalidades", nacionalidadService.listarNacionalidadActiva());
+    }
+
+    private void cargarFormularioPerfilEmpleado(Model model, PerfilClienteDTO perfil, boolean perfilExistente) {
+        model.addAttribute("perfil", perfil);
+        model.addAttribute("modoEdicion", perfilExistente);
+        model.addAttribute("perfilEmpleado", true);
     }
 
     private PerfilClienteDTO crearPerfilDto(Usuario usuario, Optional<Persona> personaOptional) {
@@ -172,5 +232,17 @@ public class RegistroController {
                 .idLocalidad(direccion.getLocalidad().getId())
                 .idDepartamento(direccion.getLocalidad().getDepartamento().getId())
                 .idProvincia(direccion.getLocalidad().getDepartamento().getProvincia().getId());
+    }
+
+    private PerfilClienteDTO crearPerfilEmpleadoDto(Usuario usuario, Empleado empleado) {
+        return PerfilClienteDTO.builder()
+                .correo(usuario.getNombreUsuario())
+                .nombre(empleado.getNombre())
+                .apellido(empleado.getApellido())
+                .sexo(empleado.getSexo())
+                .fechaNacimiento(empleado.getFechaNacimiento().toString())
+                .tipoDocumento(empleado.getTipoDocumento())
+                .numeroDocumento(empleado.getNumeroDocumento())
+                .build();
     }
 }

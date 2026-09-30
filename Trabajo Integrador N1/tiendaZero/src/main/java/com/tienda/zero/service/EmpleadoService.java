@@ -15,12 +15,20 @@ public interface EmpleadoService {
     Empleado crearEmpleado(String nombre, String apellido, Sexo sexo, Date fechaNacimiento, TipoDocumento tipoDocumento,
                            String numeroDocumento, TipoEmpleado tipoEmpleado, String idEmpresa);
 
+    Empleado crearPerfilEmpleado(String idUsuario, String nombre, String apellido, Sexo sexo,
+                                 Date fechaNacimiento, TipoDocumento tipoDocumento,
+                                 String numeroDocumento, TipoEmpleado tipoEmpleado);
+
     void validar(String nombre, String apellido, Sexo sexo, Date fechaNacimiento, TipoDocumento tipoDocumento,
                  String numeroDocumento, TipoEmpleado tipoEmpleado, String idEmpresa);
 
     Empleado modificarEmpleado(String id, String nombre, String apellido, Sexo sexo, Date fechaNacimiento,
                                TipoDocumento tipoDocumento, String numeroDocumento,
                                TipoEmpleado tipoEmpleado, String idEmpresa);
+
+    Empleado modificarDatosPersonales(String id, String nombre, String apellido, Sexo sexo,
+                                      Date fechaNacimiento, TipoDocumento tipoDocumento,
+                                      String numeroDocumento);
 
     Empleado buscarEmpleado(String id);
 
