@@ -37,6 +37,10 @@ public class Producto {
     @Builder.Default
     private boolean enOferta = false;
 
+    @Column(nullable = false, columnDefinition = "double default 0")
+    @Builder.Default
+    private double porcentajeDescuento = 0.0;
+
     @Column(nullable = false)
     @Builder.Default
     private boolean eliminado = false;

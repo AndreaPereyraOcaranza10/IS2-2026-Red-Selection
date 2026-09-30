@@ -113,6 +113,21 @@ public class ProductoServiceImpl implements ProductoService {
     }
 
     @Override
+    @Transactional
+    public Producto actualizarOferta(String id, double porcentajeDescuento) {
+        Producto producto = buscarProducto(id);
+        if (producto.isEliminado()) {
+            throw new IllegalArgumentException("No se puede cambiar la oferta de un producto eliminado");
+        }
+        if (!Double.isFinite(porcentajeDescuento) || porcentajeDescuento < 0 || porcentajeDescuento >= 100) {
+            throw new IllegalArgumentException("El descuento debe ser mayor o igual a 0 y menor a 100");
+        }
+        producto.setPorcentajeDescuento(porcentajeDescuento);
+        producto.setEnOferta(porcentajeDescuento > 0);
+        return productoRepository.save(producto);
+    }
+
+    @Override
     public List<Producto> listarProducto() {
 
         return productoRepository.findAll();

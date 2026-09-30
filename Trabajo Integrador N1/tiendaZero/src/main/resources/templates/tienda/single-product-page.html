@@ -118,7 +118,10 @@
                                 <p class="mb-2">Código de producto: <strong th:text="${product.sku}">00123</strong></p>
                                 <p class="mb-2">Disponibilidad: <strong th:text="${product.inStock} ? 'Disponible' : 'Sin stock'">Disponible</strong></p>
                             </div>
-                            <div class="text-2xl font-semibold mb-8" th:text="${'$' + product.price}">$40.00</div>
+                            <div class="mb-8">
+                                <span th:if="${product.oldPrice != null}" class="text-lg text-muted text-decoration-line-through me-2" th:text="${'$' + product.oldPrice}">$50.00</span>
+                                <span class="text-2xl font-semibold" th:text="${'$' + product.price}">$40.00</span>
+                            </div>
                             <!-- Form de "agregar al carrito": ajustá la action al endpoint real -->
                             <form th:action="@{/cart/add}" method="post">
                                 <input type="hidden" name="productId" th:value="${product.id}">

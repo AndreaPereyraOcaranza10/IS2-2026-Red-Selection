@@ -18,7 +18,6 @@ public class ProductoFormDTO {
     private String sku;
     private Double price;
     private String talle;
-    private boolean enOferta;
     private String idSubCategoria;
     private String description;
     private MultipartFile image;

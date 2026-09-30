@@ -159,7 +159,12 @@ public class FlujoCompraService {
     private BigDecimal precioActual(Producto producto) {
         VigenciaPrecio vigente = precios.buscarVigenciaPrecioVigente(producto.getId());
         if (vigente == null || vigente.getPrecio() <= 0) throw new IllegalStateException("El producto no tiene precio vigente: " + producto.getNombre());
-        return BigDecimal.valueOf(vigente.getPrecio()).setScale(2, java.math.RoundingMode.HALF_UP);
+        BigDecimal precio = BigDecimal.valueOf(vigente.getPrecio());
+        if (producto.isEnOferta() && producto.getPorcentajeDescuento() > 0) {
+            precio = precio.multiply(BigDecimal.ONE.subtract(
+                    BigDecimal.valueOf(producto.getPorcentajeDescuento()).movePointLeft(2)));
+        }
+        return precio.setScale(2, java.math.RoundingMode.HALF_UP);
     }
 
     private Optional<OrdenCompra> carritoActivo(String username) {

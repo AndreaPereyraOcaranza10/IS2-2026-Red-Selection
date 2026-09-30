@@ -39,7 +39,9 @@ public class AdminController {
     }
 
     @GetMapping({"/inventory", "/admin/inventory"})
-    public String inventory(@RequestParam(value = "q", required = false) String query, Model model) {
+    public String inventory(@RequestParam(value = "q", required = false) String query,
+                            @RequestParam(value = "page", defaultValue = "0") int requestedPage,
+                            Model model) {
         List<Producto> productos = productoService.listarProductoActivo();
 
         if (query != null && !query.isBlank()) {
@@ -51,7 +53,13 @@ public class AdminController {
             model.addAttribute("query", query);
         }
 
-        List<ProductoInventarioDTO> productosDTO = productos.stream().map(p -> {
+        int pageSize = 10;
+        int totalPages = (int) Math.ceil(productos.size() / (double) pageSize);
+        int page = Math.max(0, Math.min(requestedPage, Math.max(0, totalPages - 1)));
+        int fromIndex = Math.min(page * pageSize, productos.size());
+        List<Producto> paginaProductos = productos.subList(fromIndex, Math.min(fromIndex + pageSize, productos.size()));
+
+        List<ProductoInventarioDTO> productosDTO = paginaProductos.stream().map(p -> {
             double precio = 0.0;
             try {
                 VigenciaPrecio vig = vigenciaPrecioService.buscarVigenciaPrecioVigente(p.getId());
@@ -82,6 +90,8 @@ public class AdminController {
                     .talle(p.getTalle() != null ? p.getTalle() : "-")
                     .price(precio)
                     .priceText(String.format(Locale.US, "$%.2f", precio))
+                    .precioOferta(p.isEnOferta() ? precio * (1 - p.getPorcentajeDescuento() / 100.0) : precio)
+                    .descuento(p.getPorcentajeDescuento())
                     .stock(stockService.calcularStockActual(p.getId()))
                     .enOferta(p.isEnOferta())
                     .imageUrl(imagenUrl)
@@ -89,6 +99,13 @@ public class AdminController {
         }).collect(Collectors.toList());
 
         model.addAttribute("products", productosDTO);
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", totalPages);
+        model.addAttribute("totalProducts", productos.size());
+        model.addAttribute("pageSize", pageSize);
+        model.addAttribute("startProduct", productos.isEmpty() ? 0 : fromIndex + 1);
+        model.addAttribute("endProduct", Math.min(fromIndex + pageSize, productos.size()));
+        model.addAttribute("query", query);
         return "admin/inventory";
     }
 
@@ -123,7 +140,7 @@ public class AdminController {
                     form.getName(),
                     form.getDescription(),
                     form.getTalle(),
-                    form.isEnOferta(),
+                    false,
                     idImagen,
                     form.getIdSubCategoria()
             );
@@ -148,6 +165,42 @@ public class AdminController {
             model.addAttribute("subcategorias", subCategoriaRepository.findByEliminadoFalse());
             return "admin/create-product";
         }
+    }
+
+    @PostMapping("/products/inflation")
+    public String actualizarPorInflacion(@RequestParam double porcentaje, RedirectAttributes redirectAttributes) {
+        try {
+            int cantidad = vigenciaPrecioService.actualizarPreciosPorInflacion(porcentaje);
+            redirectAttributes.addFlashAttribute("mensajeExito", "Precios actualizados por inflación del " + porcentaje + "% en " + cantidad + " productos.");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("mensajeError", "No se pudieron actualizar los precios: " + e.getMessage());
+        }
+        return "redirect:/inventory";
+    }
+
+    @PostMapping("/products/{id}/offer")
+    public String toggleOffer(@PathVariable String id, @RequestParam double porcentaje,
+                              RedirectAttributes redirectAttributes) {
+        try {
+            Producto producto = productoService.actualizarOferta(id, porcentaje);
+            redirectAttributes.addFlashAttribute("mensajeExito", porcentaje == 0
+                    ? "Se quitó la oferta de " + producto.getNombre() + "."
+                    : producto.getNombre() + " quedó en oferta con " + porcentaje + "% de descuento.");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("mensajeError", "No se pudo cambiar la oferta: " + e.getMessage());
+        }
+        return "redirect:/inventory";
+    }
+
+    @PostMapping("/products/{id}/offer/remove")
+    public String removeOffer(@PathVariable String id, RedirectAttributes redirectAttributes) {
+        try {
+            Producto producto = productoService.actualizarOferta(id, 0);
+            redirectAttributes.addFlashAttribute("mensajeExito", "Se quitó la oferta de " + producto.getNombre() + ".");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("mensajeError", "No se pudo quitar la oferta: " + e.getMessage());
+        }
+        return "redirect:/inventory";
     }
 
     @PostMapping("/products/{id}/delete")

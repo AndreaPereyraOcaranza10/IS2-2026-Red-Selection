@@ -4,6 +4,26 @@
 <head>
   <title th:text="'Inventario - Zero'">Inventario - Zero</title>
   <th:block th:replace="~{admin/fragments/fragments :: head-assets}"></th:block>
+  <style>
+    .inventory-table { width: 100%; table-layout: fixed; }
+    .inventory-table th, .inventory-table td { overflow-wrap: anywhere; }
+    .inventory-table th:nth-child(1) { width: 18%; }
+    .inventory-table th:nth-child(2) { width: 10%; }
+    .inventory-table th:nth-child(3) { width: 14%; }
+    .inventory-table th:nth-child(4) { width: 6%; }
+    .inventory-table th:nth-child(5) { width: 11%; }
+    .inventory-table th:nth-child(6) { width: 9%; }
+    .inventory-table th:nth-child(7) { width: 9%; }
+    .inventory-table th:nth-child(8) { width: 23%; }
+    .inventory-table .actions-cell { overflow-wrap: normal; }
+    .inventory-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; align-items: center; gap: .375rem; }
+    .offer-actions { display: inline-flex; align-items: center; gap: .25rem; }
+    .discount-input { width: 66px; min-width: 66px; }
+    .inventory-actions .btn { white-space: nowrap; }
+    @media (max-width: 767.98px) {
+      .inventory-table { min-width: 760px; }
+    }
+  </style>
 </head>
 
 <body>
@@ -50,7 +70,15 @@
                   <i class="ti ti-x"></i>
                 </a>
               </form>
-              <div class="d-flex gap-2">
+              <div class="d-flex gap-2 flex-wrap">
+                <form th:action="@{/products/inflation}" method="post" class="d-flex gap-2 align-items-center">
+                  <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                  <div class="input-group" style="width: 190px;">
+                    <input class="form-control" type="number" name="porcentaje" min="0" step="0.01" placeholder="Inflación %" required>
+                    <span class="input-group-text">%</span>
+                  </div>
+                  <button type="submit" class="btn btn-outline-warning">Actualizar precios</button>
+                </form>
                 <a th:href="@{/products/new}" class="btn btn-primary d-flex align-items-center gap-1">
                   <i class="ti ti-plus"></i> Nuevo Producto
                 </a>
@@ -58,8 +86,9 @@
             </div>
           </div>
 
-          <div class="card table-responsive shadow-sm">
-            <table class="table mb-0 text-nowrap table-hover">
+          <div class="card shadow-sm">
+            <div class="table-responsive">
+            <table class="table table-sm table-hover align-middle mb-0 inventory-table">
               <thead class="table-light border-light">
                 <tr>
                   <th>Producto</th>
@@ -74,7 +103,7 @@
               </thead>
               <tbody>
                 <tr class="align-middle" th:each="product : ${products}">
-                  <td>
+                  <td class="product-cell">
                     <div class="d-flex align-items-center">
                       <img th:src="@{${product.imageUrl}}" src="/assets/images/products/1.jpg" alt="" 
                            class="avatar avatar-md rounded object-fit-cover me-3" style="width: 48px; height: 48px;" />
@@ -87,12 +116,14 @@
                   <td>
                     <span class="badge bg-light text-dark font-monospace border" th:text="${product.code}">PRD001</span>
                   </td>
-                  <td th:text="${product.category}">Hombres - Ropa</td>
+                  <td class="category-cell" th:text="${product.category}">Hombres - Ropa</td>
                   <td>
                     <span class="badge bg-secondary-subtle text-secondary" th:text="${product.talle}">M</span>
                   </td>
                   <td>
-                    <span class="fw-bold text-dark fs-6" th:text="${product.priceText}">$0.00</span>
+                    <span th:if="${product.enOferta}" class="d-block text-muted text-decoration-line-through" th:text="${product.priceText}">$0.00</span>
+                    <span class="fw-bold text-dark" th:text="${'$' + #numbers.formatDecimal(product.precioOferta, 1, 2)}">$0.00</span>
+                    <small th:if="${product.enOferta}" class="d-block text-success" th:text="${product.descuento + '% OFF'}">10% OFF</small>
                   </td>
                   <td>
                     <span class="badge" th:classappend="${product.stock > 0} ? ' bg-success-subtle text-success' : ' bg-danger-subtle text-danger'"
@@ -104,14 +135,29 @@
                     </span>
                     <span th:unless="${product.enOferta}" class="badge bg-light text-muted border">Normal</span>
                   </td>
-                  <td class="text-end">
-                    <div class="d-inline-flex gap-2 align-items-center">
-                      <a th:href="@{'/product/' + ${product.id}}" target="_blank" class="btn btn-sm btn-outline-info" title="Ver en Tienda">
+                  <td class="actions-cell">
+                    <div class="inventory-actions">
+                      <a th:href="@{'/product/' + ${product.id}}" target="_blank" class="btn btn-sm btn-outline-info" title="Ver en tienda" aria-label="Ver producto en tienda">
                         <i class="ti ti-external-link"></i>
                       </a>
+                      <form th:action="@{'/products/' + ${product.id} + '/offer'}" method="post" class="offer-actions">
+                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                        <input type="number" name="porcentaje" min="0" max="99.99" step="0.01"
+                               class="form-control form-control-sm discount-input" placeholder="% desc." required
+                               th:value="${product.enOferta ? product.descuento : ''}"
+                               th:attr="aria-label=|Porcentaje de descuento para ${product.name}|">
+                        <button type="submit" class="btn btn-sm btn-outline-success" title="Aplicar o actualizar descuento" aria-label="Aplicar o actualizar descuento">
+                          <i class="ti ti-check"></i>
+                        </button>
+                        <button th:if="${product.enOferta}" type="submit"
+                                th:formaction="@{'/products/' + ${product.id} + '/offer/remove'}" formnovalidate
+                                class="btn btn-sm btn-outline-secondary" title="Quitar oferta" aria-label="Quitar oferta">
+                          <i class="ti ti-tag-off"></i>
+                        </button>
+                      </form>
                       <form th:action="@{'/products/' + ${product.id} + '/delete'}" method="post" class="d-inline"
                             onsubmit="return confirm('¿Seguro que deseas eliminar este producto?');">
-                        <button type="submit" class="btn btn-sm btn-outline-danger" title="Eliminar">
+                        <button type="submit" class="btn btn-sm btn-outline-danger" title="Eliminar producto" aria-label="Eliminar producto">
                           <i class="ti ti-trash"></i>
                         </button>
                       </form>
@@ -132,28 +178,22 @@
                   </td>
                 </tr>
               </tbody>
-              <tfoot class="">
-
+              <tfoot>
                 <tr>
-                  <td class="border-bottom-0">Showing product per page</td>
-                  <td colspan="7" class="border-bottom-0">
-                    <nav aria-label="Page navigation" class="d-flex justify-content-end">
-                      <!--
-                          Ejemplo con th:each sobre las páginas (opcional):
-                          <li th:each="p : ${#numbers.sequence(1, totalPages)}" class="page-item"
-                              th:classappend="${p == currentPage} ? 'active'">
-                              <a class="page-link" th:href="@{/inventory(page=${p})}" th:text="${p}">1</a>
-                          </li>
-                      -->
-                      <ul class="pagination mb-0">
-                        <li class="page-item disabled">
-                          <a class="page-link" href="#" tabindex="-1">Previous</a>
+                  <td colspan="3" class="border-bottom-0 text-muted small" th:text="${'Mostrando ' + startProduct + '–' + endProduct + ' de ' + totalProducts + ' productos'}">Mostrando productos</td>
+                  <td colspan="5" class="border-bottom-0">
+                    <nav aria-label="Paginación del inventario" class="d-flex justify-content-end">
+                      <ul class="pagination pagination-sm mb-0" th:if="${totalPages > 1}">
+                        <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+                          <a class="page-link" th:if="${currentPage > 0}" th:href="@{/inventory(q=${query},page=${currentPage - 1})}">Anterior</a>
+                          <span class="page-link" th:unless="${currentPage > 0}">Anterior</span>
                         </li>
-                        <li class="page-item active"><a class="page-link" href="#">1</a></li>
-                        <li class="page-item"><a class="page-link" href="#">2</a></li>
-                        <li class="page-item"><a class="page-link" href="#">3</a></li>
-                        <li class="page-item">
-                          <a class="page-link" href="#">Next</a>
+                        <li class="page-item" th:each="p : ${#numbers.sequence(0, totalPages - 1)}" th:classappend="${p == currentPage} ? 'active'">
+                          <a class="page-link" th:href="@{/inventory(q=${query},page=${p})}" th:text="${p + 1}">1</a>
+                        </li>
+                        <li class="page-item" th:classappend="${currentPage + 1 >= totalPages} ? 'disabled'">
+                          <a class="page-link" th:if="${currentPage + 1 < totalPages}" th:href="@{/inventory(q=${query},page=${currentPage + 1})}">Siguiente</a>
+                          <span class="page-link" th:unless="${currentPage + 1 < totalPages}">Siguiente</span>
                         </li>
                       </ul>
                     </nav>
@@ -162,6 +202,7 @@
 
               </tfoot>
             </table>
+            </div>
           </div>
 
 

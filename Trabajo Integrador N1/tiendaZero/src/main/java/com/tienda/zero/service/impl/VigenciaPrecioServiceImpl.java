@@ -9,9 +9,16 @@ import org.springframework.stereotype.Service;
 
 import java.sql.Date;
 import java.util.List;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Scheduled;
 
 @Service
 public class VigenciaPrecioServiceImpl implements VigenciaPrecioService {
+
+    @Value("${tienda.inflacion.bimestral:0}")
+    private double inflacionBimestral;
 
     private final VigenciaPrecioRepository vigenciaPrecioRepository;
     private final ProductoService productoService;
@@ -111,5 +118,34 @@ public class VigenciaPrecioServiceImpl implements VigenciaPrecioService {
         }
 
         return vigente;
+    }
+
+    @Override
+    @jakarta.transaction.Transactional
+    public int actualizarPreciosPorInflacion(double porcentaje) {
+        if (!Double.isFinite(porcentaje) || porcentaje < 0) {
+            throw new IllegalArgumentException("El porcentaje de inflación debe ser un número mayor o igual a cero");
+        }
+        Date hoy = new Date(System.currentTimeMillis());
+        int actualizados = 0;
+        for (Producto producto : productoService.listarProductoActivo()) {
+            VigenciaPrecio vigente = vigenciaPrecioRepository
+                    .findByProductoIdAndFechaHastaIsNullAndEliminadoFalse(producto.getId());
+            if (vigente == null) continue;
+            // Evita cerrar una vigencia en la misma fecha en que comenzó.
+            if (vigente.getFechaDesde().before(hoy)) {
+                double nuevoPrecio = BigDecimal.valueOf(vigente.getPrecio())
+                        .multiply(BigDecimal.ONE.add(BigDecimal.valueOf(porcentaje).movePointLeft(2)))
+                        .setScale(2, RoundingMode.HALF_UP).doubleValue();
+                crearVigenciaPrecio(hoy, null, nuevoPrecio, producto.getId());
+                actualizados++;
+            }
+        }
+        return actualizados;
+    }
+
+    @Scheduled(cron = "0 0 0 1 */2 *", zone = "America/Argentina/Buenos_Aires")
+    public void actualizarPreciosBimestralmente() {
+        if (inflacionBimestral > 0) actualizarPreciosPorInflacion(inflacionBimestral);
     }
 }

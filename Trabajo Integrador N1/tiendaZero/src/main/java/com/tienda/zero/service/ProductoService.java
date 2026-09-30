@@ -12,6 +12,7 @@ public interface ProductoService {
     Producto modificarProducto(String id, String nombre, String descripcion, String talle,
                                boolean enOferta, String idImagen, String idSubCategoria);
     void eliminarProducto(String id);
+    Producto actualizarOferta(String id, double porcentajeDescuento);
     List<Producto> listarProducto();
     List<Producto> listarProductoActivo();
     Producto buscarProductoPorNombre(String nombre);

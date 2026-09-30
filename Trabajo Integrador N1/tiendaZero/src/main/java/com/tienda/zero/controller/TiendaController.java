@@ -281,8 +281,8 @@ public class TiendaController {
                 .inStock(stockService.calcularStockActual(prod.getId()) > 0)
                 .reviewCount(5)
                 .rating(5)
-                .price(precio)
-                .oldPrice(prod.isEnOferta() ? Math.round(precio * 1.25 * 100.0) / 100.0 : null)
+                .price(prod.isEnOferta() ? Math.round(precio * (1 - prod.getPorcentajeDescuento() / 100.0) * 100.0) / 100.0 : precio)
+                .oldPrice(prod.isEnOferta() ? precio : null)
                 .imageUrl(imagenUrl)
                 .build();
     }

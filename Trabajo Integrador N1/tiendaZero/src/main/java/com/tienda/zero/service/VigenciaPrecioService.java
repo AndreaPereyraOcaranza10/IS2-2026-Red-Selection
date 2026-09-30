@@ -22,4 +22,6 @@ public interface VigenciaPrecioService {
     List<VigenciaPrecio> listarVigenciaPrecioActivo();
 
     VigenciaPrecio buscarVigenciaPrecioVigente(String idProducto);
+
+    int actualizarPreciosPorInflacion(double porcentaje);
 }
