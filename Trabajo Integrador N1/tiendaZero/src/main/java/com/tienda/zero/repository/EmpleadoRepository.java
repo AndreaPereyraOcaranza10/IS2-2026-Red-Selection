@@ -13,4 +13,5 @@ public interface EmpleadoRepository extends JpaRepository<Empleado, String> {
 
     Optional<Empleado> findByTipoDocumentoAndNumeroDocumento(TipoDocumento tipoDocumento, String numeroDocumento);
     List<Empleado> findByEliminadoFalse();
+    boolean existsByEmpresaIdAndEliminadoFalse(String empresaId);
 }

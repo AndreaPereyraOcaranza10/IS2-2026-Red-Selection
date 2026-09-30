@@ -74,6 +74,7 @@
               </select>
               <div class="form-text text-danger" th:if="${#lists.isEmpty(empresas)}">
                 No hay ninguna empresa cargada: hace falta una para poder dar de alta empleados.
+                <a th:href="@{/admin/empresas/nueva}" class="ms-1">Crear empresa</a>
               </div>
             </div>
           </div>

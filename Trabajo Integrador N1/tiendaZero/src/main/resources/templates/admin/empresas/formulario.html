@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+  <title th:text="${empresa != null && empresa.id != null} ? 'Editar empresa' : 'Nueva empresa'">Empresa</title>
+  <th:block th:replace="~{admin/fragments/fragments :: head-assets}"></th:block>
+</head>
+<body>
+<div th:replace="~{admin/fragments/fragments :: sidebarTopbar(activePage='empresas')}"></div>
+<main id="content" class="content py-10">
+  <div class="container-fluid">
+    <div class="d-flex align-items-center gap-2 mb-3">
+      <a th:href="@{/admin/empresas}" class="btn btn-sm btn-light" title="Volver" aria-label="Volver">
+        <i class="ti ti-arrow-left"></i>
+      </a>
+      <h1 class="mb-0" th:text="${empresa != null && empresa.id != null} ? 'Editar empresa' : 'Nueva empresa'">Empresa</h1>
+    </div>
+
+    <div class="alert alert-danger" role="alert" th:if="${error != null}">
+      <i class="ti ti-alert-circle me-2"></i><span th:text="${error}">Error</span>
+    </div>
+
+    <form th:action="${empresa != null && empresa.id != null} ? @{/admin/empresas/{id}/editar(id=${empresa.id})} : @{/admin/empresas/nueva}"
+          method="post" th:object="${empresaForm}">
+      <div class="card mb-3">
+        <div class="card-body">
+          <h5 class="mb-3">Datos de la empresa</h5>
+          <div class="row">
+            <div class="col-md-5 mb-3">
+              <label for="razonSocial" class="form-label">Razon social</label>
+              <input type="text" id="razonSocial" th:field="*{razonSocial}" class="form-control" maxlength="255" required>
+            </div>
+            <div class="col-md-4 mb-3">
+              <label for="cuit" class="form-label">CUIT</label>
+              <input type="text" id="cuit" th:field="*{cuit}" class="form-control" inputmode="numeric"
+                     placeholder="30-12345678-9" pattern="[0-9 -]{11,15}" required>
+            </div>
+            <div class="col-md-3 mb-3">
+              <label for="tipoEmpresa" class="form-label">Tipo</label>
+              <select id="tipoEmpresa" th:field="*{tipoEmpresa}" class="form-select" required>
+                <option value="">Seleccione...</option>
+                <option th:each="tipo : ${tiposEmpresa}" th:value="${tipo}"
+                        th:text="${tipo == T(com.tienda.zero.enums.TipoEmpresa).SEDE_CENTRAL ? 'Sede central' : 'Sucursal'}"></option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card mb-3">
+        <div class="card-body">
+          <h5 class="mb-3">Direccion</h5>
+          <div class="row">
+            <div class="col-md-4 mb-3">
+              <label for="provincia" class="form-label">Provincia</label>
+              <select id="provincia" th:field="*{idProvincia}" class="form-select" required data-selected="" th:attr="data-selected=*{idProvincia}">
+                <option value="">Seleccione...</option>
+              </select>
+            </div>
+            <div class="col-md-4 mb-3">
+              <label for="departamento" class="form-label">Departamento</label>
+              <select id="departamento" th:field="*{idDepartamento}" class="form-select" required data-selected="" th:attr="data-selected=*{idDepartamento}">
+                <option value="">Seleccione...</option>
+              </select>
+            </div>
+            <div class="col-md-4 mb-3">
+              <label for="localidad" class="form-label">Localidad</label>
+              <select id="localidad" th:field="*{idLocalidad}" class="form-select" required data-selected="" th:attr="data-selected=*{idLocalidad}">
+                <option value="">Seleccione...</option>
+              </select>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label for="calle" class="form-label">Calle</label>
+              <input type="text" id="calle" th:field="*{calle}" class="form-control" required>
+            </div>
+            <div class="col-md-2 mb-3">
+              <label for="numeracion" class="form-label">Numero</label>
+              <input type="text" id="numeracion" th:field="*{numeracion}" class="form-control" required>
+            </div>
+            <div class="col-md-4 mb-3">
+              <label for="barrio" class="form-label">Barrio</label>
+              <input type="text" id="barrio" th:field="*{barrio}" class="form-control">
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-3 mb-3">
+              <label for="manzanaPiso" class="form-label">Manzana / piso</label>
+              <input type="text" id="manzanaPiso" th:field="*{manzanaPiso}" class="form-control">
+            </div>
+            <div class="col-md-3 mb-3">
+              <label for="casaDepartamento" class="form-label">Casa / departamento</label>
+              <input type="text" id="casaDepartamento" th:field="*{casaDepartamento}" class="form-control">
+            </div>
+            <div class="col-md-6 mb-3">
+              <label for="referencia" class="form-label">Referencia</label>
+              <input type="text" id="referencia" th:field="*{referencia}" class="form-control">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card mb-3">
+        <div class="card-body">
+          <h5 class="mb-3">Contacto</h5>
+          <div class="row">
+            <div class="col-md-4 mb-3">
+              <label for="medioContacto" class="form-label">Medio</label>
+              <select id="medioContacto" th:field="*{medioContacto}" class="form-select" required>
+                <option value="CORREO">Correo electronico</option>
+                <option value="TELEFONO">Telefono</option>
+              </select>
+            </div>
+            <div class="col-md-4 mb-3">
+              <label for="tipoContacto" class="form-label">Tipo de contacto</label>
+              <select id="tipoContacto" th:field="*{tipoContacto}" class="form-select" required>
+                <option th:each="tipo : ${tiposContacto}" th:value="${tipo}" th:text="${tipo}"></option>
+              </select>
+            </div>
+            <div class="col-md-4 mb-3">
+              <label for="observacion" class="form-label">Observacion</label>
+              <input type="text" id="observacion" th:field="*{observacion}" class="form-control">
+            </div>
+          </div>
+          <div id="campoCorreo" class="row">
+            <div class="col-md-6 mb-3">
+              <label for="email" class="form-label">Correo electronico</label>
+              <input type="email" id="email" th:field="*{email}" class="form-control" placeholder="contacto@empresa.com">
+            </div>
+          </div>
+          <div id="camposTelefono" class="row">
+            <div class="col-md-6 mb-3">
+              <label for="telefono" class="form-label">Telefono</label>
+              <input type="text" id="telefono" th:field="*{telefono}" class="form-control" placeholder="261 555 0000">
+            </div>
+            <div class="col-md-3 mb-3">
+              <label for="tipoTelefono" class="form-label">Tipo de telefono</label>
+              <select id="tipoTelefono" th:field="*{tipoTelefono}" class="form-select">
+                <option th:each="tipo : ${tiposTelefono}" th:value="${tipo}" th:text="${tipo}"></option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="d-flex gap-2">
+        <button type="submit" class="btn btn-primary"><i class="ti ti-device-floppy me-1"></i>Guardar</button>
+        <a th:href="@{/admin/empresas}" class="btn btn-secondary">Cancelar</a>
+      </div>
+    </form>
+  </div>
+</main>
+<th:block th:replace="~{admin/fragments/fragments :: scripts}"></th:block>
+<script>
+  document.addEventListener('DOMContentLoaded', async () => {
+    const provincia = document.getElementById('provincia');
+    const departamento = document.getElementById('departamento');
+    const localidad = document.getElementById('localidad');
+    const medio = document.getElementById('medioContacto');
+    const correo = document.getElementById('campoCorreo');
+    const telefono = document.getElementById('camposTelefono');
+    const emailInput = document.getElementById('email');
+    const telefonoInput = document.getElementById('telefono');
+    const tipoTelefono = document.getElementById('tipoTelefono');
+
+    async function cargar(select, url, seleccionado) {
+      select.innerHTML = '<option value="">Seleccione...</option>';
+      if (!url) return;
+      const respuesta = await fetch(url);
+      if (!respuesta.ok) return;
+      const opciones = await respuesta.json();
+      opciones.forEach(opcion => select.add(new Option(opcion.nombre, opcion.id)));
+      if (seleccionado) select.value = seleccionado;
+    }
+
+    function alternarContacto() {
+      const esCorreo = medio.value === 'CORREO';
+      correo.hidden = !esCorreo;
+      telefono.hidden = esCorreo;
+      emailInput.required = esCorreo;
+      telefonoInput.required = !esCorreo;
+      tipoTelefono.required = !esCorreo;
+    }
+
+    medio.addEventListener('change', alternarContacto);
+    provincia.addEventListener('change', async () => {
+      await cargar(departamento, provincia.value ? `/api/ubicacion/departamentos?idProvincia=${encodeURIComponent(provincia.value)}` : '', '');
+      await cargar(localidad, '', '');
+    });
+    departamento.addEventListener('change', async () => {
+      await cargar(localidad, departamento.value ? `/api/ubicacion/localidades?idDepartamento=${encodeURIComponent(departamento.value)}` : '', '');
+    });
+
+    alternarContacto();
+    try {
+      await cargar(provincia, '/api/ubicacion/provincias', provincia.dataset.selected);
+      if (provincia.value) {
+        await cargar(departamento, `/api/ubicacion/departamentos?idProvincia=${encodeURIComponent(provincia.value)}`, departamento.dataset.selected);
+      }
+      if (departamento.value) {
+        await cargar(localidad, `/api/ubicacion/localidades?idDepartamento=${encodeURIComponent(departamento.value)}`, localidad.dataset.selected);
+      }
+    } catch (error) {
+      console.error('No se pudieron cargar las ubicaciones', error);
+    }
+  });
+</script>
+</body>
+</html>
