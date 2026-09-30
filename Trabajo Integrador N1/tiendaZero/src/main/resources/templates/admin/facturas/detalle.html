@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+
+<head>
+    <title th:text="'Factura de proveedor - InApp Inventory Dashboard'">Factura de proveedor</title>
+    <th:block th:replace="~{admin/fragments/fragments :: head-assets}"></th:block>
+</head>
+
+<body>
+<div th:replace="~{admin/fragments/fragments :: sidebarTopbar(activePage='facturas-proveedor')}"></div>
+<!-- MAIN CONTENT -->
+<main id="content" class="content py-10">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-12">
+                <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
+                    <div class="">
+                        <h1 class="fs-3 mb-1" th:text="'Factura N° ' + ${factura.numeroFactura}">Factura N° 1234</h1>
+                        <p class="mb-0">
+                            <span th:text="${factura.proveedor.razonSocial} + ' · ' + ${#dates.format(factura.fechaFactura, 'dd/MM/yyyy')}">Proveedor</span>
+                            <span th:if="${factura.estado.name() == 'PAGADA'}" class="badge bg-success-subtle text-success ms-2">Pagada</span>
+                            <span th:if="${factura.estado.name() == 'ANULADA'}" class="badge bg-danger-subtle text-danger ms-2">Anulada</span>
+                            <span th:if="${factura.estado.name() == 'SIN_DEFINIR'}" class="badge bg-warning-subtle text-warning ms-2">Pendiente de pago</span>
+                        </p>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <a th:if="${factura.ordenCompra != null}"
+                           th:href="@{'/admin/ordenes/' + ${factura.ordenCompra.id}}" class="btn btn-outline-primary">Ver la orden de compra</a>
+                        <a th:href="@{/admin/facturas-proveedor}" class="btn btn-primary">Volver a las facturas</a>
+                    </div>
+                </div>
+
+                <!-- Mensajes Flash de Éxito o Error -->
+                <div class="alert alert-success alert-dismissible fade show mb-4" role="alert" th:if="${mensajeExito != null}">
+                    <i class="ti ti-check me-2 fs-5"></i>
+                    <span th:text="${mensajeExito}">Operación exitosa</span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                <div class="alert alert-danger alert-dismissible fade show mb-4" role="alert" th:if="${mensajeError != null}">
+                    <i class="ti ti-alert-circle me-2 fs-5"></i>
+                    <span th:text="${mensajeError}">Ocurrió un error</span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <!-- Líneas de la factura -->
+            <div class="col-lg-8">
+                <div class="card table-responsive shadow-sm">
+                    <table class="table mb-0 text-nowrap table-hover">
+                        <thead class="table-light border-light">
+                        <tr>
+                            <th>Producto</th>
+                            <th>Cantidad</th>
+                            <th>Precio de compra</th>
+                            <th class="text-end">Subtotal</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr class="align-middle" th:each="d : ${factura.detalles}">
+                            <td>
+                                <span class="fw-semibold text-dark d-block" th:text="${d.producto.nombre}">Remera</span>
+                                <small class="text-muted" th:text="${d.producto.codigo}">REM-001</small>
+                            </td>
+                            <td th:text="${d.cantidad}">10</td>
+                            <td th:text="'$' + ${#numbers.formatDecimal(d.subtotal / d.cantidad, 1, 'POINT', 2, 'COMMA')}">$0,00</td>
+                            <td class="text-end"
+                                th:text="'$' + ${#numbers.formatDecimal(d.subtotal, 1, 'POINT', 2, 'COMMA')}">$0,00</td>
+                        </tr>
+                        </tbody>
+                        <tfoot>
+                        <tr>
+                            <td colspan="3" class="text-end fw-bold border-bottom-0">Total</td>
+                            <td class="text-end fw-bold fs-6 border-bottom-0"
+                                th:text="'$' + ${#numbers.formatDecimal(factura.totalPagado, 1, 'POINT', 2, 'COMMA')}">$0,00</td>
+                        </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+
+            <div class="col-lg-4">
+                <div class="card shadow-sm mb-4">
+                    <div class="card-body p-4">
+                        <h2 class="fs-5 mb-3">Datos de la factura</h2>
+                        <p class="mb-1"><span class="text-muted">Forma de pago:</span>
+                            <span th:text="${#strings.replace(factura.formaDePago.tipoPago.name(), '_', ' ')}">EFECTIVO</span></p>
+                        <p class="mb-0"><span class="text-muted">Orden de compra:</span>
+                            <span th:text="${factura.ordenCompra != null} ? 'Vinculada' : 'Cargada sin orden'">Vinculada</span></p>
+                    </div>
+                </div>
+
+                <!-- Anulación: revierte el stock -->
+                <div class="card shadow-sm" th:unless="${factura.estado.name() == 'ANULADA'}">
+                    <div class="card-body p-4">
+                        <h2 class="fs-5 mb-1">Anular factura</h2>
+                        <p class="text-muted small mb-3">
+                            Se descuenta del stock lo que esta factura había sumado. Si esas unidades ya se vendieron, no se puede anular.
+                        </p>
+                        <form th:action="@{'/admin/facturas-proveedor/' + ${factura.id} + '/cancel'}" method="post"
+                              onsubmit="return confirm('¿Seguro que querés anular esta factura? Se va a revertir el stock.');">
+                            <div class="mb-3">
+                                <label for="observacion" class="form-label font-semibold">Motivo (opcional)</label>
+                                <textarea class="form-control" id="observacion" name="observacion" rows="2"
+                                          placeholder="Ej. Se cargó dos veces"></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-outline-danger w-100">
+                                <i class="ti ti-ban me-1"></i> Anular factura
+                            </button>
+                        </form>
+                    </div>
+                </div>
+                <div class="alert alert-danger mb-0" th:if="${factura.estado.name() == 'ANULADA'}">
+                    <i class="ti ti-ban me-2"></i> Esta factura está anulada y su stock fue revertido.
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-12">
+                <div th:replace="~{admin/fragments/fragments :: pageFooter}"></div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<th:block th:replace="~{admin/fragments/fragments :: scripts}"></th:block>
+</body>
+
+</html>

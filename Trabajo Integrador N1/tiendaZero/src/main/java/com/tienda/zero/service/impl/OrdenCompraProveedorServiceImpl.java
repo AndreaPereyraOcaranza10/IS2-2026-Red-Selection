@@ -48,4 +48,15 @@ public class OrdenCompraProveedorServiceImpl implements OrdenCompraProveedorServ
         }
         return null;
     }
+
+    @Override
+    public OrdenCompraProveedor marcarPendiente(String id) {
+        OrdenCompraProveedor o = buscarOrden(id);
+        if (o != null) {
+            o.setEntregada(false);
+            return ordenCompraProveedorRepository.save(o);
+        }
+        return null;
+    }
+
 }

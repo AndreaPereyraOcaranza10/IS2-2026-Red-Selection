@@ -13,42 +13,59 @@
       <a th:href="@{/admin/empleados/nuevo}" class="btn btn-primary">Nuevo empleado</a>
     </div>
 
+    <!-- Mensajes Flash de Éxito o Error -->
+    <div class="alert alert-success alert-dismissible fade show mb-4" role="alert" th:if="${mensajeExito != null}">
+      <i class="ti ti-check me-2 fs-5"></i>
+      <span th:text="${mensajeExito}">Operación exitosa</span>
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    <div class="alert alert-danger alert-dismissible fade show mb-4" role="alert" th:if="${mensajeError != null}">
+      <i class="ti ti-alert-circle me-2 fs-5"></i>
+      <span th:text="${mensajeError}">Ocurrió un error</span>
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
     <div class="card">
       <div class="card-body">
         <table class="table table-striped">
           <thead>
-            <tr>
-              <th>Nombre</th>
-              <th>Apellido</th>
-              <th>Tipo</th>
-              <th>Empresa</th>
-              <th>Documento</th>
-              <th>Sexo</th>
-              <th>Fecha Nac.</th>
-              <th>Acciones</th>
-            </tr>
+          <tr>
+            <th>Nombre</th>
+            <th>Apellido</th>
+            <th>Tipo</th>
+            <th>Empresa</th>
+            <th>Documento</th>
+            <th>Sexo</th>
+            <th>Fecha Nac.</th>
+            <th>Acceso</th>
+            <th>Acciones</th>
+          </tr>
           </thead>
           <tbody>
-            <tr th:each="emp : ${empleados}">
-              <td th:text="${emp.nombre}">Nombre</td>
-              <td th:text="${emp.apellido}">Apellido</td>
-              <td th:text="${emp.tipoEmpleado}">Tipo</td>
-              <td th:text="${emp.empresa != null ? emp.empresa.razonSocial : '-'}">Empresa</td>
-              <td th:text="${emp.tipoDocumento} + ' ' + ${emp.numeroDocumento}">DNI</td>
-              <td th:text="${emp.sexo}">Sexo</td>
-              <td th:text="${emp.fechaNacimiento}">dd-MM-yyyy</td>
-              <td>
-                <a th:href="@{/admin/empleados/{id}/editar(id=${emp.id})}" class="btn btn-sm btn-outline-primary">Editar</a>
-                <form th:action="@{/admin/empleados/{id}/eliminar(id=${emp.id})}" method="post" style="display:inline-block;" onsubmit="return confirm('¿Eliminar empleado?');">
-                  <button type="submit" class="btn btn-sm btn-outline-danger">Eliminar</button>
-                </form>
-              </td>
+          <tr th:each="emp : ${empleados}">
+            <td th:text="${emp.nombre}">Nombre</td>
+            <td th:text="${emp.apellido}">Apellido</td>
+            <td th:text="${emp.tipoEmpleado}">Tipo</td>
+            <td th:text="${emp.empresa != null ? emp.empresa.razonSocial : '-'}">Empresa</td>
+            <td th:text="${emp.tipoDocumento} + ' ' + ${emp.numeroDocumento}">DNI</td>
+            <td th:text="${emp.sexo}">Sexo</td>
+            <td th:text="${#dates.format(emp.fechaNacimiento, 'dd/MM/yyyy')}">01/01/1990</td>
+            <td>
+              <span th:if="${emp.usuario != null}" th:text="${emp.usuario.nombreUsuario}">correo@ejemplo.com</span>
+              <span th:unless="${emp.usuario != null}" class="badge bg-light text-muted border">Sin acceso</span>
+            </td>
+            <td>
+              <a th:href="@{/admin/empleados/{id}/editar(id=${emp.id})}" class="btn btn-sm btn-outline-primary">Editar</a>
+              <form th:action="@{/admin/empleados/{id}/eliminar(id=${emp.id})}" method="post" style="display:inline-block;" onsubmit="return confirm('¿Eliminar empleado?');">
+                <button type="submit" class="btn btn-sm btn-outline-danger">Eliminar</button>
+              </form>
+            </td>
+          </tr>
+          <th:block th:if="${empleados == null or #lists.isEmpty(empleados)}">
+            <tr>
+              <td colspan="9" class="text-center">No hay empleados registrados</td>
             </tr>
-            <th:block th:if="${empleados == null or #lists.isEmpty(empleados)}">
-              <tr>
-                <td colspan="8" class="text-center">No hay empleados registrados</td>
-              </tr>
-            </th:block>
+          </th:block>
           </tbody>
         </table>
       </div>

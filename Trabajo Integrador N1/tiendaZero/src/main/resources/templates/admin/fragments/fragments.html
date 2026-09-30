@@ -217,6 +217,8 @@
             Product</span></a></li>
       <!-- Órdenes de compra -->
       <li><a class="nav-link" th:classappend="${activePage == 'ordenes'} ? 'active'" th:href="@{/admin/ordenes}" href="/admin/ordenes"><i class="ti ti-truck"></i><span class="nav-text">Órdenes de compra</span></a></li>
+      <!-- Facturas de proveedor -->
+      <li><a class="nav-link" th:classappend="${activePage == 'facturas-proveedor'} ? 'active'" th:href="@{/admin/facturas-proveedor}" href="/admin/facturas-proveedor"><i class="ti ti-receipt-2"></i><span class="nav-text">Facturas de proveedor</span></a></li>
       <!-- Proveedores (ABM) -->
       <li><a class="nav-link" th:classappend="${activePage == 'proveedores'} ? 'active'" th:href="@{/admin/proveedores}" href="/admin/proveedores"><i class="ti ti-users"></i><span class="nav-text">Proveedores</span></a></li>
       <!-- Empleados (ABM) -->

@@ -10,4 +10,5 @@ public interface OrdenCompraProveedorService {
     List<OrdenCompraProveedor> listarOrdenes();
     List<OrdenCompraProveedor> listarOrdenesPendientes();
     OrdenCompraProveedor marcarEntregada(String id);
+    OrdenCompraProveedor marcarPendiente(String id);
 }

@@ -9,44 +9,116 @@
 <main id="content" class="content py-10">
   <div class="container-fluid">
     <div class="d-flex justify-content-between align-items-center mb-4">
-      <h1>Orden #<span th:text="${orden.id}">ID</span></h1>
+      <h1>Orden #<span th:text="${#strings.substring(orden.id, 0, 8)}">ID</span></h1>
       <div>
-        <a th:if="${!orden.entregada}" th:href="@{/admin/ordenes/{id}/entregar(id=${orden.id})}"
-           th:onclick="|event.preventDefault();document.getElementById('entregarForm').submit();|" class="btn btn-success">Marcar entregada</a>
-        <form id="entregarForm" th:action="@{/admin/ordenes/{id}/entregar(id=${orden.id})}" method="post" style="display:none"></form>
         <a th:href="@{/admin/ordenes}" class="btn btn-secondary">Volver</a>
       </div>
     </div>
 
-    <div class="card mb-4">
-      <div class="card-body">
-        <p><strong>Proveedor:</strong> <span th:text="${orden.proveedor != null ? orden.proveedor.razonSocial : 'N/A'}">Proveedor</span></p>
-        <p><strong>Fecha creación:</strong> <span th:text="${orden.fechaCreacion}">2026-01-01</span></p>
-        <p><strong>Estado:</strong> <span th:text="${orden.entregada} ? 'Entregada' : 'Pendiente'">Pendiente</span></p>
-      </div>
+    <!-- Mensajes Flash de Éxito o Error -->
+    <div class="alert alert-success alert-dismissible fade show mb-4" role="alert" th:if="${mensajeExito != null}">
+      <i class="ti ti-check me-2 fs-5"></i>
+      <span th:text="${mensajeExito}">Operación exitosa</span>
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    <div class="alert alert-danger alert-dismissible fade show mb-4" role="alert" th:if="${mensajeError != null}">
+      <i class="ti ti-alert-circle me-2 fs-5"></i>
+      <span th:text="${mensajeError}">Ocurrió un error</span>
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
 
-    <div class="card">
-      <div class="card-body">
-        <h5>Items</h5>
-        <table class="table">
-          <thead>
-          <tr>
-            <th>Producto</th>
-            <th>Cantidad</th>
-            <th>Precio unitario</th>
-            <th>Subtotal</th>
-          </tr>
-          </thead>
-          <tbody>
-          <tr th:each="d : ${orden.detalles}">
-            <td th:text="${d.producto != null ? d.producto.nombre : 'N/A'}">Producto</td>
-            <td th:text="${d.cantidad}">1</td>
-            <td th:text="${d.precioUnitario}">$0.00</td>
-            <td th:text="${d.cantidad * d.precioUnitario}">$0.00</td>
-          </tr>
-          </tbody>
-        </table>
+    <div class="row g-4">
+      <div class="col-lg-8">
+        <div class="card mb-4">
+          <div class="card-body">
+            <p><strong>Proveedor:</strong> <span th:text="${orden.proveedor != null ? orden.proveedor.razonSocial : 'N/A'}">Proveedor</span></p>
+            <p><strong>Fecha creación:</strong> <span th:text="${#dates.format(orden.fechaCreacion, 'dd/MM/yyyy')}">01/01/2026</span></p>
+            <p class="mb-0"><strong>Estado:</strong>
+              <span th:if="${orden.entregada}" class="badge bg-success-subtle text-success">Entregada</span>
+              <span th:unless="${orden.entregada}" class="badge bg-warning-subtle text-warning">Pendiente</span>
+            </p>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-body">
+            <h5>Items</h5>
+            <table class="table">
+              <thead>
+              <tr>
+                <th>Producto</th>
+                <th>Cantidad</th>
+                <th>Precio unitario</th>
+                <th class="text-end">Subtotal</th>
+              </tr>
+              </thead>
+              <tbody>
+              <tr th:each="d : ${orden.detalles}">
+                <td th:text="${d.producto != null ? d.producto.nombre : 'N/A'}">Producto</td>
+                <td th:text="${d.cantidad}">1</td>
+                <td th:text="'$' + ${#numbers.formatDecimal(d.precioUnitario, 1, 'POINT', 2, 'COMMA')}">$0,00</td>
+                <td class="text-end"
+                    th:text="'$' + ${#numbers.formatDecimal(d.cantidad * d.precioUnitario, 1, 'POINT', 2, 'COMMA')}">$0,00</td>
+              </tr>
+              </tbody>
+              <tfoot>
+              <tr>
+                <td colspan="3" class="text-end fw-bold">Total</td>
+                <td class="text-end fw-bold"
+                    th:text="'$' + ${#numbers.formatDecimal(total, 1, 'POINT', 2, 'COMMA')}">$0,00</td>
+              </tr>
+              </tfoot>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recepción de la mercadería: registra la factura del proveedor y suma el stock -->
+      <div class="col-lg-4">
+        <div class="card" th:unless="${orden.entregada}">
+          <div class="card-body">
+            <h5 class="mb-1">Recibir mercadería</h5>
+            <p class="text-muted small mb-3">
+              Se registra la factura del proveedor con estas líneas y se suma el stock de cada producto.
+            </p>
+            <form th:action="@{/admin/ordenes/{id}/recibir(id=${orden.id})}" method="post"
+                  onsubmit="return confirm('¿Confirmás que llegó la mercadería? Se va a sumar al stock.');">
+              <div class="mb-3">
+                <label for="numeroFactura" class="form-label">N° de factura del proveedor</label>
+                <input type="number" class="form-control" id="numeroFactura" name="numeroFactura"
+                       min="1" step="1" placeholder="Ej. 1234" required>
+              </div>
+              <div class="mb-3">
+                <label for="idFormaDePago" class="form-label">Forma de pago</label>
+                <select class="form-select" id="idFormaDePago" name="idFormaDePago" required>
+                  <option value="">Seleccione...</option>
+                  <option th:each="f : ${formasDePago}" th:value="${f.id}"
+                          th:text="${#strings.replace(f.tipoPago.name(), '_', ' ') + (f.observacion != null ? ' - ' + f.observacion : '')}">EFECTIVO</option>
+                </select>
+              </div>
+              <div class="mb-3">
+                <label for="estado" class="form-label">Estado de la factura</label>
+                <select class="form-select" id="estado" name="estado" required>
+                  <option th:each="e : ${estados}" th:value="${e.name()}"
+                          th:text="${e.name() == 'PAGADA'} ? 'Pagada' : 'Pendiente de pago'">Pagada</option>
+                </select>
+              </div>
+              <button type="submit" class="btn btn-success w-100">
+                <i class="ti ti-package-import me-1"></i> Registrar recepción
+              </button>
+            </form>
+          </div>
+        </div>
+
+        <div class="card" th:if="${orden.entregada}">
+          <div class="card-body">
+            <h5 class="mb-2"><i class="ti ti-circle-check text-success me-1"></i> Orden recibida</h5>
+            <p class="text-muted small mb-3">
+              La mercadería ya ingresó al stock. La factura correspondiente está en el listado de facturas de proveedor.
+            </p>
+            <a th:href="@{/admin/facturas-proveedor}" class="btn btn-outline-primary w-100">Ver facturas de proveedor</a>
+          </div>
+        </div>
       </div>
     </div>
 

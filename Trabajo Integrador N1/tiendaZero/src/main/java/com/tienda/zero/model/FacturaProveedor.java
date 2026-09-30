@@ -18,6 +18,12 @@ public class FacturaProveedor extends Factura {
     @JoinColumn(name = "proveedor_id", nullable = false)
     private Proveedor proveedor;
 
+    // Opcional: la orden de compra que originó esta factura. Una factura también se puede
+    // cargar sin orden previa, por eso admite null.
+    @ManyToOne
+    @JoinColumn(name = "orden_compra_proveedor_id")
+    private OrdenCompraProveedor ordenCompra;
+
     @Override
     public int signoStock() {
         return 1;

@@ -11,6 +11,16 @@
     <h1>Nueva orden de compra</h1>
     <div class="card">
       <div class="card-body">
+        <div class="alert alert-success alert-dismissible fade show mb-4" role="alert" th:if="${mensajeExito != null}">
+          <i class="ti ti-check me-2 fs-5"></i>
+          <span th:text="${mensajeExito}">Operación exitosa</span>
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        <div class="alert alert-danger alert-dismissible fade show mb-4" role="alert" th:if="${mensajeError != null}">
+          <i class="ti ti-alert-circle me-2 fs-5"></i>
+          <span th:text="${mensajeError}">Ocurrió un error</span>
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
         <form th:action="@{/admin/ordenes/nueva}" method="post" id="ordenForm">
           <div class="mb-3">
             <label for="proveedor">Proveedor</label>
