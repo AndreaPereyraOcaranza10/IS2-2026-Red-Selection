@@ -19,7 +19,8 @@ public class OrdenCompra {
     @Column(nullable = false, precision = 12, scale = 2) @Builder.Default private BigDecimal total = BigDecimal.ZERO;
     @Enumerated(EnumType.STRING) @Column(nullable = false) @Builder.Default private EstadoOrdenCompra estadoOrdenCompra = EstadoOrdenCompra.PENDIENTE_COMPLETAR;
     @Column(nullable = false) private String direccionEntrega;
-    @JsonIgnore @ManyToOne(optional = false) @JoinColumn(name = "cliente_id") private Cliente cliente;
+    @JsonIgnore @ManyToOne @JoinColumn(name = "usuario_propietario_id") private Usuario propietario;
+    @JsonIgnore @ManyToOne @JoinColumn(name = "cliente_id", nullable = true) private Cliente cliente;
     @JsonIgnore @ManyToOne @JoinColumn(name = "empleado_id") private Empleado empleado;
     @OneToMany(mappedBy = "ordenCompra", cascade = CascadeType.ALL, orphanRemoval = true) @Builder.Default private List<DetalleCompra> detalles = new ArrayList<>();
 }

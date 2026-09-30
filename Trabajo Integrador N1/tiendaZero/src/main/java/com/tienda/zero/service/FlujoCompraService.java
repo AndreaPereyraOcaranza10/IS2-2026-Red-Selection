@@ -186,20 +186,45 @@ public class FlujoCompraService {
     }
 
     private Optional<OrdenCompra> carritoActivo(String username) {
-        return ordenesCliente.findFirstByClienteUsuarioNombreUsuarioAndEstadoOrdenCompraAndEliminadoFalseOrderByFechaDesc(
-                username, EstadoOrdenCompra.PENDIENTE_COMPLETAR);
+        Optional<OrdenCompra> porPropietario = ordenesCliente
+                .findFirstByPropietarioNombreUsuarioAndEstadoOrdenCompraAndEliminadoFalseOrderByFechaDesc(
+                        username, EstadoOrdenCompra.PENDIENTE_COMPLETAR);
+        if (porPropietario.isPresent()) return porPropietario;
+
+        Optional<Persona> persona = personas.findByUsuarioId(usuario(username).getId());
+        if (persona.isEmpty()) return Optional.empty();
+        if (persona.get() instanceof Cliente) {
+            return ordenesCliente.findFirstByClienteUsuarioNombreUsuarioAndEstadoOrdenCompraAndEliminadoFalseOrderByFechaDesc(
+                    username, EstadoOrdenCompra.PENDIENTE_COMPLETAR);
+        }
+        if (persona.get() instanceof Empleado) {
+            return ordenesCliente.findFirstByEmpleadoUsuarioNombreUsuarioAndEstadoOrdenCompraAndEliminadoFalseOrderByFechaDesc(
+                    username, EstadoOrdenCompra.PENDIENTE_COMPLETAR);
+        }
+        return Optional.empty();
     }
 
     private OrdenCompra obtenerOCrearCarrito(String username) {
         Optional<OrdenCompra> existente = carritoActivo(username);
         if (existente.isPresent()) return existente.get();
-        Usuario usuario = usuarios.findByNombreUsuario(username).orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado"));
-        Persona persona = personas.findByUsuarioId(usuario.getId()).orElseThrow(() -> new IllegalArgumentException("El usuario debe completar su perfil de cliente"));
-        if (!(persona instanceof Cliente cliente)) throw new IllegalArgumentException("El carrito está disponible para clientes");
-        OrdenCompra nuevoCarrito = OrdenCompra.builder().identificadorCompra(UUID.randomUUID().toString())
-                .fecha(LocalDate.now()).cliente(cliente).estadoOrdenCompra(EstadoOrdenCompra.PENDIENTE_COMPLETAR)
-                .direccionEntrega(cliente.getDireccionEstadia()).total(BigDecimal.ZERO).build();
+        Usuario usuario = usuario(username);
+        Optional<Persona> persona = personas.findByUsuarioId(usuario.getId());
+        OrdenCompra.OrdenCompraBuilder carrito = OrdenCompra.builder()
+                .identificadorCompra(UUID.randomUUID().toString())
+                .fecha(LocalDate.now()).estadoOrdenCompra(EstadoOrdenCompra.PENDIENTE_COMPLETAR)
+                .direccionEntrega("A confirmar").total(BigDecimal.ZERO).propietario(usuario);
+        if (persona.orElse(null) instanceof Cliente cliente) {
+            carrito.cliente(cliente).direccionEntrega(cliente.getDireccionEstadia());
+        } else if (persona.orElse(null) instanceof Empleado empleado) {
+            carrito.empleado(empleado);
+        }
+        OrdenCompra nuevoCarrito = carrito.build();
         return ordenesCliente.save(nuevoCarrito);
+    }
+
+    private Usuario usuario(String username) {
+        return usuarios.findByNombreUsuario(username)
+                .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado"));
     }
 
     private OrdenCompra carritoEditable(String username) {

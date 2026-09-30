@@ -92,6 +92,7 @@ public class AdminController {
                     .talle(p.getTalle() != null ? p.getTalle() : "-")
                     .price(precio)
                     .priceText(String.format(Locale.US, "$%.2f", precio))
+                    .stock(stockService.calcularStockActual(p.getId()))
                     .enOferta(p.isEnOferta())
                     .imageUrl(imagenUrl)
                     .build();

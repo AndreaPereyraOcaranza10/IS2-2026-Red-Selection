@@ -68,6 +68,7 @@
                   <th>Categoría</th>
                   <th>Talle</th>
                   <th>Precio</th>
+                  <th>Stock</th>
                   <th>Estado</th>
                   <th class="text-end">Acciones</th>
                 </tr>
@@ -95,6 +96,10 @@
                     <span class="fw-bold text-dark fs-6" th:text="${product.priceText}">$0.00</span>
                   </td>
                   <td>
+                    <span class="badge" th:classappend="${product.stock > 0} ? ' bg-success-subtle text-success' : ' bg-danger-subtle text-danger'"
+                          th:text="${product.stock} + ' unidades'">0 unidades</span>
+                  </td>
+                  <td>
                     <span th:if="${product.enOferta}" class="badge bg-success-subtle text-success">
                       <i class="ti ti-tag me-1"></i>En Oferta
                     </span>
@@ -117,7 +122,7 @@
 
                 <!-- Mensaje cuando la lista de productos está vacía -->
                 <tr th:if="${products != null and #lists.isEmpty(products)}">
-                  <td colspan="7" class="text-center py-5">
+                  <td colspan="8" class="text-center py-5">
                     <div class="text-muted">
                       <i class="ti ti-package-off fs-1 d-block mb-2 text-secondary"></i>
                       <p class="fs-5 mb-2">No se encontraron productos en el inventario.</p>
@@ -132,7 +137,7 @@
 
                 <tr>
                   <td class="border-bottom-0">Showing product per page</td>
-                  <td colspan="9" class="border-bottom-0">
+                  <td colspan="7" class="border-bottom-0">
                     <nav aria-label="Page navigation" class="d-flex justify-content-end">
                       <!--
                           Ejemplo con th:each sobre las páginas (opcional):
