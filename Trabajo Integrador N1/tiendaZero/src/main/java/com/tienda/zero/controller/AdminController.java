@@ -11,6 +11,7 @@ import com.tienda.zero.service.StockService;
 import com.tienda.zero.service.ImagenService;
 import com.tienda.zero.service.ProductoService;
 import com.tienda.zero.service.ReporteVentasService;
+import com.tienda.zero.service.ReporteProductosService;
 import com.tienda.zero.service.VigenciaPrecioService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
@@ -35,6 +36,7 @@ public class AdminController {
     private final ImagenService imagenService;
     private final StockService stockService;
     private final ReporteVentasService reporteVentasService;
+    private final ReporteProductosService reporteProductosService;
 
     @GetMapping({"/admin", "/admin/dashboard", "/admin/index"})
     public String dashboard() {
@@ -127,6 +129,9 @@ public class AdminController {
                               RedirectAttributes redirectAttributes,
                               Model model) {
         try {
+            if (form.getStockIdeal() == null || form.getStockIdeal() <= 0) {
+                throw new IllegalArgumentException("El stock ideal debe ser mayor que cero");
+            }
             String idImagen = null;
             if (image != null && !image.isEmpty()) {
                 Imagen imagenGuardada = imagenService.crearImagen(
@@ -147,6 +152,7 @@ public class AdminController {
                     idImagen,
                     form.getIdSubCategoria()
             );
+            productoService.actualizarStockIdeal(producto.getId(), form.getStockIdeal());
 
             double precio = (form.getPrice() != null) ? form.getPrice() : 0.0;
             if (precio > 0) {
@@ -228,7 +234,20 @@ public class AdminController {
             fechaHasta = fechaDesde;
         }
         model.addAttribute("reporteVentas", reporteVentasService.generar(fechaDesde, fechaHasta));
+        model.addAttribute("reporteProductos", reporteProductosService.generar());
         return "admin/reports";
+    }
+
+    @PostMapping("/reports/products/{id}/stock-ideal")
+    public String actualizarStockIdeal(@PathVariable String id, @RequestParam int stockIdeal,
+                                       RedirectAttributes redirectAttributes) {
+        try {
+            Producto producto = productoService.actualizarStockIdeal(id, stockIdeal);
+            redirectAttributes.addFlashAttribute("mensajeExito", "Stock ideal de " + producto.getNombre() + " actualizado.");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("mensajeError", "No se pudo actualizar el stock ideal: " + e.getMessage());
+        }
+        return "redirect:/reports";
     }
 
     @GetMapping({"/docs", "/admin/docs"})

@@ -41,6 +41,10 @@ public class Producto {
     @Builder.Default
     private double porcentajeDescuento = 0.0;
 
+    @Column(nullable = false, columnDefinition = "integer default 0")
+    @Builder.Default
+    private int stockIdeal = 0;
+
     @Column(nullable = false)
     @Builder.Default
     private boolean eliminado = false;

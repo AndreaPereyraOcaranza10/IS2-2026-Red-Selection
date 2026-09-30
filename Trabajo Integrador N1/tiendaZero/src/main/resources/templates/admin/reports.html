@@ -14,9 +14,116 @@
       <div class="row mb-4">
         <div class="col-12">
           <h1 class="fs-3 mb-1">Reportes</h1>
-          <p class="mb-0">Ventas realizadas por rango de fechas.</p>
+          <p class="mb-0">Ventas y estado del inventario.</p>
         </div>
       </div>
+
+      <div th:if="${mensajeExito}" class="alert alert-success alert-dismissible fade show" role="alert">
+        <span th:text="${mensajeExito}">Operación realizada.</span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+      </div>
+      <div th:if="${mensajeError}" class="alert alert-danger alert-dismissible fade show" role="alert">
+        <span th:text="${mensajeError}">No se pudo completar la operación.</span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+      </div>
+
+      <section class="mb-5">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-end gap-2 mb-3">
+          <div>
+            <h2 class="fs-4 mb-1">Productos</h2>
+            <p class="text-secondary mb-0">Stock global comparado con el stock ideal configurado para cada producto.</p>
+          </div>
+        </div>
+
+        <div class="row g-3 mb-3">
+          <div class="col-12 col-sm-6 col-xl-3">
+            <div class="card h-100"><div class="card-body p-4">
+              <h6 class="mb-2">Unidades totales en stock</h6>
+              <h3 class="mb-0 fw-bold" th:text="${reporteProductos.unidadesTotales()}">0</h3>
+            </div></div>
+          </div>
+          <div class="col-12 col-sm-6 col-xl-3">
+            <div class="card h-100"><div class="card-body p-4">
+              <h6 class="mb-2">Productos activos</h6>
+              <h3 class="mb-0 fw-bold" th:text="${reporteProductos.cantidadProductos()}">0</h3>
+            </div></div>
+          </div>
+          <div class="col-12 col-sm-6 col-xl-3">
+            <div class="card h-100"><div class="card-body p-4">
+              <h6 class="mb-2">Productos con unidades</h6>
+              <h3 class="mb-0 fw-bold" th:text="${reporteProductos.productosConStock()}">0</h3>
+            </div></div>
+          </div>
+          <div class="col-12 col-sm-6 col-xl-3">
+            <div class="card h-100"><div class="card-body p-4">
+              <h6 class="mb-2">Sin stock ideal configurado</h6>
+              <h3 class="mb-0 fw-bold" th:text="${reporteProductos.productosSinStockIdeal()}">0</h3>
+            </div></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-body p-4">
+            <div th:if="${#lists.isEmpty(reporteProductos.detalles())}" class="text-center text-secondary py-5">
+              No hay productos activos para mostrar.
+            </div>
+            <div th:if="${!#lists.isEmpty(reporteProductos.detalles())}" class="table-responsive">
+              <table class="table table-hover align-middle mb-0">
+                <thead><tr>
+                  <th>Producto</th>
+                  <th class="text-end">Stock</th>
+                  <th class="text-end">Stock ideal</th>
+                  <th style="min-width: 180px">Nivel</th>
+                  <th>Estado</th>
+                  <th>Reposición al 50%</th>
+                  <th>Proveedor</th>
+                </tr></thead>
+                <tbody>
+                <tr th:each="producto : ${reporteProductos.detalles()}">
+                  <td>
+                    <div class="fw-semibold" th:text="${producto.nombre()}">Producto</div>
+                    <small class="text-secondary" th:text="${producto.codigo()}">SKU</small>
+                  </td>
+                  <td class="text-end" th:text="${producto.stockActual()}">0</td>
+                  <td class="text-end">
+                    <form th:action="@{/reports/products/{id}/stock-ideal(id=${producto.id()})}" method="post"
+                          class="d-flex justify-content-end gap-1">
+                      <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                      <input class="form-control form-control-sm text-end" style="width: 90px" type="number"
+                             name="stockIdeal" min="1" required th:value="${producto.stockIdeal()}"
+                             th:attr="aria-label=${'Stock ideal de ' + producto.nombre()}">
+                      <button type="submit" class="btn btn-sm btn-outline-primary" title="Guardar stock ideal">Guardar</button>
+                    </form>
+                  </td>
+                  <td>
+                    <div th:if="${producto.porcentaje() != null}">
+                      <div class="progress" style="height: 8px" role="progressbar"
+                           th:attr="aria-valuenow=${producto.porcentaje()}, aria-valuemin=0, aria-valuemax=100">
+                        <div class="progress-bar" th:classappend="${producto.estado() == 'Bueno' ? 'bg-success' : (producto.estado() == 'Regular' ? 'bg-warning' : 'bg-danger')}"
+                             th:style="${'width: ' + T(java.lang.Math).min(100.0, producto.porcentaje()) + '%'}"></div>
+                      </div>
+                      <small th:text="${producto.porcentaje() + '%'}">0%</small>
+                    </div>
+                    <span th:if="${producto.porcentaje() == null}" class="text-secondary">Configurar stock ideal</span>
+                  </td>
+                  <td><span class="badge" th:classappend="${producto.claseEstado()}" th:text="${producto.estado()}">Estado</span></td>
+                  <td>
+                    <span th:if="${producto.estado() == 'Malo'}" th:text="${producto.unidadesParaLlegarAl50() + ' unidades'}">0 unidades</span>
+                    <span th:unless="${producto.estado() == 'Malo'}" class="text-secondary">—</span>
+                  </td>
+                  <td>
+                    <span th:if="${producto.whatsappUrl() == null}" th:text="${producto.proveedor() != null ? producto.proveedor() : 'Sin proveedor asociado'}">Sin proveedor asociado</span>
+                    <a th:if="${producto.whatsappUrl() != null}" th:href="${producto.whatsappUrl()}" target="_blank" rel="noopener noreferrer"
+                       class="btn btn-sm btn-success" th:text="${'WhatsApp' + (producto.proveedor() != null ? ' · ' + producto.proveedor() : '')}">WhatsApp</a>
+                  </td>
+                </tr>
+                </tbody>
+              </table>
+            </div>
+            <p class="small text-secondary mt-3 mb-0">Bueno: 50% o más · Regular: desde 20% y menos de 50% · Malo: menos de 20%. El reporte usa el stock global.</p>
+          </div>
+        </div>
+      </section>
 
       <div class="row g-3 mb-3">
         <div class="col-12 col-md-4">

@@ -13,6 +13,7 @@ public interface ProductoService {
                                boolean enOferta, String idImagen, String idSubCategoria);
     void eliminarProducto(String id);
     Producto actualizarOferta(String id, double porcentajeDescuento);
+    Producto actualizarStockIdeal(String id, int stockIdeal);
     List<Producto> listarProducto();
     List<Producto> listarProductoActivo();
     Producto buscarProductoPorNombre(String nombre);

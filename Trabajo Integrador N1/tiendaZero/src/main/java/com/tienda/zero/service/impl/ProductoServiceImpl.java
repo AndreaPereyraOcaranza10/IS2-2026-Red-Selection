@@ -128,6 +128,20 @@ public class ProductoServiceImpl implements ProductoService {
     }
 
     @Override
+    @Transactional
+    public Producto actualizarStockIdeal(String id, int stockIdeal) {
+        if (stockIdeal <= 0) {
+            throw new IllegalArgumentException("El stock ideal debe ser mayor que cero");
+        }
+        Producto producto = buscarProducto(id);
+        if (producto.isEliminado()) {
+            throw new IllegalArgumentException("No se puede actualizar el stock ideal de un producto eliminado");
+        }
+        producto.setStockIdeal(stockIdeal);
+        return productoRepository.save(producto);
+    }
+
+    @Override
     public List<Producto> listarProducto() {
 
         return productoRepository.findAll();

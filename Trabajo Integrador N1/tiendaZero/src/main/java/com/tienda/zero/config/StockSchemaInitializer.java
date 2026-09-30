@@ -24,10 +24,7 @@ public class StockSchemaInitializer implements ApplicationRunner {
             jdbcTemplate.update("UPDATE stock SET movimiento = cantidad");
             eliminarColumna("cantidad");
         }
-        if (existeColumna("fecha_movimiento") && existeColumna("fecha")) {
-            jdbcTemplate.update("UPDATE stock SET fecha = fecha_movimiento");
-            eliminarColumna("fecha_movimiento");
-        }
+        asegurarColumnaFecha();
         if (existeColumna("orden_compra_proveedor_id")) {
             eliminarClavesForaneas("orden_compra_proveedor_id");
             eliminarColumna("orden_compra_proveedor_id");
@@ -54,6 +51,38 @@ public class StockSchemaInitializer implements ApplicationRunner {
 
     private void eliminarColumna(String columna) {
         jdbcTemplate.execute("ALTER TABLE `stock` DROP COLUMN `" + columna + "`");
+    }
+
+    /** Asegura que el esquema legado tenga la columna que espera la entidad Stock. */
+    private void asegurarColumnaFecha() {
+        boolean existeFecha = existeColumna("fecha");
+        boolean existeFechaMovimiento = existeColumna("fecha_movimiento");
+
+        if (existeFecha && existeFechaMovimiento) {
+            jdbcTemplate.update("UPDATE stock SET fecha = COALESCE(fecha, fecha_movimiento)");
+            eliminarColumna("fecha_movimiento");
+            return;
+        }
+
+        if (existeFecha) {
+            return;
+        }
+
+        if (existeFechaMovimiento) {
+            jdbcTemplate.update("UPDATE stock SET fecha_movimiento = CURRENT_TIMESTAMP WHERE fecha_movimiento IS NULL");
+            String tipo = jdbcTemplate.queryForObject("""
+                    SELECT COLUMN_TYPE
+                    FROM INFORMATION_SCHEMA.COLUMNS
+                    WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ? AND COLUMN_NAME = ?
+                    """, String.class, TABLA, "fecha_movimiento");
+            if (tipo == null || !tipo.matches("[A-Za-z0-9(), ]+")) {
+                throw new IllegalStateException("Tipo inesperado para stock.fecha_movimiento");
+            }
+            jdbcTemplate.execute("ALTER TABLE `stock` CHANGE COLUMN `fecha_movimiento` `fecha` " + tipo + " NOT NULL");
+            return;
+        }
+
+        jdbcTemplate.execute("ALTER TABLE `stock` ADD COLUMN `fecha` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP");
     }
 
     private boolean existeColumna(String columna) {
