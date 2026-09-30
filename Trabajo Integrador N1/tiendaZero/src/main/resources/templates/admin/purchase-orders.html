@@ -40,7 +40,7 @@
     <div class="p-4 pb-0"><h2 class="h5">Pedidos de clientes y entregas</h2></div>
     <table class="table table-hover mb-0"><thead class="table-light"><tr><th>Pedido</th><th>Cliente</th><th>Total</th><th>Estado</th><th>Dirección</th><th>Actualizar</th></tr></thead>
       <tbody><tr th:each="p : ${pedidos}"><td th:text="${p.identificadorCompra}"></td><td th:text="${p.cliente.usuario.nombreUsuario}"></td><td th:text="${p.total}"></td><td th:text="${p.estadoOrdenCompra}"></td><td th:text="${p.direccionEntrega}"></td><td>
-        <form th:if="${p.estadoOrdenCompra.name() == 'PENDIENTE_ENVIO' or p.estadoOrdenCompra.name() == 'PENDIENTE_ENTREGA'}" th:action="@{'/admin/orders/' + ${p.id} + '/tracking'}" method="post" class="d-flex gap-2">
+        <form th:if="${p.estadoOrdenCompra.name() == 'PENDIENTE_ENVIO' or p.estadoOrdenCompra.name() == 'PENDIENTE_ENTREGA'}" th:action="@{'/admin/ordenes/clientes/' + ${p.id} + '/seguimiento'}" method="post" class="d-flex gap-2">
           <select name="estado" class="form-select form-select-sm">
             <option th:if="${p.estadoOrdenCompra.name() == 'PENDIENTE_ENVIO'}" value="PENDIENTE_ENTREGA">Pendiente de entrega</option>
             <option th:if="${p.estadoOrdenCompra.name() == 'PENDIENTE_ENTREGA'}" value="ENTREGADO">Entregado</option>

@@ -212,7 +212,14 @@ public class TiendaController {
     }
 
     @PostMapping("/cart/remove/{productId}")
-    public String quitarDelCarrito(@PathVariable String productId, Authentication auth) { flujoCompraService.quitarDelCarrito(auth.getName(), productId); return "redirect:/cart"; }
+    public String quitarDelCarrito(@PathVariable String productId, Authentication auth, RedirectAttributes flash) {
+        try {
+            flujoCompraService.quitarDelCarrito(auth.getName(), productId);
+        } catch (RuntimeException e) {
+            flash.addFlashAttribute("mensajeError", e.getMessage());
+        }
+        return "redirect:/cart";
+    }
 
     @PostMapping("/cart/update/{productId}")
     public String actualizarCantidadCarrito(@PathVariable String productId, @RequestParam int quantity, Authentication auth, RedirectAttributes flash) {
@@ -222,7 +229,15 @@ public class TiendaController {
     }
 
     @PostMapping("/cart/clear")
-    public String vaciarCarrito(Authentication auth) { flujoCompraService.vaciarCarrito(auth.getName()); return "redirect:/cart"; }
+    public String vaciarCarrito(Authentication auth, RedirectAttributes flash) {
+        try {
+            flujoCompraService.vaciarCarrito(auth.getName());
+            flash.addFlashAttribute("mensajeExito", "Se vació el carrito.");
+        } catch (RuntimeException e) {
+            flash.addFlashAttribute("mensajeError", e.getMessage());
+        }
+        return "redirect:/cart";
+    }
 
     @PostMapping("/checkout")
     public String confirmarCompra(@RequestParam String address,

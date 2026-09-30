@@ -175,15 +175,11 @@
                         <a class="store-header__icon-button" th:href="@{/cart}" href="/cart.html" aria-label="Ver carrito">
                             <img th:src="@{/assets/images/cart-shopping.svg}" src="assets/images/cart-shopping.svg"
                                 alt="Cart" class="h-6 w-6 group-hover:scale-120">
-                            <!-- Opcional: <span th:if="${cartItemCount != null and cartItemCount > 0}" th:text="${cartItemCount}">0</span> como badge -->
+                            <span th:if="${cartItemCount > 0}" th:text="${cartItemCount}" class="absolute -top-1 -right-1 rounded-full bg-primary px-1.5 text-xs text-white">0</span>
                         </a>
                         <!-- Mini-carrito: reemplazamos los 2 items fijos por un th:each sobre cartItems -->
                         <div class="absolute right-0 mt-1 w-80 bg-white shadow-lg p-4 rounded hidden group-hover:block">
                             <div class="space-y-4">
-                                <!--
-                              Ejemplo de modelo esperado por item:
-                              cartItem.imageUrl, cartItem.name, cartItem.quantity, cartItem.price (formateado)
-                          -->
                                 <div th:each="cartItem, iterStat : ${cartItems}"
                                     class="flex items-center justify-between pb-4 border-b border-gray-line"
                                     th:classappend="${iterStat.last} ? 'border-b-0 pb-0' : ''">
@@ -198,30 +194,7 @@
                                     </div>
                                     <p class="font-semibold" th:text="${'$' + cartItem.price}">$25.00</p>
                                 </div>
-                                <!-- Fallback estático visible solo si no hay th:each cargado (quitar cuando el modelo esté listo) -->
-                                <div class="flex items-center justify-between pb-4 border-b border-gray-line"
-                                    th:if="${cartItems == null}">
-                                    <div class="flex items-center">
-                                        <img src="/assets/images/single-product/1.jpg" alt="Product"
-                                            class="h-12 w-12 object-cover rounded mr-2">
-                                        <div>
-                                            <p class="font-semibold">Vestido negro de verano</p>
-                                            <p class="text-sm">Cantidad: 1</p>
-                                        </div>
-                                    </div>
-                                    <p class="font-semibold">$25.00</p>
-                                </div>
-                                <div class="flex items-center justify-between" th:if="${cartItems == null}">
-                                    <div class="flex items-center">
-                                        <img src="/assets/images/single-product/2.jpg" alt="Product"
-                                            class="h-12 w-12 object-cover rounded mr-2">
-                                        <div>
-                                            <p class="font-semibold">Conjunto negro</p>
-                                            <p class="text-sm">Cantidad: 1</p>
-                                        </div>
-                                    </div>
-                                    <p class="font-semibold">$125.00</p>
-                                </div>
+                                <p th:if="${#lists.isEmpty(cartItems)}" class="text-sm text-gray-500">Tu carrito está vacío.</p>
                             </div>
                             <a th:href="@{/cart}" href="/cart.html"
                                 class="block text-center mt-4 border border-primary bg-primary hover:bg-transparent text-white hover:text-primary py-2 rounded-full font-semibold">Ver carrito</a>
@@ -469,7 +442,9 @@
         <form class="store-product-card__form" th:action="@{/cart/add}" method="post">
             <input type="hidden" name="productId" th:value="${product.id}">
             <button type="submit"
-                class="bg-primary border border-transparent hover:bg-transparent hover:border-primary text-white hover:text-primary font-semibold py-2 px-4 rounded-full w-full">Agregar al carrito</button>
+                th:disabled="${!product.inStock}"
+                th:text="${product.inStock} ? 'Agregar al carrito' : 'Sin stock'"
+                class="bg-primary border border-transparent hover:bg-transparent hover:border-primary text-white hover:text-primary font-semibold py-2 px-4 rounded-full w-full disabled:opacity-50 disabled:cursor-not-allowed">Agregar al carrito</button>
         </form>
     </div>
 

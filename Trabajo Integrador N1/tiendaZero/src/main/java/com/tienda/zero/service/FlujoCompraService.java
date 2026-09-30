@@ -52,6 +52,12 @@ public class FlujoCompraService {
         OrdenCompra carrito = obtenerOCrearCarrito(username);
         Producto producto = productoActivo(productoId);
         DetalleCompra detalle = carrito.getDetalles().stream().filter(d -> !d.isEliminado() && d.getProducto().getId().equals(productoId)).findFirst().orElse(null);
+        int cantidadActual = detalle == null ? 0 : detalle.getCantidad();
+        int stockDisponible = stockService.calcularStockActual(productoId);
+        if (cantidadActual + cantidad > stockDisponible) {
+            throw new IllegalArgumentException("Stock insuficiente de \"" + producto.getNombre()
+                    + "\": hay " + stockDisponible + " unidades disponibles");
+        }
         if (detalle == null) {
             detalle = DetalleCompra.builder().ordenCompra(carrito).producto(producto).cantidad(cantidad)
                     .subtotal(precioActual(producto).multiply(BigDecimal.valueOf(cantidad))).build();
@@ -70,6 +76,11 @@ public class FlujoCompraService {
         if (cantidad < 1) throw new IllegalArgumentException("La cantidad debe ser positiva");
         OrdenCompra carrito = carritoEditable(username);
         DetalleCompra detalle = detalleActivo(carrito, productoId);
+        int stockDisponible = stockService.calcularStockActual(productoId);
+        if (cantidad > stockDisponible) {
+            throw new IllegalArgumentException("Stock insuficiente de \"" + detalle.getProducto().getNombre()
+                    + "\": hay " + stockDisponible + " unidades disponibles");
+        }
         detalle.setCantidad(cantidad);
         detalle.setSubtotal(precioActual(detalle.getProducto()).multiply(BigDecimal.valueOf(cantidad)));
         recalcularTotal(carrito);
