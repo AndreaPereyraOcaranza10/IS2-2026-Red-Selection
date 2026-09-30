@@ -10,6 +10,7 @@ import com.tienda.zero.model.Empleado;
 import com.tienda.zero.model.Persona;
 import com.tienda.zero.model.Usuario;
 import com.tienda.zero.service.EmpleadoService;
+import com.tienda.zero.service.FlujoCompraService;
 import com.tienda.zero.service.NacionalidadService;
 import com.tienda.zero.service.PersonaService;
 import com.tienda.zero.service.RegistroService;
@@ -33,15 +34,17 @@ public class RegistroController {
     private final PersonaService personaService;
     private final NacionalidadService nacionalidadService;
     private final EmpleadoService empleadoService;
+    private final FlujoCompraService flujoCompraService;
 
     public RegistroController(RegistroService registroService, UsuarioService usuarioService,
                               PersonaService personaService, NacionalidadService nacionalidadService,
-                              EmpleadoService empleadoService) {
+                              EmpleadoService empleadoService, FlujoCompraService flujoCompraService) {
         this.registroService = registroService;
         this.usuarioService = usuarioService;
         this.personaService = personaService;
         this.nacionalidadService = nacionalidadService;
         this.empleadoService = empleadoService;
+        this.flujoCompraService = flujoCompraService;
     }
 
     @GetMapping("/login")
@@ -178,6 +181,7 @@ public class RegistroController {
         model.addAttribute("perfil", perfil);
         model.addAttribute("modoEdicion", persona.isPresent());
         model.addAttribute("nacionalidades", nacionalidadService.listarNacionalidadActiva());
+        model.addAttribute("ordenesCliente", flujoCompraService.listarPedidosCliente(perfil.getCorreo()));
     }
 
     private void cargarFormularioPerfilEmpleado(Model model, PerfilClienteDTO perfil, boolean perfilExistente) {

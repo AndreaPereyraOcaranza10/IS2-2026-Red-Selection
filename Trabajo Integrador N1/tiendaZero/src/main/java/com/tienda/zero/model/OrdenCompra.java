@@ -2,6 +2,7 @@ package com.tienda.zero.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.tienda.zero.enums.EstadoOrdenCompra;
+import com.tienda.zero.enums.TipoPago;
 import jakarta.persistence.*;
 import lombok.*;
 import java.math.BigDecimal;
@@ -19,6 +20,7 @@ public class OrdenCompra {
     @Column(nullable = false, precision = 12, scale = 2) @Builder.Default private BigDecimal total = BigDecimal.ZERO;
     @Enumerated(EnumType.STRING) @Column(nullable = false) @Builder.Default private EstadoOrdenCompra estadoOrdenCompra = EstadoOrdenCompra.PENDIENTE_COMPLETAR;
     @Column(nullable = false) private String direccionEntrega;
+    @Enumerated(EnumType.STRING) @Column private TipoPago formaPago;
     @JsonIgnore @ManyToOne @JoinColumn(name = "usuario_propietario_id") private Usuario propietario;
     @JsonIgnore @ManyToOne @JoinColumn(name = "cliente_id", nullable = true) private Cliente cliente;
     @JsonIgnore @ManyToOne @JoinColumn(name = "empleado_id") private Empleado empleado;

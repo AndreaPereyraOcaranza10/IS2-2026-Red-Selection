@@ -6,5 +6,6 @@ public enum EstadoOrdenCompra {
     PENDIENTE_ENVIO,
     PENDIENTE_ENTREGA,
     ENTREGADO,
-    ANULADA
+    ANULADA,
+    SIN_DEFINIR
 }

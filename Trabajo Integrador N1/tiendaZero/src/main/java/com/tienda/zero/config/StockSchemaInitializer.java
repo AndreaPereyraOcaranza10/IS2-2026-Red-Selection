@@ -32,6 +32,7 @@ public class StockSchemaInitializer implements ApplicationRunner {
             eliminarClavesForaneas("orden_compra_proveedor_id");
             eliminarColumna("orden_compra_proveedor_id");
         }
+        permitirDetalleFacturaOpcional();
     }
 
     private void eliminarClavesForaneas(String columna) {
@@ -62,5 +63,25 @@ public class StockSchemaInitializer implements ApplicationRunner {
                 WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ? AND COLUMN_NAME = ?
                 """, Integer.class, TABLA, columna);
         return cantidad != null && cantidad > 0;
+    }
+
+    private void permitirDetalleFacturaOpcional() {
+        if (!existeColumna("detalle_factura_id")) {
+            return;
+        }
+        String nullable = jdbcTemplate.queryForObject("""
+                SELECT IS_NULLABLE
+                FROM INFORMATION_SCHEMA.COLUMNS
+                WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ? AND COLUMN_NAME = ?
+                """, String.class, TABLA, "detalle_factura_id");
+        if ("YES".equalsIgnoreCase(nullable)) {
+            return;
+        }
+        String tipo = jdbcTemplate.queryForObject("""
+                SELECT COLUMN_TYPE
+                FROM INFORMATION_SCHEMA.COLUMNS
+                WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ? AND COLUMN_NAME = ?
+                """, String.class, TABLA, "detalle_factura_id");
+        jdbcTemplate.execute("ALTER TABLE `stock` MODIFY COLUMN `detalle_factura_id` " + tipo + " NULL");
     }
 }

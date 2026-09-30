@@ -10,6 +10,7 @@ import com.tienda.zero.repository.SubCategoriaRepository;
 import com.tienda.zero.service.StockService;
 import com.tienda.zero.service.ImagenService;
 import com.tienda.zero.service.ProductoService;
+import com.tienda.zero.service.ReporteVentasService;
 import com.tienda.zero.service.VigenciaPrecioService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
@@ -19,6 +20,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.sql.Date;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Locale;
 import java.util.stream.Collectors;
@@ -32,6 +34,7 @@ public class AdminController {
     private final SubCategoriaRepository subCategoriaRepository;
     private final ImagenService imagenService;
     private final StockService stockService;
+    private final ReporteVentasService reporteVentasService;
 
     @GetMapping({"/admin", "/admin/dashboard", "/admin/index"})
     public String dashboard() {
@@ -215,7 +218,16 @@ public class AdminController {
     }
 
     @GetMapping({"/reports", "/admin/reports"})
-    public String reports() {
+    public String reports(@RequestParam(value = "desde", required = false) LocalDate desde,
+                          @RequestParam(value = "hasta", required = false) LocalDate hasta,
+                          Model model) {
+        LocalDate hoy = LocalDate.now();
+        LocalDate fechaDesde = desde != null ? desde : hoy.withDayOfMonth(1);
+        LocalDate fechaHasta = hasta != null ? hasta : hoy;
+        if (fechaHasta.isBefore(fechaDesde)) {
+            fechaHasta = fechaDesde;
+        }
+        model.addAttribute("reporteVentas", reporteVentasService.generar(fechaDesde, fechaHasta));
         return "admin/reports";
     }
 

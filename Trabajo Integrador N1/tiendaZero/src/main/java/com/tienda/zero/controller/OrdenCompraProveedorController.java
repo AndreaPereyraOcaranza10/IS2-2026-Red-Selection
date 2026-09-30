@@ -2,12 +2,14 @@ package com.tienda.zero.controller;
 
 import com.tienda.zero.dto.ItemFacturaDTO;
 import com.tienda.zero.enums.EstadoFactura;
+import com.tienda.zero.enums.EstadoOrdenCompra;
 import com.tienda.zero.model.DetalleOrdenCompraProveedor;
 import com.tienda.zero.model.FacturaProveedor;
 import com.tienda.zero.model.OrdenCompraProveedor;
 import com.tienda.zero.model.Producto;
 import com.tienda.zero.model.Proveedor;
 import com.tienda.zero.service.FormaDePagoService;
+import com.tienda.zero.service.FlujoCompraService;
 import com.tienda.zero.service.GestionOrdenProveedorService;
 import com.tienda.zero.service.OrdenCompraProveedorService;
 import com.tienda.zero.service.ProductoService;
@@ -33,12 +35,29 @@ public class OrdenCompraProveedorController {
     private final ProveedorService proveedorService;
     private final ProductoService productoService;
     private final FormaDePagoService formaDePagoService;
+    private final FlujoCompraService flujoCompraService;
 
     @GetMapping
     public String lista(Model model) {
         List<OrdenCompraProveedor> ordenes = ordenCompraProveedorService.listarOrdenes();
         model.addAttribute("ordenes", ordenes);
+        var pedidos = flujoCompraService.listarPedidosAdministracion();
+        model.addAttribute("pedidos", pedidos);
+        model.addAttribute("estadosPedidoDisponibles", flujoCompraService.estadosAdministracion());
         return "admin/ordenes/lista";
+    }
+
+    @PostMapping("/clientes/{id}/estado")
+    public String actualizarPedidoCliente(@PathVariable String id,
+                                          @RequestParam EstadoOrdenCompra estado,
+                                          RedirectAttributes redirectAttributes) {
+        try {
+            flujoCompraService.cambiarEstadoAdministracion(id, estado);
+            redirectAttributes.addFlashAttribute("mensajeExito", "El estado del pedido fue actualizado.");
+        } catch (RuntimeException e) {
+            redirectAttributes.addFlashAttribute("mensajeError", e.getMessage());
+        }
+        return "redirect:/admin/ordenes";
     }
 
     @GetMapping("/nueva")

@@ -1,6 +1,8 @@
 package com.tienda.zero.service;
 
 import com.tienda.zero.enums.EstadoOrdenCompra;
+import com.tienda.zero.enums.TipoPago;
+import com.tienda.zero.enums.TipoUsuario;
 import com.tienda.zero.model.*;
 import com.tienda.zero.repository.*;
 import jakarta.transaction.Transactional;
@@ -96,18 +98,47 @@ public class FlujoCompraService {
     }
 
     public List<OrdenCompra> listarPedidosCliente(String username) {
-        return ordenesCliente.findByClienteUsuarioNombreUsuarioOrderByFechaDesc(username);
+        return ordenesCliente.findByClienteUsuarioNombreUsuarioOrderByFechaDesc(username).stream()
+                .filter(orden -> !orden.isEliminado())
+                .filter(orden -> orden.getEstadoOrdenCompra() != EstadoOrdenCompra.PENDIENTE_COMPLETAR)
+                .toList();
+    }
+
+    public List<OrdenCompra> listarPedidosAdministracion() {
+        return ordenesCliente.findByEstadoOrdenCompraNotAndEliminadoFalseOrderByFechaDesc(
+                EstadoOrdenCompra.PENDIENTE_COMPLETAR);
+    }
+
+    public List<EstadoOrdenCompra> estadosSiguientes(EstadoOrdenCompra estadoActual) {
+        if (estadoActual == null) return List.of();
+        return switch (estadoActual) {
+            case PENDIENTE_PAGO -> List.of(EstadoOrdenCompra.PENDIENTE_ENVIO, EstadoOrdenCompra.ANULADA);
+            case PENDIENTE_ENVIO -> List.of(EstadoOrdenCompra.PENDIENTE_ENTREGA, EstadoOrdenCompra.ANULADA);
+            case PENDIENTE_ENTREGA -> List.of(EstadoOrdenCompra.ENTREGADO, EstadoOrdenCompra.ANULADA);
+            default -> List.of();
+        };
+    }
+
+    public List<EstadoOrdenCompra> estadosAdministracion() {
+        return List.of(EstadoOrdenCompra.values());
     }
 
     @Transactional
-    public OrdenCompra crearOrdenCliente(String username, String direccion) {
+    public OrdenCompra crearOrdenCliente(String username, String direccion, TipoPago formaPago) {
         if (direccion == null || direccion.isBlank()) throw new IllegalArgumentException("La dirección de entrega es obligatoria");
+        if (formaPago == null) throw new IllegalArgumentException("La forma de pago es obligatoria");
+        Usuario usuario = usuario(username);
+        if (usuario.getRol() == TipoUsuario.CLIENTE && formaPago != TipoPago.BILLETERA_VIRTUAL)
+            throw new IllegalArgumentException("Los clientes solo pueden pagar con billetera virtual. Para efectivo o transferencia debe intervenir un empleado.");
         OrdenCompra orden = carritoEditable(username);
         List<DetalleCompra> detalles = orden.getDetalles().stream().filter(d -> !d.isEliminado()).toList();
         if (detalles.isEmpty()) throw new IllegalArgumentException("El carrito está vacío");
         orden.setDireccionEntrega(direccion.trim());
+        orden.setFormaPago(formaPago);
         orden.setFecha(LocalDate.now());
-        orden.setEstadoOrdenCompra(EstadoOrdenCompra.PENDIENTE_PAGO);
+        orden.setEstadoOrdenCompra(formaPago == TipoPago.BILLETERA_VIRTUAL
+                ? EstadoOrdenCompra.PENDIENTE_ENVIO
+                : EstadoOrdenCompra.PENDIENTE_PAGO);
         recalcularTotal(orden);
         ordenesCliente.save(orden);
         for (DetalleCompra detalle : detalles) {
@@ -140,11 +171,46 @@ public class FlujoCompraService {
     @Transactional
     public OrdenCompra cambiarSeguimiento(String ordenId, EstadoOrdenCompra nuevoEstado) {
         OrdenCompra orden = ordenesCliente.findById(ordenId).orElseThrow(() -> new IllegalArgumentException("Orden no encontrada"));
-        boolean permitido = (orden.getEstadoOrdenCompra() == EstadoOrdenCompra.PENDIENTE_ENVIO && nuevoEstado == EstadoOrdenCompra.PENDIENTE_ENTREGA)
-                || (orden.getEstadoOrdenCompra() == EstadoOrdenCompra.PENDIENTE_ENTREGA && nuevoEstado == EstadoOrdenCompra.ENTREGADO);
-        if (!permitido) throw new IllegalStateException("Transición de seguimiento inválida");
+        EstadoOrdenCompra estadoActual = orden.getEstadoOrdenCompra();
+        if (!estadosSiguientes(estadoActual).contains(nuevoEstado))
+            throw new IllegalStateException("Transicion de seguimiento invalida");
+        if (nuevoEstado == EstadoOrdenCompra.ANULADA) {
+            for (DetalleCompra detalle : orden.getDetalles()) {
+                if (!detalle.isEliminado()) {
+                    stockService.registrarMovimiento(detalle.getProducto().getId(), detalle.getCantidad(),
+                            "Reintegro por anulacion de orden", detalle);
+                }
+            }
+        }
         orden.setEstadoOrdenCompra(nuevoEstado);
         return ordenesCliente.save(orden);
+    }
+
+    @Transactional
+    public OrdenCompra cambiarEstadoAdministracion(String ordenId, EstadoOrdenCompra nuevoEstado) {
+        if (nuevoEstado == null) throw new IllegalArgumentException("El estado es obligatorio");
+        OrdenCompra orden = ordenesCliente.findById(ordenId)
+                .orElseThrow(() -> new IllegalArgumentException("Orden no encontrada"));
+        EstadoOrdenCompra estadoActual = orden.getEstadoOrdenCompra();
+        if (estadoActual == EstadoOrdenCompra.ENTREGADO || estadoActual == EstadoOrdenCompra.ANULADA)
+            throw new IllegalStateException("Las ordenes entregadas o anuladas no pueden cambiar de estado");
+        if (nuevoEstado == EstadoOrdenCompra.ANULADA && estadoActual != EstadoOrdenCompra.ANULADA
+                && stockReservado(estadoActual)) {
+            for (DetalleCompra detalle : orden.getDetalles()) {
+                if (!detalle.isEliminado()) {
+                    stockService.registrarMovimiento(detalle.getProducto().getId(), detalle.getCantidad(),
+                            "Reintegro por anulacion de orden", detalle);
+                }
+            }
+        }
+        orden.setEstadoOrdenCompra(nuevoEstado);
+        return ordenesCliente.save(orden);
+    }
+
+    private boolean stockReservado(EstadoOrdenCompra estado) {
+        return estado == EstadoOrdenCompra.PENDIENTE_PAGO
+                || estado == EstadoOrdenCompra.PENDIENTE_ENVIO
+                || estado == EstadoOrdenCompra.PENDIENTE_ENTREGA;
     }
 
     private OrdenCompra ordenClienteDeUsuario(String id, String username) {

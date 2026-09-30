@@ -115,6 +115,11 @@ a {
     align-items: flex-start;
 }
 
+.contenido-cuenta--columna {
+    flex-direction: column;
+    gap: 24px;
+}
+
 .tarjeta {
     width: 100%;
     max-width: 460px;
@@ -128,6 +133,40 @@ a {
 
 .tarjeta--ancha {
     max-width: 760px;
+}
+
+.ordenes-perfil {
+    display: grid;
+    gap: 14px;
+}
+
+.orden-perfil {
+    padding: 16px;
+    border: 1px solid var(--color-borde);
+    border-radius: var(--radio);
+    background: #ffffff;
+}
+
+.orden-perfil p {
+    margin: 8px 0 0;
+    color: var(--color-texto-suave);
+    font-size: 0.9rem;
+}
+
+.orden-perfil__encabezado {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.orden-perfil__estado {
+    padding: 5px 9px;
+    border-radius: 999px;
+    background: #f0f1f3;
+    color: var(--color-oscuro);
+    font-size: 0.75rem;
+    font-weight: 800;
 }
 
 .etiqueta {

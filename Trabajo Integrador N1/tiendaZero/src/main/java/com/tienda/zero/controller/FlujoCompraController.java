@@ -1,6 +1,7 @@
 package com.tienda.zero.controller;
 
 import com.tienda.zero.enums.EstadoOrdenCompra;
+import com.tienda.zero.enums.TipoPago;
 import com.tienda.zero.model.*;
 import com.tienda.zero.service.FlujoCompraService;
 import lombok.RequiredArgsConstructor;
@@ -37,8 +38,10 @@ public class FlujoCompraController {
     }
 
     @PostMapping("/api/orders")
-    public OrdenCompra crearPedido(@RequestParam String direccionEntrega, Authentication auth) {
-        return flujo.crearOrdenCliente(auth.getName(), direccionEntrega);
+    public OrdenCompra crearPedido(@RequestParam String direccionEntrega,
+                                   @RequestParam TipoPago formaPago,
+                                   Authentication auth) {
+        return flujo.crearOrdenCliente(auth.getName(), direccionEntrega, formaPago);
     }
 
     @GetMapping("/api/orders")

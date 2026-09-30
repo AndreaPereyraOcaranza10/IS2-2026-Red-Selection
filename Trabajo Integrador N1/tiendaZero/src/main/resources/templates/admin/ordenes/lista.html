@@ -50,6 +50,58 @@
       </div>
     </div>
 
+    <div class="card mt-4">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <div>
+            <h2 class="h5 mb-1">Pedidos de clientes</h2>
+            <p class="text-muted mb-0">Confirmar pagos atendidos por empleados y actualizar el seguimiento.</p>
+          </div>
+        </div>
+        <div class="table-responsive">
+          <table class="table align-middle">
+            <thead>
+            <tr>
+              <th>Pedido</th>
+              <th>Cliente</th>
+              <th>Fecha</th>
+              <th>Total</th>
+              <th>Forma de pago</th>
+              <th>Estado</th>
+              <th>Actualizar</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="p : ${pedidos}">
+              <td th:text="${p.identificadorCompra}">PED-001</td>
+              <td th:text="${p.cliente != null ? p.cliente.usuario.nombreUsuario : (p.propietario != null ? p.propietario.nombreUsuario : 'Sin cliente')}">cliente@mail.com</td>
+              <td th:text="${p.fecha}">2026-01-01</td>
+              <td th:text="${'$' + p.total}">$0.00</td>
+              <td th:text="${p.formaPago != null ? p.formaPago : 'No informada'}">BILLETERA_VIRTUAL</td>
+              <td th:text="${p.estadoOrdenCompra}">PENDIENTE_ENVIO</td>
+              <td>
+                <form th:if="${p.estadoOrdenCompra.name() != 'ENTREGADO' and p.estadoOrdenCompra.name() != 'ANULADA'}"
+                      th:action="@{/admin/ordenes/clientes/{id}/estado(id=${p.id})}" method="post" class="d-flex gap-2">
+                  <select name="estado" class="form-select form-select-sm" required>
+                    <option th:each="estadoDisponible : ${estadosPedidoDisponibles}"
+                            th:value="${estadoDisponible}"
+                            th:text="${estadoDisponible}"
+                            th:selected="${estadoDisponible == p.estadoOrdenCompra}">PENDIENTE_ENVIO</option>
+                  </select>
+                  <button type="submit" class="btn btn-sm btn-primary">Guardar</button>
+                </form>
+                <span th:if="${p.estadoOrdenCompra.name() == 'ENTREGADO' or p.estadoOrdenCompra.name() == 'ANULADA'}" class="text-muted">Sin acciones</span>
+              </td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(pedidos)}">
+              <td colspan="7" class="text-center py-4">Todavia no hay pedidos de clientes.</td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
   </div>
 </main>
 <th:block th:replace="~{admin/fragments/fragments :: scripts}"></th:block>

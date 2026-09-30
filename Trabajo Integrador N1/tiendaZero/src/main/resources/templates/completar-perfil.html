@@ -23,7 +23,7 @@
     </div>
 </header>
 
-<main class="contenido-cuenta contenido-cuenta--superior">
+<main class="contenido-cuenta contenido-cuenta--superior contenido-cuenta--columna">
 <section class="tarjeta tarjeta--ancha">
     <p class="etiqueta">Mi cuenta</p>
     <h1 th:text="${modoEdicion} ? 'Actualizá tu perfil' : 'Completá tu perfil'">Completá tu perfil</h1>
@@ -155,6 +155,26 @@
         <button id="guardar-perfil" type="submit" disabled
                 th:text="${modoEdicion} ? 'Guardar cambios' : 'Guardar perfil'">Guardar perfil</button>
     </form>
+</section>
+<section class="tarjeta tarjeta--ancha" th:unless="${perfilEmpleado}">
+    <p class="etiqueta">Mis compras</p>
+    <h1>Ordenes de compra</h1>
+    <p class="subtitulo">Seguimiento de tus pedidos confirmados.</p>
+
+    <p th:if="${#lists.isEmpty(ordenesCliente)}" class="subtitulo">Todavia no tenes ordenes de compra confirmadas.</p>
+
+    <div class="ordenes-perfil" th:if="${!#lists.isEmpty(ordenesCliente)}">
+        <article class="orden-perfil" th:each="orden : ${ordenesCliente}">
+            <div class="orden-perfil__encabezado">
+                <strong th:text="${orden.identificadorCompra}">PED-001</strong>
+                <span class="orden-perfil__estado" th:text="${orden.estadoOrdenCompra}">PENDIENTE_ENVIO</span>
+            </div>
+            <p>Fecha: <span th:text="${orden.fecha}">2026-01-01</span></p>
+            <p>Total: $<span th:text="${orden.total}">0.00</span></p>
+            <p>Forma de pago: <span th:text="${orden.formaPago != null ? orden.formaPago : 'No informada'}">BILLETERA_VIRTUAL</span></p>
+            <p>Entrega: <span th:text="${orden.direccionEntrega}">Direccion</span></p>
+        </article>
+    </div>
 </section>
 </main>
 

@@ -1,6 +1,7 @@
 package com.tienda.zero.controller;
 
 import com.tienda.zero.dto.ProductoCardDTO;
+import com.tienda.zero.enums.TipoPago;
 import com.tienda.zero.model.Categoria;
 import com.tienda.zero.model.Producto;
 import com.tienda.zero.model.VigenciaPrecio;
@@ -196,6 +197,10 @@ public class TiendaController {
     @GetMapping("/checkout")
     public String checkout(Authentication auth, Model model) {
         model.addAttribute("cart", flujoCompraService.verCarrito(auth.getName()));
+        boolean esCliente = auth.getAuthorities().stream()
+                .anyMatch(authority -> authority.getAuthority().equals("ROLE_CLIENTE"));
+        model.addAttribute("formasPago", esCliente ? List.of(TipoPago.BILLETERA_VIRTUAL) : List.of(TipoPago.values()));
+        model.addAttribute("checkoutCliente", esCliente);
         return "tienda/checkout";
     }
 
@@ -220,10 +225,13 @@ public class TiendaController {
     public String vaciarCarrito(Authentication auth) { flujoCompraService.vaciarCarrito(auth.getName()); return "redirect:/cart"; }
 
     @PostMapping("/checkout")
-    public String confirmarCompra(@RequestParam String address, Authentication auth, RedirectAttributes flash) {
+    public String confirmarCompra(@RequestParam String address,
+                                  @RequestParam TipoPago formaPago,
+                                  Authentication auth,
+                                  RedirectAttributes flash) {
         try {
-            var pedido = flujoCompraService.crearOrdenCliente(auth.getName(), address);
-            flash.addFlashAttribute("mensajeExito", "Orden creada y stock reservado. El pago y la factura quedan pendientes de integración. Número: " + pedido.getIdentificadorCompra());
+            var pedido = flujoCompraService.crearOrdenCliente(auth.getName(), address, formaPago);
+            flash.addFlashAttribute("mensajeExito", "Orden creada. Podés seguir su estado desde esta sección. Número: " + pedido.getIdentificadorCompra());
             return "redirect:/orders";
         } catch (RuntimeException e) {
             flash.addFlashAttribute("mensajeError", e.getMessage());

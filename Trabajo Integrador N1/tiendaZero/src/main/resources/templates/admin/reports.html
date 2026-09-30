@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
 
 <head>
   <title th:text="'Reportes - Zero'">Reportes - Zero</title>
@@ -8,209 +8,114 @@
 
 <body>
   <div th:replace="~{admin/fragments/fragments :: sidebarTopbar(activePage='reports')}"></div>
-<!-- MAIN CONTENT -->
+
   <main id="content" class="content py-10">
     <div class="container-fluid">
-      <div class="row">
+      <div class="row mb-4">
         <div class="col-12">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-          <div class="">
-            <h1 class="fs-3 mb-1">Reports</h1>
-            <p class="mb-0">View your inventory analytics and reports</p>
-          </div>
-
-          </div>
+          <h1 class="fs-3 mb-1">Reportes</h1>
+          <p class="mb-0">Ventas realizadas por rango de fechas.</p>
         </div>
       </div>
 
       <div class="row g-3 mb-3">
-        <!--
-            th:each sobre "reportStats" (List<ReportStat>: label, value, deltaText, deltaColorClass, deltaIcon).
-            model.addAttribute("reportStats", reportService.getSummary());
-        -->
-        <div class="col-12 col-sm-6 col-md-3" th:each="stat : ${reportStats}">
+        <div class="col-12 col-md-4">
           <div class="card h-100">
             <div class="card-body p-4">
-              <h6 class="mb-4 " th:text="${stat.label}">Total Revenue</h6>
-              <h3 class="mb-1 fw-bold" th:text="${stat.value}">$45,231</h3>
-              <p class="mb-0 small" th:classappend="'text-' + ${stat.deltaColorClass}"><i class="ti" th:classappend="'ti-' + ${stat.deltaIcon}"> </i><span th:text="${stat.deltaText}">12% from last month</span></p>
+              <h6 class="mb-3">Total de ventas</h6>
+              <h3 class="mb-0 fw-bold" th:text="${'$' + reporteVentas.totalVentas()}">$0.00</h3>
             </div>
           </div>
         </div>
-        <!-- Fallback estático (se ve solo si "reportStats" todavía no está en el modelo) -->
-        <th:block th:if="${reportStats == null}">
-          <div class="col-12 col-sm-6 col-md-3">
-            <div class="card h-100">
-              <div class="card-body p-4">
-                <h6 class="mb-4 ">Total Revenue</h6>
-                <h3 class="mb-1 fw-bold">$45,231</h3>
-                <p class="mb-0 text-success small"><i class="ti ti-arrow-up"> </i>12% from last month</p>
-              </div>
-            </div>
-          </div>
-          <div class="col-12 col-sm-6 col-md-3">
-            <div class="card h-100">
-              <div class="card-body p-4">
-                <h6 class="mb-4 ">Products Sold</h6>
-                <h3 class="mb-1 fw-bold">1,234</h3>
-                <p class="mb-0 text-success small"><i class="ti ti-arrow-up"> </i> 8% from last month</p>
-              </div>
-            </div>
-          </div>
-          <div class="col-12 col-sm-6 col-md-3">
-            <div class="card h-100">
-              <div class="card-body p-4">
-                <h6 class="mb-4 ">Low Stock Items</h6>
-                <h3 class="mb-1 fw-bold">23</h3>
-                <p class="mb-0 text-danger small"><i class="ti ti-arrow-down"> </i> 3% from last month</p>
-              </div>
-            </div>
-          </div>
-          <div class="col-12 col-sm-6 col-md-3">
-            <div class="card h-100">
-              <div class="card-body p-4">
-                <h6 class="mb-4 ">Out of Stock</h6>
-                <h3 class="mb-1 fw-bold">5</h3>
-                <p class="mb-0 text-danger small"><i class="ti ti-arrow-down"> </i> 2% from last month</p>
-              </div>
-            </div>
-          </div>
-        </th:block>
-      </div>
-
-      <div class="row mb-3">
-        <!-- Sales Overview (full width) -->
-        <div class="col-12">
-          <div class="card">
+        <div class="col-12 col-md-4">
+          <div class="card h-100">
             <div class="card-body p-4">
-              <div class="d-flex flex-column flex-md-row justify-content-between align-items-start mb-3 gap-2">
-                <div>
-                  <h2 class="mb-0 fs-5">Sales Overview</h2>
-
-                </div>
-                 <div class="controls">
-        <button id="btn-random" class="btn btn-light btn-sm">Randomize Data</button>
-        <button id="btn-update" class="btn btn-primary btn-sm">Show This Year Only</button>
-      </div>
-              </div>
-
-              <!-- Chart placeholder: replace with canvas or chart container when integrating chart library -->
-
-                <div id="salesChart"></div>
-
-
-              <div class="d-flex justify-content-end">
-                <a href="#" class="small">View detailed report</a>
-              </div>
+              <h6 class="mb-3">Compras realizadas</h6>
+              <h3 class="mb-0 fw-bold" th:text="${reporteVentas.cantidadOrdenes()}">0</h3>
             </div>
+          </div>
+        </div>
+        <div class="col-12 col-md-4">
+          <div class="card h-100">
+            <div class="card-body p-4">
+              <h6 class="mb-3">Unidades vendidas</h6>
+              <h3 class="mb-0 fw-bold" th:text="${reporteVentas.unidadesVendidas()}">0</h3>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card mb-3">
+        <div class="card-body p-4">
+          <form th:action="@{/reports}" method="get" class="row g-3 align-items-end">
+            <div class="col-12 col-md-4">
+              <label for="desde" class="form-label">Desde</label>
+              <input type="date" id="desde" name="desde" class="form-control" th:value="${reporteVentas.desde()}">
+            </div>
+            <div class="col-12 col-md-4">
+              <label for="hasta" class="form-label">Hasta</label>
+              <input type="date" id="hasta" name="hasta" class="form-control" th:value="${reporteVentas.hasta()}">
+            </div>
+            <div class="col-12 col-md-4">
+              <button type="submit" class="btn btn-primary w-100">Filtrar ventas</button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-body p-4">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h2 class="mb-0 fs-5">Ventas</h2>
+            <span class="text-secondary small">
+              <span th:text="${reporteVentas.desde()}">2026-03-01</span>
+              -
+              <span th:text="${reporteVentas.hasta()}">2026-03-31</span>
+            </span>
+          </div>
+
+          <div th:if="${#lists.isEmpty(reporteVentas.detalles())}" class="text-center text-secondary py-5">
+            No hay ventas registradas para el rango seleccionado.
+          </div>
+
+          <div th:if="${!#lists.isEmpty(reporteVentas.detalles())}" class="table-responsive">
+            <table class="table align-middle">
+              <thead>
+              <tr>
+                <th>Fecha</th>
+                <th>Producto</th>
+                <th>Categoria</th>
+                <th class="text-end">Cantidad</th>
+                <th>Identificador</th>
+                <th>Forma de pago</th>
+                <th class="text-end">Subtotal</th>
+              </tr>
+              </thead>
+              <tbody>
+              <tr th:each="venta : ${reporteVentas.detalles()}">
+                <td th:text="${venta.fechaCompra()}">2026-03-01</td>
+                <td th:text="${venta.producto()}">Producto</td>
+                <td th:text="${venta.categoria()}">Categoria</td>
+                <td class="text-end" th:text="${venta.cantidad()}">1</td>
+                <td><span class="badge bg-light text-dark border" th:text="${venta.identificadorCompra()}">ORD</span></td>
+                <td th:text="${venta.formaPago()}">EFECTIVO</td>
+                <td class="text-end" th:text="${'$' + venta.subtotal()}">$0.00</td>
+              </tr>
+              </tbody>
+            </table>
           </div>
         </div>
       </div>
 
       <div class="row">
-        <!-- Top Products -->
         <div class="col-12">
-          <div class="card">
-            <div class="card-body p-4">
-              <div class="d-flex justify-content-between align-items-center mb-3">
-                <div>
-                  <h2 class="mb-0 fs-5">Top Products</h2>
-
-                </div>
-              </div>
-
-              <!-- Product rows -->
-              <div class="list-group list-group-flush">
-                <!--
-                    th:each sobre "topProducts" (List<ProductStat>: imageUrl, name, unitsSoldText, revenueText).
-                    model.addAttribute("topProducts", reportService.topProducts());
-                -->
-                <div class="list-group-item p-3 d-flex align-items-center" th:each="p : ${topProducts}">
-                  <div class="me-3">
-                    <img th:src="@{${p.imageUrl}}" src="./assets/images/product-1.png" alt="Product" class="rounded" style="width:48px; height:48px; object-fit:cover;">
-                  </div>
-                  <div class="flex-grow-1">
-                    <div class="d-flex justify-content-between align-items-center">
-                      <div>
-                        <h6 class="mb-0" th:text="${p.name}">Gaming Joy Stick</h6>
-                        <small class="text-secondary" th:text="${p.unitsSoldText}">156 units sold</small>
-                      </div>
-                      <div class="text-end">
-                        <strong th:text="${p.revenueText}">$3,120</strong>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <!-- Fallback estático (se ve solo si "topProducts" todavía no está en el modelo) -->
-                <th:block th:if="${topProducts == null}">
-                  <div class="list-group-item p-3 d-flex align-items-center">
-                    <div class="me-3">
-                      <img src="./assets/images/product-1.png" alt="Product A" class="rounded" style="width:48px; height:48px; object-fit:cover;">
-                    </div>
-                    <div class="flex-grow-1">
-                      <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                          <h6 class="mb-0">Gaming Joy Stick</h6>
-                          <small class="text-secondary">156 units sold</small>
-                        </div>
-                        <div class="text-end">
-                          <strong>$3,120</strong>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="list-group-item p-3 d-flex align-items-center">
-                    <div class="me-3">
-                      <img src="./assets/images/product-2.png" alt="Product B" class="rounded" style="width:48px; height:48px; object-fit:cover;">
-                    </div>
-                    <div class="flex-grow-1">
-                      <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                          <h6 class="mb-0">Wireless Headphones</h6>
-                          <small class="text-secondary">134 units sold</small>
-                        </div>
-                        <div class="text-end">
-                          <strong>$2,680</strong>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="list-group-item p-3 d-flex align-items-center">
-                    <div class="me-3">
-                      <img src="./assets/images/product-3.png" alt="Product C" class="rounded" style="width:48px; height:48px; object-fit:cover;">
-                    </div>
-                    <div class="flex-grow-1">
-                      <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                          <h6 class="mb-0">Smartwatch</h6>
-                          <small class="text-secondary">98 units sold</small>
-                        </div>
-                        <div class="text-end">
-                          <strong>$1,960</strong>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </th:block>
-              </div>
-
-            </div>
-          </div>
+          <div th:replace="~{admin/fragments/fragments :: pageFooter}"></div>
         </div>
-      </div>
-       <div class="row">
-        <div class="col-12">
-<div th:replace="~{admin/fragments/fragments :: pageFooter}"></div>
-        </div>
-
       </div>
     </div>
   </main>
 
   <th:block th:replace="~{admin/fragments/fragments :: scripts}"></th:block>
-
-
-
 </body>
 
 </html>
