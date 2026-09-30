@@ -22,6 +22,8 @@ public interface ProductoRepository extends JpaRepository<Producto, String> {
 
     List<Producto> findByEliminadoFalse();
 
+    List<Producto> findByEnOfertaTrueAndEliminadoFalse();
+
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("select p from Producto p where p.id = :id")
     Optional<Producto> findByIdForUpdate(@Param("id") String id);
