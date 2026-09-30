@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+  <title>Proveedores</title>
+  <th:block th:replace="~{admin/fragments/fragments :: head-assets}"></th:block>
+</head>
+<body>
+<div th:replace="~{admin/fragments/fragments :: sidebarTopbar(activePage='proveedores')}"></div>
+<main id="content" class="content py-10">
+  <div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h1>Proveedores</h1>
+      <a th:href="@{/admin/proveedores/nuevo}" class="btn btn-primary">Nuevo Proveedor</a>
+    </div>
+
+    <div class="card">
+      <div class="card-body">
+        <table class="table">
+          <thead>
+          <tr>
+            <th>#</th>
+            <th>Razón social</th>
+            <th></th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr th:each="p,iterStat : ${proveedores}">
+            <td th:text="${iterStat.count}">1</td>
+            <td th:text="${p.razonSocial}">Proveedor SRL</td>
+            <td>
+              <a th:href="@{/admin/proveedores/{id}/editar(id=${p.id})}" class="btn btn-sm btn-outline-primary">Editar</a>
+              <form th:action="@{/admin/proveedores/{id}/eliminar(id=${p.id})}" method="post" class="d-inline">
+                <button type="submit" class="btn btn-sm btn-outline-danger">Eliminar</button>
+              </form>
+            </td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</main>
+<th:block th:replace="~{admin/fragments/fragments :: scripts}"></th:block>
+</body>
+</html>

@@ -7,7 +7,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
-import java.math.BigDecimal;
 import java.util.*;
 
 @RestController @RequiredArgsConstructor
@@ -47,17 +46,6 @@ public class FlujoCompraController {
 
     @PostMapping("/api/orders/{id}/cancel")
     public OrdenCompra cancelar(@PathVariable String id, Authentication auth) { return flujo.anularOrdenCliente(id, auth.getName()); }
-
-    @PostMapping("/api/admin/purchase-orders")
-    public OrdenCompraProveedor crearOrden(@RequestParam String proveedorId, @RequestParam String productoId, @RequestParam int cantidad, @RequestParam BigDecimal precioCompra) {
-        return flujo.crearOrdenProveedor(proveedorId, productoId, cantidad, precioCompra);
-    }
-
-    @GetMapping("/api/admin/purchase-orders")
-    public List<OrdenCompraProveedor> ordenesCompra() { return flujo.listarOrdenesProveedor(); }
-
-    @PostMapping("/api/admin/purchase-orders/{id}/receive")
-    public OrdenCompraProveedor recibir(@PathVariable String id) { return flujo.recibirOrdenProveedor(id); }
 
     @PostMapping("/api/admin/orders/{id}/tracking")
     public OrdenCompra seguimiento(@PathVariable String id, @RequestParam EstadoOrdenCompra estado) { return flujo.cambiarSeguimiento(id, estado); }

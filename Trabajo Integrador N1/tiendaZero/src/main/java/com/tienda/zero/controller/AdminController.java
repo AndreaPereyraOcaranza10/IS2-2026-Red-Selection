@@ -7,11 +7,6 @@ import com.tienda.zero.model.Imagen;
 import com.tienda.zero.model.Producto;
 import com.tienda.zero.model.VigenciaPrecio;
 import com.tienda.zero.repository.SubCategoriaRepository;
-import com.tienda.zero.repository.ProveedorRepository;
-import com.tienda.zero.repository.OrdenCompraProveedorRepository;
-import com.tienda.zero.repository.OrdenCompraRepository;
-import com.tienda.zero.service.FlujoCompraService;
-import com.tienda.zero.service.ProveedorService;
 import com.tienda.zero.service.StockService;
 import com.tienda.zero.service.ImagenService;
 import com.tienda.zero.service.ProductoService;
@@ -36,11 +31,6 @@ public class AdminController {
     private final VigenciaPrecioService vigenciaPrecioService;
     private final SubCategoriaRepository subCategoriaRepository;
     private final ImagenService imagenService;
-    private final ProveedorRepository proveedorRepository;
-    private final OrdenCompraProveedorRepository ordenCompraProveedorRepository;
-    private final OrdenCompraRepository ordenCompraRepository;
-    private final FlujoCompraService flujoCompraService;
-    private final ProveedorService proveedorService;
     private final StockService stockService;
 
     @GetMapping({"/admin", "/admin/dashboard", "/admin/index"})
@@ -174,44 +164,6 @@ public class AdminController {
     @GetMapping({"/reports", "/admin/reports"})
     public String reports() {
         return "admin/reports";
-    }
-
-    @GetMapping("/inventory/purchase-orders")
-    public String purchaseOrders(Model model) {
-        model.addAttribute("proveedores", proveedorRepository.findByEliminadoFalse());
-        List<Producto> productos = productoService.listarProductoActivo();
-        productos.forEach(p -> p.setStockActual(stockService.calcularStockActual(p.getId())));
-        model.addAttribute("productos", productos);
-        model.addAttribute("ordenes", ordenCompraProveedorRepository.findAll());
-        model.addAttribute("pedidos", ordenCompraRepository.findAll());
-        return "admin/purchase-orders";
-    }
-
-    @PostMapping("/inventory/purchase-orders")
-    public String createPurchaseOrder(@RequestParam String proveedorId, @RequestParam String productoId,
-                                      @RequestParam int cantidad, @RequestParam java.math.BigDecimal precioCompra,
-                                      RedirectAttributes redirectAttributes) {
-        try {
-            flujoCompraService.crearOrdenProveedor(proveedorId, productoId, cantidad, precioCompra);
-            redirectAttributes.addFlashAttribute("mensajeExito", "Orden de compra creada. El stock se actualizará al recibirla.");
-        } catch (RuntimeException e) { redirectAttributes.addFlashAttribute("mensajeError", e.getMessage()); }
-        return "redirect:/inventory/purchase-orders";
-    }
-
-    @PostMapping("/inventory/purchase-orders/providers")
-    public String createSupplier(@RequestParam String razonSocial, RedirectAttributes redirectAttributes) {
-        try {
-            proveedorService.crearProveedor(razonSocial, List.of());
-            redirectAttributes.addFlashAttribute("mensajeExito", "Proveedor creado.");
-        } catch (RuntimeException e) { redirectAttributes.addFlashAttribute("mensajeError", e.getMessage()); }
-        return "redirect:/inventory/purchase-orders";
-    }
-
-    @PostMapping("/inventory/purchase-orders/{id}/receive")
-    public String receivePurchaseOrder(@PathVariable String id, RedirectAttributes redirectAttributes) {
-        try { flujoCompraService.recibirOrdenProveedor(id); redirectAttributes.addFlashAttribute("mensajeExito", "Recepción registrada y stock actualizado."); }
-        catch (RuntimeException e) { redirectAttributes.addFlashAttribute("mensajeError", e.getMessage()); }
-        return "redirect:/inventory/purchase-orders";
     }
 
     @GetMapping({"/docs", "/admin/docs"})

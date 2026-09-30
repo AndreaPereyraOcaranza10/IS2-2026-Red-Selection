@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+  <title>Ordenes de Compra</title>
+  <th:block th:replace="~{admin/fragments/fragments :: head-assets}"></th:block>
+</head>
+<body>
+<div th:replace="~{admin/fragments/fragments :: sidebarTopbar(activePage='ordenes')}"></div>
+<main id="content" class="content py-10">
+  <div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h1>Órdenes de compra</h1>
+      <a th:href="@{/admin/ordenes/nueva}" class="btn btn-primary">Nueva Orden</a>
+    </div>
+
+    <div class="card">
+      <div class="card-body">
+        <div class="alert alert-success alert-dismissible fade show mb-4" role="alert" th:if="${mensajeExito != null}">
+          <i class="ti ti-check me-2 fs-5"></i>
+          <span th:text="${mensajeExito}">Operación exitosa</span>
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        <div class="alert alert-danger alert-dismissible fade show mb-4" role="alert" th:if="${mensajeError != null}">
+          <i class="ti ti-alert-circle me-2 fs-5"></i>
+          <span th:text="${mensajeError}">Ocurrió un error</span>
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        <table class="table">
+          <thead>
+          <tr>
+            <th>#</th>
+            <th>Proveedor</th>
+            <th>Fecha</th>
+            <th>Entregada</th>
+            <th></th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr th:each="o,iterStat : ${ordenes}">
+            <td th:text="${iterStat.count}">1</td>
+            <td th:text="${o.proveedor != null ? o.proveedor.razonSocial : 'N/A'}">Proveedor</td>
+            <td th:text="${o.fechaCreacion}">2026-01-01</td>
+            <td th:text="${o.entregada} ? 'Sí' : 'No'">No</td>
+            <td>
+              <a th:href="@{/admin/ordenes/{id}(id=${o.id})}" class="btn btn-sm btn-outline-primary">Ver</a>
+            </td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</main>
+<th:block th:replace="~{admin/fragments/fragments :: scripts}"></th:block>
+</body>
+</html>

@@ -1,7 +1,6 @@
 package com.tienda.zero.service;
 
 import com.tienda.zero.enums.EstadoOrdenCompra;
-import com.tienda.zero.enums.EstadoRecepcionCompra;
 import com.tienda.zero.model.*;
 import com.tienda.zero.repository.*;
 import jakarta.transaction.Transactional;
@@ -17,9 +16,7 @@ public class FlujoCompraService {
     private final ProductoRepository productos;
     private final UsuarioRepository usuarios;
     private final PersonaRepository personas;
-    private final ProveedorRepository proveedores;
     private final OrdenCompraRepository ordenesCliente;
-    private final OrdenCompraProveedorRepository ordenesProveedor;
     private final StockService stockService;
     private final VigenciaPrecioService precios;
 
@@ -102,8 +99,6 @@ public class FlujoCompraService {
         return ordenesCliente.findByClienteUsuarioNombreUsuarioOrderByFechaDesc(username);
     }
 
-    public List<OrdenCompraProveedor> listarOrdenesProveedor() { return ordenesProveedor.findAll(); }
-
     @Transactional
     public OrdenCompra crearOrdenCliente(String username, String direccion) {
         if (direccion == null || direccion.isBlank()) throw new IllegalArgumentException("La dirección de entrega es obligatoria");
@@ -116,7 +111,8 @@ public class FlujoCompraService {
         recalcularTotal(orden);
         ordenesCliente.save(orden);
         for (DetalleCompra detalle : detalles) {
-            stockService.registrarMovimiento(detalle.getProducto().getId(), -detalle.getCantidad(), "Reserva de stock para orden", null, detalle);
+            stockService.registrarMovimiento(detalle.getProducto().getId(), -detalle.getCantidad(),
+                    "Reserva de stock para orden", detalle);
         }
         return orden;
     }
@@ -132,7 +128,8 @@ public class FlujoCompraService {
         if (stockReservado) {
             for (DetalleCompra detalle : orden.getDetalles()) {
                 if (!detalle.isEliminado()) {
-                    stockService.registrarMovimiento(detalle.getProducto().getId(), detalle.getCantidad(), "Reintegro por anulación de orden", null, detalle);
+                    stockService.registrarMovimiento(detalle.getProducto().getId(), detalle.getCantidad(),
+                            "Reintegro por anulación de orden", detalle);
                 }
             }
         }
@@ -148,26 +145,6 @@ public class FlujoCompraService {
         if (!permitido) throw new IllegalStateException("Transición de seguimiento inválida");
         orden.setEstadoOrdenCompra(nuevoEstado);
         return ordenesCliente.save(orden);
-    }
-
-    @Transactional
-    public OrdenCompraProveedor crearOrdenProveedor(String proveedorId, String productoId, int cantidad, BigDecimal precioCompra) {
-        if (cantidad < 1 || precioCompra == null || precioCompra.signum() <= 0) throw new IllegalArgumentException("Cantidad y precio deben ser mayores que cero");
-        Proveedor proveedor = proveedores.findById(proveedorId).filter(p -> !p.isEliminado()).orElseThrow(() -> new IllegalArgumentException("Proveedor no encontrado"));
-        Producto producto = productoActivo(productoId);
-        return ordenesProveedor.save(OrdenCompraProveedor.builder().proveedor(proveedor).producto(producto).cantidad(cantidad)
-                .precioCompra(precioCompra).total(precioCompra.multiply(BigDecimal.valueOf(cantidad)))
-                .fechaCreacion(LocalDateTime.now()).build());
-    }
-
-    @Transactional
-    public OrdenCompraProveedor recibirOrdenProveedor(String ordenId) {
-        OrdenCompraProveedor orden = ordenesProveedor.findById(ordenId).orElseThrow(() -> new IllegalArgumentException("Orden de proveedor no encontrada"));
-        if (orden.getEstado() != EstadoRecepcionCompra.PENDIENTE_RECEPCION) throw new IllegalStateException("La orden ya fue procesada");
-        stockService.registrarMovimiento(orden.getProducto().getId(), orden.getCantidad(), "Recepción de compra a proveedor", orden, null);
-        orden.setEstado(EstadoRecepcionCompra.ENTREGADA);
-        orden.setFechaRecepcion(LocalDateTime.now());
-        return ordenesProveedor.save(orden);
     }
 
     private OrdenCompra ordenClienteDeUsuario(String id, String username) {

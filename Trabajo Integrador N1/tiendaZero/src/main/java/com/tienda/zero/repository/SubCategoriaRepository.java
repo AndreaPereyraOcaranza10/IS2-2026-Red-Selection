@@ -10,6 +10,10 @@ import java.util.Optional;
 @Repository
 public interface SubCategoriaRepository extends JpaRepository<SubCategoria, String> {
     Optional<SubCategoria> findByNombreIgnoreCase(String nombre);
+
+    // Control de duplicados dentro de una misma categoría
+    Optional<SubCategoria> findByNombreIgnoreCaseAndCategoriaId(String nombre, String idCategoria);
+
     List<SubCategoria> findByCategoriaId(String idCategoria);
     List<SubCategoria> findByCategoriaIdAndEliminadoFalse(String idCategoria);
     List<SubCategoria> findByEliminadoFalse();

@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+  <title>Proveedor</title>
+  <th:block th:replace="~{admin/fragments/fragments :: head-assets}"></th:block>
+</head>
+<body>
+<div th:replace="~{admin/fragments/fragments :: sidebarTopbar(activePage='proveedores')}"></div>
+<main id="content" class="content py-10">
+  <div class="container-fluid">
+    <h1 th:text="${proveedor != null && proveedor.id != null} ? 'Editar proveedor' : 'Nuevo proveedor'">Proveedor</h1>
+    <div class="card">
+      <div class="card-body">
+        <form th:action="${proveedor != null && proveedor.id != null} ? @{/admin/proveedores/{id}/editar(id=${proveedor.id})} : @{/admin/proveedores/nuevo}"
+              method="post" th:object="${proveedor}">
+          <div class="mb-3">
+            <label for="razonSocial" class="form-label">Razón social</label>
+            <input type="text" id="razonSocial" th:field="*{razonSocial}" class="form-control" required>
+          </div>
+
+          <h5 class="mt-3">Contacto</h5>
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label for="email" class="form-label">Correo electrónico</label>
+              <input type="email" id="email" name="email" th:value="${email}" class="form-control" placeholder="contacto@empresa.com">
+            </div>
+            <div class="col-md-6 mb-3">
+              <label for="tipoContacto" class="form-label">Tipo de contacto</label>
+              <select id="tipoContacto" name="tipoContactoSelected" class="form-select">
+                <option th:selected="${tipoContactoSelected == 'EMPRESA'}" value="EMPRESA">Empresa</option>
+                <option th:selected="${tipoContactoSelected == 'LABORAL'}" value="LABORAL">Laboral</option>
+                <option th:selected="${tipoContactoSelected == 'PERSONAL'}" value="PERSONAL">Personal</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label for="telefono" class="form-label">Teléfono</label>
+              <input type="text" id="telefono" name="telefono" th:value="${telefono}" class="form-control" placeholder="341-1234567">
+            </div>
+            <div class="col-md-6 mb-3">
+              <label for="tipoTelefono" class="form-label">Tipo de teléfono</label>
+              <select id="tipoTelefono" name="tipoTelefonoSelected" class="form-select">
+                <option th:selected="${tipoTelefonoSelected == 'CELULAR'}" value="CELULAR">Celular</option>
+                <option th:selected="${tipoTelefonoSelected == 'FIJO'}" value="FIJO">Fijo</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-primary">Guardar</button>
+            <a th:href="@{/admin/proveedores}" class="btn btn-secondary">Cancelar</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</main>
+<th:block th:replace="~{admin/fragments/fragments :: scripts}"></th:block>
+</body>
+</html>

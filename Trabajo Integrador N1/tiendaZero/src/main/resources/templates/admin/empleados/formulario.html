@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+  <title>Empleado</title>
+  <th:block th:replace="~{admin/fragments/fragments :: head-assets}"></th:block>
+</head>
+<body>
+<div th:replace="~{admin/fragments/fragments :: sidebarTopbar(activePage='empleados')}"></div>
+<main id="content" class="content py-10">
+  <div class="container-fluid">
+    <h1 th:text="${empleado != null && empleado.id != null} ? 'Editar empleado' : 'Nuevo empleado'">Empleado</h1>
+    <div class="card">
+      <div class="card-body">
+
+        <!-- Motivo por el que no se pudo guardar (lo envía el controlador) -->
+        <div class="alert alert-danger alert-dismissible fade show mb-4" role="alert" th:if="${error != null}">
+          <i class="ti ti-alert-circle me-2 fs-5"></i>
+          <span th:text="${error}">Ocurrió un error</span>
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+
+        <form th:action="${empleado != null && empleado.id != null} ? @{/admin/empleados/{id}/editar(id=${empleado.id})} : @{/admin/empleados/nuevo}"
+              method="post">
+
+          <div class="row">
+            <div class="col-md-4 mb-3">
+              <label for="nombre" class="form-label">Nombre</label>
+              <input type="text" id="nombre" name="nombre" th:value="${empleado != null ? empleado.nombre : ''}" class="form-control" required>
+            </div>
+            <div class="col-md-4 mb-3">
+              <label for="apellido" class="form-label">Apellido</label>
+              <input type="text" id="apellido" name="apellido" th:value="${empleado != null ? empleado.apellido : ''}" class="form-control" required>
+            </div>
+            <div class="col-md-4 mb-3">
+              <label for="sexo" class="form-label">Sexo</label>
+              <select id="sexo" name="sexo" class="form-select" required>
+                <option value="">Seleccione...</option>
+                <option th:each="s : ${sexos}" th:value="${s}" th:text="${s}" th:selected="${empleado != null ? empleado.sexo == s : false}"></option>
+              </select>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-md-4 mb-3">
+              <label for="fechaNacimiento" class="form-label">Fecha de nacimiento</label>
+              <input type="date" id="fechaNacimiento" name="fechaNacimiento" th:value="${fechaNacimientoStr}" class="form-control" required>
+            </div>
+            <div class="col-md-4 mb-3">
+              <label for="tipoDocumento" class="form-label">Tipo de documento</label>
+              <select id="tipoDocumento" name="tipoDocumento" class="form-select" required>
+                <option value="">Seleccione...</option>
+                <option th:each="t : ${tiposDocumento}" th:value="${t}" th:text="${t}" th:selected="${empleado != null ? empleado.tipoDocumento == t : false}"></option>
+              </select>
+            </div>
+            <div class="col-md-4 mb-3">
+              <label for="numeroDocumento" class="form-label">Número de documento</label>
+              <input type="text" id="numeroDocumento" name="numeroDocumento" th:value="${empleado != null ? empleado.numeroDocumento : ''}" class="form-control" required>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-md-4 mb-3">
+              <label for="tipoEmpleado" class="form-label">Tipo de empleado</label>
+              <select id="tipoEmpleado" name="tipoEmpleado" class="form-select" required>
+                <option value="">Seleccione...</option>
+                <option th:each="te : ${tiposEmpleado}" th:value="${te}" th:text="${te}" th:selected="${empleado != null ? empleado.tipoEmpleado == te : false}"></option>
+              </select>
+            </div>
+            <div class="col-md-8 mb-3">
+              <label for="empresa" class="form-label">Empresa</label>
+              <select id="empresa" name="idEmpresa" class="form-select" required>
+                <option value="">Seleccione una empresa...</option>
+                <option th:each="emp : ${empresas}" th:value="${emp.id}" th:text="${emp.razonSocial}" th:selected="${empleado != null && empleado.empresa != null ? empleado.empresa.id == emp.id : false}"></option>
+              </select>
+              <div class="form-text text-danger" th:if="${#lists.isEmpty(empresas)}">
+                No hay ninguna empresa cargada: hace falta una para poder dar de alta empleados.
+              </div>
+            </div>
+          </div>
+
+          <hr/>
+          <h5 class="mt-3">Cuenta de acceso (opcional)</h5>
+          <p class="text-muted small" th:if="${tieneCuenta}">
+            Este empleado ya tiene cuenta. Dejá la clave vacía para no cambiarla. El rol de la cuenta se ajusta
+            solo al tipo de empleado.
+          </p>
+          <p class="text-muted small" th:unless="${tieneCuenta}">
+            Para que pueda iniciar sesión, completá el correo y la clave. Si dejás los dos vacíos, no tendrá acceso al sistema.
+          </p>
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label for="nombreUsuario" class="form-label">Correo (usuario)</label>
+              <input type="email" id="nombreUsuario" name="nombreUsuario" class="form-control" th:value="${nombreUsuarioForm}" placeholder="nombre@correo.com">
+            </div>
+            <div class="col-md-6 mb-3">
+              <label for="clave" class="form-label">Clave</label>
+              <input type="password" id="clave" name="clave" class="form-control"
+                     th:placeholder="${tieneCuenta} ? 'Dejar vacía para no cambiarla' : '********'" autocomplete="new-password">
+            </div>
+          </div>
+
+          <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-primary">Guardar</button>
+            <a th:href="@{/admin/empleados}" class="btn btn-secondary">Cancelar</a>
+          </div>
+
+        </form>
+      </div>
+    </div>
+  </div>
+</main>
+<th:block th:replace="~{admin/fragments/fragments :: scripts}"></th:block>
+</body>
+</html>

@@ -31,7 +31,7 @@ public class Usuario {
 
     @Builder.Default
     @Column(nullable = false)
-    private boolean Eliminado = false;
+    private boolean eliminado = false;
 
     //prueba soporte para activación de cuenta
     @Column

@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+  <title>Nueva Orden de Compra</title>
+  <th:block th:replace="~{admin/fragments/fragments :: head-assets}"></th:block>
+</head>
+<body>
+<div th:replace="~{admin/fragments/fragments :: sidebarTopbar(activePage='ordenes')}"></div>
+<main id="content" class="content py-10">
+  <div class="container-fluid">
+    <h1>Nueva orden de compra</h1>
+    <div class="card">
+      <div class="card-body">
+        <div class="alert alert-success alert-dismissible fade show mb-4" role="alert" th:if="${mensajeExito != null}">
+          <i class="ti ti-check me-2 fs-5"></i>
+          <span th:text="${mensajeExito}">Operación exitosa</span>
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        <div class="alert alert-danger alert-dismissible fade show mb-4" role="alert" th:if="${mensajeError != null}">
+          <i class="ti ti-alert-circle me-2 fs-5"></i>
+          <span th:text="${mensajeError}">Ocurrió un error</span>
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        <form th:action="@{/admin/ordenes/nueva}" method="post" id="ordenForm">
+          <div class="mb-3">
+            <label for="proveedor">Proveedor</label>
+            <select id="proveedor" name="proveedor.id" class="form-select" required>
+              <option value="">Seleccione proveedor...</option>
+              <option th:each="p : ${proveedores}" th:value="${p.id}" th:text="${p.razonSocial}">Proveedor</option>
+            </select>
+          </div>
+
+          <h5>Items</h5>
+          <p class="text-muted">Agregá las líneas que necesites. El total se calcula automáticamente.</p>
+
+          <div class="mb-2 d-flex justify-content-end">
+            <button type="button" class="btn btn-sm btn-outline-primary" id="addItemBtn">Agregar item</button>
+          </div>
+
+          <div id="order-items">
+            <!-- Rows se agregan dinámicamente aquí -->
+          </div>
+
+          <div class="card mt-3">
+            <div class="card-body d-flex justify-content-end align-items-center gap-3">
+              <div><strong>Total:</strong></div>
+              <div id="order-total" class="fs-4">$0.00</div>
+            </div>
+          </div>
+
+          <div class="d-flex gap-2 mt-3">
+            <button type="submit" class="btn btn-primary">Crear orden</button>
+            <a th:href="@{/admin/ordenes}" class="btn btn-secondary">Cancelar</a>
+          </div>
+        </form>
+
+        <!-- Template row (clonado por JS) -->
+        <template id="order-row-template">
+          <div class="row mb-2 order-row align-items-center">
+            <div class="col-md-6">
+              <select name="productoId" class="form-select product-select">
+                <option value="">-- Producto (opcional) --</option>
+                <!-- opciones serán rellenadas por Thymeleaf -->
+                <th:block th:each="prod : ${productos}">
+                  <option th:value="${prod.id}" th:text="${prod.nombre}">Producto</option>
+                </th:block>
+              </select>
+            </div>
+            <div class="col-md-2">
+              <input type="number" name="cantidad" class="form-control cantidad-input" placeholder="Cantidad" min="1" value="1">
+            </div>
+            <div class="col-md-3">
+              <input type="number" step="0.01" name="precioUnitario" class="form-control precio-input" placeholder="Precio unitario" value="0.00">
+            </div>
+            <div class="col-md-1">
+              <button type="button" class="btn btn-danger btn-sm remove-item">&times;</button>
+            </div>
+          </div>
+        </template>
+
+        <script>
+          (function(){
+            const addBtn = document.getElementById('addItemBtn');
+            const container = document.getElementById('order-items');
+            const template = document.getElementById('order-row-template');
+            const totalEl = document.getElementById('order-total');
+
+            function formatMoney(v){
+              return '$' + v.toFixed(2);
+            }
+
+            function recalcTotal(){
+              let total = 0;
+              container.querySelectorAll('.order-row').forEach(row => {
+                const prod = row.querySelector('.product-select').value;
+                if (!prod) return; // ignore empty lines
+                const qty = parseFloat(row.querySelector('.cantidad-input').value) || 0;
+                const pu = parseFloat(row.querySelector('.precio-input').value) || 0;
+                total += qty * pu;
+              });
+              totalEl.textContent = formatMoney(total);
+            }
+
+            function addRow(){
+              const clone = template.content.cloneNode(true);
+              container.appendChild(clone);
+              const newRow = container.lastElementChild;
+              // attach listeners
+              newRow.querySelectorAll('.cantidad-input, .precio-input').forEach(inp => inp.addEventListener('input', recalcTotal));
+              const removeBtn = newRow.querySelector('.remove-item');
+              removeBtn.addEventListener('click', function(){ newRow.remove(); recalcTotal(); });
+              // if product select changes nothing automatic yet, but could set default price
+              newRow.querySelector('.product-select').addEventListener('change', recalcTotal);
+            }
+
+            addBtn.addEventListener('click', function(e){ e.preventDefault(); addRow(); });
+
+            // Add one initial row
+            addRow();
+            recalcTotal();
+
+            // on submit, ensure empty product rows removed so controller won't receive blanks
+            const form = document.getElementById('ordenForm');
+            form.addEventListener('submit', function(e){
+              // remove rows with empty product
+              container.querySelectorAll('.order-row').forEach(row => {
+                const prod = row.querySelector('.product-select').value;
+                if (!prod) row.remove();
+              });
+            });
+
+          })();
+        </script>
+      </div>
+    </div>
+  </div>
+</main>
+<th:block th:replace="~{admin/fragments/fragments :: scripts}"></th:block>
+</body>
+</html>

@@ -195,4 +195,18 @@ class PerfilClienteIntegrationTests {
                 .andExpect(model().attribute("modoEdicion", true))
                 .andExpect(content().string(containsString("value=\"Administrativa\"")));
     }
+
+    @Test
+    void elAdministradorPuedeAbrirLosModulosIntegradosDeAndre() throws Exception {
+        var administrativo = user("administrativo@tiendazero.com").roles("ADMINISTRATIVO");
+
+        mockMvc.perform(get("/admin/ordenes").with(administrativo))
+                .andExpect(status().isOk());
+        mockMvc.perform(get("/admin/facturas-proveedor").with(administrativo))
+                .andExpect(status().isOk());
+        mockMvc.perform(get("/admin/proveedores").with(administrativo))
+                .andExpect(status().isOk());
+        mockMvc.perform(get("/admin/empleados").with(administrativo))
+                .andExpect(status().isOk());
+    }
 }
