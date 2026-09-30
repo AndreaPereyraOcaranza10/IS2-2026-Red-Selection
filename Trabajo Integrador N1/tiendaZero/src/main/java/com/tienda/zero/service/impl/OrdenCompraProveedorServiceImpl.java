@@ -5,6 +5,7 @@ import com.tienda.zero.repository.OrdenCompraProveedorRepository;
 import com.tienda.zero.service.OrdenCompraProveedorService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Date;
 import java.util.List;
@@ -17,10 +18,11 @@ public class OrdenCompraProveedorServiceImpl implements OrdenCompraProveedorServ
     private final OrdenCompraProveedorRepository ordenCompraProveedorRepository;
 
     @Override
+    @Transactional
     public OrdenCompraProveedor crearOrden(OrdenCompraProveedor ordenCompraProveedor) {
         ordenCompraProveedor.setFechaCreacion(new Date(System.currentTimeMillis()));
         ordenCompraProveedor.setEntregada(false);
-        return ordenCompraProveedorRepository.save(ordenCompraProveedor);
+        return ordenCompraProveedorRepository.saveAndFlush(ordenCompraProveedor);
     }
 
     @Override
@@ -40,21 +42,23 @@ public class OrdenCompraProveedorServiceImpl implements OrdenCompraProveedorServ
     }
 
     @Override
+    @Transactional
     public OrdenCompraProveedor marcarEntregada(String id) {
         OrdenCompraProveedor o = buscarOrden(id);
         if (o != null) {
             o.setEntregada(true);
-            return ordenCompraProveedorRepository.save(o);
+            return ordenCompraProveedorRepository.saveAndFlush(o);
         }
         return null;
     }
 
     @Override
+    @Transactional
     public OrdenCompraProveedor marcarPendiente(String id) {
         OrdenCompraProveedor o = buscarOrden(id);
         if (o != null) {
             o.setEntregada(false);
-            return ordenCompraProveedorRepository.save(o);
+            return ordenCompraProveedorRepository.saveAndFlush(o);
         }
         return null;
     }
