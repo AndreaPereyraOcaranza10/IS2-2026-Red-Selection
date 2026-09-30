@@ -59,13 +59,13 @@
     <th:block th:fragment="header">
 
         <!-- Header -->
-        <header class="bg-gray-dark sticky top-0 z-50">
-            <div class="container mx-auto flex justify-between items-center py-4">
+        <header class="store-header bg-gray-dark sticky top-0 z-50">
+            <div class="store-header__inner container mx-auto px-4 lg:px-8 flex justify-between items-center">
                 <!-- Left section: Logo -->
                 <a th:href="@{/}" href="index.html" class="flex items-center">
                     <div>
                         <img th:src="@{/assets/images/logo-zero-white.png}"
-                            src="assets/images/logo-zero-white.png" alt="Zero" class="h-14 w-auto mr-4">
+                            src="assets/images/logo-zero-white.png" alt="Zero" class="store-header__logo h-14 w-auto mr-4">
                     </div>
                 </a>
 
@@ -80,7 +80,7 @@
                 </div>
 
                 <!-- Center section: Menu -->
-                <nav class="hidden lg:flex md:flex-grow justify-center">
+                <nav class="store-header__nav hidden lg:flex md:flex-grow justify-center">
                     <ul class="flex justify-center space-x-4 text-white">
                         <li><a th:href="@{/}" href="index.html" class="hover:text-secondary font-semibold">Home</a></li>
 
@@ -153,7 +153,7 @@
                 </nav>
 
                 <!-- Right section: Buttons (for desktop) -->
-                <div class="hidden lg:flex items-center space-x-3 relative">
+                <div class="store-header__actions hidden lg:flex items-center gap-2 relative">
                     <th:block sec:authorize="isAnonymous()">
                         <a th:href="@{/registro}"
                             class="bg-primary border border-primary hover:bg-transparent text-white hover:text-primary font-semibold px-4 py-2 rounded-full inline-block text-sm">Register</a>
@@ -163,7 +163,7 @@
 
                     <th:block sec:authorize="isAuthenticated()">
                         <a sec:authorize="hasAnyRole('ADMINISTRATIVO','JEFE')" th:href="@{/admin}"
-                            class="bg-amber-500/20 border border-amber-500 hover:bg-amber-500 text-white hover:text-white font-semibold px-3 py-1.5 rounded-full inline-flex items-center text-xs transition">
+                            class="store-header__admin-link bg-amber-500/20 border border-amber-500 hover:bg-amber-500 text-white hover:text-white font-semibold px-3 py-1.5 rounded-full inline-flex items-center text-xs transition">
                             <i class="fas fa-cog mr-1.5"></i> Panel administrador
                         </a>
                         <a sec:authorize="hasRole('CLIENTE')" th:href="@{/completar-perfil}"
@@ -171,14 +171,14 @@
                             <i class="fas fa-user-circle mr-1.5"></i> Mi Perfil
                         </a>
                         <form th:action="@{/logout}" method="post" class="inline">
-                            <button type="submit" class="text-white hover:text-white p-2 transition cursor-pointer"
+                            <button type="submit" class="store-header__icon-button transition cursor-pointer"
                                 title="Cerrar Sesión">
                                 <i class="fas fa-sign-out-alt text-lg"></i>
                             </button>
                         </form>
                     </th:block>
                     <div class="relative group cart-wrapper">
-                        <a th:href="@{/cart}" href="/cart.html">
+                        <a class="store-header__icon-button" th:href="@{/cart}" href="/cart.html" aria-label="Ver carrito">
                             <img th:src="@{/assets/images/cart-shopping.svg}" src="assets/images/cart-shopping.svg"
                                 alt="Cart" class="h-6 w-6 group-hover:scale-120">
                             <!-- Opcional: <span th:if="${cartItemCount != null and cartItemCount > 0}" th:text="${cartItemCount}">0</span> como badge -->
@@ -234,7 +234,7 @@
                                 to Cart</a>
                         </div>
                     </div>
-                    <a id="search-icon" href="javascript:void(0);" class="text-white hover:text-secondary group">
+                    <a id="search-icon" href="javascript:void(0);" aria-label="Buscar" class="store-header__icon-button group">
                         <img th:src="@{/assets/images/search-icon.svg}" src="assets/images/search-icon.svg" alt="Search"
                             class="h-6 w-6 transition-transform transform group-hover:scale-120">
                     </a>
@@ -467,19 +467,19 @@
     <!--   product.category, product.price, product.oldPrice       -->
     <!-- (product.oldPrice puede ser null si no hay descuento)      -->
     <!-- ======================================================= -->
-    <div th:fragment="productCard(product)" class="bg-white p-3 rounded-lg shadow-lg" th:if="${product != null}">
+    <div th:fragment="productCard(product)" class="store-product-card bg-white p-3 rounded-lg shadow-lg" th:if="${product != null}">
         <img th:src="@{${product.imageUrl}}" src="/assets/images/products/1.jpg" th:alt="${product.name}" alt="Product"
-            class="product-image-square mb-4 rounded-lg">
+            class="store-product-card__image product-image-square mb-4 rounded-lg">
         <a th:href="@{'/product/' + ${product.id}}" href="single-product-page.html" th:text="${product.name}"
-            class="text-lg font-semibold mb-2">Product name</a>
-        <p class="my-2" th:text="${product.category}">Category</p>
-        <div class="flex items-center mb-4">
+            class="store-product-card__title text-lg font-semibold mb-2">Product name</a>
+        <p class="store-product-card__category my-2" th:text="${product.category}">Category</p>
+        <div class="store-product-card__price flex items-center mb-4">
             <span class="text-lg font-bold text-primary" th:text="${'$' + product.price}">$19.99</span>
             <span class="text-sm line-through ml-2" th:if="${product.oldPrice != null}"
                 th:text="${'$' + product.oldPrice}">$24.99</span>
         </div>
         <!-- Ajustá la action al endpoint real que agrega al carrito -->
-        <form th:action="@{/cart/add}" method="post">
+        <form class="store-product-card__form" th:action="@{/cart/add}" method="post">
             <input type="hidden" name="productId" th:value="${product.id}">
             <button type="submit"
                 class="bg-primary border border-transparent hover:bg-transparent hover:border-primary text-white hover:text-primary font-semibold py-2 px-4 rounded-full w-full">Add

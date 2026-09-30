@@ -128,20 +128,24 @@ body {
 /* Topbar */
 .topbar {
   height: 60px;
-  margin-left: 240px;
-  transition: margin-left 0.3s;
+  left: 240px !important;
+  right: 0;
+  margin-left: 0;
+  transition: left 0.3s;
   background-color: #ffffff;
   border-bottom: 1px solid #e5e5e5;
+  z-index: 1040;
+  flex-wrap: nowrap;
 }
 .topbar.full {
-  margin-left: 60px;
+  left: 60px !important;
 }
 
 /* Content Area */
 .content {
   margin-left: 240px;
   transition: margin-left 0.3s;
-  padding: 20px 24px;
+  padding: 84px 24px 28px;
 }
 .content.full {
   margin-left: 60px;
@@ -155,12 +159,26 @@ body {
   .sidebar.mobile-show {
     left: 0;
   }
-  .topbar {
+  .topbar,
+  .topbar.full {
+    left: 0 !important;
     margin-left: 0 !important;
-    width: 100% !important;
+    width: auto !important;
   }
   .content {
     margin-left: 0 !important;
+    padding: 76px 16px 24px;
+  }
+}
+
+@media (max-width: 575.98px) {
+  .topbar {
+    padding-left: 12px !important;
+    padding-right: 12px !important;
+  }
+
+  .topbar .btn {
+    white-space: nowrap;
   }
 }
 

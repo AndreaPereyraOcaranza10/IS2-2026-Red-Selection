@@ -23,6 +23,146 @@ button:hover {
     background-color: #f8fafc;
 }
 
+/* Tienda: el encabezado mantiene acciones claras y alineadas en desktop. */
+.store-header {
+    position: sticky;
+    top: 0;
+    z-index: 1050;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.store-header__inner {
+    min-height: 76px;
+    gap: 1rem;
+    padding-left: 1rem;
+    padding-right: 1rem;
+}
+
+.store-header__logo {
+    display: block;
+    height: 48px;
+    width: auto;
+    margin-right: 0;
+}
+
+.store-header__nav ul {
+    align-items: center;
+    gap: 1.75rem;
+    margin: 0;
+}
+
+.store-header__nav a {
+    text-decoration: none;
+}
+
+.store-header__actions {
+    flex-shrink: 0;
+    gap: 0.5rem;
+}
+
+.store-header__admin-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    min-height: 38px;
+    padding: 0.5rem 0.875rem;
+    white-space: nowrap;
+    text-decoration: none;
+}
+
+.store-header__icon-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 40px;
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    border: 1px solid rgba(255, 255, 255, 0.28);
+    border-radius: 9999px;
+    color: #fff;
+    background: transparent;
+    text-decoration: none;
+}
+
+.store-header__icon-button:hover,
+.store-header__icon-button:focus-visible {
+    color: #fff;
+    background: rgba(255, 255, 255, 0.12);
+    outline: none;
+}
+
+.store-header__icon-button img,
+.store-header__icon-button i {
+    display: block;
+    width: 21px;
+    height: 21px;
+    font-size: 18px;
+}
+
+.store-header__actions form {
+    display: flex;
+    margin: 0;
+}
+
+/* Tarjetas alineadas: los nombres largos no desplazan el botón. */
+.store-product-card {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-width: 0;
+}
+
+.store-product-card__image {
+    flex: 0 0 auto;
+    width: 100%;
+}
+
+.store-product-card__title {
+    display: -webkit-box;
+    min-height: 3rem;
+    overflow: hidden;
+    line-height: 1.5rem;
+    text-decoration: none;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+}
+
+.store-product-card__category {
+    min-height: 1.5rem;
+}
+
+.store-product-card__price {
+    min-height: 1.75rem;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.store-product-card__form {
+    margin-top: auto;
+}
+
+.store-product-card__form button {
+    min-height: 44px;
+}
+
+@media (max-width: 1023.98px) {
+    .store-header__inner {
+        min-height: 68px;
+    }
+
+    .store-header__logo {
+        height: 44px;
+    }
+}
+
+@media (min-width: 1024px) {
+    .store-header__inner {
+        padding-left: 2rem;
+        padding-right: 2rem;
+    }
+}
+
 .mobile-menu {
     padding: 2rem;
 }
