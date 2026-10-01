@@ -68,7 +68,8 @@ if (typeof Swiper !== 'undefined') {
 }
 
 /* search icon show/hide */
-document.getElementById('search-icon').addEventListener('click', function() {
+const searchIcon = document.getElementById('search-icon');
+if (searchIcon) searchIcon.addEventListener('click', function() {
   var searchField = document.getElementById('search-field');
   if (searchField.classList.contains('hidden')) {
       searchField.classList.remove('hidden');
@@ -77,6 +78,32 @@ document.getElementById('search-icon').addEventListener('click', function() {
       searchField.classList.add('hidden');
       searchField.classList.remove('search-slide-down');
   }
+});
+
+/* Agregar sin salir del catálogo */
+document.addEventListener('submit', async function (event) {
+  const form = event.target.closest('.store-product-card__form');
+  if (!form) return;
+  event.preventDefault();
+  const button = form.querySelector('button[type="submit"]');
+  if (!button || button.disabled) return;
+  const originalText = button.textContent;
+  button.disabled = true;
+  button.textContent = 'Agregando...';
+  try {
+    const response = await fetch(form.action, {
+      method: 'POST', body: new FormData(form),
+      headers: { 'X-Requested-With': 'XMLHttpRequest' }
+    });
+    if (!response.ok) throw new Error('No se pudo agregar el producto.');
+    button.textContent = 'Agregado ✓';
+  } catch (_) {
+    button.textContent = 'Error al agregar';
+  }
+  window.setTimeout(() => {
+    button.textContent = originalText;
+    button.disabled = false;
+  }, 1600);
 });
 
 function toggleDropdown(id, show) {

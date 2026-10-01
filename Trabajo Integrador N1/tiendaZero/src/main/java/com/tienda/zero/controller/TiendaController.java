@@ -86,7 +86,8 @@ public class TiendaController {
                 allCards = allCards.stream()
                         .filter(p -> finalCats.stream().anyMatch(cf ->
                                 cf.equalsIgnoreCase(p.getCategory())
-                                        || cf.equalsIgnoreCase(p.getCategorySlug())
+                                || cf.equalsIgnoreCase(p.getCategorySlug())
+                                        || (p.getSubcategory() != null && cf.equalsIgnoreCase(p.getSubcategory()))
                         ))
                         .collect(Collectors.toList());
             }
@@ -144,6 +145,7 @@ public class TiendaController {
             // Categorías y talles disponibles para los filtros
             List<Categoria> categorias = categoriaService.listarCategoriaActivo();
             model.addAttribute("categories", categorias != null ? categorias : java.util.Collections.emptyList());
+            model.addAttribute("subcategories", List.of("Ropa", "Calzado", "Accesorios"));
 
             List<String> tallesDisponibles = java.util.List.of("S", "M", "L", "XL", "XXL", "38", "39", "40", "41", "42", "Único");
             model.addAttribute("tallesDisponibles", tallesDisponibles);
@@ -155,6 +157,9 @@ public class TiendaController {
 
         return "tienda/shop";
     }
+
+    @GetMapping("/tienda/envios")
+    public String envios() { return "tienda/envios"; }
 
     @GetMapping({"/product", "/product/{id}"})
     public String singleProduct(@PathVariable(required = false) String id, CsrfToken csrfToken, Model model) {
@@ -295,6 +300,7 @@ public class TiendaController {
                 .name(prod.getNombre())
                 .category(categoria)
                 .categorySlug(categoria.toLowerCase().replace(" ", "-"))
+                .subcategory(prod.getSubCategoria() != null ? prod.getSubCategoria().getNombre() : null)
                 .description(prod.getDescripcion() != null && !prod.getDescripcion().isBlank() 
                         ? prod.getDescripcion() 
                         : "Indumentaria deportiva oficial Zero. Diseño de alto rendimiento, confeccionado con materiales de primera calidad.")

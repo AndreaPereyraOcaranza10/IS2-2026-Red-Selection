@@ -164,6 +164,10 @@
                             class="bg-white/10 hover:bg-white/20 text-white font-semibold px-3.5 py-1.5 rounded-full inline-flex items-center text-sm transition">
                             <i class="fas fa-user-circle mr-1.5"></i> Mi Perfil
                         </a>
+                        <a sec:authorize="hasAnyRole('ADMINISTRATIVO','JEFE')" th:href="@{/admin/perfil}"
+                            class="bg-white/10 hover:bg-white/20 text-white font-semibold px-3.5 py-1.5 rounded-full inline-flex items-center text-sm transition">
+                            <i class="fas fa-user-circle mr-1.5"></i> Mi Perfil
+                        </a>
                         <form th:action="@{/logout}" method="post" class="inline">
                             <button type="submit" class="store-header__icon-button transition cursor-pointer"
                                 title="Cerrar Sesión">
@@ -199,16 +203,6 @@
                             <a th:href="@{/cart}" href="/cart.html"
                                 class="block text-center mt-4 border border-primary bg-primary hover:bg-transparent text-white hover:text-primary py-2 rounded-full font-semibold">Ver carrito</a>
                         </div>
-                    </div>
-                    <a id="search-icon" href="javascript:void(0);" aria-label="Buscar" class="store-header__icon-button group">
-                        <img th:src="@{/assets/images/search-icon.svg}" src="assets/images/search-icon.svg" alt="Buscar"
-                            class="h-6 w-6 transition-transform transform group-hover:scale-120">
-                    </a>
-                    <!-- Search field -->
-                    <div id="search-field"
-                        class="hidden absolute top-full right-0 mt-2 w-full bg-white shadow-lg p-2 rounded">
-                        <input type="text" name="q" class="w-full p-2 border border-gray-300 rounded"
-                            placeholder="Buscar productos...">
                     </div>
                 </div>
             </div>
@@ -280,17 +274,14 @@
                     <a sec:authorize="hasRole('CLIENTE')" th:href="@{/completar-perfil}"
                         class="bg-white/20 text-white font-semibold px-4 py-2 rounded-full flex items-center justify-center w-full max-w-[200px]">Mi
                         Perfil</a>
+                    <a sec:authorize="hasAnyRole('ADMINISTRATIVO','JEFE')" th:href="@{/admin/perfil}"
+                        class="bg-white/20 text-white font-semibold px-4 py-2 rounded-full flex items-center justify-center w-full max-w-[200px]">Mi Perfil</a>
                     <form th:action="@{/logout}" method="post" class="w-full text-center">
                         <button type="submit" class="text-red-400 font-semibold py-2">Cerrar Sesión</button>
                     </form>
                 </div>
                 <a th:href="@{/cart}"
                     class="bg-primary hover:bg-transparent text-white hover:text-primary border border-primary font-semibold px-4 py-2 rounded-full flex items-center justify-center w-full max-w-[200px]">Carrito ·&nbsp;<span th:text="${cartItemCount ?: 0}">0</span>&nbsp;productos</a>
-            </div>
-            <!-- Search field -->
-            <div class="  top-full right-0 mt-2 w-full bg-white shadow-lg p-2 rounded">
-                <input type="text" name="q" class="w-full p-2 border border-gray-300 rounded"
-                    placeholder="Buscar productos...">
             </div>
         </nav>
 
@@ -311,6 +302,7 @@
                         <h3 class="text-lg font-semibold mb-4">Tienda</h3>
                         <ul>
                             <li><a th:href="@{/shop}" href="/shop.html" class="hover:text-primary">Ver todos</a></li>
+                            <li><a th:href="@{/tienda/envios}" class="hover:text-primary">Env&iacute;os</a></li>
                             <li><a th:href="@{/product}" href="/single-product-page.html"
                                     class="hover:text-primary">Mujeres</a></li>
                             <li><a th:href="@{/shop}" href="/shop.html" class="hover:text-primary">Hombres</a></li>
@@ -444,7 +436,8 @@
             <button type="submit"
                 th:disabled="${!product.inStock}"
                 th:text="${product.inStock} ? 'Agregar al carrito' : 'Sin stock'"
-                class="bg-primary border border-transparent hover:bg-transparent hover:border-primary text-white hover:text-primary font-semibold py-2 px-4 rounded-full w-full disabled:opacity-50 disabled:cursor-not-allowed">Agregar al carrito</button>
+                th:style="${!product.inStock} ? 'background-color: #64748b; border-color: #64748b; color: #ffffff;' : ''"
+                class="bg-primary border border-transparent hover:bg-transparent hover:border-primary text-white hover:text-primary font-semibold py-2 px-4 rounded-full w-full disabled:opacity-100 disabled:cursor-not-allowed">Agregar al carrito</button>
         </form>
     </div>
 

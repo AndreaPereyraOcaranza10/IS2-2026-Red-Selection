@@ -156,12 +156,12 @@
                 th:text="${modoEdicion} ? 'Guardar cambios' : 'Guardar perfil'">Guardar perfil</button>
     </form>
 </section>
-<section class="tarjeta tarjeta--ancha" th:unless="${perfilEmpleado}">
+<section class="tarjeta tarjeta--ancha">
     <p class="etiqueta">Mis compras</p>
-    <h1>Ordenes de compra</h1>
+    <h1>Mis pedidos</h1>
     <p class="subtitulo">Seguimiento de tus pedidos confirmados.</p>
 
-    <p th:if="${#lists.isEmpty(ordenesCliente)}" class="subtitulo">Todavia no tenes ordenes de compra confirmadas.</p>
+    <p th:if="${#lists.isEmpty(ordenesCliente)}" class="subtitulo">Todavía no tenés pedidos confirmados.</p>
 
     <div class="ordenes-perfil" th:if="${!#lists.isEmpty(ordenesCliente)}">
         <article class="orden-perfil" th:each="orden : ${ordenesCliente}">

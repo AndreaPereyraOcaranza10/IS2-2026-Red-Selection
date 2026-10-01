@@ -144,6 +144,14 @@ public class FlujoCompraServiceImpl implements FlujoCompraService {
     }
 
     @Override
+    public List<OrdenCompra> listarPedidosUsuario(String username) {
+        return ordenesCliente.findByPropietarioNombreUsuarioOrderByFechaDesc(username).stream()
+                .filter(orden -> !orden.isEliminado())
+                .filter(orden -> orden.getEstadoOrdenCompra() != EstadoOrdenCompra.PENDIENTE_COMPLETAR)
+                .toList();
+    }
+
+    @Override
     public List<OrdenCompra> listarPedidosAdministracion() {
         return ordenesCliente.findByEstadoOrdenCompraNotAndEliminadoFalseOrderByFechaDesc(
                 EstadoOrdenCompra.PENDIENTE_COMPLETAR);

@@ -81,6 +81,19 @@
                             </div>
                         </div>
 
+                        <div class="mb-6 pb-6 border-b border-gray-line">
+                            <h3 class="text-lg font-semibold mb-4 text-gray-900">Subcategorías</h3>
+                            <div class="space-y-2.5">
+                                <label class="flex items-center cursor-pointer hover:text-primary transition" th:each="sub : ${subcategories}">
+                                    <input type="checkbox" name="categoria" th:value="${sub}"
+                                           th:checked="${selectedCategorias != null and #lists.contains(selectedCategorias, sub)}"
+                                           onchange="document.getElementById('shopFilterForm').submit()"
+                                           class="form-checkbox custom-checkbox text-primary rounded h-4 w-4">
+                                    <span class="ml-2.5 text-sm" th:text="${sub}">Ropa</span>
+                                </label>
+                            </div>
+                        </div>
+
                         <!-- Size Filter -->
                         <div class="mb-6 pb-6 border-b border-gray-line">
                             <h3 class="text-lg font-semibold mb-4 text-gray-900">Talle</h3>

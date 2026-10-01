@@ -2,11 +2,16 @@ package com.tienda.zero.controller;
 
 import com.tienda.zero.dto.ProductoFormDTO;
 import com.tienda.zero.dto.ProductoInventarioDTO;
+import com.tienda.zero.enums.EstadoOrdenCompra;
+import com.tienda.zero.enums.TipoPago;
 import com.tienda.zero.enums.TipoImagen;
 import com.tienda.zero.model.Imagen;
 import com.tienda.zero.model.Producto;
 import com.tienda.zero.model.VigenciaPrecio;
 import com.tienda.zero.repository.SubCategoriaRepository;
+import com.tienda.zero.repository.ClienteRepository;
+import com.tienda.zero.repository.OrdenCompraRepository;
+import com.tienda.zero.repository.ProveedorRepository;
 import com.tienda.zero.service.StockService;
 import com.tienda.zero.service.ImagenService;
 import com.tienda.zero.service.ProductoService;
@@ -37,9 +42,26 @@ public class AdminController {
     private final StockService stockService;
     private final ReporteVentasService reporteVentasService;
     private final ReporteProductosService reporteProductosService;
+    private final OrdenCompraRepository ordenCompraRepository;
+    private final ClienteRepository clienteRepository;
+    private final ProveedorRepository proveedorRepository;
 
     @GetMapping({"/admin", "/admin/dashboard", "/admin/index"})
-    public String dashboard() {
+    public String dashboard(Model model) {
+        List<EstadoOrdenCompra> estadosCobrados = List.of(
+                EstadoOrdenCompra.PENDIENTE_ENVIO,
+                EstadoOrdenCompra.PENDIENTE_ENTREGA,
+                EstadoOrdenCompra.ENTREGADO);
+        model.addAttribute("ventasEfectivo", ordenCompraRepository
+                .countByFormaPagoAndEstadoOrdenCompraInAndEliminadoFalse(TipoPago.EFECTIVO, estadosCobrados));
+        model.addAttribute("ventasTransferencia", ordenCompraRepository
+                .countByFormaPagoAndEstadoOrdenCompraInAndEliminadoFalse(TipoPago.TRANSFERENCIA, estadosCobrados));
+        model.addAttribute("ventasBilletera", ordenCompraRepository
+                .countByFormaPagoAndEstadoOrdenCompraInAndEliminadoFalse(TipoPago.BILLETERA_VIRTUAL, estadosCobrados));
+        model.addAttribute("clientesActivos", clienteRepository.countByEliminadoFalse());
+        model.addAttribute("proveedoresActivos", proveedorRepository.countByEliminadoFalse());
+        model.addAttribute("pedidosRegistrados", ordenCompraRepository
+                .countByEliminadoFalseAndEstadoOrdenCompraNot(EstadoOrdenCompra.PENDIENTE_COMPLETAR));
         return "admin/index";
     }
 

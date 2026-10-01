@@ -11,6 +11,7 @@ import java.util.Optional;
 
 @Repository
 public interface ClienteRepository extends JpaRepository<Cliente, String> {
+    long countByEliminadoFalse();
 
     Optional<Cliente> findByTipoDocumentoAndNumeroDocumento(TipoDocumento tipoDocumento, String numeroDocumento);
     List<Cliente> findByEliminadoFalse();

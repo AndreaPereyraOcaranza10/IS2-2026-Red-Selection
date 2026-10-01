@@ -123,7 +123,7 @@
                                 <span class="text-2xl font-semibold" th:text="${'$' + product.price}">$40.00</span>
                             </div>
                             <!-- Form de "agregar al carrito": ajustá la action al endpoint real -->
-                            <form th:action="@{/cart/add}" method="post">
+                            <form class="store-product-card__form" th:action="@{/cart/add}" method="post">
                                 <input type="hidden" name="productId" th:value="${product.id}">
                                 <div class="flex items-center mb-8">
                                     <button id="decrease" type="button"
@@ -136,7 +136,8 @@
                                 </div>
                                 <button type="submit" th:disabled="${!product.inStock}"
                                     th:text="${product.inStock} ? 'Agregar al carrito' : 'Sin stock'"
-                                    class="bg-primary border border-transparent hover:bg-transparent hover:border-primary text-white hover:text-primary font-semibold py-2 px-4 rounded-full disabled:opacity-50 disabled:cursor-not-allowed">Agregar al carrito</button>
+                                    th:style="${!product.inStock} ? 'background-color: #64748b; border-color: #64748b; color: #ffffff;' : ''"
+                                    class="bg-primary border border-transparent hover:bg-transparent hover:border-primary text-white hover:text-primary font-semibold py-2 px-4 rounded-full disabled:opacity-100 disabled:cursor-not-allowed">Agregar al carrito</button>
                             </form>
                         </div>
                         <!-- Social sharing -->
