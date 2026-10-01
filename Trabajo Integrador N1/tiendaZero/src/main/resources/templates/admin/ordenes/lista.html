@@ -74,7 +74,7 @@
             <tbody>
             <tr th:each="p : ${pedidos}">
               <td th:text="${p.identificadorCompra}">PED-001</td>
-              <td th:text="${p.cliente != null ? p.cliente.usuario.nombreUsuario : (p.propietario != null ? p.propietario.nombreUsuario : 'Sin cliente')}">cliente@mail.com</td>
+              <td th:text="${p.cliente != null and p.cliente.usuario != null ? p.cliente.usuario.nombreUsuario : (p.propietario != null ? p.propietario.nombreUsuario : 'Sin cliente')}">cliente@mail.com</td>
               <td th:text="${p.fecha}">2026-01-01</td>
               <td th:text="${'$' + p.total}">$0.00</td>
               <td th:text="${p.formaPago != null ? p.formaPago : 'No informada'}">BILLETERA_VIRTUAL</td>
