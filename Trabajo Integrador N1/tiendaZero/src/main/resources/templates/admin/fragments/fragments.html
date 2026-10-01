@@ -77,83 +77,11 @@
           <a th:href="@{/}" class="btn btn-outline-primary btn-sm d-inline-flex align-items-center gap-1">
             <i class="ti ti-arrow-left"></i>
             <span class="d-none d-sm-inline">Salir del panel</span>
-            <span class="d-sm-none">Home</span>
+            <span class="d-sm-none">Inicio</span>
           </a>
         </li>
         <!-- Pages link -->
 
-        <!-- Bell icon -->
-        <li>
-          <a class="position-relative btn-icon btn-sm btn-light btn rounded-circle" data-bs-toggle="dropdown"
-            aria-expanded="false" href="#" role="button">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
-              stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
-              class="icon icon-tabler icons-tabler-outline icon-tabler-bell">
-              <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-              <path d="M10 5a2 2 0 1 1 4 0a7 7 0 0 1 4 6v3a4 4 0 0 0 2 3h-16a4 4 0 0 0 2 -3v-3a7 7 0 0 1 4 -6" />
-              <path d="M9 17v1a3 3 0 0 0 6 0v-1" />
-            </svg>
-            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger mt-2 ms-n2"
-                  th:text="${notifications != null ? notifications.size() : 2}">
-              2
-              <span class="visually-hidden">unread messages</span>
-            </span>
-          </a>
-          <div class="dropdown-menu dropdown-menu-end dropdown-menu-md p-0">
-            <ul class="list-unstyled p-0 m-0">
-              <!--
-                  th:each sobre "notifications" (List<Notification>: avatarUrl, title, message, timeAgo).
-                  model.addAttribute("notifications", notificationService.recent());
-              -->
-              <li class="p-3 border-bottom" th:each="notif : ${notifications}">
-                <div class="d-flex gap-3">
-                  <img th:src="@{${notif.avatarUrl}}" src="./assets/images/avatar/avatar-1.jpg" alt="" class="avatar avatar-sm rounded-circle" />
-                  <div class="flex-grow-1 small">
-                    <p class="mb-0" th:text="${notif.title}">New order received</p>
-                    <p class="mb-1" th:text="${notif.message}">Order #12345 has been placed</p>
-                    <div class="text-secondary" th:text="${notif.timeAgo}">5 minutes ago</div>
-                  </div>
-                </div>
-              </li>
-              <!-- Fallback estático (se ve solo si "notifications" todavía no está en el modelo) -->
-              <th:block th:if="${notifications == null}">
-                <li class="p-3 border-bottom ">
-                  <div class="d-flex gap-3">
-                    <img src="./assets/images/avatar/avatar-1.jpg" alt="" class="avatar avatar-sm rounded-circle" />
-                    <div class="flex-grow-1 small">
-                      <p class="mb-0">New order received</p>
-                      <p class="mb-1">Order #12345 has been placed</p>
-                      <div class="text-secondary">5 minutes ago</div>
-                    </div>
-                  </div>
-                </li>
-                <li class="p-3 border-bottom ">
-                  <div class="d-flex gap-3">
-                    <img src="./assets/images/avatar/avatar-4.jpg" alt="" class="avatar avatar-sm rounded-circle" />
-                    <div class="flex-grow-1 small">
-                      <p class="mb-0">New user registered</p>
-                      <p class="mb-1">User @john_doe has signed up</p>
-                      <div class="text-secondary">30 minutes ago</div>
-                    </div>
-                  </div>
-                </li>
-                <li class="p-3 border-bottom">
-                  <div class="d-flex gap-3">
-                    <img src="./assets/images/avatar/avatar-2.jpg" alt="" class="avatar avatar-sm rounded-circle" />
-                    <div class="flex-grow-1 small">
-                      <p class="mb-0">Payment confirmed</p>
-                      <p class="mb-1">Payment of $299 has been received</p>
-                      <div class="text-secondary">1 hour ago</div>
-                    </div>
-                  </div>
-                </li>
-              </th:block>
-              <li class="px-4 py-3 text-center">
-                <a href="#" class="text-primary ">View all notifications</a>
-              </li>
-            </ul>
-          </div>
-        </li>
         <li class="ms-2 me-3 flex-shrink-0">
           <a class="d-inline-flex" th:href="@{/admin/perfil}" href="/admin/perfil" aria-label="Modificar datos personales">
             <img th:src="${currentUser != null ? currentUser.avatarUrl : '/assets/images/avatar/avatar-1.jpg'}" src="./assets/images/avatar/avatar-1.jpg" alt="" class="avatar avatar-sm rounded-circle" />
@@ -173,19 +101,18 @@
       </a>
     </div>
     <ul class="nav flex-column">
-      <li class="px-4 py-2"><small class="nav-text">Main</small></li>
+      <li class="px-4 py-2"><small class="nav-text">Principal</small></li>
       <li><a class="nav-link" th:classappend="${activePage == 'dashboard'} ? 'active'" th:href="@{/admin}" href="index.html"><i class="ti ti-home"></i><span
-            class="nav-text">Dashboard</span></a></li>
+            class="nav-text">Panel principal</span></a></li>
       <li><a class="nav-link" th:classappend="${activePage == 'inventory'} ? 'active'" th:href="@{/inventory}" href="inventory.html"><i class="ti ti-box-seam"></i><span
-            class="nav-text">Inventory</span></a></li>
-      <li><a class="nav-link" th:classappend="${activePage == 'create-product'} ? 'active'" th:href="@{/products/new}" href="create-product.html"><i class="ti ti-plus"></i><span class="nav-text">Add
-            Product</span></a></li>
+            class="nav-text">Inventario</span></a></li>
+      <li><a class="nav-link" th:classappend="${activePage == 'create-product'} ? 'active'" th:href="@{/products/new}" href="create-product.html"><i class="ti ti-plus"></i><span class="nav-text">Agregar producto</span></a></li>
       <li><a class="nav-link" th:classappend="${activePage == 'ordenes'} ? 'active'" th:href="@{/admin/ordenes}"><i class="ti ti-truck"></i><span class="nav-text">Órdenes de compra</span></a></li>
       <li><a class="nav-link" th:classappend="${activePage == 'facturas-proveedor'} ? 'active'" th:href="@{/admin/facturas-proveedor}"><i class="ti ti-receipt-2"></i><span class="nav-text">Facturas de proveedor</span></a></li>
       <li><a class="nav-link" th:classappend="${activePage == 'proveedores'} ? 'active'" th:href="@{/admin/proveedores}"><i class="ti ti-building-store"></i><span class="nav-text">Proveedores</span></a></li>
       <li><a class="nav-link" th:classappend="${activePage == 'empresas'} ? 'active'" th:href="@{/admin/empresas}"><i class="ti ti-building"></i><span class="nav-text">Empresas</span></a></li>
       <li><a class="nav-link" th:classappend="${activePage == 'empleados'} ? 'active'" th:href="@{/admin/empleados}"><i class="ti ti-users"></i><span class="nav-text">Empleados</span></a></li>
-    <li><a class="nav-link" th:classappend="${activePage == 'reports'} ? 'active'" th:href="@{/reports}" href="reports.html"><i class="ti ti-receipt"></i><span class="nav-text">Reports</span></a>
+    <li><a class="nav-link" th:classappend="${activePage == 'reports'} ? 'active'" th:href="@{/reports}" href="reports.html"><i class="ti ti-receipt"></i><span class="nav-text">Reportes</span></a>
       </li>
     </ul>
 

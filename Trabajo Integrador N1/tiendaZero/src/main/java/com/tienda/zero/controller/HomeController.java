@@ -5,6 +5,7 @@ import com.tienda.zero.model.Producto;
 import com.tienda.zero.model.VigenciaPrecio;
 import com.tienda.zero.service.ProductoService;
 import com.tienda.zero.service.VigenciaPrecioService;
+import com.tienda.zero.service.StockService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.web.csrf.CsrfToken;
 import org.springframework.stereotype.Controller;
@@ -20,6 +21,7 @@ public class HomeController {
 
     private final ProductoService productoService;
     private final VigenciaPrecioService vigenciaPrecioService;
+    private final StockService stockService;
 
     @GetMapping({"/", "/index", "/index.html"})
     public String index(CsrfToken csrfToken, Model model) {
@@ -74,13 +76,14 @@ public class HomeController {
                 .name(prod.getNombre())
                 .category(categoria)
                 .categorySlug(categoria.toLowerCase().replace(" ", "-"))
+                .subcategory(prod.getSubCategoria() != null ? prod.getSubCategoria().getNombre() : null)
                 .description(prod.getDescripcion() != null && !prod.getDescripcion().isBlank() 
                         ? prod.getDescripcion() 
                         : "Indumentaria deportiva oficial Zero.")
                 .sku(prod.getCodigo() != null ? prod.getCodigo() : "ZERO-001")
                 .brand("Zero")
                 .talle(prod.getTalle() != null ? prod.getTalle() : "-")
-                .inStock(true)
+                .inStock(stockService.calcularStockActual(prod.getId()) > 0)
                 .reviewCount(5)
                 .rating(5)
                 .price(prod.isEnOferta() ? Math.round(precio * (1 - prod.getPorcentajeDescuento() / 100.0) * 100.0) / 100.0 : precio)

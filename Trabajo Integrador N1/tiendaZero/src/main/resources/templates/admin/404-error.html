@@ -2,7 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org" lang="en">
 
 <head>
-  <title th:text="'404 Error - Zero'">404 Error - Zero</title>
+  <title th:text="'Error 404 - Zero'">Error 404 - Zero</title>
   <th:block th:replace="~{admin/fragments/fragments :: head-assets}"></th:block>
 </head>
 
@@ -19,10 +19,10 @@
             </div>
 
             <h1 class="display-1 fw-bold text-primary mb-2">404</h1>
-            <h2 class="card-title h4 mb-3">Page Not Found</h2>
-            <p class="text-muted mb-4">Sorry, the page you're looking for doesn't exist or has been moved.</p>
+            <h2 class="card-title h4 mb-3">Página no encontrada</h2>
+            <p class="text-muted mb-4">La página que buscás no existe o fue movida.</p>
 
-            <a th:href="@{/}" href="index.html" class="btn btn-primary">Go to Dashboard</a>
+            <a th:href="@{/admin}" href="index.html" class="btn btn-primary">Ir al panel principal</a>
         </div>
     </div>
 </div>

@@ -24,158 +24,158 @@
 </header>
 
 <main class="contenido-cuenta contenido-cuenta--superior contenido-cuenta--columna">
-    <section class="tarjeta tarjeta--ancha">
-        <p class="etiqueta">Mi cuenta</p>
-        <h1 th:text="${modoEdicion} ? 'Actualizá tu perfil' : 'Completá tu perfil'">Completá tu perfil</h1>
-        <p class="subtitulo"
-           th:text="${modoEdicion} ? 'Revisá tus datos personales y guardá los cambios que necesites' : 'Necesitamos estos datos para terminar de crear tu cuenta'">
-            Necesitamos estos datos para terminar de crear tu cuenta
-        </p>
+<section class="tarjeta tarjeta--ancha">
+    <p class="etiqueta">Mi cuenta</p>
+    <h1 th:text="${modoEdicion} ? 'Actualizá tu perfil' : 'Completá tu perfil'">Completá tu perfil</h1>
+    <p class="subtitulo"
+       th:text="${modoEdicion} ? 'Revisá tus datos personales y guardá los cambios que necesites' : 'Necesitamos estos datos para terminar de crear tu cuenta'">
+        Necesitamos estos datos para terminar de crear tu cuenta
+    </p>
 
-        <p class="mensaje mensaje--error" th:if="${error}" th:text="${error}"></p>
+    <p class="mensaje mensaje--error" th:if="${error}" th:text="${error}"></p>
 
-        <form id="perfil-form" th:action="${perfilEmpleado} ? @{/admin/perfil} : @{/completar-perfil}" th:object="${perfil}" method="post">
-            <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+    <form id="perfil-form" th:action="${perfilEmpleado} ? @{/admin/perfil} : @{/completar-perfil}" th:object="${perfil}" method="post">
+        <input type="hidden" th:if="${_csrf != null}" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
 
-            <fieldset>
-                <legend>Datos personales</legend>
+        <fieldset>
+            <legend>Datos personales</legend>
 
-                <label for="correo">Correo electrónico</label>
-                <input type="email" id="correo" th:value="*{correo}" disabled aria-describedby="correo-ayuda"/>
-                <small id="correo-ayuda" class="ayuda-campo">El correo de acceso no se puede modificar.</small>
+            <label for="correo">Correo electrónico</label>
+            <input type="email" id="correo" th:value="*{correo}" disabled aria-describedby="correo-ayuda"/>
+            <small id="correo-ayuda" class="ayuda-campo">El correo de acceso no se puede modificar.</small>
 
-                <div class="fila">
-                    <div>
-                        <label for="nombre">Nombre</label>
-                        <input type="text" id="nombre" th:field="*{nombre}" required/>
-                    </div>
-                    <div>
-                        <label for="apellido">Apellido</label>
-                        <input type="text" id="apellido" th:field="*{apellido}" required/>
-                    </div>
+            <div class="fila">
+                <div>
+                    <label for="nombre">Nombre</label>
+                    <input type="text" id="nombre" th:field="*{nombre}" required/>
                 </div>
-
-                <div class="fila">
-                    <div>
-                        <label for="sexo">Sexo</label>
-                        <select id="sexo" th:field="*{sexo}" required>
-                            <option value="" disabled>Seleccionar</option>
-                            <option value="MASCULINO">Masculino</option>
-                            <option value="FEMENINO">Femenino</option>
-                            <option value="OTRO">Otro</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label for="fechaNacimiento">Fecha de nacimiento</label>
-                        <input type="date" id="fechaNacimiento" th:field="*{fechaNacimiento}" required/>
-                    </div>
+                <div>
+                    <label for="apellido">Apellido</label>
+                    <input type="text" id="apellido" th:field="*{apellido}" required/>
                 </div>
+            </div>
 
-                <div class="fila">
-                    <div>
-                        <label for="tipoDocumento">Tipo de documento</label>
-                        <select id="tipoDocumento" th:field="*{tipoDocumento}" required>
-                            <option value="DNI">DNI</option>
-                            <option value="PASAPORTE">Pasaporte</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label for="numeroDocumento">Número de documento</label>
-                        <input type="text" id="numeroDocumento" th:field="*{numeroDocumento}" required/>
-                    </div>
-                </div>
-
-                <th:block th:unless="${perfilEmpleado}">
-                    <label for="telefono">Número de teléfono</label>
-                    <input type="tel" id="telefono" th:field="*{telefono}" placeholder="11234567"/>
-
-                    <label for="idNacionalidad">Nacionalidad</label>
-                    <select id="idNacionalidad" th:field="*{idNacionalidad}" required>
+            <div class="fila">
+                <div>
+                    <label for="sexo">Sexo</label>
+                    <select id="sexo" th:field="*{sexo}" required>
                         <option value="" disabled>Seleccionar</option>
-                        <option th:each="n : ${nacionalidades}" th:value="${n.id}" th:text="${n.nombre}"></option>
+                        <option value="MASCULINO">Masculino</option>
+                        <option value="FEMENINO">Femenino</option>
+                        <option value="OTRO">Otro</option>
                     </select>
-
-                    <label for="direccionEstadia">Dirección de estadía</label>
-                    <input type="text" id="direccionEstadia" th:field="*{direccionEstadia}" required/>
-                </th:block>
-            </fieldset>
-
-            <fieldset th:unless="${perfilEmpleado}">
-                <legend>Dirección</legend>
-
-                <div class="fila">
-                    <div>
-                        <label for="idProvincia">Provincia</label>
-                        <select id="idProvincia" name="idProvincia" required>
-                            <option value="" disabled selected>Seleccionar</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label for="idDepartamento">Departamento</label>
-                        <select id="idDepartamento" name="idDepartamento" required disabled>
-                            <option value="" disabled selected>Elegí una provincia primero</option>
-                        </select>
-                    </div>
                 </div>
-
-                <label for="idLocalidad">Localidad</label>
-                <select id="idLocalidad" th:field="*{idLocalidad}" required disabled>
-                    <option value="" disabled selected>Elegí un departamento primero</option>
-                </select>
-
-                <div class="fila">
-                    <div>
-                        <label for="calle">Calle</label>
-                        <input type="text" id="calle" th:field="*{calle}" required/>
-                    </div>
-                    <div>
-                        <label for="numeracion">N° de calle</label>
-                        <input type="text" id="numeracion" th:field="*{numeracion}" required/>
-                    </div>
+                <div>
+                    <label for="fechaNacimiento">Fecha de nacimiento</label>
+                    <input type="date" id="fechaNacimiento" th:field="*{fechaNacimiento}" required/>
                 </div>
+            </div>
 
-                <div class="fila">
-                    <div>
-                        <label for="manzanaPiso">Manzana / piso</label>
-                        <input type="text" id="manzanaPiso" th:field="*{manzanaPiso}" placeholder="Manzana A"/>
-                    </div>
-                    <div>
-                        <label for="casaDepartamento">N° casa / depto</label>
-                        <input type="text" id="casaDepartamento" th:field="*{casaDepartamento}" placeholder="123"/>
-                    </div>
+            <div class="fila">
+                <div>
+                    <label for="tipoDocumento">Tipo de documento</label>
+                    <select id="tipoDocumento" th:field="*{tipoDocumento}" required>
+                        <option value="DNI">DNI</option>
+                        <option value="PASAPORTE">Pasaporte</option>
+                    </select>
                 </div>
-
-                <label for="barrio">Barrio</label>
-                <input type="text" id="barrio" th:field="*{barrio}" placeholder="Av. Siempre Viva"/>
-
-                <label for="referencia">Referencia</label>
-                <input type="text" id="referencia" th:field="*{referencia}" placeholder="Es en muy muy lejano"/>
-            </fieldset>
-
-            <button id="guardar-perfil" type="submit" disabled
-                    th:text="${modoEdicion} ? 'Guardar cambios' : 'Guardar perfil'">Guardar perfil</button>
-        </form>
-    </section>
-    <section class="tarjeta tarjeta--ancha" th:unless="${perfilEmpleado}">
-        <p class="etiqueta">Mis compras</p>
-        <h1>Ordenes de compra</h1>
-        <p class="subtitulo">Seguimiento de tus pedidos confirmados.</p>
-
-        <p th:if="${#lists.isEmpty(ordenesCliente)}" class="subtitulo">Todavia no tenes ordenes de compra confirmadas.</p>
-
-        <div class="ordenes-perfil" th:if="${!#lists.isEmpty(ordenesCliente)}">
-            <article class="orden-perfil" th:each="orden : ${ordenesCliente}">
-                <div class="orden-perfil__encabezado">
-                    <strong th:text="${orden.identificadorCompra}">PED-001</strong>
-                    <span class="orden-perfil__estado" th:text="${orden.estadoOrdenCompra}">PENDIENTE_ENVIO</span>
+                <div>
+                    <label for="numeroDocumento">Número de documento</label>
+                    <input type="text" id="numeroDocumento" th:field="*{numeroDocumento}" required/>
                 </div>
-                <p>Fecha: <span th:text="${orden.fecha}">2026-01-01</span></p>
-                <p>Total: $<span th:text="${orden.total}">0.00</span></p>
-                <p>Forma de pago: <span th:text="${orden.formaPago != null ? orden.formaPago : 'No informada'}">BILLETERA_VIRTUAL</span></p>
-                <p>Entrega: <span th:text="${orden.direccionEntrega}">Direccion</span></p>
-            </article>
-        </div>
-    </section>
+            </div>
+
+            <th:block th:unless="${perfilEmpleado}">
+            <label for="telefono">Número de teléfono</label>
+            <input type="tel" id="telefono" th:field="*{telefono}" placeholder="11234567"/>
+
+            <label for="idNacionalidad">Nacionalidad</label>
+            <select id="idNacionalidad" th:field="*{idNacionalidad}" required>
+                <option value="" disabled>Seleccionar</option>
+                <option th:each="n : ${nacionalidades}" th:value="${n.id}" th:text="${n.nombre}"></option>
+            </select>
+
+            <label for="direccionEstadia">Dirección de estadía</label>
+            <input type="text" id="direccionEstadia" th:field="*{direccionEstadia}" required/>
+            </th:block>
+        </fieldset>
+
+        <fieldset th:unless="${perfilEmpleado}">
+            <legend>Dirección</legend>
+
+            <div class="fila">
+                <div>
+                    <label for="idProvincia">Provincia</label>
+                    <select id="idProvincia" name="idProvincia" required>
+                        <option value="" disabled selected>Seleccionar</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="idDepartamento">Departamento</label>
+                    <select id="idDepartamento" name="idDepartamento" required disabled>
+                        <option value="" disabled selected>Elegí una provincia primero</option>
+                    </select>
+                </div>
+            </div>
+
+            <label for="idLocalidad">Localidad</label>
+            <select id="idLocalidad" th:field="*{idLocalidad}" required disabled>
+                <option value="" disabled selected>Elegí un departamento primero</option>
+            </select>
+
+            <div class="fila">
+                <div>
+                    <label for="calle">Calle</label>
+                    <input type="text" id="calle" th:field="*{calle}" required/>
+                </div>
+                <div>
+                    <label for="numeracion">N° de calle</label>
+                    <input type="text" id="numeracion" th:field="*{numeracion}" required/>
+                </div>
+            </div>
+
+            <div class="fila">
+                <div>
+                    <label for="manzanaPiso">Manzana / piso</label>
+                    <input type="text" id="manzanaPiso" th:field="*{manzanaPiso}" placeholder="Manzana A"/>
+                </div>
+                <div>
+                    <label for="casaDepartamento">N° casa / depto</label>
+                    <input type="text" id="casaDepartamento" th:field="*{casaDepartamento}" placeholder="123"/>
+                </div>
+            </div>
+
+            <label for="barrio">Barrio</label>
+            <input type="text" id="barrio" th:field="*{barrio}" placeholder="Av. Siempre Viva"/>
+
+            <label for="referencia">Referencia</label>
+            <input type="text" id="referencia" th:field="*{referencia}" placeholder="Es en muy muy lejano"/>
+        </fieldset>
+
+        <button id="guardar-perfil" type="submit" disabled
+                th:text="${modoEdicion} ? 'Guardar cambios' : 'Guardar perfil'">Guardar perfil</button>
+    </form>
+</section>
+<section class="tarjeta tarjeta--ancha" th:unless="${perfilEmpleado}">
+    <p class="etiqueta">Mis compras</p>
+    <h1>Ordenes de compra</h1>
+    <p class="subtitulo">Seguimiento de tus pedidos confirmados.</p>
+
+    <p th:if="${#lists.isEmpty(ordenesCliente)}" class="subtitulo">Todavia no tenes ordenes de compra confirmadas.</p>
+
+    <div class="ordenes-perfil" th:if="${!#lists.isEmpty(ordenesCliente)}">
+        <article class="orden-perfil" th:each="orden : ${ordenesCliente}">
+            <div class="orden-perfil__encabezado">
+                <strong th:text="${orden.identificadorCompra}">PED-001</strong>
+                <span class="orden-perfil__estado" th:text="${orden.estadoOrdenCompra}">PENDIENTE_ENVIO</span>
+            </div>
+            <p>Fecha: <span th:text="${orden.fecha}">2026-01-01</span></p>
+            <p>Total: $<span th:text="${orden.total}">0.00</span></p>
+            <p>Forma de pago: <span th:text="${orden.formaPago != null ? orden.formaPago : 'No informada'}">BILLETERA_VIRTUAL</span></p>
+            <p>Entrega: <span th:text="${orden.direccionEntrega}">Direccion</span></p>
+        </article>
+    </div>
+</section>
 </main>
 
 <script th:if="${perfilEmpleado}">
@@ -204,7 +204,6 @@
     const selectLocalidad = document.getElementById('idLocalidad');
     const formulario = document.getElementById('perfil-form');
     const botonGuardar = document.getElementById('guardar-perfil');
-    const ubicacion = /*[[${ubicacion}]]*/ null;
     const ubicacionInicial = {
         provincia: /*[[${perfil.idProvincia}]]*/ '',
         departamento: /*[[${perfil.idDepartamento}]]*/ '',
@@ -212,26 +211,23 @@
     };
     let estadoInicial = '';
 
-    function departamentosDe(idProvincia) {
-        return ubicacion.departamentos.filter(d => d.idProvincia === idProvincia);
-    }
-
-    function localidadesDe(idDepartamento) {
-        return ubicacion.localidades.filter(l => l.idDepartamento === idDepartamento);
-    }
-
-    function cargarOpciones(select, datos, placeholder, seleccionada = '') {
-        if (datos.length === 0) {
-            select.innerHTML = `<option value="" disabled selected>Sin opciones cargadas</option>`;
-            select.disabled = true;
-            return;
-        }
-        select.innerHTML = `<option value="" disabled selected>${placeholder}</option>` +
-            datos.map(d => `<option value="${d.id}">${d.nombre}</option>`).join('');
-        select.disabled = false;
-        if (seleccionada) {
-            select.value = seleccionada;
-        }
+    function cargarOpciones(select, url, placeholder, seleccionada = '') {
+        select.disabled = true;
+        select.innerHTML = `<option value="" disabled selected>Cargando...</option>`;
+        return fetch(url)
+            .then(r => r.json())
+            .then(datos => {
+                if (datos.length === 0) {
+                    select.innerHTML = `<option value="" disabled selected>Sin opciones cargadas</option>`;
+                    return;
+                }
+                select.innerHTML = `<option value="" disabled selected>${placeholder}</option>` +
+                    datos.map(d => `<option value="${d.id}">${d.nombre}</option>`).join('');
+                select.disabled = false;
+                if (seleccionada) {
+                    select.value = seleccionada;
+                }
+            });
     }
 
     function estadoFormulario() {
@@ -245,14 +241,16 @@
         botonGuardar.disabled = estadoFormulario() === estadoInicial;
     }
 
-    function cargarUbicacionInicial() {
-        cargarOpciones(selectProvincia, ubicacion.provincias, 'Seleccionar', ubicacionInicial.provincia);
+    async function cargarUbicacionInicial() {
+        await cargarOpciones(selectProvincia, '/api/ubicacion/provincias', 'Seleccionar', ubicacionInicial.provincia);
         if (ubicacionInicial.provincia) {
-            cargarOpciones(selectDepartamento, departamentosDe(ubicacionInicial.provincia),
+            await cargarOpciones(selectDepartamento,
+                `/api/ubicacion/departamentos?idProvincia=${ubicacionInicial.provincia}`,
                 'Seleccionar', ubicacionInicial.departamento);
         }
         if (ubicacionInicial.departamento) {
-            cargarOpciones(selectLocalidad, localidadesDe(ubicacionInicial.departamento),
+            await cargarOpciones(selectLocalidad,
+                `/api/ubicacion/localidades?idDepartamento=${ubicacionInicial.departamento}`,
                 'Seleccionar', ubicacionInicial.localidad);
         }
         estadoInicial = estadoFormulario();
@@ -260,13 +258,13 @@
     }
 
     selectProvincia.addEventListener('change', () => {
-        cargarOpciones(selectDepartamento, departamentosDe(selectProvincia.value), 'Seleccionar');
+        cargarOpciones(selectDepartamento, `/api/ubicacion/departamentos?idProvincia=${selectProvincia.value}`, 'Seleccionar');
         selectLocalidad.disabled = true;
         selectLocalidad.innerHTML = `<option value="" disabled selected>Elegí un departamento primero</option>`;
     });
 
     selectDepartamento.addEventListener('change', () => {
-        cargarOpciones(selectLocalidad, localidadesDe(selectDepartamento.value), 'Seleccionar');
+        cargarOpciones(selectLocalidad, `/api/ubicacion/localidades?idDepartamento=${selectDepartamento.value}`, 'Seleccionar');
     });
 
     formulario.addEventListener('input', actualizarBotonGuardar);

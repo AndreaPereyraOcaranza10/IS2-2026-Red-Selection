@@ -60,6 +60,19 @@ public class OrdenCompraProveedorController {
         return "redirect:/admin/ordenes";
     }
 
+    @PostMapping("/clientes/{id}/seguimiento")
+    public String actualizarSeguimientoCliente(@PathVariable String id,
+                                               @RequestParam EstadoOrdenCompra estado,
+                                               RedirectAttributes redirectAttributes) {
+        try {
+            flujoCompraService.cambiarSeguimiento(id, estado);
+            redirectAttributes.addFlashAttribute("mensajeExito", "El seguimiento del pedido fue actualizado.");
+        } catch (RuntimeException e) {
+            redirectAttributes.addFlashAttribute("mensajeError", e.getMessage());
+        }
+        return "redirect:/admin/ordenes";
+    }
+
     @GetMapping("/nueva")
     public String nuevaForm(Model model) {
         List<Proveedor> proveedores = proveedorService.listarProveedorActivo();

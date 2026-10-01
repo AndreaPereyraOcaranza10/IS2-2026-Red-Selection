@@ -1,37 +1,85 @@
 <!doctype html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>Confirmar compra - Zero</title>
+    <title>Confirmar compra | Zero</title>
     <th:block th:replace="~{tienda/fragments/fragments :: head-assets}"></th:block>
 </head>
-<body>
+<body class="checkout-page">
 <div th:replace="~{tienda/fragments/fragments :: header}"></div>
-<section class="bg-white py-16">
-    <div class="container mx-auto px-4 max-w-3xl">
-        <h1 class="text-2xl font-semibold mb-6">Confirmar compra</h1>
-        <p th:if="${mensajeError}" class="text-red-600 mb-4" th:text="${mensajeError}"></p>
-        <p th:if="${cart != null and #lists.isEmpty(cart.items)}" class="mb-4">El carrito esta vacio.</p>
-        <form th:if="${cart != null and !#lists.isEmpty(cart.items)}" th:action="@{/checkout}" method="post" class="bg-white rounded-lg shadow-md p-6">
-            <h2 class="text-lg font-semibold mb-3">Resumen</h2>
-            <div th:each="item : ${cart.items}" class="flex justify-between border-b py-2">
-                <span><span th:text="${item.nombre}">Producto</span> x <span th:text="${item.cantidad}">1</span></span>
-                <span th:text="${'$' + item.subtotal}">$0.00</span>
-            </div>
-            <p class="font-semibold text-right mt-4">Total: <span th:text="${'$' + cart.total}">$0.00</span></p>
-            <label for="address" class="block mt-6 mb-2">Direccion de entrega</label>
-            <input id="address" name="address" required maxlength="250" class="w-full px-3 py-2 border rounded" placeholder="Calle, numero, localidad">
-            <label for="formaPago" class="block mt-6 mb-2">Forma de pago</label>
-            <select id="formaPago" name="formaPago" required class="w-full px-3 py-2 border rounded bg-white">
-                <option value="">Seleccionar forma de pago</option>
-                <option th:each="forma : ${formasPago}" th:value="${forma}" th:text="${forma}">EFECTIVO</option>
-            </select>
-            <p th:if="${checkoutCliente}" class="mt-2 text-sm text-gray-600">Los clientes solo pueden pagar con billetera virtual. Efectivo y transferencia deben ser cobrados por un empleado.</p>
-            <p class="mt-4 text-sm text-gray-600">Al confirmar, se generara la orden y vas a poder seguir su estado desde Mis pedidos.</p>
-            <button type="submit" class="bg-primary text-white py-2 px-5 rounded-full mt-6">Confirmar orden</button>
+
+<main class="checkout-main">
+    <div class="checkout-container">
+        <header class="checkout-heading">
+            <span class="checkout-eyebrow">CASI LISTO</span>
+            <h1>Confirm&aacute; tu compra</h1>
+            <p>Revis&aacute; tu pedido y eleg&iacute; d&oacute;nde quer&eacute;s recibirlo.</p>
+        </header>
+
+        <p th:if="${mensajeError}" class="checkout-alert" th:text="${mensajeError}"></p>
+
+        <section th:if="${cart != null and #lists.isEmpty(cart.items)}" class="checkout-empty">
+            <span class="checkout-empty__icon"><i class="fas fa-cart-shopping"></i></span>
+            <h2>Tu carrito est&aacute; vac&iacute;o</h2>
+            <p>Agreg&aacute; productos antes de confirmar la compra.</p>
+            <a th:href="@{/shop}" class="checkout-primary-link">Explorar la tienda</a>
+        </section>
+
+        <form th:if="${cart != null and !#lists.isEmpty(cart.items)}" th:action="@{/checkout}" method="post" class="checkout-layout">
+            <section class="checkout-panel checkout-details">
+                <div class="checkout-section-heading">
+                    <span class="checkout-step">1</span>
+                    <div><h2>Entrega y pago</h2><p>Complet&aacute; los datos para finalizar tu pedido.</p></div>
+                </div>
+
+                <div class="checkout-field">
+                    <label for="address">Direcci&oacute;n de entrega</label>
+                    <input id="address" name="address" type="text" required maxlength="250"
+                           th:value="${direccionGuardada}" autocomplete="street-address"
+                           placeholder="Calle, n&uacute;mero, localidad y provincia">
+                    <small th:if="${!#strings.isEmpty(direccionGuardada)}">Completamos tu direcci&oacute;n guardada. Pod&eacute;s editarla para este pedido.</small>
+                    <small th:if="${#strings.isEmpty(direccionGuardada)}">No encontramos una direcci&oacute;n guardada. Escrib&iacute; la direcci&oacute;n donde quer&eacute;s recibir tu pedido.</small>
+                </div>
+
+                <div class="checkout-field">
+                    <label for="formaPago">Forma de pago</label>
+                    <select id="formaPago" name="formaPago" required>
+                        <option value="">Seleccion&aacute; una forma de pago</option>
+                        <option th:each="forma : ${formasPago}" th:value="${forma}"
+                                th:text="${forma.name() == 'EFECTIVO' ? 'Efectivo' : (forma.name() == 'TRANSFERENCIA' ? 'Transferencia' : 'Billetera virtual')}">Billetera virtual</option>
+                    </select>
+                </div>
+
+                <div th:if="${checkoutCliente}" class="checkout-payment-note">
+                    <i class="fas fa-shield-halved"></i>
+                    <p>El pago de clientes se realiza con billetera virtual. Efectivo y transferencia se gestionan con un empleado.</p>
+                </div>
+                <div class="checkout-actions">
+                    <a th:href="@{/cart}" class="checkout-back-link"><i class="fas fa-arrow-left"></i> Volver al carrito</a>
+                    <button type="submit" class="checkout-submit"><i class="fas fa-lock"></i> Confirmar pedido</button>
+                </div>
+            </section>
+
+            <aside class="checkout-panel checkout-summary">
+                <div class="checkout-summary__heading">
+                    <div><span class="checkout-step">2</span><h2>Resumen del pedido</h2></div>
+                    <span class="checkout-item-count" th:text="${#lists.size(cart.items)} + ' productos'">0 productos</span>
+                </div>
+                <div class="checkout-items">
+                    <div th:each="item : ${cart.items}" class="checkout-item">
+                        <div class="checkout-item__info">
+                            <strong th:text="${item.nombre}">Producto</strong>
+                            <span th:text="${'Cantidad: ' + item.cantidad}">Cantidad: 1</span>
+                        </div>
+                        <strong class="checkout-item__price" th:text="${'$ ' + item.subtotal}">$ 0,00</strong>
+                    </div>
+                </div>
+                <div class="checkout-total"><span>Total a pagar</span><strong th:text="${'$ ' + cart.total}">$ 0,00</strong></div>
+                <p class="checkout-secure"><i class="fas fa-lock"></i> Tus datos se usan solo para procesar esta compra.</p>
+            </aside>
         </form>
-        <a th:href="@{/cart}" class="inline-block mt-4">Volver al carrito</a>
     </div>
-</section>
+</main>
+
 <div th:replace="~{tienda/fragments/fragments :: footer}"></div>
 <th:block th:replace="~{tienda/fragments/fragments :: scripts}"></th:block>
 </body>

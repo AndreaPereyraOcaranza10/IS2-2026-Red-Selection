@@ -19,6 +19,7 @@ public class ProductoCardDTO {
     private String name;
     private String category;
     private String categorySlug;
+    private String subcategory;
     private double price;
     private Double oldPrice;
     private String imageUrl;

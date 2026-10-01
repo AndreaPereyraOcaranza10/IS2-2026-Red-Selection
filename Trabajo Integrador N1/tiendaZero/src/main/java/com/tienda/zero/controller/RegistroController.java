@@ -187,6 +187,7 @@ public class RegistroController {
         model.addAttribute("perfil", perfil);
         model.addAttribute("modoEdicion", perfilExistente);
         model.addAttribute("perfilEmpleado", true);
+        model.addAttribute("ordenesCliente", flujoCompraService.listarPedidosUsuario(perfil.getCorreo()));
     }
 
     private PerfilClienteDTO crearPerfilDto(Usuario usuario, Optional<Persona> personaOptional) {

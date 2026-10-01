@@ -18,7 +18,7 @@ public class WebMvcConfig implements WebMvcConfigurer {
                 );
 
         // Rutas específicas para tienda y admin
-        registry.addResourceHandler("/tienda/**")
+        registry.addResourceHandler("/shop/**")
                 .addResourceLocations("classpath:/static/tienda/");
 
         registry.addResourceHandler("/admin/**")
