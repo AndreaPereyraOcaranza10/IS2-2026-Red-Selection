@@ -1,20 +1,28 @@
 package com.tienda.zero.config;
 
 import com.tienda.zero.enums.TipoImagen;
+import com.tienda.zero.enums.TipoContacto;
+import com.tienda.zero.enums.TipoTelefono;
 import com.tienda.zero.model.Categoria;
+import com.tienda.zero.model.Contacto;
+import com.tienda.zero.model.ContactoTelefonico;
 import com.tienda.zero.model.Imagen;
 import com.tienda.zero.model.Producto;
+import com.tienda.zero.model.Proveedor;
 import com.tienda.zero.model.SubCategoria;
 import com.tienda.zero.repository.CategoriaRepository;
 import com.tienda.zero.repository.ProductoRepository;
 import com.tienda.zero.repository.SubCategoriaRepository;
 import com.tienda.zero.service.ImagenService;
 import com.tienda.zero.service.ProductoService;
+import com.tienda.zero.service.ProveedorService;
+import com.tienda.zero.service.StockService;
 import com.tienda.zero.service.VigenciaPrecioService;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.core.annotation.Order;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.InputStream;
 import java.sql.Date;
@@ -70,34 +78,75 @@ public class ProductosDemo implements CommandLineRunner {
     private final ProductoRepository productoRepository;
     private final CategoriaRepository categoriaRepository;
     private final SubCategoriaRepository subCategoriaRepository;
+    private final ProveedorService proveedorService;
+    private final StockService stockService;
 
     public ProductosDemo(ProductoService productoService, ImagenService imagenService,
                          VigenciaPrecioService vigenciaPrecioService, ProductoRepository productoRepository,
-                         CategoriaRepository categoriaRepository, SubCategoriaRepository subCategoriaRepository) {
+                         CategoriaRepository categoriaRepository, SubCategoriaRepository subCategoriaRepository,
+                         ProveedorService proveedorService, StockService stockService) {
         this.productoService = productoService;
         this.imagenService = imagenService;
         this.vigenciaPrecioService = vigenciaPrecioService;
         this.productoRepository = productoRepository;
         this.categoriaRepository = categoriaRepository;
         this.subCategoriaRepository = subCategoriaRepository;
+        this.proveedorService = proveedorService;
+        this.stockService = stockService;
     }
 
     @Override
+    @Transactional
     public void run(String... args) {
+        Proveedor proveedor = proveedorService.listarProveedorActivo().stream()
+                .filter(item -> item.getRazonSocial().equalsIgnoreCase("Textil Andes S.R.L."))
+                .findFirst()
+                .orElseGet(() -> proveedorService.crearProveedor("Textil Andes S.R.L.", List.of()));
+        asegurarTelefonoDemo(proveedor);
         for (ProductoEjemplo ejemplo : PRODUCTOS) {
-            if (productoRepository.findByCodigoIgnoreCase(ejemplo.codigo()).isPresent()) {
-                continue;
-            }
             try {
-                crearProducto(ejemplo);
+                var existente = productoRepository.findByCodigoIgnoreCase(ejemplo.codigo());
+                if (existente.isPresent()) {
+                    completarConfiguracion(existente.get(), ejemplo.codigo(), proveedor);
+                } else {
+                    Producto producto = crearProducto(ejemplo);
+                    completarConfiguracion(producto, ejemplo.codigo(), proveedor);
+                }
             } catch (Exception e) {
                 // Un producto de ejemplo fallido no debe impedir el arranque de la aplicación
                 System.err.println("No se pudo crear el producto de ejemplo " + ejemplo.codigo() + ": " + e.getMessage());
             }
         }
+        // Completa también productos ya cargados fuera del catálogo demo para que el inventario
+        // inicial no deje filas sin stock ideal, saldo o proveedor.
+        for (Producto producto : productoService.listarProductoActivo()) {
+            try {
+                completarConfiguracion(producto, producto.getCodigo(), proveedor);
+            } catch (Exception e) {
+                System.err.println("No se pudo completar el inventario de " + producto.getCodigo() + ": " + e.getMessage());
+            }
+        }
     }
 
-    private void crearProducto(ProductoEjemplo ejemplo) throws Exception {
+    private void asegurarTelefonoDemo(Proveedor proveedor) {
+        boolean tieneTelefonoPermitido = proveedor.getContactos().stream()
+                .filter(contacto -> !contacto.isEliminado() && contacto instanceof ContactoTelefonico)
+                .map(contacto -> ((ContactoTelefonico) contacto).getTelefono())
+                .anyMatch(telefono -> "+5492615341338".equals(telefono) || "+5492613179999".equals(telefono));
+        if (tieneTelefonoPermitido) return;
+
+        List<Contacto> contactos = new java.util.ArrayList<>(proveedor.getContactos());
+        contactos.add(ContactoTelefonico.builder()
+                .telefono("+5492615341338")
+                .tipoTelefono(TipoTelefono.CELULAR)
+                .tipoContacto(TipoContacto.EMPRESA)
+                .observacion("Contacto para reposición de stock")
+                .eliminado(false)
+                .build());
+        proveedor = proveedorService.modificarProveedor(proveedor.getId(), proveedor.getRazonSocial(), contactos);
+    }
+
+    private Producto crearProducto(ProductoEjemplo ejemplo) throws Exception {
         Categoria categoria = categoriaRepository.findByNombreIgnoreCase(ejemplo.categoria())
                 .orElseThrow(() -> new IllegalStateException("Falta la categoría " + ejemplo.categoria()));
         SubCategoria subCategoria = subCategoriaRepository.findByCategoriaId(categoria.getId()).stream()
@@ -115,6 +164,40 @@ public class ProductosDemo implements CommandLineRunner {
         double precioAnterior = Math.round(ejemplo.precio() * 0.85);
         vigenciaPrecioService.crearVigenciaPrecio(inicioAnterior, inicioVigente, precioAnterior, producto.getId());
         vigenciaPrecioService.crearVigenciaPrecio(inicioVigente, null, ejemplo.precio(), producto.getId());
+        return producto;
+    }
+
+    private void completarConfiguracion(Producto producto, String codigo, Proveedor proveedor) {
+        if (producto.getStockIdeal() <= 0) producto.setStockIdeal(stockIdeal(codigo));
+        if (producto.getProveedor() == null) producto.setProveedor(proveedor);
+        productoRepository.save(producto);
+        if (stockService.calcularStockActual(producto.getId()) == 0) {
+            stockService.registrarMovimiento(producto.getId(), stockInicial(codigo), "Stock inicial de demostración", null);
+        }
+    }
+
+    private int stockIdeal(String codigo) {
+        return switch (codigo) {
+            case "CAL-002" -> 120;
+            case "ZAP-003", "ZAP-007" -> 60;
+            case "ACC-005" -> 40;
+            case "CON-006" -> 80;
+            case "GOR-008" -> 50;
+            default -> 100;
+        };
+    }
+
+    private int stockInicial(String codigo) {
+        return switch (codigo) {
+            case "CAL-002" -> 90;
+            case "ZAP-003" -> 45;
+            case "TOP-004" -> 70;
+            case "ACC-005" -> 25;
+            case "CON-006" -> 55;
+            case "ZAP-007" -> 40;
+            case "GOR-008" -> 35;
+            default -> 70;
+        };
     }
 
     // Devuelve el id de la imagen creada, o null si el archivo no está disponible (el producto se crea igual)

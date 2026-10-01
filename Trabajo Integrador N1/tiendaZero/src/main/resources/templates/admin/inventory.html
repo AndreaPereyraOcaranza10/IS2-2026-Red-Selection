@@ -35,8 +35,8 @@
         <div class="col-12">
           <div class="d-flex justify-content-between align-items-center mb-4">
             <div class="">
-              <h1 class="fs-3 mb-1">Inventory</h1>
-              <p class="mb-0">Manage your product inventory</p>
+              <h1 class="fs-3 mb-1">Inventario</h1>
+              <p class="mb-0">Administrá el inventario de productos</p>
             </div>
             <div>
               <a th:href="@{/admin/ordenes}" class="btn btn-outline-primary">Órdenes de compra</a>
@@ -50,12 +50,12 @@
           <div class="alert alert-success alert-dismissible fade show mb-4" role="alert" th:if="${mensajeExito != null}">
             <i class="ti ti-check me-2 fs-5"></i>
             <span th:text="${mensajeExito}">Operación exitosa</span>
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
           </div>
           <div class="alert alert-danger alert-dismissible fade show mb-4" role="alert" th:if="${mensajeError != null}">
             <i class="ti ti-alert-circle me-2 fs-5"></i>
             <span th:text="${mensajeError}">Ocurrió un error</span>
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
           </div>
 
           <div>

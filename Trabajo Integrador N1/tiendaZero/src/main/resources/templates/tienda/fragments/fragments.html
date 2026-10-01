@@ -20,7 +20,7 @@
     el fragment funciona igual si no las mandás porque no hay th:each
     todavía sobre el menú, solo sobre el carrito):
         - cartItems      : List<CartItem>  (para el mini-carrito del header)
-        - cartItemCount  : int             (para el contador "Cart - N items")
+        - cartItemCount  : int             (disponible para mostrar cantidades fuera del header)
 -->
 <html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 
@@ -161,12 +161,12 @@
                             <i class="fas fa-cog mr-1.5"></i> Panel administrador
                         </a>
                         <a sec:authorize="hasRole('CLIENTE')" th:href="@{/completar-perfil}"
-                            class="bg-white/10 hover:bg-white/20 text-white font-semibold px-3.5 py-1.5 rounded-full inline-flex items-center text-sm transition">
-                            <i class="fas fa-user-circle mr-1.5"></i> Mi Perfil
+                            class="store-header__icon-button transition" aria-label="Mi Perfil" title="Mi Perfil">
+                            <i class="fas fa-user-circle" aria-hidden="true"></i>
                         </a>
                         <a sec:authorize="hasAnyRole('ADMINISTRATIVO','JEFE')" th:href="@{/admin/perfil}"
-                            class="bg-white/10 hover:bg-white/20 text-white font-semibold px-3.5 py-1.5 rounded-full inline-flex items-center text-sm transition">
-                            <i class="fas fa-user-circle mr-1.5"></i> Mi Perfil
+                            class="store-header__icon-button transition" aria-label="Mi Perfil" title="Mi Perfil">
+                            <i class="fas fa-user-circle" aria-hidden="true"></i>
                         </a>
                         <form th:action="@{/logout}" method="post" class="inline">
                             <button type="submit" class="store-header__icon-button transition cursor-pointer"
@@ -179,7 +179,6 @@
                         <a class="store-header__icon-button" th:href="@{/cart}" href="/cart.html" aria-label="Ver carrito">
                             <img th:src="@{/assets/images/cart-shopping.svg}" src="assets/images/cart-shopping.svg"
                                 alt="Cart" class="h-6 w-6 group-hover:scale-120">
-                            <span th:if="${cartItemCount > 0}" th:text="${cartItemCount}" class="cart-count-badge absolute -top-2 -right-2 rounded-full bg-primary px-2.5 py-1.5 text-xs font-bold leading-none text-white ring-2 ring-gray-dark">0</span>
                         </a>
                         <!-- Mini-carrito: reemplazamos los 2 items fijos por un th:each sobre cartItems -->
                         <div class="absolute right-0 mt-1 w-80 bg-white shadow-lg p-4 rounded hidden group-hover:block">
@@ -281,7 +280,7 @@
                     </form>
                 </div>
                 <a th:href="@{/cart}"
-                    class="bg-primary hover:bg-transparent text-white hover:text-primary border border-primary font-semibold px-4 py-2 rounded-full flex items-center justify-center w-full max-w-[200px]">Carrito ·&nbsp;<span th:text="${cartItemCount ?: 0}">0</span>&nbsp;productos</a>
+                    class="bg-primary hover:bg-transparent text-white hover:text-primary border border-primary font-semibold px-4 py-2 rounded-full flex items-center justify-center w-full max-w-[200px]">Carrito</a>
             </div>
         </nav>
 
