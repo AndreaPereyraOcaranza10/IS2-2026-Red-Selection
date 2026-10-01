@@ -45,8 +45,9 @@
                     <select id="formaPago" name="formaPago" required>
                         <option value="">Seleccion&aacute; una forma de pago</option>
                         <option th:each="forma : ${formasPago}" th:value="${forma}"
-                                th:text="${forma.name() == 'EFECTIVO' ? 'Efectivo' : (forma.name() == 'TRANSFERENCIA' ? 'Transferencia' : 'Billetera virtual')}">Billetera virtual</option>
+                                th:text="${forma.name() == 'EFECTIVO' ? 'Efectivo' : (forma.name() == 'TRANSFERENCIA' ? 'Transferencia' : 'Mercado Pago')}">Mercado Pago</option>
                     </select>
+                    <small th:if="${checkoutCliente}">Te redirigiremos a Mercado Pago para completar el pago.</small>
                 </div>
 
                 <div th:if="${checkoutCliente}" class="checkout-payment-note">

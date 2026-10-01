@@ -15,6 +15,7 @@ import com.tienda.zero.service.FlujoCompraService;
 import com.tienda.zero.service.StockService;
 import com.tienda.zero.service.PersonaService;
 import com.tienda.zero.service.UsuarioService;
+import com.tienda.zero.service.MercadoPagoService;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -41,6 +42,7 @@ public class TiendaController {
     private final StockService stockService;
     private final UsuarioService usuarioService;
     private final PersonaService personaService;
+    private final MercadoPagoService mercadoPagoService;
 
     @GetMapping("/shop")
     public String shop(
@@ -308,6 +310,19 @@ public class TiendaController {
                                   RedirectAttributes flash) {
         try {
             var pedido = flujoCompraService.crearOrdenCliente(auth.getName(), address, formaPago);
+            if (formaPago == TipoPago.BILLETERA_VIRTUAL) {
+                try {
+                    String checkoutUrl = mercadoPagoService.crearCheckout(pedido);
+                    return "redirect:" + checkoutUrl;
+                } catch (RuntimeException e) {
+                    try {
+                        flujoCompraService.anularOrdenCliente(pedido.getId(), auth.getName());
+                    } catch (RuntimeException ignored) {
+                        // La orden queda disponible para revisión si no se puede compensar.
+                    }
+                    throw e;
+                }
+            }
             flash.addFlashAttribute("mensajeExito", "Orden creada. Podés seguir su estado desde esta sección. Número: " + pedido.getIdentificadorCompra());
             return "redirect:/orders";
         } catch (RuntimeException e) {

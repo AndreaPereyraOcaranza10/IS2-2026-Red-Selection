@@ -189,9 +189,9 @@ public class FlujoCompraServiceImpl implements FlujoCompraService {
         orden.setDireccionEntrega(direccion.trim());
         orden.setFormaPago(formaPago);
         orden.setFecha(LocalDate.now());
-        orden.setEstadoOrdenCompra(formaPago == TipoPago.BILLETERA_VIRTUAL
-                ? EstadoOrdenCompra.PENDIENTE_ENVIO
-                : EstadoOrdenCompra.PENDIENTE_PAGO);
+        // La orden no pasa a PENDIENTE_ENVIO hasta que Mercado Pago confirme
+        // el pago mediante su notificación.
+        orden.setEstadoOrdenCompra(EstadoOrdenCompra.PENDIENTE_PAGO);
         recalcularTotal(orden);
         ordenesCliente.save(orden);
         for (DetalleCompra detalle : detalles) {
@@ -199,6 +199,15 @@ public class FlujoCompraServiceImpl implements FlujoCompraService {
                     "Reserva de stock para orden", detalle);
         }
         return orden;
+    }
+
+    @Override
+    @Transactional
+    public void guardarDatosMercadoPago(String ordenId, String preferenceId) {
+        OrdenCompra orden = ordenesCliente.findById(ordenId)
+                .orElseThrow(() -> new IllegalArgumentException("Orden no encontrada"));
+        orden.setMpPreferenceId(preferenceId);
+        ordenesCliente.save(orden);
     }
 
     @Override
