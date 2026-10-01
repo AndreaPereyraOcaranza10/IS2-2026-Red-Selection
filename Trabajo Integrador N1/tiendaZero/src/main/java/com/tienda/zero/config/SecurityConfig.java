@@ -9,22 +9,25 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
+
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http.authorizeHttpRequests(auth -> auth
+        http.csrf(csrf -> csrf.ignoringRequestMatchers("/mercadopago/webhook"))
+                .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/admin/**", "/inventory/**", "/reports/**", "/docs/**", "/products/**")
-                                .hasAnyRole("ADMINISTRATIVO", "JEFE")
+                        .hasAnyRole("ADMINISTRATIVO", "JEFE")
+                        .requestMatchers("/mercadopago/webhook").permitAll()
                         .requestMatchers("/completar-perfil", "/perfil-completo", "/cart/**", "/cart", "/checkout/**", "/orders/**").authenticated()
                         .anyRequest().permitAll()
-        ).formLogin(form -> form
+                ).formLogin(form -> form
                         .loginPage("/login")
                         .permitAll()
                 )
-        .logout(Customizer.withDefaults());
+                .logout(Customizer.withDefaults());
         return http.build();
     }
 

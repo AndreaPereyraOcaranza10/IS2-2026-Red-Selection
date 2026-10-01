@@ -23,11 +23,14 @@
             <label for="formaPago" class="block mt-6 mb-2">Forma de pago</label>
             <select id="formaPago" name="formaPago" required class="w-full px-3 py-2 border rounded bg-white">
                 <option value="">Seleccionar forma de pago</option>
-                <option th:each="forma : ${formasPago}" th:value="${forma}" th:text="${forma}">EFECTIVO</option>
+                <option th:each="forma : ${formasPago}"
+                        th:value="${forma}"
+                        th:text="${checkoutCliente ? 'Mercado Pago' : forma}">EFECTIVO</option>
             </select>
             <p th:if="${checkoutCliente}" class="mt-2 text-sm text-gray-600">Los clientes solo pueden pagar con billetera virtual. Efectivo y transferencia deben ser cobrados por un empleado.</p>
-            <p class="mt-4 text-sm text-gray-600">Al confirmar, se generara la orden y vas a poder seguir su estado desde Mis pedidos.</p>
-            <button type="submit" class="bg-primary text-white py-2 px-5 rounded-full mt-6">Confirmar orden</button>
+            <p th:if="${checkoutCliente}" class="mt-4 text-sm text-gray-600">Al confirmar, se crea la orden y serás redirigido a Mercado Pago para completar el pago de forma segura.</p>
+            <p th:unless="${checkoutCliente}" class="mt-4 text-sm text-gray-600">Si elegís Mercado Pago, la orden se creará como pendiente de pago y serás redirigido al checkout de Mercado Pago.</p>
+            <button type="submit" class="bg-primary text-white py-2 px-5 rounded-full mt-6">Continuar al pago</button>
         </form>
         <a th:href="@{/cart}" class="inline-block mt-4">Volver al carrito</a>
     </div>

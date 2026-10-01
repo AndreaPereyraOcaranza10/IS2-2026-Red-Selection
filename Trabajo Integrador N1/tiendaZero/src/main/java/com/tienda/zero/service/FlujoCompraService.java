@@ -28,6 +28,7 @@ public interface FlujoCompraService {
     List<EstadoOrdenCompra> estadosAdministracion();
 
     OrdenCompra crearOrdenCliente(String username, String direccion, TipoPago formaPago);
+    void guardarDatosMercadoPago(String ordenId, String preferenceId);
 
     OrdenCompra anularOrdenCliente(String ordenId, String username);
 

@@ -11,6 +11,7 @@ import java.util.Optional;
 public interface OrdenCompraRepository extends JpaRepository<OrdenCompra, String> {
     List<OrdenCompra> findByClienteUsuarioNombreUsuarioOrderByFechaDesc(String username);
     Optional<OrdenCompra> findByIdAndClienteUsuarioNombreUsuario(String id, String username);
+    Optional<OrdenCompra> findByIdentificadorCompra(String identificadorCompra);
     List<OrdenCompra> findByEstadoOrdenCompraNotAndEliminadoFalseOrderByFechaDesc(EstadoOrdenCompra estado);
     Optional<OrdenCompra> findFirstByClienteUsuarioNombreUsuarioAndEstadoOrdenCompraAndEliminadoFalseOrderByFechaDesc(String username, EstadoOrdenCompra estado);
     Optional<OrdenCompra> findFirstByEmpleadoUsuarioNombreUsuarioAndEstadoOrdenCompraAndEliminadoFalseOrderByFechaDesc(String username, EstadoOrdenCompra estado);
@@ -18,3 +19,4 @@ public interface OrdenCompraRepository extends JpaRepository<OrdenCompra, String
     List<OrdenCompra> findByFechaBetweenAndEstadoOrdenCompraNotInAndEliminadoFalseOrderByFechaDesc(
             LocalDate desde, LocalDate hasta, Collection<EstadoOrdenCompra> estadosExcluidos);
 }
+

@@ -5,11 +5,7 @@ import com.tienda.zero.enums.TipoPago;
 import com.tienda.zero.model.Categoria;
 import com.tienda.zero.model.Producto;
 import com.tienda.zero.model.VigenciaPrecio;
-import com.tienda.zero.service.CategoriaService;
-import com.tienda.zero.service.ProductoService;
-import com.tienda.zero.service.VigenciaPrecioService;
-import com.tienda.zero.service.FlujoCompraService;
-import com.tienda.zero.service.StockService;
+import com.tienda.zero.service.*;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -24,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import java.util.List;
 import java.util.stream.Collectors;
 
+
 @Controller
 @RequiredArgsConstructor
 public class TiendaController {
@@ -33,6 +30,7 @@ public class TiendaController {
     private final VigenciaPrecioService vigenciaPrecioService;
     private final FlujoCompraService flujoCompraService;
     private final StockService stockService;
+    private final MercadoPagoService mercadoPagoService;
 
     @GetMapping("/shop")
     public String shop(
@@ -246,6 +244,19 @@ public class TiendaController {
                                   RedirectAttributes flash) {
         try {
             var pedido = flujoCompraService.crearOrdenCliente(auth.getName(), address, formaPago);
+            if (formaPago == TipoPago.BILLETERA_VIRTUAL) {
+                try {
+                    String checkoutUrl = mercadoPagoService.crearCheckout(pedido);
+                    return "redirect:" + checkoutUrl;
+                } catch (RuntimeException e) {
+                    try {
+                        flujoCompraService.anularOrdenCliente(pedido.getId(), auth.getName());
+                    } catch (RuntimeException ignored) {
+                        // Si la compensación falla, dejamos la orden visible para revisión administrativa.
+                    }
+                    throw e;
+                }
+            }
             flash.addFlashAttribute("mensajeExito", "Orden creada. Podés seguir su estado desde esta sección. Número: " + pedido.getIdentificadorCompra());
             return "redirect:/orders";
         } catch (RuntimeException e) {
@@ -295,8 +306,8 @@ public class TiendaController {
                 .name(prod.getNombre())
                 .category(categoria)
                 .categorySlug(categoria.toLowerCase().replace(" ", "-"))
-                .description(prod.getDescripcion() != null && !prod.getDescripcion().isBlank() 
-                        ? prod.getDescripcion() 
+                .description(prod.getDescripcion() != null && !prod.getDescripcion().isBlank()
+                        ? prod.getDescripcion()
                         : "Indumentaria deportiva oficial Zero. Diseño de alto rendimiento, confeccionado con materiales de primera calidad.")
                 .sku(prod.getCodigo() != null ? prod.getCodigo() : "ZERO-001")
                 .brand("Zero")
