@@ -3,6 +3,9 @@ package com.tienda.zero.controller;
 import com.tienda.zero.dto.ProductoCardDTO;
 import com.tienda.zero.enums.TipoPago;
 import com.tienda.zero.model.Categoria;
+import com.tienda.zero.model.Cliente;
+import com.tienda.zero.model.Direccion;
+import com.tienda.zero.model.Persona;
 import com.tienda.zero.model.Producto;
 import com.tienda.zero.model.VigenciaPrecio;
 import com.tienda.zero.service.CategoriaService;
@@ -10,6 +13,8 @@ import com.tienda.zero.service.ProductoService;
 import com.tienda.zero.service.VigenciaPrecioService;
 import com.tienda.zero.service.FlujoCompraService;
 import com.tienda.zero.service.StockService;
+import com.tienda.zero.service.PersonaService;
+import com.tienda.zero.service.UsuarioService;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -22,6 +27,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
+import java.util.ArrayList;
 import java.util.stream.Collectors;
 
 @Controller
@@ -33,6 +39,8 @@ public class TiendaController {
     private final VigenciaPrecioService vigenciaPrecioService;
     private final FlujoCompraService flujoCompraService;
     private final StockService stockService;
+    private final UsuarioService usuarioService;
+    private final PersonaService personaService;
 
     @GetMapping("/shop")
     public String shop(
@@ -177,6 +185,7 @@ public class TiendaController {
             if (productosActivos != null && !productosActivos.isEmpty()) {
                 List<ProductoCardDTO> related = productosActivos.stream()
                         .map(this::convertirAProductoCardDTO)
+                        .filter(producto -> id == null || !id.equals(producto.getId()))
                         .limit(4)
                         .collect(Collectors.toList());
                 model.addAttribute("relatedProducts", related);
@@ -206,7 +215,55 @@ public class TiendaController {
                 .anyMatch(authority -> authority.getAuthority().equals("ROLE_CLIENTE"));
         model.addAttribute("formasPago", esCliente ? List.of(TipoPago.BILLETERA_VIRTUAL) : List.of(TipoPago.values()));
         model.addAttribute("checkoutCliente", esCliente);
+        model.addAttribute("direccionGuardada", direccionGuardada(auth.getName()));
         return "tienda/checkout";
+    }
+
+    private String direccionGuardada(String username) {
+        var usuario = usuarioService.buscarUsuarioPorNombreUsuario(username);
+        var persona = personaService.buscarPersonaPorUsuario(usuario.getId());
+        if (persona.isEmpty()) return "";
+
+        Persona titular = persona.get();
+        String direccion = titular.getDirecciones().stream()
+                .filter(d -> !d.isEliminado())
+                .findFirst()
+                .map(this::formatearDireccion)
+                .orElse("");
+        if (!direccion.isBlank()) return direccion;
+        if (titular instanceof Cliente cliente && cliente.getDireccionEstadia() != null) {
+            return limitarDireccion(cliente.getDireccionEstadia().trim());
+        }
+        return "";
+    }
+
+    private String formatearDireccion(Direccion direccion) {
+        List<String> partes = new ArrayList<>();
+        agregarParte(partes, direccion.getCalle());
+        agregarParte(partes, direccion.getNumeracion());
+        agregarParte(partes, direccion.getBarrio());
+        agregarParte(partes, direccion.getManzanaPiso());
+        agregarParte(partes, direccion.getCasaDepartamento());
+        if (direccion.getLocalidad() != null) {
+            agregarParte(partes, direccion.getLocalidad().getNombre());
+            agregarParte(partes, direccion.getLocalidad().getCodigoPostal());
+            if (direccion.getLocalidad().getDepartamento() != null) {
+                agregarParte(partes, direccion.getLocalidad().getDepartamento().getNombre());
+                if (direccion.getLocalidad().getDepartamento().getProvincia() != null) {
+                    agregarParte(partes, direccion.getLocalidad().getDepartamento().getProvincia().getNombre());
+                }
+            }
+        }
+        agregarParte(partes, direccion.getReferencia());
+        return limitarDireccion(String.join(", ", partes));
+    }
+
+    private String limitarDireccion(String direccion) {
+        return direccion.length() > 250 ? direccion.substring(0, 250) : direccion;
+    }
+
+    private void agregarParte(List<String> partes, String parte) {
+        if (parte != null && !parte.isBlank()) partes.add(parte.trim());
     }
 
     @PostMapping("/cart/add")
@@ -261,7 +318,7 @@ public class TiendaController {
 
     @GetMapping("/orders")
     public String orders(Authentication auth, Model model) {
-        model.addAttribute("orders", flujoCompraService.listarPedidosCliente(auth.getName()));
+        model.addAttribute("orders", flujoCompraService.listarPedidosUsuario(auth.getName()));
         return "tienda/orders";
     }
 
@@ -301,10 +358,10 @@ public class TiendaController {
                 .category(categoria)
                 .categorySlug(categoria.toLowerCase().replace(" ", "-"))
                 .subcategory(prod.getSubCategoria() != null ? prod.getSubCategoria().getNombre() : null)
-                .description(prod.getDescripcion() != null && !prod.getDescripcion().isBlank() 
-                        ? prod.getDescripcion() 
-                        : "Indumentaria deportiva oficial Zero. Diseño de alto rendimiento, confeccionado con materiales de primera calidad.")
-                .sku(prod.getCodigo() != null ? prod.getCodigo() : "ZERO-001")
+                .description(prod.getDescripcion() != null && !prod.getDescripcion().isBlank()
+                        ? prod.getDescripcion()
+                        : null)
+                .sku(prod.getCodigo())
                 .brand("Zero")
                 .talle(prod.getTalle() != null ? prod.getTalle() : "-")
                 .inStock(stockService.calcularStockActual(prod.getId()) > 0)

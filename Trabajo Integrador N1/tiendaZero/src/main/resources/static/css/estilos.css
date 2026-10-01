@@ -117,6 +117,7 @@ a {
 
 .contenido-cuenta--columna {
     flex-direction: column;
+    align-items: center;
     gap: 24px;
 }
 
@@ -145,6 +146,8 @@ a {
 .contenido-cuenta--columna #guardar-perfil { width: auto; min-width: 190px; margin-top: 26px; padding: 12px 22px; border-radius: 999px; }
 .contenido-cuenta--columna #guardar-perfil:disabled { opacity: .48; cursor: not-allowed; }
 .orden-perfil { padding: 20px; border-radius: 12px; }
+.perfil-orders-link { display: inline-flex; align-items: center; gap: 9px; margin: 0 0 22px; padding: 11px 19px; border: 1px solid var(--color-primario); border-radius: 999px; background: var(--color-primario); color: #fff; font-size: .9rem; font-weight: 800; text-decoration: none; transition: background .15s ease, color .15s ease; }
+.perfil-orders-link:hover, .perfil-orders-link:focus-visible { background: #fff; color: var(--color-primario); }
 
 .ordenes-perfil {
     display: grid;

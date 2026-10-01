@@ -179,7 +179,7 @@
                         <a class="store-header__icon-button" th:href="@{/cart}" href="/cart.html" aria-label="Ver carrito">
                             <img th:src="@{/assets/images/cart-shopping.svg}" src="assets/images/cart-shopping.svg"
                                 alt="Cart" class="h-6 w-6 group-hover:scale-120">
-                            <span th:if="${cartItemCount > 0}" th:text="${cartItemCount}" class="absolute -top-1 -right-1 rounded-full bg-primary px-1.5 text-xs text-white">0</span>
+                            <span th:if="${cartItemCount > 0}" th:text="${cartItemCount}" class="cart-count-badge absolute -top-2 -right-2 rounded-full bg-primary px-2.5 py-1.5 text-xs font-bold leading-none text-white ring-2 ring-gray-dark">0</span>
                         </a>
                         <!-- Mini-carrito: reemplazamos los 2 items fijos por un th:each sobre cartItems -->
                         <div class="absolute right-0 mt-1 w-80 bg-white shadow-lg p-4 rounded hidden group-hover:block">

@@ -187,10 +187,10 @@ document.addEventListener('DOMContentLoaded', function() {
         toggleButton.addEventListener('click', function() {
             if (filters.classList.contains('hidden')) {
                 filters.classList.remove('hidden');
-                this.textContent = 'Hide Filters';
+                this.innerHTML = '<i class="fas fa-xmark"></i> Ocultar filtros';
             } else {
                 filters.classList.add('hidden');
-                this.textContent = 'Show Filters';
+                this.innerHTML = '<i class="fas fa-sliders"></i> Mostrar filtros';
             }
         });
     }

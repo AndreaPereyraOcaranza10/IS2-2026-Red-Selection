@@ -16,6 +16,9 @@ public interface OrdenCompraRepository extends JpaRepository<OrdenCompra, String
     long countByEliminadoFalseAndEstadoOrdenCompraNot(EstadoOrdenCompra estado);
     List<OrdenCompra> findByClienteUsuarioNombreUsuarioOrderByFechaDesc(String username);
     List<OrdenCompra> findByPropietarioNombreUsuarioOrderByFechaDesc(String username);
+    List<OrdenCompra> findByPropietarioNombreUsuarioOrClienteUsuarioNombreUsuarioOrEmpleadoUsuarioNombreUsuarioOrderByFechaDesc(
+            String propietario, String cliente, String empleado);
+    Optional<OrdenCompra> findByIdAndPropietarioNombreUsuario(String id, String username);
     Optional<OrdenCompra> findByIdAndClienteUsuarioNombreUsuario(String id, String username);
     List<OrdenCompra> findByEstadoOrdenCompraNotAndEliminadoFalseOrderByFechaDesc(EstadoOrdenCompra estado);
     Optional<OrdenCompra> findFirstByClienteUsuarioNombreUsuarioAndEstadoOrdenCompraAndEliminadoFalseOrderByFechaDesc(String username, EstadoOrdenCompra estado);

@@ -160,6 +160,7 @@
     <p class="etiqueta">Mis compras</p>
     <h1>Mis pedidos</h1>
     <p class="subtitulo">Seguimiento de tus pedidos confirmados.</p>
+    <a class="perfil-orders-link" th:href="@{/orders}"><i class="fas fa-box-open" aria-hidden="true"></i> Ver todos mis pedidos</a>
 
     <p th:if="${#lists.isEmpty(ordenesCliente)}" class="subtitulo">Todavía no tenés pedidos confirmados.</p>
 

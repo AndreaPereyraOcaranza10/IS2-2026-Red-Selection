@@ -145,7 +145,9 @@ public class FlujoCompraServiceImpl implements FlujoCompraService {
 
     @Override
     public List<OrdenCompra> listarPedidosUsuario(String username) {
-        return ordenesCliente.findByPropietarioNombreUsuarioOrderByFechaDesc(username).stream()
+        return ordenesCliente
+                .findByPropietarioNombreUsuarioOrClienteUsuarioNombreUsuarioOrEmpleadoUsuarioNombreUsuarioOrderByFechaDesc(
+                        username, username, username).stream()
                 .filter(orden -> !orden.isEliminado())
                 .filter(orden -> orden.getEstadoOrdenCompra() != EstadoOrdenCompra.PENDIENTE_COMPLETAR)
                 .toList();
@@ -268,7 +270,8 @@ public class FlujoCompraServiceImpl implements FlujoCompraService {
     }
 
     private OrdenCompra ordenClienteDeUsuario(String id, String username) {
-        return ordenesCliente.findByIdAndClienteUsuarioNombreUsuario(id, username)
+        return ordenesCliente.findByIdAndPropietarioNombreUsuario(id, username)
+                .or(() -> ordenesCliente.findByIdAndClienteUsuarioNombreUsuario(id, username))
                 .orElseThrow(() -> new IllegalArgumentException("Orden no encontrada"));
     }
 

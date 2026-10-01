@@ -1,524 +1,97 @@
 <!doctype html>
-<html xmlns:th="http://www.thymeleaf.org">
-
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title th:text="'Producto - Zero'">Producto - Zero</title>
+    <title th:text="${product != null ? product.name + ' | Zero' : 'Producto | Zero'}">Producto | Zero</title>
     <th:block th:replace="~{tienda/fragments/fragments :: head-assets}"></th:block>
 </head>
+<body class="product-page">
+<div th:replace="~{tienda/fragments/fragments :: header}"></div>
 
-<body>
-    <div th:replace="~{tienda/fragments/fragments :: header}"></div>
+<main th:if="${product != null}" class="product-main">
+    <div class="product-container">
+        <nav class="product-breadcrumb" aria-label="Ruta de navegación">
+            <a th:href="@{/}">Inicio</a><i class="fas fa-chevron-right"></i>
+            <a th:href="@{/shop}">Tienda</a><i class="fas fa-chevron-right"></i>
+            <a th:href="@{/shop(categoria=${product.category})}" th:text="${product.category}">Categoría</a>
+            <i class="fas fa-chevron-right"></i><span th:text="${product.name}">Producto</span>
+        </nav>
 
-    <!-- Breadcrumbs -->
-    <!--
-        "product" es el objeto principal de esta página (model.addAttribute("product", ...)).
-        Se usa en breadcrumbs, galería, info y en el form de "Add to Cart" más abajo.
-    -->
-    <section id="breadcrumbs" class="pt-6 bg-gray-50">
-        <div class="container mx-auto px-4">
-            <ol class="list-reset flex">
-                <li><a th:href="@{/}" href="index.html" class="font-semibold hover:text-primary">Inicio</a></li>
-                <li><span class="mx-2">&gt;</span></li>
-                <li><a th:href="@{/shop}" href="shop.html" class="font-semibold hover:text-primary">Tienda</a></li>
-                <li><span class="mx-2">&gt;</span></li>
-                <li><a th:href="@{/shop(category=${product.categorySlug})}" href="category.html" th:text="${product.category}" class="font-semibold hover:text-primary">T-shirts</a></li>
-                <li><span class="mx-2">&gt;</span></li>
-                <li th:text="${product.name}">Remera deportiva</li>
-            </ol>
-        </div>
-    </section>
-
-    <!-- Product info -->
-    <section id="product-info">
-        <div class="container mx-auto px-4">
-            <div class="py-6">
-                <div class="flex flex-col lg:flex-row gap-6">
-                    <!-- Image Section -->
-                    <div class="w-full lg:w-1/2">
-                        <div class="grid gap-4">
-                            <!-- Big Image -->
-                            <div id="main-image-container">
-                                <img id="main-image"
-                                    class="product-image-square rounded-lg"
-                                    th:src="@{${product.mainImageUrl}}"
-                                    src="/assets/images/products/1.jpg"
-                                    alt="Main Product Image" />
-                            </div>
-                            <!-- Small Images -->
-                            <!--
-                                th:each sobre product.galleryImages (List<String> de rutas de imagen).
-                                El onclick/data-full los sigue usando el script.js original para el swap
-                                de imagen principal, así que no hace falta tocar el JS.
-                            -->
-                            <div class="grid grid-cols-5 gap-4">
-                                <div class="aspect-square overflow-hidden rounded-lg bg-gray-50 p-1"
-                                    th:each="imageUrl : ${product.galleryImages}">
-                                    <img onclick="changeImage(this)"
-                                    th:attr="data-full=@{${imageUrl}}"
-                                    th:src="@{${imageUrl}}"
-                                    src="/assets/images/single-product/1.jpg"
-                                    class="product-image-square cursor-pointer rounded-lg"
-                                    alt="Imagen principal del producto" />
-                                </div>
-                                <!-- Fallback estático (se ve solo si "product" todavía no está en el modelo) -->
-                                <th:block th:if="${product == null}">
-                                    <div class="aspect-square overflow-hidden rounded-lg bg-gray-50 p-1">
-                                        <img onclick="changeImage(this)"
-                                        data-full="/assets/images/single-product/1.jpg"
-                                        src="/assets/images/single-product/1.jpg"
-                                        class="product-image-square cursor-pointer rounded-lg"
-                                        alt="Vista del producto 1" />
-                                    </div>
-                                    <div class="aspect-square overflow-hidden rounded-lg bg-gray-50 p-1">
-                                        <img onclick="changeImage(this)"
-                                        data-full="/assets/images/single-product/2.jpg"
-                                        src="/assets/images/single-product/2.jpg"
-                                        class="product-image-square cursor-pointer rounded-lg"
-                                        alt="Vista del producto 2" />
-                                    </div>
-                                    <div class="aspect-square overflow-hidden rounded-lg bg-gray-50 p-1">
-                                        <img onclick="changeImage(this)"
-                                        data-full="/assets/images/single-product/3.jpg"
-                                        src="/assets/images/single-product/3.jpg"
-                                        class="product-image-square cursor-pointer rounded-lg"
-                                        alt="Vista del producto 3" />
-                                    </div>
-                                    <div class="aspect-square overflow-hidden rounded-lg bg-gray-50 p-1">
-                                        <img onclick="changeImage(this)"
-                                        data-full="/assets/images/single-product/4.jpg"
-                                        src="/assets/images/single-product/4.jpg"
-                                        class="product-image-square cursor-pointer rounded-lg"
-                                        alt="Vista del producto 4" />
-                                    </div>
-                                    <div class="aspect-square overflow-hidden rounded-lg bg-gray-50 p-1">
-                                        <img onclick="changeImage(this)"
-                                        data-full="/assets/images/single-product/5.jpg"
-                                        src="/assets/images/single-product/5.jpg"
-                                        class="product-image-square cursor-pointer rounded-lg"
-                                        alt="Vista del producto 5" />
-                                    </div>
-                                </th:block>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- Product Details Section -->
-                    <div class="w-full lg:w-1/2 flex flex-col justify-between">
-                        <div class="pb-8 border-b border-gray-line">
-                            <h1 class="text-3xl font-bold mb-4" th:text="${product.name}">Preppy T-shirt</h1>
-                            <div class="flex items-center mb-8">
-                                <!-- Ej. de estrellas dinámicas con #numbers, opcional:
-                                     <span th:each="i : ${#numbers.sequence(1,5)}" th:text="${i <= product.rating} ? '★' : '☆'"></span> -->
-                                <span>★★★★★</span>
-                                <span class="ml-2" th:text="'(' + ${product.reviewCount} + ' reseñas)'">(0 reseñas)</span>
-                                <a href="#reviews" class="ml-4 text-primary font-semibold">Dejá tu opinión</a>
-                            </div>
-                            <div class="mb-4 pb-4 border-b border-gray-line">
-                                <p class="mb-2">Marca: <strong><span class="hover:text-primary" th:text="${product.brand}">Zero</span></strong>
-                                </p>
-                                <p class="mb-2">Código de producto: <strong th:text="${product.sku}">00123</strong></p>
-                                <p class="mb-2">Disponibilidad: <strong th:text="${product.inStock} ? 'Disponible' : 'Sin stock'">Disponible</strong></p>
-                            </div>
-                            <div class="mb-8">
-                                <span th:if="${product.oldPrice != null}" class="text-lg text-muted text-decoration-line-through me-2" th:text="${'$' + product.oldPrice}">$50.00</span>
-                                <span class="text-2xl font-semibold" th:text="${'$' + product.price}">$40.00</span>
-                            </div>
-                            <!-- Form de "agregar al carrito": ajustá la action al endpoint real -->
-                            <form class="store-product-card__form" th:action="@{/cart/add}" method="post">
-                                <input type="hidden" name="productId" th:value="${product.id}">
-                                <div class="flex items-center mb-8">
-                                    <button id="decrease" type="button"
-                                        class="bg-primary hover:bg-transparent border border-transparent hover:border-primary text-white hover:text-primary font-semibold w-10 h-10 rounded-full flex items-center justify-center focus:outline-none"
-                                        disabled>-</button>
-                                    <input id="quantity" name="quantity" type="number" value="1" min="1"
-                                        class="w-16 py-2 text-center focus:outline-none" readonly>
-                                    <button id="increase" type="button"
-                                        class="bg-primary hover:bg-transparent border border-transparent hover:border-primary text-white hover:text-primary font-semibold  w-10 h-10 rounded-full focus:outline-none">+</button>
-                                </div>
-                                <button type="submit" th:disabled="${!product.inStock}"
-                                    th:text="${product.inStock} ? 'Agregar al carrito' : 'Sin stock'"
-                                    th:style="${!product.inStock} ? 'background-color: #64748b; border-color: #64748b; color: #ffffff;' : ''"
-                                    class="bg-primary border border-transparent hover:bg-transparent hover:border-primary text-white hover:text-primary font-semibold py-2 px-4 rounded-full disabled:opacity-100 disabled:cursor-not-allowed">Agregar al carrito</button>
-                            </form>
-                        </div>
-                        <!-- Social sharing -->
-                        <div class="flex space-x-4 my-6">
-                            <a href="#" class="w-4 h-4 flex items-center justify-center">
-                                <img th:src="@{/assets/images/social_icons/facebook.svg}" src="assets/images/social_icons/facebook.svg" alt="Facebook"
-                                    class="w-4 h-4 transition-transform transform hover:scale-110">
-                            </a>
-                            <a href="#" class="w-4 h-4 flex items-center justify-center">
-                                <img th:src="@{/assets/images/social_icons/instagram.svg}" src="assets/images/social_icons/instagram.svg" alt="Instagram"
-                                    class="w-4 h-4 transition-transform transform hover:scale-110">
-                            </a>
-                            <a href="#" class="w-4 h-4 flex items-center justify-center">
-                                <img th:src="@{/assets/images/social_icons/pinterest.svg}" src="assets/images/social_icons/pinterest.svg" alt="Pinterest"
-                                    class="w-4 h-4 transition-transform transform hover:scale-110">
-                            </a>
-                            <a href="#" class="w-4 h-4 flex items-center justify-center">
-                                <img th:src="@{/assets/images/social_icons/twitter.svg}" src="assets/images/social_icons/twitter.svg" alt="Twitter"
-                                    class="w-4 h-4 transition-transform transform hover:scale-110">
-                            </a>
-                            <a href="#" class="w-4 h-4 flex items-center justify-center">
-                                <img th:src="@{/assets/images/social_icons/viber.svg}" src="assets/images/social_icons/viber.svg" alt="Viber"
-                                    class="w-4 h-4 transition-transform transform hover:scale-110">
-                            </a>
-                        </div>
-                        <!-- Additional Information -->
-                        <div>
-                            <h3 class="text-lg font-semibold mb-2">Descripción del producto</h3>
-                            <p th:text="${product.description}">Una prenda cómoda y versátil, confeccionada para acompañarte en tus actividades de todos los días.</p>
-                        </div>
-                    </div>
+        <section class="product-hero">
+            <div class="product-gallery">
+                <div class="product-gallery__image-wrap">
+                    <span class="product-stock-badge" th:classappend="${product.inStock} ? 'product-stock-badge--available' : 'product-stock-badge--unavailable'">
+                        <i th:class="${product.inStock} ? 'fas fa-check' : 'fas fa-xmark'"></i>
+                        <span th:text="${product.inStock} ? 'Disponible' : 'Sin stock'">Disponible</span>
+                    </span>
+                    <img class="product-gallery__image" th:src="@{${product.mainImageUrl}}" th:alt="${product.name}">
                 </div>
             </div>
-        </div>
-    </section>
 
-    <!-- Product tabs description -->
-    <section>
-        <div class="container mx-auto px-4">
-            <div class="py-12">
-                <div class="mt-10">
-                    <div class="flex space-x-4" role="tablist">
-                        <button id="description-tab" role="tab" aria-controls="description-content" aria-selected="true"
-                            class="tab active">Descripción</button>
-                        <button id="additional-info-tab" role="tab" aria-controls="additional-info-content"
-                            aria-selected="false" class="tab">Información adicional</button>
-                        <button id="size-shape-tab" role="tab" aria-controls="size-shape-content" aria-selected="false"
-                            class="tab">Talles y calce</button>
-                        <button id="reviews-tab" role="tab" aria-controls="reviews-content" aria-selected="false"
-                            class="tab">Reseñas (3)</button>
-                    </div>
-                    <div class="mt-8">
-                        <div id="description-content" role="tabpanel" aria-labelledby="description-tab"
-                            class="tab-content">
-                            <div class="flex flex-col lg:flex-row lg:space-x-8">
-                                <div class="w-full lg:w-1/2">
-                                    <h3 class="text-xl font-semibold mb-2">Comodidad y estilo para acompañar tu ritmo.</h3>
-                                    <p class="mb-4">Conocé los detalles de esta prenda y elegí el talle que mejor se adapte a vos. Sumala a tu equipo y disfrutá de una propuesta versátil para todos los días.</p>
-                                </div>
-                                <div class="w-full lg:w-1/4">
-                                    <h3 class="text-xl font-semibold mb-5">Material y cuidados</h3>
-                                    <p class="mb-2 pb-2 border-b border-gray-line">Material: <span
-                                            class="font-semibold">100 % algodón</span></p>
-                                    <p class="mb-2 pb-2 border-b border-gray-line">Tejido: <span
-                                            class="font-semibold">Jersey suave</span></p>
-                                    <p class="mb-2">Cuidados: <span class="font-semibold">Lavar a máquina a 30 °C, no usar secadora, planchar a baja temperatura y no usar blanqueador.</span></p>
-                                </div>
-                                <div class="w-full lg:w-1/4">
-                                    <h3 class="text-xl font-semibold mb-5">Talles y calce</h3>
-                                    <p class="mb-2 pb-2 border-b border-gray-line">Altura de referencia: <span
-                                            class="font-semibold">180 cm, talle M</span>
-                                    </p>
-                                    <p class="mb-2 pb-2 border-b border-gray-line">Calce: <span
-                                            class="font-semibold">Regular</span></p>
-                                    <p class="mb-2 pb-2 border-b border-gray-line">Largo: <span
-                                            class="font-semibold">Estándar</span></p>
-                                    <p class="mb-2">Mangas: <span class="font-semibold">Cortas</span></p>
-                                </div>
-                            </div>
-                        </div>
-                        <div id="additional-info-content" role="tabpanel" aria-labelledby="additional-info-tab"
-                            class="tab-content hidden">
-                            <p>Información adicional sobre el producto.</p>
-                            <div class="flex flex-col space-y-8">
-                                <div>
-                                    <h3 class="text-lg font-semibold mb-2">Colores</h3>
-                                    <p class="text-base text-gray-700">
-                                        Colores disponibles:
-                                        <span class="text-primary">Rojo</span>,
-                                        <span class="text-primary">Azul</span>,
-                                        <span class="text-primary">Verde</span>,
-                                        <span class="text-primary">Negro</span> y
-                                        <span class="text-primary">Blanco</span>.
-                                    </p>
-                                </div>
-                                <div>
-                                    <h3 class="text-lg font-semibold mb-2">Marca</h3>
-                                    <p class="text-base text-gray-700">
-                                        Producto de
-                                        <span class="text-primary">Zero</span>.
-                                    </p>
-                                </div>
-                                <div>
-                                    <h3 class="text-lg font-semibold mb-2">Material y cuidados</h3>
-                                    <p class="text-base text-gray-700">
-                                        Material: 100 % algodón
-                                        <br>
-                                        Cuidados: lavar a máquina a 40 °C, no usar secadora, planchar a temperatura media y no usar blanqueador.
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-                        <div id="size-shape-content" role="tabpanel" aria-labelledby="size-shape-tab"
-                            class="tab-content hidden">
-                            <div class="overflow-x-auto">
-                                <table class="min-w-full bg-white">
-                                    <thead>
-                                        <tr>
-                                            <th
-                                                class="px-6 py-3 border-b border-gray-line bg-gray-100 text-left text-xs leading-4 font-medium text-gray-700 uppercase tracking-wider">
-                                                Talle
-                                            </th>
-                                            <th
-                                                class="px-6 py-3 border-b border-gray-line bg-gray-100 text-left text-xs leading-4 font-medium text-gray-700 uppercase tracking-wider">
-                                                Pecho (pulgadas)
-                                            </th>
-                                            <th
-                                                class="px-6 py-3 border-b border-gray-line bg-gray-100 text-left text-xs leading-4 font-medium text-gray-700 uppercase tracking-wider">
-                                                Cintura (pulgadas)
-                                            </th>
-                                            <th
-                                                class="px-6 py-3 border-b border-gray-line bg-gray-100 text-left text-xs leading-4 font-medium text-gray-700 uppercase tracking-wider">
-                                                Largo de manga (pulgadas)
-                                            </th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr>
-                                            <td
-                                                class="px-6 py-4 whitespace-no-wrap border-b border-gray-line text-sm leading-5 text-gray-700">
-                                                Chico
-                                            </td>
-                                            <td
-                                                class="px-6 py-4 whitespace-no-wrap border-b border-gray-line text-sm leading-5 text-gray-700">
-                                                34-36
-                                            </td>
-                                            <td
-                                                class="px-6 py-4 whitespace-no-wrap border-b border-gray-line text-sm leading-5 text-gray-700">
-                                                28-30
-                                            </td>
-                                            <td
-                                                class="px-6 py-4 whitespace-no-wrap border-b border-gray-line text-sm leading-5 text-gray-700">
-                                                32-33
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td
-                                                class="px-6 py-4 whitespace-no-wrap border-b border-gray-line text-sm leading-5 text-gray-700">
-                                                Mediano
-                                            </td>
-                                            <td
-                                                class="px-6 py-4 whitespace-no-wrap border-b border-gray-line text-sm leading-5 text-gray-700">
-                                                38-40
-                                            </td>
-                                            <td
-                                                class="px-6 py-4 whitespace-no-wrap border-b border-gray-line text-sm leading-5 text-gray-700">
-                                                32-34
-                                            </td>
-                                            <td
-                                                class="px-6 py-4 whitespace-no-wrap border-b border-gray-line text-sm leading-5 text-gray-700">
-                                                33-34
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td
-                                                class="px-6 py-4 whitespace-no-wrap border-b border-gray-line text-sm leading-5 text-gray-700">
-                                                Grande
-                                            </td>
-                                            <td
-                                                class="px-6 py-4 whitespace-no-wrap border-b border-gray-line text-sm leading-5 text-gray-700">
-                                                42-44
-                                            </td>
-                                            <td
-                                                class="px-6 py-4 whitespace-no-wrap border-b border-gray-line text-sm leading-5 text-gray-700">
-                                                36-38
-                                            </td>
-                                            <td
-                                                class="px-6 py-4 whitespace-no-wrap border-b border-gray-line text-sm leading-5 text-gray-700">
-                                                34-35
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td
-                                                class="px-6 py-4 whitespace-no-wrap border-b border-gray-line text-sm leading-5 text-gray-700">
-                                                Extra grande
-                                            </td>
-                                            <td
-                                                class="px-6 py-4 whitespace-no-wrap border-b border-gray-line text-sm leading-5 text-gray-700">
-                                                46-48
-                                            </td>
-                                            <td
-                                                class="px-6 py-4 whitespace-no-wrap border-b border-gray-line text-sm leading-5 text-gray-700">
-                                                40-42
-                                            </td>
-                                            <td
-                                                class="px-6 py-4 whitespace-no-wrap border-b border-gray-line text-sm leading-5 text-gray-700">
-                                                35-36
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-
-                        </div>
-                        <div id="reviews-content" role="tabpanel" aria-labelledby="reviews-tab"
-                            class="tab-content hidden">
-                            <!-- Reviews List -->
-                            <div class="space-y-6">
-                                <h3 class="text-lg font-semibold mb-4">Opiniones de clientes</h3>
-                                <div id="reviews-list">
-                                    <!--
-                                        Si el controlador incorpora una lista "reviews", se renderiza aquí.
-                                        El separador "border-t" se agrega a todos menos al primero con th:classappend.
-                                    -->
-                                    <div th:each="review, iterStat : ${reviews}"
-                                         th:classappend="${iterStat.first} ? '' : 'border-t border-gray-line'"
-                                         class="py-4">
-                                        <div class="flex items-center mb-2">
-                                            <span class="text-lg font-semibold text-gray-700" th:text="${review.authorName}">Cliente Zero</span>
-                                            <span class="ml-2 text-primary" th:text="${'★'.repeat(review.rating)}">★★★★★</span>
-                                        </div>
-                                        <p th:text="${review.comment}">Muy buena calidad, cómodo y con un calce excelente.</p>
-                                    </div>
-                                    <!-- Fallback estático (se ve solo si "product" todavía no está en el modelo) -->
-                                    <th:block th:if="${product == null}">
-                                        <div class="py-4">
-                                            <div class="flex items-center mb-2">
-                                                <span class="text-lg font-semibold text-gray-700">Cliente Zero</span>
-                                                <span class="ml-2 text-primary">★★★★★</span>
-                                            </div>
-                                            <p>Muy buena calidad, cómodo y con un calce excelente.</p>
-                                        </div>
-                                        <div class="border-t border-gray-line py-4">
-                                            <div class="flex items-center mb-2">
-                                                <span class="text-lg font-semibold text-gray-700">Cliente Zero</span>
-                                                <span class="ml-2 text-primary">★★★★☆</span>
-                                            </div>
-                                            <p>Me gustó el diseño y la tela es muy cómoda. La volvería a elegir.</p>
-                                        </div>
-                                        <div class="border-t border-gray-line py-4">
-                                            <div class="flex items-center mb-2">
-                                                <span class="text-lg font-semibold text-gray-700">Cliente Zero</span>
-                                                <span class="ml-2 text-primary">★★★★★</span>
-                                            </div>
-                                            <p>Excelente prenda, el talle me quedó perfecto. Sin dudas volvería a comprar.</p>
-                                        </div>
-                                    </th:block>
-                                </div>
-                            </div>
-
-                            <!-- Submit Review Form -->
-                            <div class="mt-8">
-                                <h3 class="text-lg font-semibold mb-4">Dejá tu opinión</h3>
-                                <form id="review-form" th:action="@{'/product/' + ${product.id} + '/reviews'}" method="post" class="space-y-4">
-                                    <input type="hidden" name="productId" th:value="${product.id}">
-                                    <div class="space-y-4 md:flex md:space-x-4 md:space-y-0">
-                                        <div class="md:flex-1">
-                                            <label for="review-name"
-                                                class="block text-sm font-medium text-gray-700">Nombre</label>
-                                            <input type="text" id="review-name" name="review-name"
-                                                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary sm:text-sm">
-                                        </div>
-                                        <div class="md:flex-1">
-                                            <label for="review-email"
-                                                class="block text-sm font-medium text-gray-700">Correo electrónico</label>
-                                            <input type="email" id="review-email" name="review-email"
-                                                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary sm:text-sm">
-                                        </div>
-                                        <div class="md:flex-1">
-                                            <label for="review-rating"
-                                                class="block text-sm font-medium text-gray-700">Calificación</label>
-                                            <select id="review-rating" name="review-rating"
-                                                class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary sm:text-sm">
-                                                <option value="5">★★★★★</option>
-                                                <option value="4">★★★★☆</option>
-                                                <option value="3">★★★☆☆</option>
-                                                <option value="2">★★☆☆☆</option>
-                                                <option value="1">★☆☆☆☆</option>
-                                            </select>
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <label for="review-text"
-                                            class="block text-sm font-medium text-gray-700">Reseña</label>
-                                        <textarea id="review-text" name="review-text" rows="4"
-                                            class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary sm:text-sm"></textarea>
-                                    </div>
-                                    <div>
-                                        <button type="submit"
-                                            class="bg-primary hover:bg-transparent border border-transparent hover:border-primary text-white hover:text-primary font-semibold py-2 px-4 rounded-full focus:outline-none">Enviar opinión</button>
-                                    </div>
-                                </form>
-
-                            </div>
-
-                        </div>
-                    </div>
+            <div class="product-information">
+                <div class="product-tags">
+                    <span class="product-tag" th:text="${product.category}">Categoría</span>
+                    <span class="product-tag product-tag--muted" th:if="${product.subcategory != null and !#strings.isEmpty(product.subcategory)}" th:text="${product.subcategory}">Subcategoría</span>
                 </div>
-            </div>
-        </div>
-    </section>
 
-    <!-- Related products -->
-    <section id="latest-products" class="py-10">
-        <div class="container mx-auto px-4">
-            <h2 class="text-2xl font-bold mb-8">Productos relacionados</h2>
-            <div class="flex flex-wrap -mx-4">
-                <!-- Mismo fragment "productCard" reutilizado en home / shop / esta página -->
-                <div class="w-full sm:w-1/2 lg:w-1/4 px-4 mb-8" th:each="relatedProduct : ${relatedProducts}">
+                <h1 class="product-title" th:text="${product.name}">Nombre del producto</h1>
+                <p class="product-sku" th:if="${product.sku != null and !#strings.isEmpty(product.sku)}">Código de producto <strong th:text="${product.sku}">SKU</strong></p>
+
+                <div class="product-price-block">
+                    <span th:if="${product.oldPrice != null}" class="product-old-price" th:text="${'$ ' + #numbers.formatDecimal(product.oldPrice, 1, 2)}">$ 0,00</span>
+                    <strong class="product-price" th:text="${'$ ' + #numbers.formatDecimal(product.price, 1, 2)}">$ 0,00</strong>
+                    <span th:if="${product.oldPrice != null}" class="product-offer-label">Precio promocional</span>
+                </div>
+
+                <div class="product-facts">
+                    <div><span>Categoría</span><strong th:text="${product.category}">Categoría</strong></div>
+                    <div th:if="${product.subcategory != null and !#strings.isEmpty(product.subcategory)}"><span>Subcategoría</span><strong th:text="${product.subcategory}">Subcategoría</strong></div>
+                    <div th:if="${product.talle != null and product.talle != '-'}"><span>Talle</span><strong th:text="${product.talle}">Talle</strong></div>
+                    <div><span>Marca</span><strong th:text="${product.brand}">Zero</strong></div>
+                </div>
+
+                <form class="product-buy-form store-product-card__form" th:action="@{/cart/add}" method="post">
+                    <input type="hidden" name="productId" th:value="${product.id}">
+                    <label for="quantity">Cantidad</label>
+                    <div class="product-buy-row">
+                        <div class="product-quantity-control">
+                            <button id="decrease" type="button" aria-label="Disminuir cantidad" disabled>&minus;</button>
+                            <input id="quantity" name="quantity" type="number" value="1" min="1" readonly aria-label="Cantidad seleccionada">
+                            <button id="increase" type="button" aria-label="Aumentar cantidad" th:disabled="${!product.inStock}">+</button>
+                        </div>
+                        <button type="submit" class="product-add-button" th:disabled="${!product.inStock}"
+                                th:text="${product.inStock} ? 'Agregar al carrito' : 'Sin stock'"
+                                th:style="${!product.inStock} ? 'background-color: #64748b; border-color: #64748b; color: #ffffff;' : ''">
+                            Agregar al carrito
+                        </button>
+                    </div>
+                    <p class="product-cart-feedback" aria-live="polite"></p>
+                </form>
+
+                <div class="product-delivery-note"><i class="fas fa-truck-fast"></i><span>La dirección de entrega se confirma al finalizar la compra.</span></div>
+            </div>
+        </section>
+
+        <section class="product-description-panel" th:if="${product.description != null and !#strings.isEmpty(product.description)}">
+            <div class="product-description-panel__icon"><i class="fas fa-circle-info"></i></div>
+            <div><span class="product-section-eyebrow">DETALLES</span><h2>Acerca del producto</h2><p th:text="${product.description}">Descripción del producto.</p></div>
+        </section>
+
+        <section class="related-products" th:if="${relatedProducts != null and !#lists.isEmpty(relatedProducts)}">
+            <div class="related-products__heading"><div><span class="product-section-eyebrow">SELECCI&Oacute;N ZERO</span><h2>Seguí explorando</h2></div><a th:href="@{/shop}">Ver toda la tienda <i class="fas fa-arrow-right"></i></a></div>
+            <div class="related-products__grid">
+                <article th:each="relatedProduct : ${relatedProducts}" class="related-product-card">
                     <div th:replace="~{tienda/fragments/fragments :: productCard(product=${relatedProduct})}"></div>
-                </div>
-                <!-- Fallback estático (se ve solo si "relatedProducts" todavía no está en el modelo) -->
-                <th:block th:if="${relatedProducts == null}">
-                    <div class="w-full sm:w-1/2 lg:w-1/4 px-4 mb-8">
-                      <div class="bg-white p-3 rounded-lg shadow-lg">
-                        <img src="assets/images/products/5.jpg" alt="Product 1" class="product-image-square mb-4 rounded-lg">
-                        <a th:href="@{/shop}" href="/shop" class="text-lg font-semibold mb-2">Conjunto azul para mujer</a>
-                        <p class=" my-2">Mujeres</p>
-                        <div class="flex items-center mb-4">
-                          <span class="text-lg font-bold text-primary">$19.99</span>
-                          <span class="text-sm line-through ml-2">$24.99</span>
-                        </div>
-                        <button class="bg-primary border border-transparent hover:bg-transparent hover:border-primary text-white hover:text-primary font-semibold py-2 px-4 rounded-full w-full">Agregar al carrito</button>
-                      </div>
-                    </div>
-                    <div class="w-full sm:w-1/2 lg:w-1/4 px-4 mb-8">
-                      <div class="bg-white p-3 rounded-lg shadow-lg">
-                        <img src="assets/images/products/6.jpg" alt="Product 2" class="product-image-square mb-4 rounded-lg">
-                        <a th:href="@{/shop}" href="/shop" class="text-lg font-semibold mb-2">Camisa blanca de manga larga</a>
-                        <p class=" my-2">Mujeres</p>
-                        <div class="flex items-center mb-4">
-                          <span class="text-lg font-bold text-gray-900">$29.99</span>
-                        </div>
-                        <button class="bg-primary border border-transparent hover:bg-transparent hover:border-primary text-white hover:text-primary font-semibold py-2 px-4 rounded-full w-full">Agregar al carrito</button>
-                      </div>
-                    </div>
-                    <div class="w-full sm:w-1/2 lg:w-1/4 px-4 mb-8">
-                      <div class="bg-white p-3 rounded-lg shadow-lg">
-                        <img src="assets/images/products/7.jpg" alt="Product 3" class="product-image-square mb-4 rounded-lg">
-                        <a th:href="@{/shop}" href="/shop" class="text-lg font-semibold mb-2">Conjunto amarillo para hombre</a>
-                        <p class="my-2">Hombres</p>
-                        <div class="flex items-center mb-4">
-                          <span class="text-lg font-bold text-gray-900">$15.99</span>
-                          <span class="text-sm line-through  ml-2">$19.99</span>
-                        </div>
-                        <button class="bg-primary border border-transparent hover:bg-transparent hover:border-primary text-white hover:text-primary font-semibold py-2 px-4 rounded-full w-full">Agregar al carrito</button>
-                      </div>
-                    </div>
-                    <div class="w-full sm:w-1/2 lg:w-1/4 px-4 mb-8">
-                      <div class="bg-white p-3 rounded-lg shadow-lg">
-                        <img src="assets/images/products/8.jpg" alt="Product 4" class="product-image-square mb-4 rounded-lg">
-                        <a th:href="@{/shop}" href="/shop" class="text-lg font-semibold mb-2">Vestido rojo</a>
-                        <p class="my-2">Mujeres</p>
-                        <div class="flex items-center mb-4">
-                            <span class="text-lg font-bold text-primary">$39.99</span>
-                            <span class="text-sm line-through ml-2">$49.99</span>
-                        </div>
-                        <button class="bg-primary border border-transparent hover:bg-transparent hover:border-primary text-white hover:text-primary font-semibold py-2 px-4 rounded-full w-full">Agregar al carrito</button>
-                      </div>
-                    </div>
-                </th:block>
-              </div>
-        </div>
-    </section>
+                </article>
+            </div>
+        </section>
+    </div>
+</main>
 
-    <div th:replace="~{tienda/fragments/fragments :: footer}"></div>
+<main th:unless="${product != null}" class="product-not-found">
+    <div><span><i class="fas fa-box-open"></i></span><h1>Producto no disponible</h1><p>No encontramos este producto en la tienda.</p><a th:href="@{/shop}">Volver a la tienda</a></div>
+</main>
 
-    <!-- Swiper (galeria de imagenes / relacionados) es especifico de esta pagina -->
-    <script th:src="@{/node_modules/swiper/swiper-bundle.js}" src="node_modules/swiper/swiper-bundle.js"></script>
-    <th:block th:replace="~{tienda/fragments/fragments :: scripts}"></th:block>
-
+<div th:replace="~{tienda/fragments/fragments :: footer}"></div>
+<th:block th:replace="~{tienda/fragments/fragments :: scripts}"></th:block>
 </body>
-
 </html>
