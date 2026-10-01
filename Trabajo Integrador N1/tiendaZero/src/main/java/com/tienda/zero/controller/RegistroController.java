@@ -9,12 +9,7 @@ import com.tienda.zero.model.Direccion;
 import com.tienda.zero.model.Empleado;
 import com.tienda.zero.model.Persona;
 import com.tienda.zero.model.Usuario;
-import com.tienda.zero.service.EmpleadoService;
-import com.tienda.zero.service.FlujoCompraService;
-import com.tienda.zero.service.NacionalidadService;
-import com.tienda.zero.service.PersonaService;
-import com.tienda.zero.service.RegistroService;
-import com.tienda.zero.service.UsuarioService;
+import com.tienda.zero.service.*;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -35,16 +30,19 @@ public class RegistroController {
     private final NacionalidadService nacionalidadService;
     private final EmpleadoService empleadoService;
     private final FlujoCompraService flujoCompraService;
+    private final UbicacionService ubicacionService;
 
     public RegistroController(RegistroService registroService, UsuarioService usuarioService,
                               PersonaService personaService, NacionalidadService nacionalidadService,
-                              EmpleadoService empleadoService, FlujoCompraService flujoCompraService) {
+                              EmpleadoService empleadoService, FlujoCompraService flujoCompraService,
+                              UbicacionService ubicacionService) {
         this.registroService = registroService;
         this.usuarioService = usuarioService;
         this.personaService = personaService;
         this.nacionalidadService = nacionalidadService;
         this.empleadoService = empleadoService;
         this.flujoCompraService = flujoCompraService;
+        this.ubicacionService = ubicacionService;
     }
 
     @GetMapping("/login")
@@ -182,6 +180,7 @@ public class RegistroController {
         model.addAttribute("modoEdicion", persona.isPresent());
         model.addAttribute("nacionalidades", nacionalidadService.listarNacionalidadActiva());
         model.addAttribute("ordenesCliente", flujoCompraService.listarPedidosCliente(perfil.getCorreo()));
+        model.addAttribute("ubicacion", ubicacionService.obtenerUbicaciones());
     }
 
     private void cargarFormularioPerfilEmpleado(Model model, PerfilClienteDTO perfil, boolean perfilExistente) {

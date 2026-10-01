@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import com.tienda.zero.service.UbicacionService;
 
 @Controller
 @RequiredArgsConstructor
@@ -30,6 +31,7 @@ public class EmpresaController {
 
     private final EmpresaService empresaService;
     private final GestionEmpresaService gestionEmpresaService;
+    private final UbicacionService ubicacionService;
 
     @GetMapping
     public String listar(Model model) {
@@ -104,6 +106,7 @@ public class EmpresaController {
         model.addAttribute("tiposEmpresa", TipoEmpresa.values());
         model.addAttribute("tiposContacto", TipoContacto.values());
         model.addAttribute("tiposTelefono", TipoTelefono.values());
+        model.addAttribute("ubicacion", ubicacionService.obtenerUbicaciones());
     }
 
     private EmpresaFormDTO convertirFormulario(Empresa empresa) {

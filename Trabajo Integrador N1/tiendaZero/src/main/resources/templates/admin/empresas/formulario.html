@@ -151,8 +151,8 @@
   </div>
 </main>
 <th:block th:replace="~{admin/fragments/fragments :: scripts}"></th:block>
-<script>
-  document.addEventListener('DOMContentLoaded', async () => {
+<script th:inline="javascript">
+  document.addEventListener('DOMContentLoaded', () => {
     const provincia = document.getElementById('provincia');
     const departamento = document.getElementById('departamento');
     const localidad = document.getElementById('localidad');
@@ -162,15 +162,20 @@
     const emailInput = document.getElementById('email');
     const telefonoInput = document.getElementById('telefono');
     const tipoTelefono = document.getElementById('tipoTelefono');
+    const ubicacion = /*[[${ubicacion}]]*/ null;
 
-    async function cargar(select, url, seleccionado) {
+    function llenar(select, opciones, seleccionado) {
       select.innerHTML = '<option value="">Seleccione...</option>';
-      if (!url) return;
-      const respuesta = await fetch(url);
-      if (!respuesta.ok) return;
-      const opciones = await respuesta.json();
       opciones.forEach(opcion => select.add(new Option(opcion.nombre, opcion.id)));
       if (seleccionado) select.value = seleccionado;
+    }
+
+    function departamentosDe(idProvincia) {
+      return ubicacion.departamentos.filter(d => d.idProvincia === idProvincia);
+    }
+
+    function localidadesDe(idDepartamento) {
+      return ubicacion.localidades.filter(l => l.idDepartamento === idDepartamento);
     }
 
     function alternarContacto() {
@@ -183,26 +188,18 @@
     }
 
     medio.addEventListener('change', alternarContacto);
-    provincia.addEventListener('change', async () => {
-      await cargar(departamento, provincia.value ? `/api/ubicacion/departamentos?idProvincia=${encodeURIComponent(provincia.value)}` : '', '');
-      await cargar(localidad, '', '');
+    provincia.addEventListener('change', () => {
+      llenar(departamento, departamentosDe(provincia.value), '');
+      llenar(localidad, [], '');
     });
-    departamento.addEventListener('change', async () => {
-      await cargar(localidad, departamento.value ? `/api/ubicacion/localidades?idDepartamento=${encodeURIComponent(departamento.value)}` : '', '');
+    departamento.addEventListener('change', () => {
+      llenar(localidad, localidadesDe(departamento.value), '');
     });
 
     alternarContacto();
-    try {
-      await cargar(provincia, '/api/ubicacion/provincias', provincia.dataset.selected);
-      if (provincia.value) {
-        await cargar(departamento, `/api/ubicacion/departamentos?idProvincia=${encodeURIComponent(provincia.value)}`, departamento.dataset.selected);
-      }
-      if (departamento.value) {
-        await cargar(localidad, `/api/ubicacion/localidades?idDepartamento=${encodeURIComponent(departamento.value)}`, localidad.dataset.selected);
-      }
-    } catch (error) {
-      console.error('No se pudieron cargar las ubicaciones', error);
-    }
+    llenar(provincia, ubicacion.provincias, provincia.dataset.selected);
+    llenar(departamento, departamentosDe(provincia.value), departamento.dataset.selected);
+    llenar(localidad, localidadesDe(departamento.value), localidad.dataset.selected);
   });
 </script>
 </body>
