@@ -8,7 +8,8 @@ import java.util.List;
 public interface OrdenCompraProveedorRepository extends JpaRepository<OrdenCompraProveedor, String> {
     List<OrdenCompraProveedor> findByEntregadaFalse();
     List<OrdenCompraProveedor> findAllByOrderByFechaCreacionDesc();
-
+    List<OrdenCompraProveedor> findByEntregadaFalseOrderByFechaCreacionDescFechaHoraCreacionDescIdDesc();
+    List<OrdenCompraProveedor> findAllByOrderByFechaCreacionDescFechaHoraCreacionDescIdDesc();
     List<OrdenCompraProveedor> findByEntregadaFalseAndEliminadoFalse();
     List<OrdenCompraProveedor> findByEliminadoFalseOrderByFechaCreacionDesc();
 }
