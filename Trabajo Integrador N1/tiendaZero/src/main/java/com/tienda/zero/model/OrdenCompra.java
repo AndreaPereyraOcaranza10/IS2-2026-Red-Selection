@@ -7,6 +7,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,6 +17,7 @@ public class OrdenCompra {
     @Id @GeneratedValue(strategy = GenerationType.UUID) private String id;
     @Column(nullable = false, unique = true) private String identificadorCompra;
     @Column(nullable = false) private LocalDate fecha;
+    private LocalDateTime fechaHoraCreacion;
     @Column(nullable = false) @Builder.Default private boolean eliminado = false;
     @Column(nullable = false, precision = 12, scale = 2) @Builder.Default private BigDecimal total = BigDecimal.ZERO;
     @Enumerated(EnumType.STRING) @Column(nullable = false) @Builder.Default private EstadoOrdenCompra estadoOrdenCompra = EstadoOrdenCompra.PENDIENTE_COMPLETAR;
@@ -35,5 +37,4 @@ public class OrdenCompra {
     @JsonIgnore @ManyToOne @JoinColumn(name = "empleado_id") private Empleado empleado;
     @OneToMany(mappedBy = "ordenCompra", cascade = CascadeType.ALL, orphanRemoval = true) @Builder.Default private List<DetalleCompra> detalles = new ArrayList<>();
 }
-
 

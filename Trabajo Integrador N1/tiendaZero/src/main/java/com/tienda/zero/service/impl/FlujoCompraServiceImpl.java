@@ -2,6 +2,7 @@ package com.tienda.zero.service.impl;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -26,6 +27,7 @@ import com.tienda.zero.repository.PersonaRepository;
 import com.tienda.zero.repository.ProductoRepository;
 import com.tienda.zero.repository.UsuarioRepository;
 import com.tienda.zero.service.FlujoCompraService;
+import com.tienda.zero.service.FacturaClienteService;
 import com.tienda.zero.service.StockService;
 import com.tienda.zero.service.VigenciaPrecioService;
 
@@ -41,6 +43,7 @@ public class FlujoCompraServiceImpl implements FlujoCompraService {
     private final OrdenCompraRepository ordenesCliente;
     private final StockService stockService;
     private final VigenciaPrecioService precios;
+    private final FacturaClienteService facturaClienteService;
 
     @Override
     @Transactional
@@ -137,7 +140,17 @@ public class FlujoCompraServiceImpl implements FlujoCompraService {
 
     @Override
     public List<OrdenCompra> listarPedidosCliente(String username) {
-        return ordenesCliente.findByClienteUsuarioNombreUsuarioOrderByFechaDesc(username).stream()
+        return ordenesCliente.findByClienteUsuarioNombreUsuarioOrderByFechaDescFechaHoraCreacionDescIdDesc(username).stream()
+                .filter(orden -> !orden.isEliminado())
+                .filter(orden -> orden.getEstadoOrdenCompra() != EstadoOrdenCompra.PENDIENTE_COMPLETAR)
+                .toList();
+    }
+
+    @Override
+    public List<OrdenCompra> listarPedidosUsuario(String username) {
+        return ordenesCliente
+                .findByPropietarioNombreUsuarioOrClienteUsuarioNombreUsuarioOrEmpleadoUsuarioNombreUsuarioOrderByFechaDescFechaHoraCreacionDescIdDesc(
+                        username, username, username).stream()
                 .filter(orden -> !orden.isEliminado())
                 .filter(orden -> orden.getEstadoOrdenCompra() != EstadoOrdenCompra.PENDIENTE_COMPLETAR)
                 .toList();
@@ -145,7 +158,7 @@ public class FlujoCompraServiceImpl implements FlujoCompraService {
 
     @Override
     public List<OrdenCompra> listarPedidosAdministracion() {
-        return ordenesCliente.findByEstadoOrdenCompraNotAndEliminadoFalseOrderByFechaDesc(
+        return ordenesCliente.findByEstadoOrdenCompraNotAndEliminadoFalseOrderByFechaDescFechaHoraCreacionDescIdDesc(
                 EstadoOrdenCompra.PENDIENTE_COMPLETAR);
     }
 
@@ -188,6 +201,9 @@ public class FlujoCompraServiceImpl implements FlujoCompraService {
             stockService.registrarMovimiento(detalle.getProducto().getId(), -detalle.getCantidad(),
                     "Reserva de stock para orden", detalle);
         }
+        if (!facturaClienteService.requiereFormulario(orden)) {
+            facturaClienteService.emitirAutomatica(orden);
+        }
         return orden;
     }
 
@@ -218,6 +234,7 @@ public class FlujoCompraServiceImpl implements FlujoCompraService {
             }
         }
         orden.setEstadoOrdenCompra(EstadoOrdenCompra.ANULADA);
+        facturaClienteService.actualizarEstado(orden);
         return ordenesCliente.save(orden);
     }
 
@@ -237,6 +254,7 @@ public class FlujoCompraServiceImpl implements FlujoCompraService {
             }
         }
         orden.setEstadoOrdenCompra(nuevoEstado);
+        facturaClienteService.actualizarEstado(orden);
         return ordenesCliente.save(orden);
     }
 
@@ -259,6 +277,7 @@ public class FlujoCompraServiceImpl implements FlujoCompraService {
             }
         }
         orden.setEstadoOrdenCompra(nuevoEstado);
+        facturaClienteService.actualizarEstado(orden);
         return ordenesCliente.save(orden);
     }
 
@@ -269,7 +288,8 @@ public class FlujoCompraServiceImpl implements FlujoCompraService {
     }
 
     private OrdenCompra ordenClienteDeUsuario(String id, String username) {
-        return ordenesCliente.findByIdAndClienteUsuarioNombreUsuario(id, username)
+        return ordenesCliente.findByIdAndPropietarioNombreUsuario(id, username)
+                .or(() -> ordenesCliente.findByIdAndClienteUsuarioNombreUsuario(id, username))
                 .orElseThrow(() -> new IllegalArgumentException("Orden no encontrada"));
     }
 

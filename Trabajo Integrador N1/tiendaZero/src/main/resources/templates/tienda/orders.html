@@ -1,49 +1,106 @@
 <!doctype html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>Mis pedidos - Zero</title>
+    <title>Mis pedidos | Zero</title>
     <th:block th:replace="~{tienda/fragments/fragments :: head-assets}"></th:block>
 </head>
-<body>
+<body class="orders-page">
 <div th:replace="~{tienda/fragments/fragments :: header}"></div>
-<section class="bg-white py-16">
-    <div class="container mx-auto px-4 max-w-4xl">
-        <div class="flex flex-wrap items-end justify-between gap-3 mb-6">
+
+<main class="orders-main">
+    <div class="orders-container">
+        <header class="orders-heading">
             <div>
-                <h1 class="text-2xl font-semibold">Mis pedidos</h1>
-                <p class="text-gray-600 mt-2">Segui el estado de todas tus ordenes de compra.</p>
+                <span class="orders-eyebrow">MI CUENTA</span>
+                <h1>Mis pedidos</h1>
+                <p>Consult&aacute; el estado, los productos y los datos de entrega de tus compras.</p>
             </div>
-            <a th:href="@{/shop}" class="bg-primary text-white rounded-full px-5 py-2">Seguir comprando</a>
-        </div>
-        <p th:if="${mensajeExito}" class="text-green-700 mb-4" th:text="${mensajeExito}"></p>
-        <p th:if="${mensajeError}" class="text-red-600 mb-4" th:text="${mensajeError}"></p>
-        <div th:if="${#lists.isEmpty(orders)}" class="py-8">Todavia no realizaste ordenes.</div>
-        <article th:each="pedido : ${orders}" class="border rounded-lg p-5 mb-4">
-            <div class="flex flex-wrap justify-between gap-2">
-                <strong>Orden <span th:text="${pedido.identificadorCompra}">id</span></strong>
-                <span class="rounded bg-gray-100 px-3 py-1" th:switch="${pedido.estadoOrdenCompra.name()}">
-                    <span th:case="'PENDIENTE_COMPLETAR'">Pendiente de completar</span>
-                    <span th:case="'PENDIENTE_PAGO'">Pendiente de pago</span>
-                    <span th:case="'PENDIENTE_ENVIO'">Pendiente de envio</span>
-                    <span th:case="'PENDIENTE_ENTREGA'">Pendiente de entrega</span>
-                    <span th:case="'ENTREGADO'">Entregado</span>
-                    <span th:case="'ANULADA'">Anulada</span>
-                    <span th:case="*">Estado actualizado</span>
-                </span>
-            </div>
-            <p class="mt-2">Fecha: <span th:text="${pedido.fecha}"></span></p>
-            <p>Total: $<span th:text="${pedido.total}"></span></p>
-            <p>Forma de pago: <span th:text="${pedido.formaPago != null ? pedido.formaPago : 'No informada'}"></span></p>
-            <p>Entrega: <span th:text="${pedido.direccionEntrega}"></span></p>
-            <ul class="mt-3 list-disc pl-6">
-                <li th:each="detalle : ${pedido.detalles}"><span th:text="${detalle.producto.nombre}"></span> x <span th:text="${detalle.cantidad}"></span> - $<span th:text="${detalle.subtotal}"></span></li>
-            </ul>
-            <form th:if="${pedido.estadoOrdenCompra.name() == 'PENDIENTE_PAGO' or pedido.estadoOrdenCompra.name() == 'PENDIENTE_ENVIO'}" th:action="@{'/orders/' + ${pedido.id} + '/cancel'}" method="post" class="mt-4">
-                <button class="border border-red-600 text-red-600 rounded-full px-4 py-2">Anular compra</button>
-            </form>
-        </article>
+            <a th:href="@{/shop}" class="orders-shop-link"><i class="fas fa-bag-shopping"></i> Seguir comprando</a>
+        </header>
+
+        <p th:if="${mensajeExito}" class="orders-alert orders-alert--success" th:text="${mensajeExito}"></p>
+        <p th:if="${mensajeError}" class="orders-alert orders-alert--error" th:text="${mensajeError}"></p>
+
+        <section th:if="${#lists.isEmpty(orders)}" class="orders-empty">
+            <span class="orders-empty__icon"><i class="fas fa-box-open"></i></span>
+            <h2>Todav&iacute;a no ten&eacute;s pedidos</h2>
+            <p>Cuando realices una compra, vas a poder seguirla desde esta pantalla.</p>
+            <a th:href="@{/shop}" class="orders-shop-link">Explorar la tienda</a>
+        </section>
+
+        <section th:unless="${#lists.isEmpty(orders)}" class="orders-list" aria-label="Listado de pedidos">
+            <article th:each="pedido : ${orders}" class="order-card">
+                <div class="order-card__header">
+                    <div>
+                        <span class="order-card__caption">N&Uacute;MERO DE PEDIDO</span>
+                        <h2 th:text="${pedido.identificadorCompra}">PED-000000</h2>
+                    </div>
+                    <span class="order-status" th:switch="${pedido.estadoOrdenCompra.name()}">
+                        <span th:case="'PENDIENTE_COMPLETAR'" class="order-status__pill order-status__pill--pending">Pendiente de completar</span>
+                        <span th:case="'PENDIENTE_PAGO'" class="order-status__pill order-status__pill--pending">Pendiente de pago</span>
+                        <span th:case="'PENDIENTE_ENVIO'" class="order-status__pill order-status__pill--progress">Pendiente de env&iacute;o</span>
+                        <span th:case="'PENDIENTE_ENTREGA'" class="order-status__pill order-status__pill--progress">En camino</span>
+                        <span th:case="'ENTREGADO'" class="order-status__pill order-status__pill--complete">Entregado</span>
+                        <span th:case="'ANULADA'" class="order-status__pill order-status__pill--cancelled">Anulado</span>
+                        <span th:case="*" class="order-status__pill order-status__pill--pending">Estado actualizado</span>
+                    </span>
+                </div>
+
+                <div class="order-card__summary">
+                    <div class="order-meta">
+                        <i class="far fa-calendar"></i>
+                        <div><span>Fecha</span><strong th:text="${pedido.fecha}">2026-01-01</strong></div>
+                    </div>
+                    <div class="order-meta">
+                        <i class="far fa-credit-card"></i>
+                        <div><span>Forma de pago</span>
+                            <strong th:switch="${pedido.formaPago != null ? pedido.formaPago.name() : 'NO_INFORMADA'}">
+                                <span th:case="'EFECTIVO'">Efectivo</span>
+                                <span th:case="'TRANSFERENCIA'">Transferencia</span>
+                                <span th:case="'BILLETERA_VIRTUAL'">Billetera virtual</span>
+                                <span th:case="*">No informada</span>
+                            </strong>
+                        </div>
+                    </div>
+                    <div class="order-meta order-meta--total">
+                        <i class="fas fa-receipt"></i>
+                        <div><span>Total</span><strong th:text="${'$ ' + pedido.total}">$ 0,00</strong></div>
+                    </div>
+                </div>
+
+                <div class="order-card__delivery">
+                    <i class="fas fa-location-dot"></i>
+                    <div><span>Direcci&oacute;n de entrega</span><p th:text="${pedido.direccionEntrega}">Dirección</p></div>
+                </div>
+
+                <div class="order-card__actions" th:if="${facturasPedidos != null and facturasPedidos.containsKey(pedido.id)}">
+                    <a class="orders-shop-link" th:href="@{/orders/facturas/{id}(id=${facturasPedidos.get(pedido.id).id})}">
+                        <i class="fas fa-file-invoice"></i>
+                        <span th:text="${'Factura Nro. ' + facturasPedidos.get(pedido.id).numeroFactura}">Ver factura</span>
+                    </a>
+                </div>
+                <div class="order-card__actions" th:if="${facturasPedidos != null and !facturasPedidos.containsKey(pedido.id) and pedido.propietario != null and (pedido.propietario.rol.name() == 'ADMINISTRATIVO' or pedido.propietario.rol.name() == 'JEFE') and pedido.estadoOrdenCompra.name() != 'ANULADA'}">
+                    <a class="orders-shop-link" th:href="@{/admin/facturas/clientes/orden/{id}/nueva(id=${pedido.id})}"><i class="fas fa-file-invoice"></i> Completar factura</a>
+                </div>
+
+                <div class="order-card__items" th:if="${!#lists.isEmpty(pedido.detalles)}">
+                    <h3>Productos del pedido</h3>
+                    <div class="order-item" th:each="detalle : ${pedido.detalles}" th:if="${!detalle.eliminado}">
+                        <span class="order-item__name" th:text="${detalle.producto.nombre}">Producto</span>
+                        <span class="order-item__quantity" th:text="${'Cantidad: ' + detalle.cantidad}">Cantidad: 1</span>
+                        <strong th:text="${'$ ' + detalle.subtotal}">$ 0,00</strong>
+                    </div>
+                </div>
+
+                <form th:if="${pedido.estadoOrdenCompra.name() == 'PENDIENTE_PAGO' or pedido.estadoOrdenCompra.name() == 'PENDIENTE_ENVIO'}"
+                      th:action="@{'/orders/' + ${pedido.id} + '/cancel'}" method="post" class="order-card__actions">
+                    <button class="orders-cancel-button" type="submit"><i class="fas fa-xmark"></i> Anular compra</button>
+                </form>
+            </article>
+        </section>
     </div>
-</section>
+</main>
+
 <div th:replace="~{tienda/fragments/fragments :: footer}"></div>
 <th:block th:replace="~{tienda/fragments/fragments :: scripts}"></th:block>
 </body>

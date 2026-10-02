@@ -12,12 +12,20 @@
     <div th:replace="~{tienda/fragments/fragments :: header}"></div>
 
     <!-- Shop -->
-    <section id="shop">
-        <div class="container mx-auto">
+    <section id="shop" class="shop-page">
+        <div class="shop-container container mx-auto px-4">
+            <header class="shop-heading">
+                <div>
+                    <span class="shop-eyebrow">COLECCI&Oacute;N ZERO</span>
+                    <h1>Encontr&aacute; tu pr&oacute;ximo favorito</h1>
+                    <p>Prendas y accesorios pensados para moverte con comodidad y estilo.</p>
+                </div>
+                <span class="shop-results-count" th:text="${totalItems} + ' productos'">0 productos</span>
+            </header>
             <!-- Top Filter -->
-            <div class="flex flex-col md:flex-row justify-between items-center py-4 gap-4">
+            <div class="shop-toolbar flex flex-col md:flex-row justify-between items-center py-4 gap-4">
                 <div class="flex items-center space-x-3">
-                    <a th:href="@{/shop(categoria=${selectedCategorias}, talle=${selectedTalles}, sort=${currentSort}, q=${query}, oferta=${currentOferta == true ? null : true})}"
+                    <a th:href="@{/shop(categoria=${selectedCategorias}, subcategoria=${selectedSubcategorias}, talle=${selectedTalles}, sort=${currentSort}, q=${query}, oferta=${currentOferta == true ? null : true})}"
                        th:classappend="${currentOferta == true} ? 'bg-primary text-white border-primary shadow-sm' : 'bg-white text-gray-700 border-gray-300 hover:border-primary hover:text-primary'"
                        class="border py-2 px-5 rounded-full font-medium transition text-sm flex items-center gap-1.5 focus:outline-none">
                         <i class="ti ti-tag text-base" th:if="${currentOferta == true}"></i>
@@ -31,6 +39,7 @@
                 <div class="flex items-center space-x-4">
                     <form th:action="@{/shop}" method="get" class="relative flex items-center gap-2">
                         <input type="hidden" name="categoria" th:each="c : ${selectedCategorias}" th:value="${c}">
+                        <input type="hidden" name="subcategoria" th:each="s : ${selectedSubcategorias}" th:value="${s}">
                         <input type="hidden" name="talle" th:each="t : ${selectedTalles}" th:value="${t}">
                         <input type="hidden" name="oferta" th:value="${currentOferta}" th:if="${currentOferta != null}">
                         <input type="hidden" name="q" th:value="${query}" th:if="${query != null}">
@@ -52,13 +61,13 @@
                 </div>
             </div>
             <!-- Filter Toggle Button for Mobile -->
-            <div class="block md:hidden text-center mb-4">
+            <div class="shop-mobile-toggle block md:hidden text-center mb-4">
                 <button id="products-toggle-filters"
-                    class="bg-primary text-white py-2 px-4 rounded-full focus:outline-none">Mostrar filtros</button>
+                    class="bg-primary text-white py-2 px-4 rounded-full focus:outline-none"><i class="fas fa-sliders"></i> Mostrar filtros</button>
             </div>
-            <div class="flex flex-col md:flex-row">
+            <div class="shop-catalog-layout flex flex-col md:flex-row">
                 <!-- Filters Sidebar -->
-                <div id="filters" class="w-full md:w-1/4 p-4 hidden md:block">
+                <div id="filters" class="shop-filters w-full md:w-1/4 p-4 hidden md:block">
                     <form id="shopFilterForm" th:action="@{/shop}" method="get">
                         <input type="hidden" name="sort" th:value="${currentSort}">
                         <input type="hidden" name="oferta" th:value="${currentOferta}" th:if="${currentOferta != null}">
@@ -77,6 +86,19 @@
                                            onchange="document.getElementById('shopFilterForm').submit()"
                                            class="form-checkbox custom-checkbox text-primary rounded h-4 w-4">
                                     <span class="ml-2.5 text-sm" th:text="${category.nombre}">Hombres</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="mb-6 pb-6 border-b border-gray-line">
+                            <h3 class="text-lg font-semibold mb-4 text-gray-900">Subcategorías</h3>
+                            <div class="space-y-2.5">
+                                <label class="flex items-center cursor-pointer hover:text-primary transition" th:each="sub : ${subcategories}">
+                                    <input type="checkbox" name="subcategoria" th:value="${sub}"
+                                           th:checked="${selectedSubcategorias != null and #lists.contains(selectedSubcategorias, sub)}"
+                                           onchange="document.getElementById('shopFilterForm').submit()"
+                                           class="form-checkbox custom-checkbox text-primary rounded h-4 w-4">
+                                    <span class="ml-2.5 text-sm" th:text="${sub}">Ropa</span>
                                 </label>
                             </div>
                         </div>
@@ -105,7 +127,11 @@
                     </form>
                 </div>
                 <!-- Products List -->
-                <div class="w-full md:w-3/4 p-4">
+                <div class="shop-results w-full md:w-3/4 p-4">
+                    <div class="shop-results__toolbar">
+                        <span th:text="${totalItems} + ' resultados'">0 resultados</span>
+                        <span th:if="${hasActiveFilters}" class="shop-filter-indicator"><i class="fas fa-filter"></i> Filtros aplicados</span>
+                    </div>
                     <!-- Products grid -->
                     <!--
                         th:each reemplaza los 6 productos hardcodeados.
@@ -113,13 +139,15 @@
                         model.addAttribute("products", productService.search(filters, pageable));
                         Reusamos el mismo fragment "productCard" que en la home para no duplicar markup.
                     -->
-                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div class="shop-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                         <th:block th:each="product : ${products}">
                             <div th:replace="~{tienda/fragments/fragments :: productCard(product=${product})}"></div>
                         </th:block>
-                        <div class="col-span-full text-center py-12 text-gray-500" th:if="${products != null and #lists.isEmpty(products)}">
+                        <div class="shop-empty col-span-full text-center py-12 text-gray-500" th:if="${products != null and #lists.isEmpty(products)}">
+                            <span class="shop-empty__icon"><i class="fas fa-magnifying-glass"></i></span>
                             <p class="text-xl font-semibold mb-2">No se encontraron productos disponibles en el catálogo.</p>
                             <p class="text-sm text-gray-400">Pronto agregaremos nuevas prendas y calzado.</p>
+                            <a th:href="@{/shop}" class="shop-empty__link">Ver todos los productos</a>
                         </div>
                     </div>
                     <!-- Fallback estático (se ve solo si "products" todavía no está en el modelo) -->
@@ -202,14 +230,14 @@
                             <ul class="inline-flex items-center space-x-2">
                                 <!-- Botón Anterior -->
                                 <li th:if="${currentPage > 1}">
-                                    <a th:href="@{/shop(page=${currentPage - 1}, categoria=${selectedCategorias}, talle=${selectedTalles}, sort=${currentSort}, oferta=${currentOferta}, q=${query})}"
+                                    <a th:href="@{/shop(page=${currentPage - 1}, categoria=${selectedCategorias}, subcategoria=${selectedSubcategorias}, talle=${selectedTalles}, sort=${currentSort}, oferta=${currentOferta}, q=${query})}"
                                        class="w-10 h-10 flex items-center justify-center rounded-full border border-gray-300 hover:bg-primary hover:text-white hover:border-primary transition text-sm">
                                         &lt;
                                     </a>
                                 </li>
                                 <!-- Botones de Páginas 1 .. totalPages -->
                                 <li th:each="p : ${#numbers.sequence(1, totalPages)}">
-                                    <a th:href="@{/shop(page=${p}, categoria=${selectedCategorias}, talle=${selectedTalles}, sort=${currentSort}, oferta=${currentOferta}, q=${query})}"
+                                    <a th:href="@{/shop(page=${p}, categoria=${selectedCategorias}, subcategoria=${selectedSubcategorias}, talle=${selectedTalles}, sort=${currentSort}, oferta=${currentOferta}, q=${query})}"
                                        th:text="${p}"
                                        th:classappend="${p == currentPage} ? 'bg-primary text-white font-bold border-primary shadow-sm' : 'border border-gray-300 hover:bg-primary hover:text-white hover:border-primary text-gray-700'"
                                        class="w-10 h-10 flex items-center justify-center rounded-full border transition text-sm">
@@ -218,7 +246,7 @@
                                 </li>
                                 <!-- Botón Siguiente -->
                                 <li th:if="${currentPage < totalPages}">
-                                    <a th:href="@{/shop(page=${currentPage + 1}, categoria=${selectedCategorias}, talle=${selectedTalles}, sort=${currentSort}, oferta=${currentOferta}, q=${query})}"
+                                    <a th:href="@{/shop(page=${currentPage + 1}, categoria=${selectedCategorias}, subcategoria=${selectedSubcategorias}, talle=${selectedTalles}, sort=${currentSort}, oferta=${currentOferta}, q=${query})}"
                                        class="w-10 h-10 flex items-center justify-center rounded-full border border-gray-300 hover:bg-primary hover:text-white hover:border-primary transition text-sm">
                                         &gt;
                                     </a>

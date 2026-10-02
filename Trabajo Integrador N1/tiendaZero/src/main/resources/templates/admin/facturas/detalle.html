@@ -2,12 +2,12 @@
 <html xmlns:th="http://www.thymeleaf.org" lang="es">
 
 <head>
-    <title th:text="'Factura de proveedor - InApp Inventory Dashboard'">Factura de proveedor</title>
+    <title th:text="'Factura de proveedor - Zero'">Factura de proveedor - Zero</title>
     <th:block th:replace="~{admin/fragments/fragments :: head-assets}"></th:block>
 </head>
 
 <body>
-<div th:replace="~{admin/fragments/fragments :: sidebarTopbar(activePage='facturas-proveedor')}"></div>
+<div th:replace="~{admin/fragments/fragments :: sidebarTopbar(activePage='facturas')}"></div>
 <!-- MAIN CONTENT -->
 <main id="content" class="content py-10">
     <div class="container-fluid">
@@ -26,7 +26,7 @@
                     <div class="d-flex gap-2">
                         <a th:if="${factura.ordenCompra != null}"
                            th:href="@{'/admin/ordenes/' + ${factura.ordenCompra.id}}" class="btn btn-outline-primary">Ver la orden de compra</a>
-                        <a th:href="@{/admin/facturas-proveedor}" class="btn btn-primary">Volver a las facturas</a>
+                        <a th:href="@{/admin/facturas}" class="btn btn-primary">Volver a las facturas</a>
                     </div>
                 </div>
 

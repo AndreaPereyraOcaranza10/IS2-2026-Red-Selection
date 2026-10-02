@@ -31,7 +31,7 @@ public class ReporteProductosServiceImpl implements ReporteProductosService {
     public ReporteProductos generar() {
         Map<String, ProveedorContacto> proveedores = proveedoresPorProducto();
         List<ProductoStock> detalles = productoRepository.findByEliminadoFalse().stream()
-                .map(producto -> construirDetalle(producto, proveedores.get(producto.getId())))
+                .map(producto -> construirDetalle(producto, proveedorPara(producto, proveedores)))
                 .toList();
 
         int unidadesTotales = detalles.stream().mapToInt(ProductoStock::stockActual).sum();
@@ -66,9 +66,8 @@ public class ReporteProductosServiceImpl implements ReporteProductosService {
         int objetivo50 = (stockIdeal + 1) / 2;
         int reposicion = Math.max(0, objetivo50 - stockActual);
         String whatsappUrl = null;
-        String proveedorNombre = null;
+        String proveedorNombre = proveedor == null ? null : proveedor.nombre();
         if ("Malo".equals(estado) && reposicion > 0 && proveedor != null) {
-            proveedorNombre = proveedor.nombre();
             String telefono = normalizarTelefono(proveedor.telefono());
             if (telefono != null) {
                 String mensaje = "Hola, necesitamos reponer " + reposicion + " unidades de " + producto.getNombre()
@@ -86,17 +85,10 @@ public class ReporteProductosServiceImpl implements ReporteProductosService {
 
     private Map<String, ProveedorContacto> proveedoresPorProducto() {
         Map<String, ProveedorContacto> proveedores = new HashMap<>();
-        for (OrdenCompraProveedor orden : ordenCompraProveedorRepository.findAllByOrderByFechaCreacionDesc()) {
+        for (OrdenCompraProveedor orden : ordenCompraProveedorRepository.findAllByOrderByFechaCreacionDescFechaHoraCreacionDescIdDesc()) {
             Proveedor proveedor = orden.getProveedor();
             if (proveedor == null || proveedor.isEliminado()) continue;
-            String telefono = proveedor.getContactos().stream()
-                    .filter(contacto -> !contacto.isEliminado() && contacto instanceof ContactoTelefonico)
-                    .map(contacto -> ((ContactoTelefonico) contacto).getTelefono())
-                    .filter(numero -> numero != null && !numero.isBlank())
-                    .findFirst().orElse(null);
-            if (telefono == null) continue;
-
-            ProveedorContacto contactoProveedor = new ProveedorContacto(proveedor.getRazonSocial(), telefono);
+            ProveedorContacto contactoProveedor = contactoDe(proveedor);
             if (orden.getDetalles() == null) continue;
             for (var detalle : orden.getDetalles()) {
                 if (detalle.getProducto() != null) {
@@ -105,6 +97,22 @@ public class ReporteProductosServiceImpl implements ReporteProductosService {
             }
         }
         return proveedores;
+    }
+
+    private ProveedorContacto contactoDe(Proveedor proveedor) {
+        String telefono = proveedor.getContactos().stream()
+                .filter(contacto -> !contacto.isEliminado() && contacto instanceof ContactoTelefonico)
+                .map(contacto -> ((ContactoTelefonico) contacto).getTelefono())
+                .filter(numero -> numero != null && !numero.isBlank())
+                .findFirst().orElse(null);
+        return new ProveedorContacto(proveedor.getRazonSocial(), telefono);
+    }
+
+    private ProveedorContacto proveedorPara(Producto producto, Map<String, ProveedorContacto> proveedores) {
+        ProveedorContacto proveedorOrden = proveedores.get(producto.getId());
+        if (proveedorOrden != null && proveedorOrden.telefono() != null) return proveedorOrden;
+        if (producto.getProveedor() != null) return contactoDe(producto.getProveedor());
+        return proveedorOrden;
     }
 
     private String normalizarTelefono(String telefono) {

@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head><title>Datos de factura | Zero</title><th:block th:replace="~{admin/fragments/fragments :: head-assets}"></th:block></head>
+<body>
+<div th:replace="~{admin/fragments/fragments :: sidebarTopbar(activePage='facturas')}"></div>
+<main id="content" class="content py-10"><div class="container-fluid" style="max-width: 960px">
+    <div class="d-flex flex-wrap justify-content-between gap-3 mb-4"><h1 class="fs-3">Datos de la factura</h1><a th:href="@{/orders}" class="btn btn-outline-secondary">Mis pedidos</a></div>
+    <div class="alert alert-danger" th:if="${mensajeError}" th:text="${mensajeError}"></div>
+    <div class="border-bottom pb-3 mb-4"><p class="mb-1 text-break" th:text="${'Orden: ' + orden.identificadorCompra}"></p><strong th:text="${'Total: $ ' + orden.total}"></strong></div>
+    <form th:action="@{/admin/facturas/clientes/orden/{id}/nueva(id=${orden.id})}" th:object="${datos}" method="post">
+        <div class="row g-3">
+            <div class="col-md-6"><label for="nombre" class="form-label">Nombre</label><input id="nombre" class="form-control" th:field="*{nombre}" maxlength="100" required autocomplete="given-name"></div>
+            <div class="col-md-6"><label for="apellido" class="form-label">Apellido</label><input id="apellido" class="form-control" th:field="*{apellido}" maxlength="100" required autocomplete="family-name"></div>
+            <div class="col-md-6"><label for="documento" class="form-label">DNI / CUIT</label><input id="documento" class="form-control" th:field="*{documento}" maxlength="50"></div>
+            <div class="col-md-6"><label for="correo" class="form-label">Correo</label><input id="correo" class="form-control" type="email" th:field="*{correo}" maxlength="150" autocomplete="email" required></div>
+            <div class="col-12"><label for="domicilio" class="form-label">Domicilio</label><input id="domicilio" class="form-control" th:field="*{domicilio}" maxlength="250" required autocomplete="street-address"></div>
+        </div>
+        <div class="table-responsive mt-4"><table class="table"><thead><tr><th>Producto</th><th>Cantidad</th><th>Subtotal</th></tr></thead><tbody>
+            <tr th:each="detalle : ${orden.detalles}" th:if="${!detalle.eliminado}"><td th:text="${detalle.producto.nombre}"></td><td th:text="${detalle.cantidad}"></td><td th:text="${'$ ' + detalle.subtotal}"></td></tr>
+        </tbody></table></div>
+        <button class="btn btn-primary mt-3" type="submit"><i class="ti ti-file-invoice me-1"></i> <span th:text="${orden.formaPago.name() == 'BILLETERA_VIRTUAL' ? 'Guardar factura y continuar al pago' : 'Guardar factura'}"></span></button>
+    </form>
+</div></main>
+<th:block th:replace="~{admin/fragments/fragments :: scripts}"></th:block>
+</body></html>

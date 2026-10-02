@@ -1,157 +1,94 @@
 <!doctype html>
-<html xmlns:th="http://www.thymeleaf.org">
-
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title th:text="'Carrito - Zero'">Carrito - Zero</title>
+    <title>Mi carrito | Zero</title>
     <th:block th:replace="~{tienda/fragments/fragments :: head-assets}"></th:block>
-    <style>
-        .cart-table tbody td {
-            padding-top: 1.5rem;
-            padding-bottom: 1.5rem;
-        }
-
-        .cart-table tbody tr:not(:last-child) td {
-            border-bottom: 1px solid #e5e7eb;
-        }
-    </style>
 </head>
+<body class="cart-page">
+<div th:replace="~{tienda/fragments/fragments :: header}"></div>
 
-<body>
-    <div th:replace="~{tienda/fragments/fragments :: header}"></div>
-
-    <!-- Cart -->
-    <section id="cart-page" class="bg-gray-50 py-10 md:py-16 min-h-[60vh]">
-        <div class="container mx-auto px-4 max-w-7xl">
-            <h1 class="text-2xl md:text-3xl font-semibold mb-6">Mi carrito</h1>
-            <p th:if="${mensajeExito}" class="text-green-700 mb-4" th:text="${mensajeExito}"></p>
-            <p th:if="${mensajeError}" class="text-red-600 mb-4" th:text="${mensajeError}"></p>
-            <div class="flex flex-col md:flex-row gap-4">
-                <div class="md:w-3/4 min-w-0">
-                    <div class="bg-white rounded-xl shadow-md p-4 md:p-6 mb-4">
-                        <div class="overflow-x-auto">
-                            <table class="cart-table w-full min-w-[680px]">
-                                <thead>
-                                    <tr>
-                                        <th class="text-left font-semibold pb-3">Producto</th>
-                                        <th class="text-center font-semibold pb-3">Precio</th>
-                                        <th class="text-center font-semibold pb-3">Cantidad</th>
-                                        <th class="text-right font-semibold pb-3">Importe</th>
-                                        <th class="pb-3"><span class="sr-only">Acciones</span></th>
-                                    </tr>
-                                </thead>
-                                <tbody id="cart-items">
-                                    <!--
-                                        th:each reemplaza las filas fijas por el contenido real del carrito.
-                                        "cartItems" es una List<CartItem> que debería venir del Controller, ej:
-                                        model.addAttribute("cartItems", cartService.getItems(session));
-                                        Cada CartItem: id, imageUrl, name, price, quantity, lineTotal.
-                                    -->
-                                    <tr th:each="item, iterStat : ${cartItems}"
-                                        th:classappend="${iterStat.last} ? '' : 'border-b border-gray-100'">
-                                        <td class="px-1 py-5">
-                                            <div class="flex items-center gap-3 md:gap-5">
-                                                <img class="h-16 w-16 md:h-24 md:w-24 object-cover rounded-md bg-gray-50" th:src="@{${item.imageUrl}}" src="/assets/images/single-product/1.jpg" th:alt="${item.name}" alt="Imagen del producto">
-                                                <p class="text-sm md:text-base font-semibold" th:text="${item.name}">Vestido negro de verano</p>
-                                            </div>
-                                        </td>
-                                        <td class="px-1 py-5 text-center whitespace-nowrap" th:text="${'$' + #numbers.formatDecimal(item.price, 1, 2)}">$19.99</td>
-                                        <td class="px-1 py-5 text-center">
-                                            <div class="inline-flex items-center rounded-full border border-gray-200 p-1">
-                                                <form th:action="@{'/cart/update/' + ${item.id}}" method="post">
-                                                    <button type="submit" name="quantity" th:value="${item.quantity - 1}" th:disabled="${item.quantity <= 1}" aria-label="Disminuir cantidad" class="h-8 w-8 rounded-full text-lg hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-40">−</button>
-                                                </form>
-                                                <span class="min-w-8 text-center font-medium" th:text="${item.quantity}">1</span>
-                                                <form th:action="@{'/cart/update/' + ${item.id}}" method="post">
-                                                    <button type="submit" name="quantity" th:value="${item.quantity + 1}" aria-label="Aumentar cantidad" class="h-8 w-8 rounded-full text-lg hover:bg-gray-100">+</button>
-                                                </form>
-                                            </div>
-                                        </td>
-                                        <td class="px-1 py-5 text-right font-medium whitespace-nowrap" th:text="${'$' + #numbers.formatDecimal(item.lineTotal, 1, 2)}">$19.99</td>
-                                        <td class="px-1 py-5 text-right">
-                                            <form th:action="@{'/cart/remove/' + ${item.id}}" method="post">
-                                                <button type="submit" aria-label="Quitar producto" class="h-9 w-9 rounded-full border border-gray-200 text-gray-500 hover:border-red-500 hover:text-red-600">×</button>
-                                            </form>
-                                        </td>
-                                    </tr>
-                                    <!-- Fallback estático (se ve solo si "cartItems" todavía no está en el modelo) -->
-                                    <th:block th:if="${cartItems == null}">
-                                        <tr class="pb-4 border-b border-gray-line">
-                                            <td class="px-1 py-4">
-                                                <div class="flex items-center flex-col sm:flex-row text-center sm:text-left">
-                                                    <img class="h-16 w-16 md:h-24 md:w-24 sm:mr-8 mb-4 sm:mb-0" src="/assets/images/single-product/1.jpg" alt="Imagen del producto">
-                                                    <p class="text-sm md:text-base md:font-semibold">Vestido negro de verano</p>
-                                                </div>
-                                            </td>
-                                            <td class="px-1 py-4 text-center">$19.99</td>
-                                            <td class="px-1 py-4 text-center">
-                                                <div class="flex items-center justify-center">
-                                                    <button class="cart-decrement border border-primary bg-primary text-white hover:bg-transparent hover:text-primary rounded-full w-10 h-10 flex items-center justify-center">-</button>
-                                                    <p class="quantity text-center w-8">1</p>
-                                                    <button class="cart-increment border border-primary bg-primary text-white hover:bg-transparent hover:text-primary rounded-full w-10 h-10 flex items-center justify-center">+</button>
-                                                </div>
-                                            </td>
-                                            <td class="px-1 py-4 text-right">$19.99</td>
-                                        </tr>
-                                        <tr class="pb-4">
-                                            <td class="px-1 py-4">
-                                                <div class="flex items-center flex-col sm:flex-row text-center sm:text-left">
-                                                    <img class="h-16 w-16 md:h-24 md:w-24 sm:mr-8 mb-4 sm:mb-0" src="/assets/images/single-product/2.jpg" alt="Imagen del producto">
-                                                    <p class="text-sm md:text-base md:font-semibold">Conjunto negro</p>
-                                                </div>
-                                            </td>
-                                            <td class="px-1 py-4 text-center">$19.99</td>
-                                            <td class="px-1 py-4 text-center">
-                                                <div class="flex items-center justify-center">
-                                                    <button class="cart-decrement border border-primary bg-primary text-white hover:bg-transparent hover:text-primary rounded-full w-10 h-10 flex items-center justify-center">-</button>
-                                                    <p class="quantity text-center w-8">1</p>
-                                                    <button class="cart-increment border border-primary bg-primary text-white hover:bg-transparent hover:text-primary rounded-full w-10 h-10 flex items-center justify-center">+</button>
-                                                </div>
-                                            </td>
-                                            <td class="px-1 py-4 text-right">$19.99</td>
-                                        </tr>
-                                    </th:block>
-                                </tbody>
-                            </table>
-                            <p th:if="${cartItems != null and #lists.isEmpty(cartItems)}" class="py-8 text-center text-gray-500">Tu carrito está vacío. Explorá la tienda para agregar productos.</p>
-                            <div class="px-1 flex flex-col sm:flex-row justify-end items-center mt-6">
-                                <div class="flex items-center">
-                                    <form th:if="${cartItems != null and !#lists.isEmpty(cartItems)}" th:action="@{/cart/clear}" method="post">
-                                        <button type="submit" class="border border-primary text-primary hover:bg-primary hover:text-white rounded-full py-2 px-5 transition">Vaciar carrito</button>
-                                    </form>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="md:w-1/4 p-2">
-                    <div class="bg-white rounded-xl shadow-md p-5 md:p-6 md:sticky md:top-24">
-                        <h2 class="text-lg font-semibold mb-4">Resumen de compra</h2>
-                        <div class="flex justify-between mb-4">
-                            <p>Subtotal</p>
-                            <p th:text="${'$' + #numbers.formatDecimal(cartSubtotal, 1, 2)}">$0.00</p>
-                        </div>
-                        <div class="flex justify-between mb-4">
-                            <p>Impuestos</p>
-                            <p th:text="${'$' + #numbers.formatDecimal(cartTaxes, 1, 2)}">$0.00</p>
-                        </div>
-                        <div class="flex justify-between mb-4 pb-4 border-b border-gray-line">
-                            <p>Envío</p>
-                            <p th:text="${'$' + #numbers.formatDecimal(cartShipping, 1, 2)}">$0.00</p>
-                        </div>
-                        <div class="flex justify-between mb-2">
-                            <p class="font-semibold">Total</p>
-                            <p class="font-semibold" th:text="${'$' + #numbers.formatDecimal(cartTotal, 1, 2)}">$0.00</p>
-                        </div>
-                        <a th:href="@{/checkout}" href="/checkout" th:classappend="${cartItems == null or #lists.isEmpty(cartItems)} ? ' opacity-50 pointer-events-none' : ''" class="bg-primary text-white border hover:border-primary hover:bg-transparent hover:text-primary py-2 px-4 rounded-full mt-4 w-full text-center block transition">Continuar con la compra</a>
-                    </div>
-                </div>
+<main class="cart-main">
+    <div class="cart-container">
+        <header class="cart-heading">
+            <div>
+                <span class="cart-eyebrow">TU SELECCI&Oacute;N ZERO</span>
+                <h1>Mi carrito</h1>
+                <p>Revis&aacute; tus productos antes de continuar con la compra.</p>
             </div>
+            <a th:href="@{/shop}" class="cart-continue-link"><i class="fas fa-arrow-left"></i> Seguir explorando</a>
+        </header>
+
+        <p th:if="${mensajeExito}" class="cart-alert cart-alert--success" th:text="${mensajeExito}"></p>
+        <p th:if="${mensajeError}" class="cart-alert cart-alert--error" th:text="${mensajeError}"></p>
+
+        <section th:if="${cartItems != null and #lists.isEmpty(cartItems)}" class="cart-empty">
+            <span class="cart-empty__icon"><i class="fas fa-bag-shopping"></i></span>
+            <h2>Tu carrito est&aacute; vac&iacute;o</h2>
+            <p>Explor&aacute; la tienda y encontr&aacute; algo para vos.</p>
+            <a th:href="@{/shop}" class="cart-primary-link">Explorar productos</a>
+        </section>
+
+        <div th:if="${cartItems != null and !#lists.isEmpty(cartItems)}" class="cart-layout">
+            <section class="cart-products-panel">
+                <div class="cart-products-heading">
+                    <h2>Productos</h2>
+                    <span th:text="${#lists.size(cartItems)} + ' productos'">0 productos</span>
+                </div>
+
+                <article th:each="item : ${cartItems}" class="cart-product">
+                    <a th:href="@{'/product/' + ${item.id}}" class="cart-product__image-link">
+                        <img th:src="@{${item.imageUrl}}" th:alt="${item.name}" class="cart-product__image">
+                    </a>
+                    <div class="cart-product__info">
+                        <span class="cart-product__label">INDUMENTARIA ZERO</span>
+                        <a th:href="@{'/product/' + ${item.id}}" class="cart-product__name" th:text="${item.name}">Producto</a>
+                        <span class="cart-product__unit-price" th:text="${'$ ' + #numbers.formatDecimal(item.price, 1, 2)}">$ 0,00 c/u</span>
+                    </div>
+                    <div class="cart-quantity">
+                        <span class="cart-quantity__label">Cantidad</span>
+                        <div class="cart-quantity__control">
+                            <form th:action="@{'/cart/update/' + ${item.id}}" method="post">
+                                <button type="submit" name="quantity" th:value="${item.quantity - 1}" th:disabled="${item.quantity <= 1}" aria-label="Disminuir cantidad">&minus;</button>
+                            </form>
+                            <strong th:text="${item.quantity}">1</strong>
+                            <form th:action="@{'/cart/update/' + ${item.id}}" method="post">
+                                <button type="submit" name="quantity" th:value="${item.quantity + 1}" aria-label="Aumentar cantidad">+</button>
+                            </form>
+                        </div>
+                    </div>
+                    <div class="cart-product__line-total">
+                        <span>Importe</span>
+                        <strong th:text="${'$ ' + #numbers.formatDecimal(item.lineTotal, 1, 2)}">$ 0,00</strong>
+                    </div>
+                    <form th:action="@{'/cart/remove/' + ${item.id}}" method="post" class="cart-product__remove-form">
+                        <button type="submit" aria-label="Quitar producto" title="Quitar producto" class="cart-remove-button"><i class="fas fa-trash-can"></i></button>
+                    </form>
+                </article>
+
+                <form th:action="@{/cart/clear}" method="post" class="cart-clear-form">
+                    <button type="submit" class="cart-clear-button"><i class="far fa-trash-can"></i> Vaciar carrito</button>
+                </form>
+            </section>
+
+            <aside class="cart-summary">
+                <div class="cart-summary__heading">
+                    <span class="cart-summary__icon"><i class="fas fa-receipt"></i></span>
+                    <h2>Resumen de compra</h2>
+                </div>
+                <div class="cart-summary__lines">
+                    <div><span>Subtotal</span><strong th:text="${'$ ' + #numbers.formatDecimal(cartSubtotal, 1, 2)}">$ 0,00</strong></div>
+                    <div><span>Impuestos</span><strong th:text="${'$ ' + #numbers.formatDecimal(cartTaxes, 1, 2)}">$ 0,00</strong></div>
+                    <div><span>Env&iacute;o</span><strong th:text="${'$ ' + #numbers.formatDecimal(cartShipping, 1, 2)}">$ 0,00</strong></div>
+                </div>
+                <div class="cart-summary__total"><span>Total</span><strong th:text="${'$ ' + #numbers.formatDecimal(cartTotal, 1, 2)}">$ 0,00</strong></div>
+                <a th:href="@{/checkout}" class="cart-checkout-link"><i class="fas fa-lock"></i> Continuar con la compra</a>
+                <p class="cart-summary__secure"><i class="fas fa-shield-halved"></i> Compra segura. Revis&aacute; la direcci&oacute;n y el pago en el siguiente paso.</p>
+            </aside>
         </div>
-    </section>
-    
-    <div th:replace="~{tienda/fragments/fragments :: footer}"></div>
+    </div>
+</main>
 
-    <th:block th:replace="~{tienda/fragments/fragments :: scripts}"></th:block>
+<div th:replace="~{tienda/fragments/fragments :: footer}"></div>
+<th:block th:replace="~{tienda/fragments/fragments :: scripts}"></th:block>
 </body>
-
 </html>

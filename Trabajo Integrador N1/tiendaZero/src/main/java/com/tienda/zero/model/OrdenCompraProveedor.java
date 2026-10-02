@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.sql.Date;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,6 +27,8 @@ public class OrdenCompraProveedor {
 
     @Column(nullable = false)
     private Date fechaCreacion;
+
+    private LocalDateTime fechaHoraCreacion;
 
     @Column(nullable = false)
     private boolean entregada;

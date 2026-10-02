@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <title>Env&iacute;os | Zero</title>
+  <th:block th:replace="~{tienda/fragments/fragments :: head-assets}"></th:block>
+</head>
+<body>
+  <div th:replace="~{tienda/fragments/fragments :: header}"></div>
+  <main class="container mx-auto max-w-6xl px-4 py-14">
+    <header class="mx-auto mb-12 max-w-3xl text-center">
+      <p class="mb-3 text-sm font-bold uppercase tracking-[.2em] text-primary">Zero &middot; Compr&aacute; con confianza</p>
+      <h1 class="mb-4 text-4xl font-extrabold text-gray-900 md:text-5xl">Env&iacute;os y entregas</h1>
+      <p class="text-lg text-gray-600">Preparamos tu pedido para que llegue seguro y puedas seguir cada etapa.</p>
+    </header>
+    <section class="grid gap-6 md:grid-cols-3">
+      <article class="rounded-2xl border border-gray-200 bg-white p-7 shadow-sm"><span class="mb-5 inline-flex h-12 w-12 items-center justify-center rounded-full bg-rose-50 text-xl text-primary"><i class="fas fa-box"></i></span><h2 class="mb-3 text-xl font-bold">Preparaci&oacute;n</h2><p class="leading-relaxed text-gray-600">Una vez confirmada la compra, preparamos y despachamos los productos seg&uacute;n disponibilidad.</p></article>
+      <article class="rounded-2xl border border-gray-200 bg-white p-7 shadow-sm"><span class="mb-5 inline-flex h-12 w-12 items-center justify-center rounded-full bg-rose-50 text-xl text-primary"><i class="fas fa-location-dot"></i></span><h2 class="mb-3 text-xl font-bold">Direcci&oacute;n correcta</h2><p class="leading-relaxed text-gray-600">Revis&aacute; que la direcci&oacute;n de entrega y sus referencias est&eacute;n completas antes de confirmar tu pedido.</p></article>
+      <article class="rounded-2xl border border-gray-200 bg-white p-7 shadow-sm"><span class="mb-5 inline-flex h-12 w-12 items-center justify-center rounded-full bg-rose-50 text-xl text-primary"><i class="fas fa-truck-fast"></i></span><h2 class="mb-3 text-xl font-bold">Seguimiento</h2><p class="leading-relaxed text-gray-600">Consult&aacute; el estado de tus compras desde tu perfil y la secci&oacute;n de &oacute;rdenes.</p></article>
+    </section>
+    <div class="mt-10 rounded-2xl bg-gray-900 p-8 text-center text-white"><h2 class="mb-2 text-2xl font-bold">&iquest;Ya hiciste tu compra?</h2><p class="mb-5 text-gray-300">Ingres&aacute; a tu cuenta para revisar el estado de tu pedido.</p><a th:href="@{/orders}" class="inline-block rounded-full bg-primary px-6 py-3 font-bold text-white hover:bg-rose-700">Ver mis pedidos</a></div>
+  </main>
+  <div th:replace="~{tienda/fragments/fragments :: footer}"></div>
+  <th:block th:replace="~{tienda/fragments/fragments :: scripts}"></th:block>
+</body>
+</html>

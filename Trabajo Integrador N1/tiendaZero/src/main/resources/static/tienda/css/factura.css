@@ -1,0 +1,43 @@
+.factura-main { padding: 32px 20px; color: #17202a; }
+.factura-toolbar, .factura-sheet, .factura-payment, .factura-error { max-width: 940px; margin: 0 auto; }
+.factura-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 24px; }
+.factura-toolbar a { color: #374151; text-decoration: underline; }
+.factura-toolbar button, .factura-payment button { border: 1px solid #d1d5db; border-radius: 6px; padding: 10px 16px; background: #fff; cursor: pointer; }
+.factura-sheet { background: #fff; border: 1px solid #d1d5db; padding: 32px; }
+.factura-heading { display: flex; justify-content: space-between; gap: 24px; border-bottom: 2px solid #17202a; padding-bottom: 24px; }
+.factura-brand { font-size: 30px; color: #ff004c; }
+.factura-heading h1 { font-size: 22px; margin-top: 8px; }
+.factura-number { display: grid; gap: 6px; text-align: right; }
+.factura-number strong { font-size: 22px; }
+.factura-data { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; padding: 24px 0; }
+.factura-data h2 { font-size: 14px; color: #6b7280; margin-bottom: 8px; }
+.factura-data p { margin: 6px 0; overflow-wrap: anywhere; }
+.factura-reference { font-size: 13px; }
+.factura-table-wrapper { overflow-x: auto; }
+.factura-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+.factura-table th, .factura-table td { padding: 14px 8px; text-align: right; border-bottom: 1px solid #e5e7eb; }
+.factura-table th:first-child, .factura-table td:first-child { text-align: left; }
+.factura-table small { display: block; color: #6b7280; margin-top: 4px; }
+.factura-table td:not(:first-child) { white-space: nowrap; }
+.factura-total { display: flex; justify-content: flex-end; align-items: center; gap: 24px; padding-top: 24px; }
+.factura-total strong { font-size: 24px; }
+.factura-payment { text-align: right; margin-top: 20px; }
+.factura-error { color: #b91c1c; margin-bottom: 16px; }
+/* En el panel, deja espacio para la barra superior fija de administración. */
+.factura-main.content { padding-top: 84px; }
+@media (max-width: 600px) {
+    .factura-main { padding: 20px 12px; }
+    .factura-main.content { padding-top: 84px; }
+    .factura-sheet { padding: 20px 12px; }
+    .factura-heading { flex-wrap: wrap; }
+    .factura-number { text-align: left; }
+    .factura-data { grid-template-columns: 1fr; gap: 20px; }
+}
+@media print {
+    body > header, body > footer, .store-header, .store-footer, .sidebar, .topbar, .factura-toolbar, .factura-payment, .factura-error { display: none !important; }
+    .factura-main.content, .factura-main { margin: 0 !important; padding: 0 !important; }
+    .factura-sheet { border: 0; max-width: none; padding: 0; }
+    .factura-table-wrapper { overflow: visible; }
+    .factura-data { grid-template-columns: 1fr 1fr; }
+    .factura-heading, .factura-total, tr { break-inside: avoid; }
+}

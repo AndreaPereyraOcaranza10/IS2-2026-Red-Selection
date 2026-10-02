@@ -10,6 +10,8 @@ import java.util.Optional;
 @Repository
 public interface ProveedorRepository extends JpaRepository<Proveedor, String> {
 
+    long countByEliminadoFalse();
+
     List<Proveedor> findByEliminadoFalse();
     Optional<Proveedor> findByRazonSocialIgnoreCaseAndEliminadoFalse(String razonSocial);
 }

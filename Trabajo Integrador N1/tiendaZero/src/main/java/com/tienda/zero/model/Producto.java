@@ -61,6 +61,10 @@ public class Producto {
     @JoinColumn(name = "subcategoria_id", nullable = false)
     private SubCategoria subCategoria;
 
+    @ManyToOne
+    @JoinColumn(name = "proveedor_id")
+    private Proveedor proveedor;
+
     //Relación para la imágen
     @JsonIgnore @ManyToOne
     @JoinColumn(name = "imagen_id")

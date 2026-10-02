@@ -156,12 +156,13 @@
                 th:text="${modoEdicion} ? 'Guardar cambios' : 'Guardar perfil'">Guardar perfil</button>
     </form>
 </section>
-<section class="tarjeta tarjeta--ancha" th:unless="${perfilEmpleado}">
+<section class="tarjeta tarjeta--ancha">
     <p class="etiqueta">Mis compras</p>
-    <h1>Ordenes de compra</h1>
+    <h1>Mis pedidos</h1>
     <p class="subtitulo">Seguimiento de tus pedidos confirmados.</p>
+    <a class="perfil-orders-link" th:href="@{/orders}"><i class="fas fa-box-open" aria-hidden="true"></i> Ver todos mis pedidos</a>
 
-    <p th:if="${#lists.isEmpty(ordenesCliente)}" class="subtitulo">Todavia no tenes ordenes de compra confirmadas.</p>
+    <p th:if="${#lists.isEmpty(ordenesCliente)}" class="subtitulo">Todavía no tenés pedidos confirmados.</p>
 
     <div class="ordenes-perfil" th:if="${!#lists.isEmpty(ordenesCliente)}">
         <article class="orden-perfil" th:each="orden : ${ordenesCliente}">
@@ -204,6 +205,7 @@
     const selectLocalidad = document.getElementById('idLocalidad');
     const formulario = document.getElementById('perfil-form');
     const botonGuardar = document.getElementById('guardar-perfil');
+    const ubicacion = /*[[${ubicacion}]]*/ { provincias: [], departamentos: [], localidades: [] };
     const ubicacionInicial = {
         provincia: /*[[${perfil.idProvincia}]]*/ '',
         departamento: /*[[${perfil.idDepartamento}]]*/ '',
@@ -211,23 +213,23 @@
     };
     let estadoInicial = '';
 
-    function cargarOpciones(select, url, placeholder, seleccionada = '') {
-        select.disabled = true;
-        select.innerHTML = `<option value="" disabled selected>Cargando...</option>`;
-        return fetch(url)
-            .then(r => r.json())
-            .then(datos => {
-                if (datos.length === 0) {
-                    select.innerHTML = `<option value="" disabled selected>Sin opciones cargadas</option>`;
-                    return;
-                }
-                select.innerHTML = `<option value="" disabled selected>${placeholder}</option>` +
-                    datos.map(d => `<option value="${d.id}">${d.nombre}</option>`).join('');
-                select.disabled = false;
-                if (seleccionada) {
-                    select.value = seleccionada;
-                }
-            });
+    function llenarOpciones(select, opciones, placeholder, seleccionada = '') {
+        select.innerHTML = `<option value="" disabled>${placeholder}</option>`;
+        opciones.forEach(opcion => select.add(new Option(opcion.nombre, opcion.id)));
+        select.disabled = opciones.length === 0;
+        if (seleccionada && opciones.some(opcion => opcion.id === seleccionada)) {
+            select.value = seleccionada;
+        } else {
+            select.selectedIndex = 0;
+        }
+    }
+
+    function departamentosDe(idProvincia) {
+        return ubicacion.departamentos.filter(departamento => departamento.idProvincia === idProvincia);
+    }
+
+    function localidadesDe(idDepartamento) {
+        return ubicacion.localidades.filter(localidad => localidad.idDepartamento === idDepartamento);
     }
 
     function estadoFormulario() {
@@ -241,30 +243,23 @@
         botonGuardar.disabled = estadoFormulario() === estadoInicial;
     }
 
-    async function cargarUbicacionInicial() {
-        await cargarOpciones(selectProvincia, '/api/ubicacion/provincias', 'Seleccionar', ubicacionInicial.provincia);
-        if (ubicacionInicial.provincia) {
-            await cargarOpciones(selectDepartamento,
-                `/api/ubicacion/departamentos?idProvincia=${ubicacionInicial.provincia}`,
-                'Seleccionar', ubicacionInicial.departamento);
-        }
-        if (ubicacionInicial.departamento) {
-            await cargarOpciones(selectLocalidad,
-                `/api/ubicacion/localidades?idDepartamento=${ubicacionInicial.departamento}`,
-                'Seleccionar', ubicacionInicial.localidad);
-        }
+    function cargarUbicacionInicial() {
+        llenarOpciones(selectProvincia, ubicacion.provincias, 'Seleccionar', ubicacionInicial.provincia);
+        llenarOpciones(selectDepartamento, departamentosDe(selectProvincia.value), 'Elegí una provincia primero', ubicacionInicial.departamento);
+        llenarOpciones(selectLocalidad, localidadesDe(selectDepartamento.value), 'Elegí un departamento primero', ubicacionInicial.localidad);
         estadoInicial = estadoFormulario();
         actualizarBotonGuardar();
     }
 
     selectProvincia.addEventListener('change', () => {
-        cargarOpciones(selectDepartamento, `/api/ubicacion/departamentos?idProvincia=${selectProvincia.value}`, 'Seleccionar');
-        selectLocalidad.disabled = true;
-        selectLocalidad.innerHTML = `<option value="" disabled selected>Elegí un departamento primero</option>`;
+        llenarOpciones(selectDepartamento, departamentosDe(selectProvincia.value), 'Seleccionar');
+        llenarOpciones(selectLocalidad, [], 'Elegí un departamento primero');
+        actualizarBotonGuardar();
     });
 
     selectDepartamento.addEventListener('change', () => {
-        cargarOpciones(selectLocalidad, `/api/ubicacion/localidades?idDepartamento=${selectDepartamento.value}`, 'Seleccionar');
+        llenarOpciones(selectLocalidad, localidadesDe(selectDepartamento.value), 'Seleccionar');
+        actualizarBotonGuardar();
     });
 
     formulario.addEventListener('input', actualizarBotonGuardar);

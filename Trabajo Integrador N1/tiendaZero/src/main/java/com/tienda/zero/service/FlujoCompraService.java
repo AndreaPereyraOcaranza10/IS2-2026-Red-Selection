@@ -20,6 +20,7 @@ public interface FlujoCompraService {
     Map<String, Object> vaciarCarrito(String username);
 
     List<OrdenCompra> listarPedidosCliente(String username);
+    List<OrdenCompra> listarPedidosUsuario(String username);
 
     List<OrdenCompra> listarPedidosAdministracion();
 
