@@ -25,7 +25,7 @@
             <!-- Top Filter -->
             <div class="shop-toolbar flex flex-col md:flex-row justify-between items-center py-4 gap-4">
                 <div class="flex items-center space-x-3">
-                    <a th:href="@{/shop(categoria=${selectedCategorias}, talle=${selectedTalles}, sort=${currentSort}, q=${query}, oferta=${currentOferta == true ? null : true})}"
+                    <a th:href="@{/shop(categoria=${selectedCategorias}, subcategoria=${selectedSubcategorias}, talle=${selectedTalles}, sort=${currentSort}, q=${query}, oferta=${currentOferta == true ? null : true})}"
                        th:classappend="${currentOferta == true} ? 'bg-primary text-white border-primary shadow-sm' : 'bg-white text-gray-700 border-gray-300 hover:border-primary hover:text-primary'"
                        class="border py-2 px-5 rounded-full font-medium transition text-sm flex items-center gap-1.5 focus:outline-none">
                         <i class="ti ti-tag text-base" th:if="${currentOferta == true}"></i>
@@ -39,6 +39,7 @@
                 <div class="flex items-center space-x-4">
                     <form th:action="@{/shop}" method="get" class="relative flex items-center gap-2">
                         <input type="hidden" name="categoria" th:each="c : ${selectedCategorias}" th:value="${c}">
+                        <input type="hidden" name="subcategoria" th:each="s : ${selectedSubcategorias}" th:value="${s}">
                         <input type="hidden" name="talle" th:each="t : ${selectedTalles}" th:value="${t}">
                         <input type="hidden" name="oferta" th:value="${currentOferta}" th:if="${currentOferta != null}">
                         <input type="hidden" name="q" th:value="${query}" th:if="${query != null}">
@@ -93,8 +94,8 @@
                             <h3 class="text-lg font-semibold mb-4 text-gray-900">Subcategorías</h3>
                             <div class="space-y-2.5">
                                 <label class="flex items-center cursor-pointer hover:text-primary transition" th:each="sub : ${subcategories}">
-                                    <input type="checkbox" name="categoria" th:value="${sub}"
-                                           th:checked="${selectedCategorias != null and #lists.contains(selectedCategorias, sub)}"
+                                    <input type="checkbox" name="subcategoria" th:value="${sub}"
+                                           th:checked="${selectedSubcategorias != null and #lists.contains(selectedSubcategorias, sub)}"
                                            onchange="document.getElementById('shopFilterForm').submit()"
                                            class="form-checkbox custom-checkbox text-primary rounded h-4 w-4">
                                     <span class="ml-2.5 text-sm" th:text="${sub}">Ropa</span>
@@ -229,14 +230,14 @@
                             <ul class="inline-flex items-center space-x-2">
                                 <!-- Botón Anterior -->
                                 <li th:if="${currentPage > 1}">
-                                    <a th:href="@{/shop(page=${currentPage - 1}, categoria=${selectedCategorias}, talle=${selectedTalles}, sort=${currentSort}, oferta=${currentOferta}, q=${query})}"
+                                    <a th:href="@{/shop(page=${currentPage - 1}, categoria=${selectedCategorias}, subcategoria=${selectedSubcategorias}, talle=${selectedTalles}, sort=${currentSort}, oferta=${currentOferta}, q=${query})}"
                                        class="w-10 h-10 flex items-center justify-center rounded-full border border-gray-300 hover:bg-primary hover:text-white hover:border-primary transition text-sm">
                                         &lt;
                                     </a>
                                 </li>
                                 <!-- Botones de Páginas 1 .. totalPages -->
                                 <li th:each="p : ${#numbers.sequence(1, totalPages)}">
-                                    <a th:href="@{/shop(page=${p}, categoria=${selectedCategorias}, talle=${selectedTalles}, sort=${currentSort}, oferta=${currentOferta}, q=${query})}"
+                                    <a th:href="@{/shop(page=${p}, categoria=${selectedCategorias}, subcategoria=${selectedSubcategorias}, talle=${selectedTalles}, sort=${currentSort}, oferta=${currentOferta}, q=${query})}"
                                        th:text="${p}"
                                        th:classappend="${p == currentPage} ? 'bg-primary text-white font-bold border-primary shadow-sm' : 'border border-gray-300 hover:bg-primary hover:text-white hover:border-primary text-gray-700'"
                                        class="w-10 h-10 flex items-center justify-center rounded-full border transition text-sm">
@@ -245,7 +246,7 @@
                                 </li>
                                 <!-- Botón Siguiente -->
                                 <li th:if="${currentPage < totalPages}">
-                                    <a th:href="@{/shop(page=${currentPage + 1}, categoria=${selectedCategorias}, talle=${selectedTalles}, sort=${currentSort}, oferta=${currentOferta}, q=${query})}"
+                                    <a th:href="@{/shop(page=${currentPage + 1}, categoria=${selectedCategorias}, subcategoria=${selectedSubcategorias}, talle=${selectedTalles}, sort=${currentSort}, oferta=${currentOferta}, q=${query})}"
                                        class="w-10 h-10 flex items-center justify-center rounded-full border border-gray-300 hover:bg-primary hover:text-white hover:border-primary transition text-sm">
                                         &gt;
                                     </a>
