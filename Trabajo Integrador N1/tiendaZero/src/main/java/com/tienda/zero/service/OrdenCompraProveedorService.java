@@ -6,6 +6,8 @@ import java.util.List;
 
 public interface OrdenCompraProveedorService {
     OrdenCompraProveedor crearOrden(OrdenCompraProveedor ordenCompraProveedor);
+    OrdenCompraProveedor modificarOrden(OrdenCompraProveedor ordenCompraProveedor);
+    void eliminarOrden(String id);
     OrdenCompraProveedor buscarOrden(String id);
     List<OrdenCompraProveedor> listarOrdenes();
     List<OrdenCompraProveedor> listarOrdenesPendientes();

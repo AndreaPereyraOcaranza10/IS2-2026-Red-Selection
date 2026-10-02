@@ -1,14 +1,14 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" lang="en">
 <head>
-  <title>Nueva Orden de Compra</title>
+  <title th:text="${modoEdicion} ? 'Editar Orden de Compra' : 'Nueva Orden de Compra'">Nueva Orden de Compra</title>
   <th:block th:replace="~{admin/fragments/fragments :: head-assets}"></th:block>
 </head>
 <body>
 <div th:replace="~{admin/fragments/fragments :: sidebarTopbar(activePage='ordenes')}"></div>
 <main id="content" class="content py-10">
   <div class="container-fluid">
-    <h1>Nueva orden de compra</h1>
+    <h1 th:text="${modoEdicion} ? 'Editar orden de compra' : 'Nueva orden de compra'">Nueva orden de compra</h1>
     <div class="card">
       <div class="card-body">
         <div class="alert alert-success alert-dismissible fade show mb-4" role="alert" th:if="${mensajeExito != null}">
@@ -21,12 +21,14 @@
           <span th:text="${mensajeError}">Ocurrió un error</span>
           <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
-        <form th:action="@{/admin/ordenes/nueva}" method="post" id="ordenForm">
+        <form th:action="${modoEdicion} ? @{/admin/ordenes/{id}/editar(id=${orden.id})} : @{/admin/ordenes/nueva}"
+              method="post" id="ordenForm">
           <div class="mb-3">
             <label for="proveedor">Proveedor</label>
             <select id="proveedor" name="proveedor.id" class="form-select" required>
               <option value="">Seleccione proveedor...</option>
-              <option th:each="p : ${proveedores}" th:value="${p.id}" th:text="${p.razonSocial}">Proveedor</option>
+              <option th:each="p : ${proveedores}" th:value="${p.id}" th:text="${p.razonSocial}"
+                      th:selected="${orden.proveedor != null and orden.proveedor.id == p.id}">Proveedor</option>
             </select>
           </div>
 
@@ -49,8 +51,10 @@
           </div>
 
           <div class="d-flex gap-2 mt-3">
-            <button type="submit" class="btn btn-primary">Crear orden</button>
-            <a th:href="@{/admin/ordenes}" class="btn btn-secondary">Cancelar</a>
+            <button type="submit" class="btn btn-primary"
+                    th:text="${modoEdicion} ? 'Guardar cambios' : 'Crear orden'">Crear orden</button>
+            <a th:href="${modoEdicion} ? @{/admin/ordenes/{id}(id=${orden.id})} : @{/admin/ordenes}"
+               class="btn btn-secondary">Cancelar</a>
           </div>
         </form>
 
@@ -78,6 +82,14 @@
           </div>
         </template>
 
+        <!-- Líneas existentes de la orden (solo en modo edición): el script las carga en el formulario -->
+        <div id="items-existentes" hidden th:if="${modoEdicion}">
+          <span th:each="d : ${orden.detalles}" th:if="${d.producto != null}"
+                th:data-producto="${d.producto.id}"
+                th:data-cantidad="${d.cantidad}"
+                th:data-precio="${d.precioUnitario}"></span>
+        </div>
+
         <script>
           (function(){
             const addBtn = document.getElementById('addItemBtn');
@@ -101,22 +113,30 @@
               totalEl.textContent = formatMoney(total);
             }
 
-            function addRow(){
+            function addRow(productoId, cantidad, precio){
               const clone = template.content.cloneNode(true);
               container.appendChild(clone);
               const newRow = container.lastElementChild;
+              // valores iniciales (solo al editar una orden existente)
+              if (productoId) newRow.querySelector('.product-select').value = productoId;
+              if (cantidad) newRow.querySelector('.cantidad-input').value = cantidad;
+              if (precio) newRow.querySelector('.precio-input').value = precio;
               // attach listeners
               newRow.querySelectorAll('.cantidad-input, .precio-input').forEach(inp => inp.addEventListener('input', recalcTotal));
               const removeBtn = newRow.querySelector('.remove-item');
               removeBtn.addEventListener('click', function(){ newRow.remove(); recalcTotal(); });
-              // if product select changes nothing automatic yet, but could set default price
               newRow.querySelector('.product-select').addEventListener('change', recalcTotal);
             }
 
             addBtn.addEventListener('click', function(e){ e.preventDefault(); addRow(); });
 
-            // Add one initial row
-            addRow();
+            // En edición carga las líneas existentes; en alta agrega una fila vacía
+            const existentes = document.querySelectorAll('#items-existentes span');
+            if (existentes.length > 0) {
+              existentes.forEach(s => addRow(s.dataset.producto, s.dataset.cantidad, s.dataset.precio));
+            } else {
+              addRow();
+            }
             recalcTotal();
 
             // on submit, ensure empty product rows removed so controller won't receive blanks

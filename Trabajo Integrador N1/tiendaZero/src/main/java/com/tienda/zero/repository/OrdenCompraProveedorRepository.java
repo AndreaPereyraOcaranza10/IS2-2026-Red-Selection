@@ -8,4 +8,7 @@ import java.util.List;
 public interface OrdenCompraProveedorRepository extends JpaRepository<OrdenCompraProveedor, String> {
     List<OrdenCompraProveedor> findByEntregadaFalse();
     List<OrdenCompraProveedor> findAllByOrderByFechaCreacionDesc();
+
+    List<OrdenCompraProveedor> findByEntregadaFalseAndEliminadoFalse();
+    List<OrdenCompraProveedor> findByEliminadoFalseOrderByFechaCreacionDesc();
 }

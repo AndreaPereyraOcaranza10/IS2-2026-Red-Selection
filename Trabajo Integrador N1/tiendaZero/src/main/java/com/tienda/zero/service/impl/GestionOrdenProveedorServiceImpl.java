@@ -36,16 +36,46 @@ public class GestionOrdenProveedorServiceImpl implements GestionOrdenProveedorSe
     @Transactional
     public OrdenCompraProveedor crearOrden(String idProveedor, List<ItemFacturaDTO> items) {
         validar(idProveedor, items);
+        Proveedor proveedor = buscarProveedorActivo(idProveedor);
 
+        OrdenCompraProveedor orden = new OrdenCompraProveedor();
+        orden.setProveedor(proveedor);
+        orden.setDetalles(armarDetalles(items));
+        return ordenCompraProveedorService.crearOrden(orden);
+    }
+
+    @Override
+    @Transactional
+    public OrdenCompraProveedor modificarOrden(String idOrden, String idProveedor, List<ItemFacturaDTO> items) {
+        OrdenCompraProveedor orden = ordenCompraProveedorService.buscarOrden(idOrden);
+        if (orden == null) {
+            throw new IllegalArgumentException("No existe la orden de compra con id: " + idOrden);
+        }
+        if (orden.isEntregada()) {
+            throw new IllegalArgumentException("Una orden ya recibida no se puede modificar");
+        }
+        validar(idProveedor, items);
+        Proveedor proveedor = buscarProveedorActivo(idProveedor);
+
+        List<DetalleOrdenCompraProveedor> nuevos = armarDetalles(items);
+        orden.setProveedor(proveedor);
+        // Importante: con orphanRemoval hay que modificar la lista existente,
+        // no reemplazarla por otra (setDetalles) o Hibernate lanza un error.
+        orden.getDetalles().clear();
+        orden.getDetalles().addAll(nuevos);
+        return ordenCompraProveedorService.modificarOrden(orden);
+    }
+
+    private Proveedor buscarProveedorActivo(String idProveedor) {
         Proveedor proveedor = proveedorService.buscarProveedor(idProveedor);
         if (proveedor.isEliminado()) {
             throw new IllegalArgumentException("El proveedor está eliminado");
         }
+        return proveedor;
+    }
 
-        OrdenCompraProveedor orden = new OrdenCompraProveedor();
-        orden.setProveedor(proveedor);
-        orden.setDetalles(new ArrayList<>());
-
+    private List<DetalleOrdenCompraProveedor> armarDetalles(List<ItemFacturaDTO> items) {
+        List<DetalleOrdenCompraProveedor> detalles = new ArrayList<>();
         for (ItemFacturaDTO item : items) {
             Producto producto = productoService.buscarProducto(item.idProducto());
             if (producto.isEliminado()) {
@@ -55,12 +85,11 @@ public class GestionOrdenProveedorServiceImpl implements GestionOrdenProveedorSe
             detalle.setProducto(producto);
             detalle.setCantidad(item.cantidad());
             detalle.setPrecioUnitario(item.precioUnitario());
-            orden.getDetalles().add(detalle);
+            detalles.add(detalle);
         }
-
-        // OrdenCompraProveedorService completa la fecha y la deja como pendiente
-        return ordenCompraProveedorService.crearOrden(orden);
+        return detalles;
     }
+
 
     private void validar(String idProveedor, List<ItemFacturaDTO> items) {
         if (idProveedor == null || idProveedor.isBlank()) {
@@ -86,4 +115,6 @@ public class GestionOrdenProveedorServiceImpl implements GestionOrdenProveedorSe
             }
         }
     }
+
 }
+

@@ -31,7 +31,11 @@ public class OrdenCompraProveedor {
     private boolean entregada;
 
     @Builder.Default
-    @OneToMany(cascade = CascadeType.ALL)
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "orden_compra_id")
     private List<DetalleOrdenCompraProveedor> detalles = new ArrayList<>();
+
+    @Builder.Default
+    @Column(nullable = false)
+    private boolean eliminado = false;
 }

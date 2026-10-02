@@ -37,6 +37,15 @@
               <span th:if="${orden.entregada}" class="badge bg-success-subtle text-success">Entregada</span>
               <span th:unless="${orden.entregada}" class="badge bg-warning-subtle text-warning">Pendiente</span>
             </p>
+
+            <!-- Editar / eliminar: solo mientras la orden no fue recibida -->
+            <div class="d-flex gap-2 mt-3" th:unless="${orden.entregada}">
+              <a th:href="@{/admin/ordenes/{id}/editar(id=${orden.id})}" class="btn btn-sm btn-outline-primary">Editar</a>
+              <form th:action="@{/admin/ordenes/{id}/eliminar(id=${orden.id})}" method="post"
+                    onsubmit="return confirm('¿Eliminar esta orden de compra?');">
+                <button type="submit" class="btn btn-sm btn-outline-danger">Eliminar</button>
+              </form>
+            </div>
           </div>
         </div>
 

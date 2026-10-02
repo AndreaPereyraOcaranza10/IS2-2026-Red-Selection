@@ -84,7 +84,7 @@ public class OrdenCompraProveedorController {
     }
 
     /**
-     * El alta ahora pasa por GestionOrdenProveedorService, que valida antes de guardar:
+     * El alta pasa por GestionOrdenProveedorService, que valida antes de guardar:
      * al menos una línea, cantidades y precios positivos, sin productos repetidos y sin
      * proveedor ni productos eliminados. Si algo falla, vuelve al formulario con el motivo.
      */
@@ -94,21 +94,10 @@ public class OrdenCompraProveedorController {
                              @RequestParam(value = "cantidad", required = false) List<Integer> cantidades,
                              @RequestParam(value = "precioUnitario", required = false) List<Double> precios,
                              RedirectAttributes redirectAttributes) {
-        List<ItemFacturaDTO> items = new ArrayList<>();
-        if (productoIds != null) {
-            for (int i = 0; i < productoIds.size(); i++) {
-                String pid = productoIds.get(i);
-                if (pid == null || pid.isBlank()) continue;   // líneas vacías del formulario
-                int qty = (cantidades != null && cantidades.size() > i && cantidades.get(i) != null) ? cantidades.get(i) : 0;
-                double pu = (precios != null && precios.size() > i && precios.get(i) != null) ? precios.get(i) : 0.0;
-                items.add(new ItemFacturaDTO(pid, qty, pu));
-            }
-        }
-
         String idProveedor = ordenCompraProveedor.getProveedor() != null
                 ? ordenCompraProveedor.getProveedor().getId() : null;
         try {
-            gestionOrdenProveedorService.crearOrden(idProveedor, items);
+            gestionOrdenProveedorService.crearOrden(idProveedor, armarItems(productoIds, cantidades, precios));
             redirectAttributes.addFlashAttribute("mensajeExito", "La orden de compra fue creada.");
             return "redirect:/admin/ordenes";
         } catch (IllegalArgumentException e) {
@@ -126,6 +115,53 @@ public class OrdenCompraProveedorController {
         model.addAttribute("formasDePago", formaDePagoService.listarFormaDePagoActivo());
         model.addAttribute("estados", List.of(EstadoFactura.PAGADA, EstadoFactura.SIN_DEFINIR));
         return "admin/ordenes/detalle";
+    }
+
+    @GetMapping("/{id}/editar")
+    public String editarForm(@PathVariable String id, Model model, RedirectAttributes redirectAttributes) {
+        OrdenCompraProveedor orden = ordenCompraProveedorService.buscarOrden(id);
+        if (orden == null) {
+            redirectAttributes.addFlashAttribute("mensajeError", "No existe la orden de compra");
+            return "redirect:/admin/ordenes";
+        }
+        if (orden.isEntregada()) {
+            redirectAttributes.addFlashAttribute("mensajeError", "Una orden ya recibida no se puede editar");
+            return "redirect:/admin/ordenes/" + id;
+        }
+        model.addAttribute("proveedores", proveedorService.listarProveedorActivo());
+        model.addAttribute("productos", productoService.listarProductoActivo());
+        model.addAttribute("orden", orden);
+        model.addAttribute("modoEdicion", true);
+        return "admin/ordenes/formulario";
+    }
+
+    @PostMapping("/{id}/editar")
+    public String editarOrden(@PathVariable String id,
+                              @RequestParam(value = "proveedor.id", required = false) String idProveedor,
+                              @RequestParam(value = "productoId", required = false) List<String> productoIds,
+                              @RequestParam(value = "cantidad", required = false) List<Integer> cantidades,
+                              @RequestParam(value = "precioUnitario", required = false) List<Double> precios,
+                              RedirectAttributes redirectAttributes) {
+        try {
+            gestionOrdenProveedorService.modificarOrden(id, idProveedor, armarItems(productoIds, cantidades, precios));
+            redirectAttributes.addFlashAttribute("mensajeExito", "La orden de compra fue actualizada.");
+            return "redirect:/admin/ordenes/" + id;
+        } catch (IllegalArgumentException e) {
+            redirectAttributes.addFlashAttribute("mensajeError", e.getMessage());
+            return "redirect:/admin/ordenes/" + id + "/editar";
+        }
+    }
+
+    @PostMapping("/{id}/eliminar")
+    public String eliminarOrden(@PathVariable String id, RedirectAttributes redirectAttributes) {
+        try {
+            ordenCompraProveedorService.eliminarOrden(id);
+            redirectAttributes.addFlashAttribute("mensajeExito", "La orden de compra fue eliminada.");
+            return "redirect:/admin/ordenes";
+        } catch (IllegalArgumentException e) {
+            redirectAttributes.addFlashAttribute("mensajeError", e.getMessage());
+            return "redirect:/admin/ordenes/" + id;
+        }
     }
 
     /**
@@ -158,5 +194,18 @@ public class OrdenCompraProveedorController {
             total += d.getCantidad() * d.getPrecioUnitario();
         }
         return Math.round(total * 100.0) / 100.0;
+    }
+
+    private List<ItemFacturaDTO> armarItems(List<String> productoIds, List<Integer> cantidades, List<Double> precios) {
+        List<ItemFacturaDTO> items = new ArrayList<>();
+        if (productoIds == null) return items;
+        for (int i = 0; i < productoIds.size(); i++) {
+            String pid = productoIds.get(i);
+            if (pid == null || pid.isBlank()) continue;   // líneas vacías del formulario
+            int qty = (cantidades != null && cantidades.size() > i && cantidades.get(i) != null) ? cantidades.get(i) : 0;
+            double pu = (precios != null && precios.size() > i && precios.get(i) != null) ? precios.get(i) : 0.0;
+            items.add(new ItemFacturaDTO(pid, qty, pu));
+        }
+        return items;
     }
 }

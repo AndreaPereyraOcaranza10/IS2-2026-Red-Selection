@@ -26,19 +26,41 @@ public class OrdenCompraProveedorServiceImpl implements OrdenCompraProveedorServ
     }
 
     @Override
+    @Transactional
+    public OrdenCompraProveedor modificarOrden(OrdenCompraProveedor ordenCompraProveedor) {
+        return ordenCompraProveedorRepository.saveAndFlush(ordenCompraProveedor);
+    }
+
+    @Override
+    @Transactional
+    public void eliminarOrden(String id) {
+        OrdenCompraProveedor orden = buscarOrden(id);
+        if (orden == null) {
+            throw new IllegalArgumentException("No existe la orden de compra con id: " + id);
+        }
+        if (orden.isEntregada()) {
+            throw new IllegalArgumentException(
+                    "No se puede eliminar una orden ya recibida. Anulá primero su factura.");
+        }
+        orden.setEliminado(true);
+        ordenCompraProveedorRepository.saveAndFlush(orden);
+    }
+
+    @Override
     public OrdenCompraProveedor buscarOrden(String id) {
-        Optional<OrdenCompraProveedor> o = ordenCompraProveedorRepository.findById(id);
-        return o.orElse(null);
+        return ordenCompraProveedorRepository.findById(id)
+                .filter(o -> !o.isEliminado())
+                .orElse(null);
     }
 
     @Override
     public List<OrdenCompraProveedor> listarOrdenes() {
-        return ordenCompraProveedorRepository.findAll();
+        return ordenCompraProveedorRepository.findByEliminadoFalseOrderByFechaCreacionDesc();
     }
 
     @Override
     public List<OrdenCompraProveedor> listarOrdenesPendientes() {
-        return ordenCompraProveedorRepository.findByEntregadaFalse();
+        return ordenCompraProveedorRepository.findByEntregadaFalseAndEliminadoFalse();
     }
 
     @Override
@@ -62,5 +84,4 @@ public class OrdenCompraProveedorServiceImpl implements OrdenCompraProveedorServ
         }
         return null;
     }
-
 }
