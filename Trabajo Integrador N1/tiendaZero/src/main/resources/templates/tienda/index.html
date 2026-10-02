@@ -238,64 +238,6 @@
       </div>
     </div>
   </section>
-  <!-- Banner section -->
-  <section id="banner" class="relative my-16">
-    <div class="container mx-auto px-4 py-20 rounded-lg relative bg-cover bg-center"
-      th:style="'background-image: url(' + @{/assets/images/banner1.jpg} + ')'"
-      style="background-image: url('assets/images/banner1.jpg');">
-      <div class="absolute inset-0 bg-black opacity-40 rounded-lg"></div>
-      <div class="relative flex flex-col items-center justify-center h-full text-center text-white py-20">
-        <h2 class="text-4xl font-bold mb-4">Tu próximo desafío empieza acá</h2>
-        <p class="mb-6 max-w-2xl">Elegí prendas que se mueven con vos y preparate para dar lo mejor en cada momento.</p>
-        <div class="flex flex-wrap justify-center gap-3">
-          <a th:href="@{/shop}" href="/shop" class="bg-primary hover:bg-transparent text-white hover:text-primary border border-primary font-semibold px-5 py-3 rounded-full inline-block">Ver toda la colección</a>
-          <a th:href="@{/shop(sort='latest')}" href="/shop?sort=latest" class="bg-transparent hover:bg-white text-white hover:text-primary border border-white font-semibold px-5 py-3 rounded-full inline-block">Descubrir novedades</a>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Blog section -->
-  <section class="py-16">
-    <div class="text-center mb-12 lg:mb-20">
-      <h2 class="text-4xl md:text-5xl font-bold mb-4">Ideas para <span class="text-primary">moverte</span></h2>
-      <p class="my-7">Inspiración, consejos y novedades para encontrar tu estilo y disfrutar cada actividad.</p>
-    </div>
-    <div class="relative items-center w-full px-5 py-12 mx-auto md:px-12 lg:px-24 max-w-7xl">
-      <div class="grid w-full grid-cols-1 gap-6 mx-auto lg:grid-cols-3">
-        <div class="flex flex-col p-6 bg-white rounded-xl shadow-lg">
-          <img class="object-cover object-center w-full mb-8 rounded-xl" th:src="@{/assets/images/fashion-trends.jpg}"
-            src="/assets/images/fashion-trends.jpg" alt="blog">
-          <h2 class="mb-2 text-xs font-semibold tracking-widest text-primary uppercase">Tendencias</h2>
-          <h3 class="mb-4 text-2xl font-semibold leading-none tracking-tighter text-gray-dark lg:text-3xl">Prendas para entrenar con estilo</h3>
-          <p class="flex-grow text-base font-medium leading-relaxed text-gray-txt">Colores, calces y detalles que renuevan tus básicos deportivos. Encontrá opciones cómodas para cada día.</p>
-          <div class="mt-8">
-            <a th:href="@{/shop}" href="/shop" class="bg-primary border border-transparent hover:bg-transparent hover:border-primary text-white hover:text-primary font-semibold py-2 px-4 rounded-full inline-block">Ver colección</a>
-          </div>
-        </div>
-        <div class="flex flex-col p-6 bg-white rounded-xl shadow-lg">
-          <img class="object-cover object-center w-full mb-8 rounded-xl" th:src="@{/assets/images/stylisng-tips.jpg}"
-            src="/assets/images/stylisng-tips.jpg" alt="blog">
-          <h2 class="mb-2 text-xs font-semibold tracking-widest text-primary uppercase">Consejos de estilo</h2>
-          <h3 class="mb-4 text-2xl font-semibold leading-none tracking-tighter text-gray-dark lg:text-3xl">Un conjunto para cada plan</h3>
-          <p class="flex-grow text-base font-medium leading-relaxed text-gray-txt">Combiná prendas cómodas y funcionales para pasar del entrenamiento a tus actividades de todos los días.</p>
-          <div class="mt-8">
-            <a th:href="@{/shop}" href="/shop" class="bg-primary border border-transparent hover:bg-transparent hover:border-primary text-white hover:text-primary font-semibold py-2 px-4 rounded-full inline-block">Encontrá tu estilo</a>
-          </div>
-        </div>
-        <div class="flex flex-col p-6 bg-white rounded-xl shadow-lg">
-          <img class="object-cover object-center w-full mb-8 rounded-xl" th:src="@{/assets/images/customer-stories.jpg}"
-            src="/assets/images/customer-stories.jpg" alt="blog">
-          <h2 class="mb-2 text-xs font-semibold tracking-widest text-primary uppercase">Elegí tu próximo favorito</h2>
-          <h3 class="mb-4 text-2xl font-semibold leading-none tracking-tighter text-gray-dark lg:text-3xl">Calidad para acompañarte</h3>
-          <p class="flex-grow text-base font-medium leading-relaxed text-gray-txt">Explorá la colección Zero y encontrá prendas pensadas para sumar comodidad a tu rutina.</p>
-          <div class="mt-8">
-            <a th:href="@{/shop}" href="/shop" class="bg-primary border border-transparent hover:bg-transparent hover:border-primary text-white hover:text-primary font-semibold py-2 px-4 rounded-full inline-block">Comprar ahora</a>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
 
   <!-- Subscribe section -->
   <section id="subscribe" class="py-6 lg:py-24 bg-white border-t border-gray-line">
