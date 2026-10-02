@@ -85,7 +85,7 @@ public class ReporteProductosServiceImpl implements ReporteProductosService {
 
     private Map<String, ProveedorContacto> proveedoresPorProducto() {
         Map<String, ProveedorContacto> proveedores = new HashMap<>();
-        for (OrdenCompraProveedor orden : ordenCompraProveedorRepository.findAllByOrderByFechaCreacionDesc()) {
+        for (OrdenCompraProveedor orden : ordenCompraProveedorRepository.findAllByOrderByFechaCreacionDescFechaHoraCreacionDescIdDesc()) {
             Proveedor proveedor = orden.getProveedor();
             if (proveedor == null || proveedor.isEliminado()) continue;
             ProveedorContacto contactoProveedor = contactoDe(proveedor);

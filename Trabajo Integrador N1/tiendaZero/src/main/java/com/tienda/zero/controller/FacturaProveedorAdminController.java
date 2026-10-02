@@ -2,6 +2,7 @@ package com.tienda.zero.controller;
 
 import com.tienda.zero.model.FacturaProveedor;
 import com.tienda.zero.service.FacturaProveedorService;
+import com.tienda.zero.service.FacturaClienteService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -16,20 +17,24 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
  * Las facturas se crean al recibir una orden de compra, no desde acá.
  */
 @Controller
-@RequestMapping("/admin/facturas-proveedor")
+@RequestMapping({"/admin/facturas", "/admin/facturas-proveedor"})
 public class FacturaProveedorAdminController {
 
-    private static final String REDIRECCION_LISTA = "redirect:/admin/facturas-proveedor";
+    private static final String REDIRECCION_LISTA = "redirect:/admin/facturas";
 
     private final FacturaProveedorService facturaProveedorService;
+    private final FacturaClienteService facturaClienteService;
 
-    public FacturaProveedorAdminController(FacturaProveedorService facturaProveedorService) {
+    public FacturaProveedorAdminController(FacturaProveedorService facturaProveedorService,
+                                          FacturaClienteService facturaClienteService) {
         this.facturaProveedorService = facturaProveedorService;
+        this.facturaClienteService = facturaClienteService;
     }
 
     @GetMapping
     public String listar(Model model) {
         model.addAttribute("facturas", facturaProveedorService.listarFacturaProveedor());
+        model.addAttribute("facturasClientes", facturaClienteService.listar());
         return "admin/facturas/lista";
     }
 

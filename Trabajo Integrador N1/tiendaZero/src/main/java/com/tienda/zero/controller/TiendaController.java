@@ -15,6 +15,8 @@ import com.tienda.zero.service.FlujoCompraService;
 import com.tienda.zero.service.StockService;
 import com.tienda.zero.service.PersonaService;
 import com.tienda.zero.service.UsuarioService;
+import com.tienda.zero.service.MercadoPagoService;
+import com.tienda.zero.service.FacturaClienteService;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -25,8 +27,10 @@ import org.springframework.security.web.csrf.CsrfToken;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.http.ResponseEntity;
 
 import java.util.List;
+import java.util.Map;
 import java.util.ArrayList;
 import java.util.stream.Collectors;
 
@@ -41,11 +45,15 @@ public class TiendaController {
     private final StockService stockService;
     private final UsuarioService usuarioService;
     private final PersonaService personaService;
+    private final MercadoPagoService mercadoPagoService;
+    private final FacturaClienteService facturaClienteService;
 
     @GetMapping("/shop")
     public String shop(
             @RequestParam(value = "categoria", required = false) List<String> categoriasParam,
             @RequestParam(value = "category", required = false) List<String> categoryParam,
+            @RequestParam(value = "subcategoria", required = false) List<String> subcategoriasParam,
+            @RequestParam(value = "subcategory", required = false) List<String> subcategoryParam,
             @RequestParam(value = "talle", required = false) List<String> tallesParam,
             @RequestParam(value = "oferta", required = false) Boolean ofertaParam,
             @RequestParam(value = "sort", required = false, defaultValue = "latest") String sort,
@@ -58,24 +66,62 @@ public class TiendaController {
         csrfToken.getToken();
 
         try {
-            // Unificar categorías (soporta tanto 'categoria' como 'category')
-            List<String> categoriasFiltro = new java.util.ArrayList<>();
-            if (categoriasParam != null) categoriasFiltro.addAll(categoriasParam);
-            if (categoryParam != null) categoriasFiltro.addAll(categoryParam);
-            categoriasFiltro = categoriasFiltro.stream()
-                    .filter(c -> c != null && !c.isBlank())
-                    .map(String::trim)
-                    .distinct()
-                    .collect(Collectors.toList());
-
+            // Normalizar filtros recibidos por URL.
             List<String> tallesFiltro = (tallesParam != null)
                     ? tallesParam.stream().filter(t -> t != null && !t.isBlank()).map(String::trim).distinct().collect(Collectors.toList())
                     : java.util.Collections.emptyList();
+
+            List<Categoria> categorias = categoriaService.listarCategoriaActivo();
+            List<Categoria> categoriasDisponibles = categorias != null ? categorias : java.util.Collections.emptyList();
 
             List<Producto> productosActivos = productoService.listarProductoActivo();
             List<ProductoCardDTO> allCards = (productosActivos != null)
                     ? productosActivos.stream().map(this::convertirAProductoCardDTO).collect(Collectors.toList())
                     : new java.util.ArrayList<>();
+
+            List<String> subcategoriasDisponibles = allCards.stream()
+                    .map(ProductoCardDTO::getSubcategory)
+                    .filter(s -> s != null && !s.isBlank())
+                    .distinct()
+                    .sorted(String.CASE_INSENSITIVE_ORDER)
+                    .collect(Collectors.toList());
+
+            java.util.Set<String> nombresCategorias = categoriasDisponibles.stream()
+                    .map(Categoria::getNombre)
+                    .filter(n -> n != null && !n.isBlank())
+                    .map(n -> n.trim().toLowerCase())
+                    .collect(Collectors.toSet());
+            java.util.Set<String> slugsCategorias = categoriasDisponibles.stream()
+                    .map(Categoria::getNombre)
+                    .filter(n -> n != null && !n.isBlank())
+                    .map(n -> n.trim().toLowerCase().replace(" ", "-"))
+                    .collect(Collectors.toSet());
+            java.util.Set<String> nombresSubcategorias = subcategoriasDisponibles.stream()
+                    .map(s -> s.trim().toLowerCase())
+                    .collect(Collectors.toSet());
+
+            List<String> categoriasFiltro = new java.util.ArrayList<>();
+            List<String> subcategoriasFiltro = new java.util.ArrayList<>();
+
+            List<String> categoriasRecibidas = new java.util.ArrayList<>();
+            if (categoriasParam != null) categoriasRecibidas.addAll(categoriasParam);
+            if (categoryParam != null) categoriasRecibidas.addAll(categoryParam);
+            for (String valor : limpiarValores(categoriasRecibidas)) {
+                String normalizado = valor.toLowerCase();
+                if (nombresCategorias.contains(normalizado) || slugsCategorias.contains(normalizado)) {
+                    categoriasFiltro.add(valor);
+                } else if (nombresSubcategorias.contains(normalizado)) {
+                    subcategoriasFiltro.add(valor);
+                }
+            }
+
+            List<String> subcategoriasRecibidas = new java.util.ArrayList<>();
+            if (subcategoriasParam != null) subcategoriasRecibidas.addAll(subcategoriasParam);
+            if (subcategoryParam != null) subcategoriasRecibidas.addAll(subcategoryParam);
+            subcategoriasFiltro.addAll(limpiarValores(subcategoriasRecibidas));
+
+            categoriasFiltro = limpiarValores(categoriasFiltro);
+            subcategoriasFiltro = limpiarValores(subcategoriasFiltro);
 
             // 1. Filtrar por búsqueda q
             if (query != null && !query.isBlank()) {
@@ -95,12 +141,20 @@ public class TiendaController {
                         .filter(p -> finalCats.stream().anyMatch(cf ->
                                 cf.equalsIgnoreCase(p.getCategory())
                                 || cf.equalsIgnoreCase(p.getCategorySlug())
-                                        || (p.getSubcategory() != null && cf.equalsIgnoreCase(p.getSubcategory()))
                         ))
                         .collect(Collectors.toList());
             }
 
-            // 3. Filtrar por talles seleccionados
+            // 3. Filtrar por subcategorias seleccionadas
+            if (!subcategoriasFiltro.isEmpty()) {
+                List<String> finalSubcats = subcategoriasFiltro;
+                allCards = allCards.stream()
+                        .filter(p -> p.getSubcategory() != null
+                                && finalSubcats.stream().anyMatch(sf -> sf.equalsIgnoreCase(p.getSubcategory())))
+                        .collect(Collectors.toList());
+            }
+
+            // 4. Filtrar por talles seleccionados
             if (!tallesFiltro.isEmpty()) {
                 List<String> finalTalles = tallesFiltro;
                 allCards = allCards.stream()
@@ -108,14 +162,14 @@ public class TiendaController {
                         .collect(Collectors.toList());
             }
 
-            // 4. Filtrar por oferta
+            // 5. Filtrar por oferta
             if (Boolean.TRUE.equals(ofertaParam)) {
                 allCards = allCards.stream()
                         .filter(p -> p.getOldPrice() != null)
                         .collect(Collectors.toList());
             }
 
-            // 5. Ordenamiento
+            // 6. Ordenamiento
             switch (sort != null ? sort : "latest") {
                 case "price_asc" -> allCards.sort(java.util.Comparator.comparingDouble(ProductoCardDTO::getPrice));
                 case "price_desc" -> allCards.sort((a, b) -> Double.compare(b.getPrice(), a.getPrice()));
@@ -125,7 +179,7 @@ public class TiendaController {
                 default -> {} // orden natural / más recientes
             }
 
-            // 6. Paginación
+            // 7. Paginación
             int totalItems = allCards.size();
             int pageSize = size != null && size > 0 ? size : Math.max(totalItems, 1);
             int totalPages = Math.max(1, (int) Math.ceil((double) totalItems / pageSize));
@@ -142,18 +196,22 @@ public class TiendaController {
             model.addAttribute("totalPages", totalPages);
             model.addAttribute("totalItems", totalItems);
             model.addAttribute("selectedCategorias", categoriasFiltro);
+            model.addAttribute("selectedSubcategorias", subcategoriasFiltro);
             model.addAttribute("selectedTalles", tallesFiltro);
             model.addAttribute("currentOferta", ofertaParam);
             model.addAttribute("currentSort", sort != null ? sort : "latest");
             model.addAttribute("query", query != null ? query.trim() : null);
 
-            boolean hasActiveFilters = !categoriasFiltro.isEmpty() || !tallesFiltro.isEmpty() || Boolean.TRUE.equals(ofertaParam) || (query != null && !query.isBlank());
+            boolean hasActiveFilters = !categoriasFiltro.isEmpty()
+                    || !subcategoriasFiltro.isEmpty()
+                    || !tallesFiltro.isEmpty()
+                    || Boolean.TRUE.equals(ofertaParam)
+                    || (query != null && !query.isBlank());
             model.addAttribute("hasActiveFilters", hasActiveFilters);
 
             // Categorías y talles disponibles para los filtros
-            List<Categoria> categorias = categoriaService.listarCategoriaActivo();
-            model.addAttribute("categories", categorias != null ? categorias : java.util.Collections.emptyList());
-            model.addAttribute("subcategories", List.of("Ropa", "Calzado", "Accesorios"));
+            model.addAttribute("categories", categoriasDisponibles);
+            model.addAttribute("subcategories", subcategoriasDisponibles);
 
             List<String> tallesDisponibles = java.util.List.of("S", "M", "L", "XL", "XXL", "38", "39", "40", "41", "42", "Único");
             model.addAttribute("tallesDisponibles", tallesDisponibles);
@@ -164,6 +222,17 @@ public class TiendaController {
         }
 
         return "tienda/shop";
+    }
+
+    private List<String> limpiarValores(List<String> valores) {
+        if (valores == null) {
+            return java.util.Collections.emptyList();
+        }
+        return valores.stream()
+                .filter(v -> v != null && !v.isBlank())
+                .map(String::trim)
+                .distinct()
+                .collect(Collectors.toList());
     }
 
     @GetMapping("/tienda/envios")
@@ -273,6 +342,19 @@ public class TiendaController {
         return "redirect:/cart";
     }
 
+    @PostMapping(value = "/cart/add", headers = "X-Requested-With=XMLHttpRequest")
+    public ResponseEntity<Map<String, Object>> agregarAlCarritoAjax(
+            @RequestParam String productId,
+            @RequestParam(defaultValue = "1") int quantity,
+            Authentication auth) {
+        try {
+            flujoCompraService.agregarAlCarrito(auth.getName(), productId, quantity);
+            return ResponseEntity.ok(Map.of("success", true, "message", "Producto agregado al carrito."));
+        } catch (IllegalArgumentException | IllegalStateException e) {
+            return ResponseEntity.badRequest().body(Map.of("success", false, "message", e.getMessage()));
+        }
+    }
+
     @PostMapping("/cart/remove/{productId}")
     public String quitarDelCarrito(@PathVariable String productId, Authentication auth, RedirectAttributes flash) {
         try {
@@ -308,6 +390,22 @@ public class TiendaController {
                                   RedirectAttributes flash) {
         try {
             var pedido = flujoCompraService.crearOrdenCliente(auth.getName(), address, formaPago);
+            if (facturaClienteService.requiereFormulario(pedido)) {
+                return "redirect:/admin/facturas/clientes/orden/" + pedido.getId() + "/nueva";
+            }
+            if (formaPago == TipoPago.BILLETERA_VIRTUAL) {
+                try {
+                    String checkoutUrl = mercadoPagoService.crearCheckout(pedido);
+                    return "redirect:" + checkoutUrl;
+                } catch (RuntimeException e) {
+                    try {
+                        flujoCompraService.anularOrdenCliente(pedido.getId(), auth.getName());
+                    } catch (RuntimeException ignored) {
+                        // La orden queda disponible para revisión si no se puede compensar.
+                    }
+                    throw e;
+                }
+            }
             flash.addFlashAttribute("mensajeExito", "Orden creada. Podés seguir su estado desde esta sección. Número: " + pedido.getIdentificadorCompra());
             return "redirect:/orders";
         } catch (RuntimeException e) {
@@ -318,7 +416,14 @@ public class TiendaController {
 
     @GetMapping("/orders")
     public String orders(Authentication auth, Model model) {
+        // La consulta de pedidos debe seguir disponible aunque Mercado Pago no responda.
+        try {
+            mercadoPagoService.sincronizarPagosPendientesUsuario(auth.getName());
+        } catch (RuntimeException e) {
+            // La sincronización se reintentará en la próxima visita; no bloquear el historial.
+        }
         model.addAttribute("orders", flujoCompraService.listarPedidosUsuario(auth.getName()));
+        model.addAttribute("facturasPedidos", facturaClienteService.delUsuario(auth.getName()));
         return "tienda/orders";
     }
 

@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -20,7 +21,9 @@ public class OrdenCompraProveedorServiceImpl implements OrdenCompraProveedorServ
     @Override
     @Transactional
     public OrdenCompraProveedor crearOrden(OrdenCompraProveedor ordenCompraProveedor) {
-        ordenCompraProveedor.setFechaCreacion(new Date(System.currentTimeMillis()));
+        LocalDateTime fechaHora = LocalDateTime.now();
+        ordenCompraProveedor.setFechaCreacion(Date.valueOf(fechaHora.toLocalDate()));
+        ordenCompraProveedor.setFechaHoraCreacion(fechaHora);
         ordenCompraProveedor.setEntregada(false);
         return ordenCompraProveedorRepository.saveAndFlush(ordenCompraProveedor);
     }
@@ -33,12 +36,12 @@ public class OrdenCompraProveedorServiceImpl implements OrdenCompraProveedorServ
 
     @Override
     public List<OrdenCompraProveedor> listarOrdenes() {
-        return ordenCompraProveedorRepository.findAll();
+        return ordenCompraProveedorRepository.findAllByOrderByFechaCreacionDescFechaHoraCreacionDescIdDesc();
     }
 
     @Override
     public List<OrdenCompraProveedor> listarOrdenesPendientes() {
-        return ordenCompraProveedorRepository.findByEntregadaFalse();
+        return ordenCompraProveedorRepository.findByEntregadaFalseOrderByFechaCreacionDescFechaHoraCreacionDescIdDesc();
     }
 
     @Override

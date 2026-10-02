@@ -1,0 +1,21 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "java",
+            "name": "TiendaZeroApplication",
+            "request": "launch",
+            "mainClass": "com.tienda.zero.TiendaZeroApplication",
+            "projectName": "org.example-tiendaZero"
+        },
+        {
+            "type": "java",
+            "name": "TiendaZeroApplication",
+            "request": "launch",
+            "mainClass": "com.tienda.zero.TiendaZeroApplication",
+            "projectName": "tiendaZero",
+            "cwd": "${workspaceFolder}/Trabajo Integrador N1/tiendaZero",
+            "envFile": "${workspaceFolder}/Trabajo Integrador N1/tiendaZero/.env"
+        }
+    ]
+}

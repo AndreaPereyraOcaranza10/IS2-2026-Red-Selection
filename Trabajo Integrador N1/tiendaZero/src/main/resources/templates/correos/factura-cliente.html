@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Factura de compra | Zero</title></head>
+<body style="margin:0;padding:20px;background:#f4f5f7;font-family:Arial,sans-serif;color:#17202a">
+<div style="max-width:720px;margin:0 auto;background:white;padding:24px">
+    <header style="border-bottom:2px solid #17202a;padding-bottom:16px">
+        <strong style="font-size:28px;color:#ff004c">ZERO</strong>
+        <h1 style="font-size:22px" th:text="${'Factura Nro. ' + #numbers.formatInteger(factura.numeroFactura, 8)}"></h1>
+        <p th:text="${#dates.format(factura.fechaFactura, 'dd/MM/yyyy')}"></p>
+    </header>
+    <section style="padding:16px 0">
+        <h2 style="font-size:16px">Cliente</h2>
+        <p th:text="${factura.nombreCliente + ' ' + factura.apellidoCliente}"></p>
+        <p th:if="${!#strings.isEmpty(factura.documentoCliente)}" th:text="${'Documento: ' + factura.documentoCliente}"></p>
+        <p th:text="${factura.domicilioCliente}"></p><p th:text="${factura.correoCliente}"></p>
+        <p style="overflow-wrap:anywhere" th:text="${'Orden: ' + factura.ordenCompra.identificadorCompra}"></p>
+        <p th:text="${'Forma de pago: ' + #strings.replace(factura.formaDePago.tipoPago.name(), '_', ' ')}"></p>
+        <p th:text="${factura.estado.name() == 'PAGADA' ? 'Pagada' : 'Pendiente de pago'}"></p>
+    </section>
+    <table style="width:100%;border-collapse:collapse;font-size:14px">
+        <thead><tr><th style="text-align:left;border-bottom:1px solid #ddd;padding:10px 4px">Producto</th><th style="padding:10px 4px;border-bottom:1px solid #ddd">Cantidad</th><th style="padding:10px 4px;border-bottom:1px solid #ddd">Precio unitario</th><th style="text-align:right;padding:10px 4px;border-bottom:1px solid #ddd">Subtotal</th></tr></thead>
+        <tbody><tr th:each="detalle : ${factura.detalles}" th:if="${!detalle.eliminado}">
+            <td style="padding:12px 4px;border-bottom:1px solid #eee"><strong th:text="${detalle.nombreProducto}"></strong><br><small th:text="${detalle.codigoProducto}"></small></td>
+            <td style="text-align:center;padding:12px 4px;border-bottom:1px solid #eee" th:text="${detalle.cantidad}"></td>
+            <td style="text-align:center;padding:12px 4px;border-bottom:1px solid #eee" th:text="${'$ ' + #numbers.formatDecimal(detalle.subtotal / detalle.cantidad, 1, 2)}"></td>
+            <td style="text-align:right;padding:12px 4px;border-bottom:1px solid #eee" th:text="${'$ ' + #numbers.formatDecimal(detalle.subtotal, 1, 2)}"></td>
+        </tr></tbody>
+    </table>
+    <p style="text-align:right;font-size:20px;font-weight:bold" th:text="${'Total ARS: $ ' + #numbers.formatDecimal(factura.totalPagado, 1, 2)}"></p>
+</div>
+</body></html>

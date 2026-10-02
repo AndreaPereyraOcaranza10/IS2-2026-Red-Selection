@@ -2,12 +2,12 @@
 <html xmlns:th="http://www.thymeleaf.org" lang="es">
 
 <head>
-    <title th:text="'Facturas de proveedor - Zero'">Facturas de proveedor - Zero</title>
+    <title>Facturas - Zero</title>
     <th:block th:replace="~{admin/fragments/fragments :: head-assets}"></th:block>
 </head>
 
 <body>
-<div th:replace="~{admin/fragments/fragments :: sidebarTopbar(activePage='facturas-proveedor')}"></div>
+<div th:replace="~{admin/fragments/fragments :: sidebarTopbar(activePage='facturas')}"></div>
 <!-- MAIN CONTENT -->
 <main id="content" class="content py-10">
     <div class="container-fluid">
@@ -15,8 +15,7 @@
             <div class="col-12">
                 <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
                     <div class="">
-                        <h1 class="fs-3 mb-1">Facturas de proveedor</h1>
-                        <p class="mb-0">Se generan al recibir una orden de compra</p>
+                        <h1 class="fs-3 mb-1">Facturas</h1>
                     </div>
                     <div>
                         <a th:href="@{/admin/ordenes}" class="btn btn-primary">Ver órdenes de compra</a>
@@ -35,7 +34,25 @@
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
 
-                <div class="card table-responsive shadow-sm">
+                <ul class="nav nav-tabs mb-4" role="tablist">
+                    <li class="nav-item" role="presentation"><button class="nav-link active" id="clientes-tab" data-bs-toggle="tab" data-bs-target="#facturas-clientes" type="button" role="tab" aria-controls="facturas-clientes" aria-selected="true">Clientes</button></li>
+                    <li class="nav-item" role="presentation"><button class="nav-link" id="proveedores-tab" data-bs-toggle="tab" data-bs-target="#facturas-proveedores" type="button" role="tab" aria-controls="facturas-proveedores" aria-selected="false">Proveedores</button></li>
+                </ul>
+                <div class="tab-content">
+                <section class="tab-pane fade show active" id="facturas-clientes" role="tabpanel" aria-labelledby="clientes-tab">
+                    <div class="table-responsive"><table class="table table-hover">
+                        <thead class="table-light"><tr><th>Nro. factura</th><th>Fecha</th><th>Cliente</th><th>Orden</th><th>Total</th><th>Estado</th><th>Acciones</th></tr></thead>
+                        <tbody><tr th:each="f : ${facturasClientes}">
+                            <td th:text="${f.numeroFactura}"></td><td th:text="${#dates.format(f.fechaFactura, 'dd/MM/yyyy')}"></td>
+                            <td th:text="${f.nombreCliente + ' ' + f.apellidoCliente}"></td><td class="text-break" th:text="${f.ordenCompra.identificadorCompra}"></td>
+                            <td class="text-nowrap" th:text="${'$ ' + #numbers.formatDecimal(f.totalPagado, 1, 2)}"></td>
+                            <td th:text="${f.estado.name() == 'PAGADA' ? 'Pagada' : (f.estado.name() == 'ANULADA' ? 'Anulada' : 'Pendiente de pago')}"></td>
+                            <td><a class="btn btn-sm btn-outline-primary" th:href="@{/admin/facturas/clientes/{id}(id=${f.id})}" title="Ver factura" aria-label="Ver factura"><i class="ti ti-eye"></i></a></td>
+                        </tr><tr th:if="${#lists.isEmpty(facturasClientes)}"><td colspan="7" class="text-center py-4">Todav&iacute;a no hay facturas de clientes.</td></tr></tbody>
+                    </table></div>
+                </section>
+                <section class="tab-pane fade" id="facturas-proveedores" role="tabpanel" aria-labelledby="proveedores-tab">
+                <div class="table-responsive">
                     <table class="table mb-0 text-nowrap table-hover">
                         <thead class="table-light border-light">
                         <tr>
@@ -79,6 +96,8 @@
                         </tr>
                         </tbody>
                     </table>
+                </div>
+                </section>
                 </div>
             </div>
         </div>
