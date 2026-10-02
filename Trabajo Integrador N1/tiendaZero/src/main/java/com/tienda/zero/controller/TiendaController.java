@@ -353,7 +353,12 @@ public class TiendaController {
 
     @GetMapping("/orders")
     public String orders(Authentication auth, Model model) {
-        mercadoPagoService.sincronizarPagosPendientesUsuario(auth.getName());
+        // La consulta de pedidos debe seguir disponible aunque Mercado Pago no responda.
+        try {
+            mercadoPagoService.sincronizarPagosPendientesUsuario(auth.getName());
+        } catch (RuntimeException e) {
+            // La sincronización se reintentará en la próxima visita; no bloquear el historial.
+        }
         model.addAttribute("orders", flujoCompraService.listarPedidosUsuario(auth.getName()));
         model.addAttribute("facturasPedidos", facturaClienteService.delUsuario(auth.getName()));
         return "tienda/orders";

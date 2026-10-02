@@ -164,7 +164,7 @@ public class FacturaClienteService {
     @Transactional(readOnly = true)
     public Map<String, FacturaCliente> delUsuario(String username) {
         return facturas.findByOrdenCompraPropietarioNombreUsuarioAndEliminadoFalseOrderByFechaFacturaDescNumeroFacturaDesc(username)
-                .stream().collect(Collectors.toMap(f -> f.getOrdenCompra().getId(), f -> f));
+                .stream().collect(Collectors.toMap(f -> f.getOrdenCompra().getId(), f -> f, (primera, siguiente) -> primera));
     }
 
     public List<FacturaCliente> listar() {
