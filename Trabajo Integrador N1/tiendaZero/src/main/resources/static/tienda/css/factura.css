@@ -23,8 +23,11 @@
 .factura-total strong { font-size: 24px; }
 .factura-payment { text-align: right; margin-top: 20px; }
 .factura-error { color: #b91c1c; margin-bottom: 16px; }
+/* En el panel, deja espacio para la barra superior fija de administración. */
+.factura-main.content { padding-top: 84px; }
 @media (max-width: 600px) {
     .factura-main { padding: 20px 12px; }
+    .factura-main.content { padding-top: 84px; }
     .factura-sheet { padding: 20px 12px; }
     .factura-heading { flex-wrap: wrap; }
     .factura-number { text-align: left; }
