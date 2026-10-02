@@ -22,6 +22,12 @@ public class DetalleFactura {
     @Column(nullable = false)
     private double subtotal;
 
+    @Column(length = 250)
+    private String nombreProducto;
+
+    @Column(length = 100)
+    private String codigoProducto;
+
     @Builder.Default
     @Column(nullable = false)
     private boolean eliminado = false;

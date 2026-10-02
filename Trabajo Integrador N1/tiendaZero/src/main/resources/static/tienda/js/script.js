@@ -88,21 +88,35 @@ document.addEventListener('submit', async function (event) {
   const button = form.querySelector('button[type="submit"]');
   if (!button || button.disabled) return;
   const originalText = button.textContent;
+  const originalTitle = button.getAttribute('title');
   button.disabled = true;
   button.textContent = 'Agregando...';
   try {
     const response = await fetch(form.action, {
       method: 'POST', body: new FormData(form),
-      headers: { 'X-Requested-With': 'XMLHttpRequest' }
+      headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' }
     });
-    if (!response.ok) throw new Error('No se pudo agregar el producto.');
+    if (response.redirected) {
+      window.location.assign(response.url);
+      return;
+    }
+    if (!response.headers.get('content-type')?.includes('application/json')) {
+      throw new Error('No se pudo confirmar que el producto se agrego al carrito.');
+    }
+    const result = await response.json();
+    if (!response.ok || result.success !== true) {
+      throw new Error(result.message || 'No se pudo agregar el producto.');
+    }
     button.textContent = 'Agregado ✓';
-  } catch (_) {
+  } catch (error) {
     button.textContent = 'Error al agregar';
+    button.title = error.message;
   }
   window.setTimeout(() => {
     button.textContent = originalText;
     button.disabled = false;
+    if (originalTitle === null) button.removeAttribute('title');
+    else button.title = originalTitle;
   }, 1600);
 });
 

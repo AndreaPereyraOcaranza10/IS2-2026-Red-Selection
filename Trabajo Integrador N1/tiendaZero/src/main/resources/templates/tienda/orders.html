@@ -73,6 +73,16 @@
                     <div><span>Direcci&oacute;n de entrega</span><p th:text="${pedido.direccionEntrega}">Dirección</p></div>
                 </div>
 
+                <div class="order-card__actions" th:if="${facturasPedidos != null and facturasPedidos.containsKey(pedido.id)}">
+                    <a class="orders-shop-link" th:href="@{/orders/facturas/{id}(id=${facturasPedidos.get(pedido.id).id})}">
+                        <i class="fas fa-file-invoice"></i>
+                        <span th:text="${'Factura Nro. ' + facturasPedidos.get(pedido.id).numeroFactura}">Ver factura</span>
+                    </a>
+                </div>
+                <div class="order-card__actions" th:if="${facturasPedidos != null and !facturasPedidos.containsKey(pedido.id) and pedido.propietario != null and (pedido.propietario.rol.name() == 'ADMINISTRATIVO' or pedido.propietario.rol.name() == 'JEFE') and pedido.estadoOrdenCompra.name() != 'ANULADA'}">
+                    <a class="orders-shop-link" th:href="@{/admin/facturas/clientes/orden/{id}/nueva(id=${pedido.id})}"><i class="fas fa-file-invoice"></i> Completar factura</a>
+                </div>
+
                 <div class="order-card__items" th:if="${!#lists.isEmpty(pedido.detalles)}">
                     <h3>Productos del pedido</h3>
                     <div class="order-item" th:each="detalle : ${pedido.detalles}" th:if="${!detalle.eliminado}">

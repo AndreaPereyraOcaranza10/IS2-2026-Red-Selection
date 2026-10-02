@@ -24,7 +24,7 @@ public class ReporteVentasServiceImpl implements ReporteVentasService {
     @Transactional(readOnly = true)
     public ReporteVentas generar(LocalDate desde, LocalDate hasta) {
         List<OrdenCompra> ordenes = ordenCompraRepository
-                .findByFechaBetweenAndEstadoOrdenCompraNotInAndEliminadoFalseOrderByFechaDesc(
+                .findByFechaBetweenAndEstadoOrdenCompraNotInAndEliminadoFalseOrderByFechaDescFechaHoraCreacionDescIdDesc(
                         desde, hasta, List.of(EstadoOrdenCompra.PENDIENTE_COMPLETAR, EstadoOrdenCompra.ANULADA));
 
         BigDecimal totalVentas = ordenes.stream()

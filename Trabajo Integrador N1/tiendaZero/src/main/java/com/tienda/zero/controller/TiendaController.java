@@ -16,6 +16,7 @@ import com.tienda.zero.service.StockService;
 import com.tienda.zero.service.PersonaService;
 import com.tienda.zero.service.UsuarioService;
 import com.tienda.zero.service.MercadoPagoService;
+import com.tienda.zero.service.FacturaClienteService;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -26,8 +27,10 @@ import org.springframework.security.web.csrf.CsrfToken;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.http.ResponseEntity;
 
 import java.util.List;
+import java.util.Map;
 import java.util.ArrayList;
 import java.util.stream.Collectors;
 
@@ -43,6 +46,7 @@ public class TiendaController {
     private final UsuarioService usuarioService;
     private final PersonaService personaService;
     private final MercadoPagoService mercadoPagoService;
+    private final FacturaClienteService facturaClienteService;
 
     @GetMapping("/shop")
     public String shop(
@@ -275,6 +279,19 @@ public class TiendaController {
         return "redirect:/cart";
     }
 
+    @PostMapping(value = "/cart/add", headers = "X-Requested-With=XMLHttpRequest")
+    public ResponseEntity<Map<String, Object>> agregarAlCarritoAjax(
+            @RequestParam String productId,
+            @RequestParam(defaultValue = "1") int quantity,
+            Authentication auth) {
+        try {
+            flujoCompraService.agregarAlCarrito(auth.getName(), productId, quantity);
+            return ResponseEntity.ok(Map.of("success", true, "message", "Producto agregado al carrito."));
+        } catch (IllegalArgumentException | IllegalStateException e) {
+            return ResponseEntity.badRequest().body(Map.of("success", false, "message", e.getMessage()));
+        }
+    }
+
     @PostMapping("/cart/remove/{productId}")
     public String quitarDelCarrito(@PathVariable String productId, Authentication auth, RedirectAttributes flash) {
         try {
@@ -310,6 +327,9 @@ public class TiendaController {
                                   RedirectAttributes flash) {
         try {
             var pedido = flujoCompraService.crearOrdenCliente(auth.getName(), address, formaPago);
+            if (facturaClienteService.requiereFormulario(pedido)) {
+                return "redirect:/admin/facturas/clientes/orden/" + pedido.getId() + "/nueva";
+            }
             if (formaPago == TipoPago.BILLETERA_VIRTUAL) {
                 try {
                     String checkoutUrl = mercadoPagoService.crearCheckout(pedido);
@@ -333,7 +353,9 @@ public class TiendaController {
 
     @GetMapping("/orders")
     public String orders(Authentication auth, Model model) {
+        mercadoPagoService.sincronizarPagosPendientesUsuario(auth.getName());
         model.addAttribute("orders", flujoCompraService.listarPedidosUsuario(auth.getName()));
+        model.addAttribute("facturasPedidos", facturaClienteService.delUsuario(auth.getName()));
         return "tienda/orders";
     }
 

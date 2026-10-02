@@ -11,6 +11,8 @@ public interface MercadoPagoService {
     /** Procesa una notificación de pago consultando el pago mediante el SDK. */
     void procesarPago(Long paymentId);
 
+    void sincronizarPagosPendientesUsuario(String username);
+
     /** Valida la firma del webhook de Mercado Pago. */
     boolean validarWebhook(String xSignature, String xRequestId, String dataId);
 }
