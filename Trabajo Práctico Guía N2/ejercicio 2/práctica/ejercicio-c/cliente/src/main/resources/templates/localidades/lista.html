@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Localidades</title>
+    <link rel="stylesheet" th:href="@{/css/estilos.css}">
+</head>
+<body>
+<div th:replace="~{fragments/layout :: navbar}"></div>
+
+<main>
+    <h1>Localidades</h1>
+
+    <div th:replace="~{fragments/layout :: alertas}"></div>
+
+    <form th:object="${nuevaLocalidad}" th:action="@{/localidades}" method="post" class="busqueda">
+        <input type="text" th:field="*{denominacion}" placeholder="Nombre de la nueva localidad" required>
+        <button type="submit">Agregar</button>
+    </form>
+
+    <table>
+        <thead>
+        <tr><th>ID</th><th>Denominación</th></tr>
+        </thead>
+        <tbody>
+        <tr th:each="l : ${localidades}">
+            <td th:text="${l.id}"></td>
+            <td th:text="${l.denominacion}"></td>
+        </tr>
+        <tr th:if="${#lists.isEmpty(localidades)}">
+            <td colspan="2" class="vacio">No hay localidades cargadas.</td>
+        </tr>
+        </tbody>
+    </table>
+</main>
+</body>
+</html>
