@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.envers.Audited;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Entity
@@ -29,6 +30,9 @@ public class Libro extends Base {
 
     @Column(name="paginas")
     private int paginas;
+
+    @Column(name = "fecha_devolucion")
+    private LocalDate fechaDevolucion;
 
     @ManyToMany(cascade = CascadeType.REFRESH)
     private List<Autor> autores;

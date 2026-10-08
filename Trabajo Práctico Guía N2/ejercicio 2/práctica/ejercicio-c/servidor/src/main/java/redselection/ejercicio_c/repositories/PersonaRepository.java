@@ -8,6 +8,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import redselection.ejercicio_c.entities.Persona;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Repository
@@ -48,4 +49,10 @@ public interface PersonaRepository extends BaseRepository<Persona, Long> {
     )
     List<Persona> searchNativo(@Param("filtro")String filtro, Pageable pageable);
     */
+
+    List<Persona> findDistinctByLibrosFechaDevolucion(LocalDate fecha);
+
+    // Personas que cumplen años en ese día y mes
+    @Query("SELECT p FROM Persona p WHERE extract(month from p.fechaNacimiento) = :mes AND extract(day from p.fechaNacimiento) = :dia")
+    List<Persona> findCumpleaneros(@Param("mes") int mes, @Param("dia") int dia);
 }

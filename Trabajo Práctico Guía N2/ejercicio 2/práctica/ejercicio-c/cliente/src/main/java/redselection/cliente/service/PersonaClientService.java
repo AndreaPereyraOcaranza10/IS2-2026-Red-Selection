@@ -58,6 +58,8 @@ public class PersonaClientService {
         domicilio.setLatitud(formulario.getDomicilio().getLatitud());
         domicilio.setLongitud(formulario.getDomicilio().getLongitud());
         domicilio.setLocalidad(formulario.getDomicilio().getLocalidad());
+        existente.setEmail(formulario.getEmail());
+        existente.setFechaNacimiento(formulario.getFechaNacimiento());
 
         restTemplate.put(baseUrl + "/{id}", existente, id);
     }

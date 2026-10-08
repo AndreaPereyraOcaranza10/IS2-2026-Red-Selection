@@ -20,6 +20,8 @@
             <dt>Nombre</dt><dd th:text="${persona.nombre}"></dd>
             <dt>Apellido</dt><dd th:text="${persona.apellido}"></dd>
             <dt>DNI</dt><dd th:text="${persona.dni}"></dd>
+            <dt>Email</dt><dd th:text="${persona.email}"></dd>
+            <dt>Nacimiento</dt><dd th:text="${#temporals.format(persona.fechaNacimiento, 'dd/MM/yyyy')}"></dd>
         </dl>
     </section>
 
@@ -45,7 +47,7 @@
         <h2>Libros</h2>
         <table th:if="${!#lists.isEmpty(persona.libros)}">
             <thead>
-            <tr><th>Título</th><th>Año</th><th>Género</th><th>Páginas</th><th>Autores</th><th></th></tr>
+            <tr><th>Título</th><th>Año</th><th>Género</th><th>Páginas</th><th>Autores</th><th>Devolución</th><th></th></tr>
             </thead>
             <tbody>
             <tr th:each="libro : ${persona.libros}">
@@ -57,6 +59,7 @@
                     <span th:each="a, st : ${libro.autores}"
                           th:text="${a.nombre + ' ' + a.apellido + (st.last ? '' : ', ')}"></span>
                 </td>
+                <td th:text="${#temporals.format(libro.fechaDevolucion, 'dd/MM/yyyy')}"></td>
                 <td>
                     <form th:action="@{/personas/{pid}/libros/{lid}/eliminar(pid=${persona.id},lid=${libro.id})}" method="post"
                           onsubmit="return confirm('¿Quitar este libro?');">
@@ -83,6 +86,9 @@
             </label>
             <label>Páginas
                 <input type="number" th:field="*{paginas}" min="1" required>
+            </label>
+            <label>Fecha de devolución
+                <input type="date" th:field="*{fechaDevolucion}" required>
             </label>
             <label>Autores (Ctrl/Cmd para elegir más de uno)
                 <select name="autorIds" multiple size="5">

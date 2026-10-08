@@ -4,7 +4,9 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.format.annotation.DateTimeFormat;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,6 +21,11 @@ public class PersonaDTO {
     private Integer dni;
     private DomicilioDTO domicilio = new DomicilioDTO();
     private List<LibroDTO> libros = new ArrayList<>();
+
+    private String email;
+
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+    private LocalDate fechaNacimiento;
 
     /** El servidor puede devolver domicilio/localidad en null; el formulario necesita objetos no nulos. */
     public void asegurarDomicilio() {
