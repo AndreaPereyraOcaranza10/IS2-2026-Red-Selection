@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title th:text="${persona.id == null} ? 'Nueva persona' : 'Editar persona'">Persona</title>
+    <link rel="stylesheet" th:href="@{/css/estilos.css}">
+</head>
+<body>
+<div th:replace="~{fragments/layout :: navbar}"></div>
+
+<main>
+    <h1 th:text="${persona.id == null} ? 'Nueva persona' : 'Editar persona'">Persona</h1>
+
+    <div th:replace="~{fragments/layout :: alertas}"></div>
+
+    <form th:object="${persona}"
+          th:action="${persona.id == null} ? @{/personas} : @{/personas/{id}(id=${persona.id})}"
+          method="post" class="formulario">
+
+        <fieldset>
+            <legend>Datos personales</legend>
+            <label>Nombre
+                <input type="text" th:field="*{nombre}" required>
+            </label>
+            <label>Apellido
+                <input type="text" th:field="*{apellido}" required>
+            </label>
+            <label>DNI
+                <input type="number" th:field="*{dni}" min="1" required>
+            </label>
+        </fieldset>
+
+        <fieldset>
+            <legend>Domicilio</legend>
+            <label>Calle
+                <input type="text" th:field="*{domicilio.calle}" required>
+            </label>
+            <label>Número
+                <input type="number" th:field="*{domicilio.numero}" min="0" required>
+            </label>
+            <label>Localidad
+                <select th:field="*{domicilio.localidad.id}" required>
+                    <option value="">Seleccioná una localidad</option>
+                    <option th:each="l : ${localidades}" th:value="${l.id}" th:text="${l.denominacion}"></option>
+                </select>
+            </label>
+            <p th:if="${#lists.isEmpty(localidades)}" class="ayuda">
+                No hay localidades cargadas. Agregá una desde <a th:href="@{/localidades}">Localidades</a>.
+            </p>
+        </fieldset>
+
+        <div class="barra">
+            <a th:href="@{/personas}" class="boton secundario">Cancelar</a>
+            <button type="submit">Guardar</button>
+        </div>
+    </form>
+</main>
+</body>
+</html>
