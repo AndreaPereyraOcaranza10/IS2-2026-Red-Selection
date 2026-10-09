@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Personas</title>
+    <link rel="stylesheet" th:href="@{/css/estilos.css}">
+</head>
+<body>
+<div th:replace="~{fragments/layout :: navbar}"></div>
+
+<main>
+    <h1>Personas</h1>
+
+    <div th:replace="~{fragments/layout :: alertas}"></div>
+
+    <div class="barra">
+        <form th:action="@{/personas}" method="get" class="busqueda">
+            <input type="text" name="filtro" th:value="${filtro}" placeholder="Buscar por nombre o apellido">
+            <button type="submit">Buscar</button>
+            <a th:if="${filtro != null and !filtro.isBlank()}" th:href="@{/personas}" class="boton secundario">Limpiar</a>
+        </form>
+        <a th:href="@{/personas/nueva}" class="boton">+ Nueva persona</a>
+        <a href="http://localhost:8080/api/v1/personas/alquileres/pdf"
+           target="_blank"
+           class="boton">
+            Descargar Alquileres (PDF)
+        </a>
+        <a href="http://localhost:8080/api/v1/personas/libros-disponibles/excel"
+           target="_blank"
+           class="boton">
+            Libros Disponibles (Excel)
+        </a>
+    </div>
+
+    <table>
+        <thead>
+        <tr>
+            <th>Nombre</th>
+            <th>Apellido</th>
+            <th>DNI</th>
+            <th>Domicilio</th>
+            <th>Acciones</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="p : ${personas}">
+            <td th:text="${p.nombre}"></td>
+            <td th:text="${p.apellido}"></td>
+            <td th:text="${p.dni}"></td>
+            <td>
+                <span th:if="${p.domicilio != null}"
+                      th:text="${p.domicilio.calle + ' ' + p.domicilio.numero} + (${p.domicilio.localidad != null} ? ', ' + ${p.domicilio.localidad.denominacion} : '')"></span>
+                <span th:if="${p.domicilio == null}" class="vacio">Sin domicilio</span>
+            </td>
+            <td class="acciones">
+                <a th:href="@{/personas/{id}(id=${p.id})}" class="boton chico">Ver</a>
+                <a th:href="@{/personas/{id}/editar(id=${p.id})}" class="boton chico secundario">Editar</a>
+                <form th:action="@{/personas/{id}/eliminar(id=${p.id})}" method="post"
+                      onsubmit="return confirm('¿Eliminar a esta persona?');">
+                    <button type="submit" class="chico peligro">Eliminar</button>
+                </form>
+            </td>
+        </tr>
+        <tr th:if="${#lists.isEmpty(personas)}">
+            <td colspan="5" class="vacio">No hay personas para mostrar.</td>
+        </tr>
+        </tbody>
+    </table>
+</main>
+</body>
+</html>
