@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Clima Ahora | Pronóstico</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link href="/styles.css" rel="stylesheet">
+  <link href="/polish.css" rel="stylesheet">
+</head>
+<body>
+  <main class="container py-5">
+    <nav class="d-flex justify-content-between align-items-center mb-5"><a class="brand" href="/">☀️ Clima<span>Ahora</span></a><span class="source">DATOS EN VIVO · OPEN-METEO</span></nav>
+    <section class="intro mb-4"><p class="eyebrow">TU PRONÓSTICO, DE UN VISTAZO</p><h1>¿Qué tiempo hace<br>en tu ciudad?</h1><p class="text-secondary">Consultá las condiciones actuales y los próximos cinco días.</p></section>
+    <form id="search-form" class="search-box d-flex gap-2 mb-4"><label class="visually-hidden" for="city">Ciudad</label><input id="city" class="form-control" placeholder="Probá con Mendoza..." value="Mendoza" required><button class="btn btn-primary px-4" type="submit">Buscar <span aria-hidden="true">→</span></button></form>
+    <div id="message" class="alert d-none" role="status"></div>
+    <section id="weather" class="d-none" aria-live="polite">
+      <div class="current-card p-4 p-md-5 mb-4"><div class="row align-items-center"><div class="col-md-7"><p class="eyebrow text-white-50 mb-2">AHORA EN</p><h2 id="place" class="h3 mb-1"></h2><p id="updated" class="text-white-50 mb-0"></p></div><div class="col-md-5 text-md-end mt-4 mt-md-0"><div class="temperature"><span id="temperature"></span><sup>°C</sup></div><div id="condition" class="fs-5"></div></div></div><hr class="border-light opacity-25 my-4"><div class="row g-3"><div class="col-6 col-lg-3"><div class="metric-label">SENSACIÓN TÉRMICA</div><strong id="feels"></strong></div><div class="col-6 col-lg-3"><div class="metric-label">HUMEDAD</div><strong id="humidity"></strong></div><div class="col-6 col-lg-3"><div class="metric-label">VIENTO</div><strong id="wind"></strong></div><div class="col-6 col-lg-3"><div class="metric-label">UBICACIÓN</div><strong id="coordinates"></strong></div></div></div>
+      <div class="d-flex justify-content-between align-items-end mb-3"><div><p class="eyebrow mb-1">PRÓXIMOS DÍAS</p><h2 class="h4 mb-0">Pronóstico extendido</h2></div><span class="text-secondary small">5 días</span></div><div id="forecast" class="row g-3"></div>
+    </section>
+    <footer class="pt-5 mt-5 border-top text-secondary small">Proyecto académico · Ingeniería de Software II <span class="float-end">Información provista por Open-Meteo</span></footer>
+  </main>
+  <script src="/app.js"></script>
+</body></html>
