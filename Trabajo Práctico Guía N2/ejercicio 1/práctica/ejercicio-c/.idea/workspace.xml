@@ -4,7 +4,26 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="d52d5d5f-af95-4beb-978c-c878dba0f2ee" name="Changes" comment="" />
+    <list default="true" id="d52d5d5f-af95-4beb-978c-c878dba0f2ee" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/../../../ejercicio 2/práctica/ejercicio-c/servidor/src/main/java/redselection/ejercicio_c/scheduler/TareasProgramadas.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../../../ejercicio 2/práctica/ejercicio-c/servidor/src/main/java/redselection/ejercicio_c/services/EmailService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../../../ejercicio 2/práctica/ejercicio-c/servidor/src/main/java/redselection/ejercicio_c/services/PlantillaCorreo.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../ejercicio 2/práctica/ejercicio-b/cliente/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/../../../ejercicio 2/práctica/ejercicio-b/cliente/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../ejercicio 2/práctica/ejercicio-b/cliente/src/main/resources/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/../../../ejercicio 2/práctica/ejercicio-b/cliente/src/main/resources/application.properties" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../ejercicio 2/práctica/ejercicio-b/servidor/src/main/resources/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/../../../ejercicio 2/práctica/ejercicio-b/servidor/src/main/resources/application.properties" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../ejercicio 2/práctica/ejercicio-c/.idea/compiler.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../../../ejercicio 2/práctica/ejercicio-c/.idea/compiler.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../ejercicio 2/práctica/ejercicio-c/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../../../ejercicio 2/práctica/ejercicio-c/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../ejercicio 2/práctica/ejercicio-c/cliente/src/main/java/redselection/cliente/dto/LibroDTO.java" beforeDir="false" afterPath="$PROJECT_DIR$/../../../ejercicio 2/práctica/ejercicio-c/cliente/src/main/java/redselection/cliente/dto/LibroDTO.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../ejercicio 2/práctica/ejercicio-c/cliente/src/main/java/redselection/cliente/dto/PersonaDTO.java" beforeDir="false" afterPath="$PROJECT_DIR$/../../../ejercicio 2/práctica/ejercicio-c/cliente/src/main/java/redselection/cliente/dto/PersonaDTO.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../ejercicio 2/práctica/ejercicio-c/cliente/src/main/java/redselection/cliente/service/PersonaClientService.java" beforeDir="false" afterPath="$PROJECT_DIR$/../../../ejercicio 2/práctica/ejercicio-c/cliente/src/main/java/redselection/cliente/service/PersonaClientService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../ejercicio 2/práctica/ejercicio-c/cliente/src/main/resources/templates/personas/detalle.html" beforeDir="false" afterPath="$PROJECT_DIR$/../../../ejercicio 2/práctica/ejercicio-c/cliente/src/main/resources/templates/personas/detalle.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../ejercicio 2/práctica/ejercicio-c/cliente/src/main/resources/templates/personas/form.html" beforeDir="false" afterPath="$PROJECT_DIR$/../../../ejercicio 2/práctica/ejercicio-c/cliente/src/main/resources/templates/personas/form.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../ejercicio 2/práctica/ejercicio-c/servidor/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../../../ejercicio 2/práctica/ejercicio-c/servidor/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../ejercicio 2/práctica/ejercicio-c/servidor/src/main/java/redselection/ejercicio_c/entities/Libro.java" beforeDir="false" afterPath="$PROJECT_DIR$/../../../ejercicio 2/práctica/ejercicio-c/servidor/src/main/java/redselection/ejercicio_c/entities/Libro.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../ejercicio 2/práctica/ejercicio-c/servidor/src/main/java/redselection/ejercicio_c/entities/Persona.java" beforeDir="false" afterPath="$PROJECT_DIR$/../../../ejercicio 2/práctica/ejercicio-c/servidor/src/main/java/redselection/ejercicio_c/entities/Persona.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../ejercicio 2/práctica/ejercicio-c/servidor/src/main/java/redselection/ejercicio_c/repositories/PersonaRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/../../../ejercicio 2/práctica/ejercicio-c/servidor/src/main/java/redselection/ejercicio_c/repositories/PersonaRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../ejercicio 2/práctica/ejercicio-c/servidor/src/main/resources/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/../../../ejercicio 2/práctica/ejercicio-c/servidor/src/main/resources/application.properties" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -62,7 +81,7 @@
     "codeWithMe.voiceChat.enabledByDefault": "false",
     "git-widget-placeholder": "main",
     "kotlin-language-version-configured": "true",
-    "last_opened_file_path": "/home/guada/Documentos/Ing Software II/IS2-2026-Red-Selection/Trabajo Práctico Guía N2/ejercicio 1/práctica/ejercicio-c/cliente",
+    "last_opened_file_path": "/home/guada/Documentos/Ing Software II/IS2-2026-Red-Selection/Trabajo Práctico Guía N2/ejercicio 1/práctica/ejercicio-c",
     "nodejs_package_manager_path": "npm",
     "settings.editor.selected.configurable": "preferences.pluginManager"
   }
@@ -72,6 +91,19 @@
       <recent name="redselection.ejercicio_c.controllers" />
       <recent name="redselection.ejercicio_c.services" />
     </key>
+  </component>
+  <component name="RunManager">
+    <configuration default="true" type="JetRunConfigurationType">
+      <module name="ejercicio-c" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration default="true" type="KotlinStandaloneScriptRunConfigurationType">
+      <module name="ejercicio-c" />
+      <option name="filePath" />
+      <method v="2" />
+    </configuration>
   </component>
   <component name="SharedIndexes">
     <attachedChunks>
