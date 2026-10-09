@@ -1,0 +1,3 @@
+Lionel;Escaloneta;293851450;Perú;345;
+Pablo;Perez;293451460;San Martín;1050;
+Esteban;Peralta;291251480;Benavente;121;

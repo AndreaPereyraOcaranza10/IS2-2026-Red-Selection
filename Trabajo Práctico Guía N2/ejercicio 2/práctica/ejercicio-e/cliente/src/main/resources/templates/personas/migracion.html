@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Migración de personas</title>
+    <link rel="stylesheet" th:href="@{/css/estilos.css}">
+</head>
+<body>
+<div th:replace="~{fragments/layout :: navbar}"></div>
+<main class="contenedor">
+    <h1>Migración desde archivo TXT</h1>
+    <div th:replace="~{fragments/layout :: alertas}"></div>
+    <p>Se leerá <strong>migración.txt</strong> desde la carpeta de ejecución del servidor.</p>
+    <p>Formato por línea: <code>NOMBRE;APELLIDO;DNI;CALLE;NÚMERO;</code></p>
+    <p>Los domicilios se asociarán a la primera localidad cargada en el sistema.</p>
+    <form th:action="@{/migracion}" method="post">
+        <button type="submit">Iniciar migración</button>
+    </form>
+</main>
+</body>
+</html>
