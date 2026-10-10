@@ -5,12 +5,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.beans.factory.annotation.Value;
 
 @Service
 public class ClimaService {
 
-    // Coloca aquí tu clave generada en OpenWeatherMap
-    private final String apiKey = "f309215942ce74fcb09cbdd4b5c9a268";
+    @Value("${weather.api.key}")
+    private String apiKey;
 
     public ResponseEntity<String> obtenerClimaApi(String ciudad) {
         try {
