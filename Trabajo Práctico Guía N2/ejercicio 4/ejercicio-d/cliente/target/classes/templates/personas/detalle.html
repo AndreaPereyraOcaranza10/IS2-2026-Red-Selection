@@ -47,12 +47,12 @@
         <h2>Libros</h2>
         <table th:if="${!#lists.isEmpty(persona.libros)}">
             <thead>
-            <tr><th>Título</th><th>Año</th><th>Género</th><th>Páginas</th><th>Autores</th><th>Devolución</th><th></th></tr>
+            <tr><th>Título</th><th>Publicación</th><th>Género</th><th>Páginas</th><th>Autores</th><th>Devolución</th><th></th></tr>
             </thead>
             <tbody>
             <tr th:each="libro : ${persona.libros}">
                 <td th:text="${libro.titulo}"></td>
-                <td th:text="${libro.fecha}"></td>
+                <td th:text="${#temporals.format(libro.fechaPublicacion, 'dd/MM/yyyy')}"></td>
                 <td th:text="${libro.genero}"></td>
                 <td th:text="${libro.paginas}"></td>
                 <td>
@@ -78,8 +78,8 @@
             <label>Título
                 <input type="text" th:field="*{titulo}" required>
             </label>
-            <label>Año
-                <input type="number" th:field="*{fecha}" min="0" required>
+            <label>Fecha de publicación
+                <input type="date" th:field="*{fechaPublicacion}" required>
             </label>
             <label>Género
                 <input type="text" th:field="*{genero}" required>

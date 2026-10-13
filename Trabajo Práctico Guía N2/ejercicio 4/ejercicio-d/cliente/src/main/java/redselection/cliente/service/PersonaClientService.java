@@ -7,6 +7,9 @@ import redselection.cliente.dto.AutorDTO;
 import redselection.cliente.dto.DomicilioDTO;
 import redselection.cliente.dto.LibroDTO;
 import redselection.cliente.dto.PersonaDTO;
+import redselection.cliente.patrones.builder.LibroBuilderImpl;
+import redselection.cliente.patrones.builder.LibroDirector;
+import java.util.ArrayList;
 
 import java.util.Arrays;
 import java.util.List;
@@ -68,11 +71,27 @@ public class PersonaClientService {
      * No existe un endpoint de libros en el servidor: los libros se guardan a través de la persona
      * (Persona.libros tiene cascade ALL). Se trae la persona, se le agrega el libro y se hace PUT.
      */
-    public void agregarLibro(Long personaId, LibroDTO libro, List<Long> autorIds) {
+    public void agregarLibro(Long personaId, LibroDTO formulario, List<Long> autorIds) {
         PersonaDTO existente = obtener(personaId);
-        libro.setId(null);
 
-        List<AutorDTO> autores = new java.util.ArrayList<>();
+        // Patrón Builder: el Director le indica al builder qué pasos seguir para armar el libro
+        LibroBuilderImpl builder = new LibroBuilderImpl();
+        LibroDirector director = new LibroDirector(builder);
+        director.construirLibroPrestado(
+                formulario.getTitulo(),
+                formulario.getFechaPublicacion(),
+                formulario.getGenero(),
+                formulario.getPaginas(),
+                autoresPorId(autorIds),
+                formulario.getFechaDevolucion());
+
+        existente.getLibros().add(builder.obtenerResultado());
+
+        restTemplate.put(baseUrl + "/{id}", existente, personaId);
+    }
+
+    private List<AutorDTO> autoresPorId(List<Long> autorIds) {
+        List<AutorDTO> autores = new ArrayList<>();
         if (autorIds != null) {
             for (Long autorId : autorIds) {
                 AutorDTO autor = new AutorDTO();
@@ -80,10 +99,7 @@ public class PersonaClientService {
                 autores.add(autor);
             }
         }
-        libro.setAutores(autores);
-        existente.getLibros().add(libro);
-
-        restTemplate.put(baseUrl + "/{id}", existente, personaId);
+        return autores;
     }
 
     /** Al sacarlo de la lista, el servidor lo elimina (Persona.libros tiene orphanRemoval). */
