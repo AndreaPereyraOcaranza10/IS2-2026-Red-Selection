@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Catálogo de libros</title>
+
+    <link rel="stylesheet" th:href="@{/css/estilos.css}">
+
+</head>
+
+
+
+<body>
+
+<div th:replace="~{fragments/layout :: navbar}"></div>
+
+<main class="container">
+
+    <h1>Catálogo de libros</h1>
+
+
+
+    <div th:replace="~{fragments/layout :: alertas}"></div>
+
+
+
+
+
+    <div th:if="${mensaje != null}"
+
+         th:text="${mensaje}">
+
+    </div>
+
+
+
+    <div th:if="${error != null}"
+
+         th:text="${error}">
+
+    </div>
+
+
+
+    <p>
+        <a th:href="@{/libros/nuevo}">Nuevo libro</a>
+    </p>
+
+    <section class="filtro-libros">
+        <h2>Buscar libros por autor</h2>
+
+        <form th:action="@{/libros}" method="get">
+            <label for="autorId">Seleccioná un autor:</label>
+
+            <select id="autorId" name="autorId">
+                <option value="">Todos los autores</option>
+
+                <option th:each="autor : ${autores}"
+                        th:value="${autor.id}"
+                        th:text="${autor.nombre + ' ' + autor.apellido}"
+                        th:selected="${autorId != null and autor.id == autorId}">
+                </option>
+            </select>
+
+            <button type="submit">Buscar libros</button>
+
+            <a th:href="@{/libros}">Limpiar filtro</a>
+        </form>
+
+        <p th:if="${autorId != null}">
+            Resultados filtrados por el autor seleccionado.
+        </p>
+    </section>
+
+
+    <table>
+
+        <thead>
+
+        <tr>
+
+            <th>Título</th>
+
+            <th>Fecha de publicación</th>
+
+            <th>Género</th>
+
+            <th>Páginas</th>
+
+            <th>Autores</th>
+
+            <th>Acciones</th>
+
+        </tr>
+
+        </thead>
+
+
+
+        <tbody>
+
+        <tr th:each="libro : ${libros}">
+
+            <td th:text="${libro.titulo}"></td>
+
+
+
+            <td th:text="${libro.fechaPublicacion != null
+
+                        ? libro.fechaPublicacion : '-'}"></td>
+
+
+
+            <td th:text="${libro.genero}"></td>
+
+
+
+            <td th:text="${libro.paginas}"></td>
+
+
+
+            <td>
+
+                        <span th:if="${#lists.isEmpty(libro.autores)}">
+
+                            Sin autores
+
+                        </span>
+
+
+
+                <span th:each="autor, iter : ${libro.autores}">
+
+                            <span th:text="${autor.nombre + ' ' + autor.apellido}"></span>
+
+                            <span th:if="${!iter.last}">, </span>
+
+                        </span>
+
+            </td>
+
+
+
+            <td>
+
+                <a th:href="@{/libros/{id}/editar(id=${libro.id})}">
+
+                    Editar
+
+                </a>
+
+
+
+                <form th:action="@{/libros/{id}/eliminar(id=${libro.id})}"
+
+                      method="post">
+
+                    <button type="submit">Eliminar</button>
+
+                </form>
+
+            </td>
+
+        </tr>
+
+
+
+        <tr th:if="${#lists.isEmpty(libros)}">
+
+            <td colspan="6">No hay libros cargados.</td>
+
+        </tr>
+
+        </tbody>
+
+    </table>
+
+</main>
+
+
+
+</body>
+
+</html>

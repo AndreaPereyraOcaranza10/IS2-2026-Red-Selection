@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Formulario de libro</title>
+
+    <link rel="stylesheet" th:href="@{/css/estilos.css}">
+
+</head>
+
+
+
+<body>
+
+<div th:replace="~{fragments/layout :: navbar}"></div>
+
+<main class="container">
+
+
+
+    <h1 th:text="${libro.id == null
+
+            ? 'Nuevo libro'
+
+            : 'Editar libro'}">
+
+    </h1>
+
+
+
+    <div th:if="${error != null}"
+
+         th:text="${error}">
+
+    </div>
+
+
+
+    <form th:object="${libro}"
+
+          th:action="${libro.id == null}
+
+                ? @{/libros}
+
+                : @{/libros/{id}(id=${libro.id})}"
+
+          method="post"
+
+          class="formulario">
+
+
+
+        <div>
+
+            <label for="titulo">Título</label>
+
+            <input type="text"
+
+                   id="titulo"
+
+                   th:field="*{titulo}"
+
+                   required>
+
+        </div>
+
+
+
+        <div>
+
+            <label for="fechaPublicacion">Fecha de publicación</label>
+
+            <input type="date"
+
+                   id="fechaPublicacion"
+
+                   th:field="*{fechaPublicacion}">
+
+        </div>
+
+
+
+        <div>
+
+            <label for="genero">Género</label>
+
+            <input type="text"
+
+                   id="genero"
+
+                   th:field="*{genero}"
+
+                   required>
+
+        </div>
+
+
+
+        <div>
+
+            <label for="paginas">Cantidad de páginas</label>
+
+            <input type="number"
+
+                   id="paginas"
+
+                   th:field="*{paginas}"
+
+                   min="1"
+
+                   required>
+
+        </div>
+
+
+
+        <div>
+
+            <label for="autores">Autores</label>
+
+
+
+            <select id="autores" name="autorIds" multiple>
+
+                <option th:each="autor : ${autores}"
+
+                        th:value="${autor.id}"
+
+                        th:text="${autor.nombre + ' ' + autor.apellido}"
+
+                        th:selected="${libro.autores != null
+
+                                and #lists.contains(
+
+                                    libro.autores.![id],
+
+                                    autor.id
+
+                                )}">
+
+                </option>
+
+            </select>
+
+
+
+            <small>
+
+                Podés seleccionar varios autores manteniendo presionada
+
+                la tecla Ctrl (o Cmd en Mac).
+
+            </small>
+
+        </div>
+
+
+
+        <div>
+
+            <button type="submit">Guardar libro</button>
+
+            <a th:href="@{/libros}">Cancelar</a>
+
+        </div>
+
+
+
+    </form>
+
+
+
+</main>
+
+
+
+</body>
+
+</html>
