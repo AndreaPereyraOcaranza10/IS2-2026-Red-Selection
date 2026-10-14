@@ -24,6 +24,6 @@ public class FotoPaciente extends Base {
     private String mime;
 
     @Lob
-    @Column(name = "contenido")
+    @Column(name = "contenido", columnDefinition = "LONGBLOB")
     private byte[] contenido;
 }

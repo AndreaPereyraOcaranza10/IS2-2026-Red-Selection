@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Usuario')}"></head>
+<body class="starter-page-page">
+<header th:replace="~{fragments/layout :: header('usuarios')}"></header>
+
+<main class="main">
+    <div th:replace="~{fragments/layout :: encabezado('Usuario', 'Completá los datos del usuario')}"></div>
+
+    <section class="section">
+        <div class="container" style="max-width:640px">
+            <form th:action="@{/usuarios/guardar}" th:object="${usuario}" method="post">
+                <input type="hidden" th:field="*{id}">
+
+                <div class="mb-3">
+                    <label class="form-label">Nombre de usuario</label>
+                    <input type="text" class="form-control" th:field="*{nombreUsuario}" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Clave</label>
+                    <input type="password" class="form-control" th:field="*{clave}" required>
+                </div>
+
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary">Guardar</button>
+                    <a th:href="@{/usuarios}" class="btn btn-outline-secondary">Cancelar</a>
+                </div>
+            </form>
+        </div>
+    </section>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+</body>
+</html>
