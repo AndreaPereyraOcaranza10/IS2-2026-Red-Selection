@@ -3,14 +3,11 @@ package redselection.cliente.service;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
-import redselection.cliente.dto.AutorDTO;
+import org.springframework.web.util.UriComponentsBuilder;
 import redselection.cliente.dto.DomicilioDTO;
-import redselection.cliente.dto.LibroDTO;
 import redselection.cliente.dto.PersonaDTO;
-import redselection.cliente.patrones.builder.LibroBuilderImpl;
-import redselection.cliente.patrones.builder.LibroDirector;
-import java.util.ArrayList;
 
+import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
 
@@ -19,16 +16,13 @@ public class PersonaClientService {
 
     private final RestTemplate restTemplate;
     private final String baseUrl;
-    private final LibroClientService libroService;
 
     public PersonaClientService(
             RestTemplate restTemplate,
-            @Value("${api.base-url}") String apiBaseUrl,
-            LibroClientService libroService) {
+            @Value("${api.base-url}") String apiBaseUrl) {
 
         this.restTemplate = restTemplate;
         this.baseUrl = apiBaseUrl + "/personas";
-        this.libroService = libroService;
     }
 
     public List<PersonaDTO> listar() {
@@ -51,7 +45,8 @@ public class PersonaClientService {
 
     /**
      * El servidor hace save() con lo que recibe, así que hay que mandarle la entidad completa con sus ids
-     * (persona, domicilio y libros). Por eso se trae la persona actual y solo se pisan los campos del formulario.
+     * (persona y domicilio). Por eso se trae la persona actual y solo se pisan los campos del formulario.
+     * Los libros no se tocan desde acá: el servidor conserva los que ya tiene asignados.
      */
     public void actualizar(Long id, PersonaDTO formulario) {
         PersonaDTO existente = obtener(id);
@@ -74,39 +69,23 @@ public class PersonaClientService {
     }
 
 
-    public void asociarLibro(Long personaId, Long libroId) {
-        PersonaDTO persona = obtener(personaId);
-        if (persona.getLibros() == null) {
-            persona.setLibros(new ArrayList<>());
+    /**
+     * Asigna a la persona un libro que ya existe en el catálogo. No crea ningún libro:
+     * el servidor solo vincula persona y libro (y guarda la fecha de devolución, si se indicó).
+     */
+    public void asociarLibro(Long personaId, Long libroId, LocalDate fechaDevolucion) {
+        UriComponentsBuilder uri = UriComponentsBuilder
+                .fromUriString(baseUrl + "/{personaId}/libros/{libroId}");
+        if (fechaDevolucion != null) {
+            uri.queryParam("fechaDevolucion", fechaDevolucion);
         }
 
-        LibroDTO libro = libroService.obtener(libroId);
-
-        if (libro == null) {
-            throw new IllegalArgumentException(
-                    "No existe el libro con ID: " + libroId);
-        }
-
-        boolean yaAsociado = persona.getLibros().stream()
-                .anyMatch(l -> libroId.equals(l.getId()));
-
-        if (yaAsociado) {
-            throw new IllegalArgumentException(
-                    "El libro ya está asociado a esta persona.");
-        }
-
-        persona.getLibros().add(libro);
-
-        restTemplate.put(baseUrl + "/{id}", persona, personaId);
+        restTemplate.postForObject(uri.buildAndExpand(personaId, libroId).toUri(), null, Void.class);
     }
 
-
-    /** Al sacarlo de la lista, el servidor lo elimina (Persona.libros tiene orphanRemoval). */
+    /** Solo desvincula el libro de la persona: el libro sigue existiendo en el catálogo. */
     public void quitarLibro(Long personaId, Long libroId) {
-        PersonaDTO existente = obtener(personaId);
-        existente.getLibros().removeIf(l -> libroId.equals(l.getId()));
-
-        restTemplate.put(baseUrl + "/{id}", existente, personaId);
+        restTemplate.delete(baseUrl + "/{personaId}/libros/{libroId}", personaId, libroId);
     }
 
     public void eliminar(Long id) {

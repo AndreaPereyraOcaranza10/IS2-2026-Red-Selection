@@ -4,6 +4,9 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import redselection.cliente.service.AutorClientService;
 import redselection.cliente.service.LibroClientService;
+import redselection.cliente.service.PersonaClientService;
+import redselection.cliente.dto.PersonaDTO;
+import redselection.cliente.util.MensajesError;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -16,6 +19,8 @@ import redselection.cliente.dto.AutorDTO;
 import java.util.List;
 import org.springframework.web.bind.annotation.RequestParam;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 
 @Controller
@@ -24,12 +29,15 @@ public class LibroViewController {
 
     private final LibroClientService libroService;
     private final AutorClientService autorService;
+    private final PersonaClientService personaService;
 
     public LibroViewController(
             LibroClientService libroService,
-            AutorClientService autorService) {
+            AutorClientService autorService,
+            PersonaClientService personaService) {
         this.libroService = libroService;
         this.autorService = autorService;
+        this.personaService = personaService;
     }
 
     @GetMapping
@@ -45,10 +53,12 @@ public class LibroViewController {
             model.addAttribute("libros", libros);
             model.addAttribute("autores", autorService.listar());
             model.addAttribute("autorId", autorId);
+            model.addAttribute("asignaciones", asignaciones());
 
         } catch (RestClientException e) {
             model.addAttribute("libros", List.of());
             model.addAttribute("autores", List.of());
+            model.addAttribute("asignaciones", Map.of());
             model.addAttribute(
                     "error",
                     "No se pudieron cargar los libros. Verificá que el servidor esté funcionando."
@@ -127,9 +137,23 @@ public class LibroViewController {
             libroService.eliminar(id);
             redirect.addFlashAttribute("mensaje", "Libro eliminado correctamente.");
         } catch (RestClientException e) {
-            redirect.addFlashAttribute("error", "No se pudo eliminar el libro.");
+            redirect.addFlashAttribute("error", MensajesError.de(e));
         }
         return "redirect:/libros";
+    }
+
+    // libroId -> "Nombre Apellido" de la persona que lo tiene asignado (solo es informativo)
+    private Map<Long, String> asignaciones() {
+        Map<Long, String> asignaciones = new HashMap<>();
+        for (PersonaDTO persona : personaService.listar()) {
+            if (persona.getLibros() == null) {
+                continue;
+            }
+            for (LibroDTO libro : persona.getLibros()) {
+                asignaciones.put(libro.getId(), persona.getNombre() + " " + persona.getApellido());
+            }
+        }
+        return asignaciones;
     }
 
     private void asignarAutores(LibroDTO libro, List<Long> autorIds) {

@@ -10,6 +10,7 @@ import redselection.ejercicio_c.entities.Persona;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface PersonaRepository extends BaseRepository<Persona, Long> {
@@ -51,6 +52,9 @@ public interface PersonaRepository extends BaseRepository<Persona, Long> {
     */
 
     List<Persona> findDistinctByLibrosFechaDevolucion(LocalDate fecha);
+
+    // Persona que tiene asignado un libro (un libro está asignado a una sola persona a la vez)
+    Optional<Persona> findFirstByLibrosId(Long libroId);
 
     // Personas que cumplen años en ese día y mes
     @Query("SELECT p FROM Persona p WHERE extract(month from p.fechaNacimiento) = :mes AND extract(day from p.fechaNacimiento) = :dia")

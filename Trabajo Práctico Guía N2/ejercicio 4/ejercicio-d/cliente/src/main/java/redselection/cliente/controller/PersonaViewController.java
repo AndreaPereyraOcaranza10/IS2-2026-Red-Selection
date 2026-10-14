@@ -1,5 +1,6 @@
 package redselection.cliente.controller;
 
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -13,6 +14,7 @@ import redselection.cliente.service.PersonaClientService;
 import redselection.cliente.util.MensajesError;
 import redselection.cliente.service.LibroClientService;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Controller
@@ -58,29 +60,35 @@ public class PersonaViewController {
     public String crear(
             @ModelAttribute("persona") PersonaDTO persona,
             @RequestParam(required = false) List<Long> libroIds,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaDevolucion,
             Model model,
             RedirectAttributes redirect) {
 
+        PersonaDTO personaCreada;
         try {
-            PersonaDTO personaCreada = personaService.crear(persona);
-
-            if (libroIds != null && !libroIds.isEmpty()) {
-                for (Long libroId : libroIds) {
-                    personaService.asociarLibro(
-                            personaCreada.getId(), libroId);
-                }
-            }
-
-            redirect.addFlashAttribute(
-                    "mensaje", "Persona creada correctamente.");
-            return "redirect:/personas";
-
+            personaCreada = personaService.crear(persona);
         } catch (RestClientException e) {
             model.addAttribute("error", MensajesError.de(e));
             cargarLocalidades(model);
             cargarLibros(model);
             return "personas/form";
         }
+
+        // La persona ya existe; los libros se le asignan del catálogo (no se crean libros nuevos)
+        if (libroIds != null) {
+            try {
+                for (Long libroId : libroIds) {
+                    personaService.asociarLibro(personaCreada.getId(), libroId, fechaDevolucion);
+                }
+            } catch (RestClientException e) {
+                redirect.addFlashAttribute("error",
+                        "La persona se creó, pero no se pudieron asignar todos los libros: " + MensajesError.de(e));
+                return "redirect:/personas/" + personaCreada.getId();
+            }
+        }
+
+        redirect.addFlashAttribute("mensaje", "Persona creada correctamente.");
+        return "redirect:/personas";
     }
 
     @GetMapping("/{id}")
@@ -89,7 +97,7 @@ public class PersonaViewController {
             PersonaDTO persona = personaService.obtener(id);
             persona.asegurarDomicilio();
             model.addAttribute("persona", persona);
-            model.addAttribute("librosDisponibles", libroService.listar());
+            model.addAttribute("librosDisponibles", libroService.listarDisponibles());
             return "personas/detalle";
         } catch (RestClientException e) {
             redirect.addFlashAttribute("error", MensajesError.de(e));
@@ -141,12 +149,12 @@ public class PersonaViewController {
     public String agregarLibro(
             @PathVariable Long personaId,
             @RequestParam Long libroId,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaDevolucion,
             RedirectAttributes redirect) {
 
         try {
-            personaService.asociarLibro(personaId, libroId);
-            redirect.addFlashAttribute(
-                    "mensaje", "Libro asignado correctamente.");
+            personaService.asociarLibro(personaId, libroId, fechaDevolucion);
+            redirect.addFlashAttribute("mensaje", "Libro asignado correctamente.");
         } catch (RestClientException e) {
             redirect.addFlashAttribute("error", MensajesError.de(e));
         }
@@ -158,7 +166,7 @@ public class PersonaViewController {
     public String quitarLibro(@PathVariable Long id, @PathVariable Long libroId, RedirectAttributes redirect) {
         try {
             personaService.quitarLibro(id, libroId);
-            redirect.addFlashAttribute("mensaje", "Libro eliminado correctamente.");
+            redirect.addFlashAttribute("mensaje", "Libro desasignado correctamente. Sigue disponible en el catálogo.");
         } catch (RestClientException e) {
             redirect.addFlashAttribute("error", MensajesError.de(e));
         }
@@ -185,7 +193,7 @@ public class PersonaViewController {
 
     private void cargarLibros(Model model) {
         try {
-            model.addAttribute("librosDisponibles", libroService.listar());
+            model.addAttribute("librosDisponibles", libroService.listarDisponibles());
         } catch (RestClientException e) {
             model.addAttribute("librosDisponibles", List.of());
             model.addAttribute("error", MensajesError.de(e));

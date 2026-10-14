@@ -44,7 +44,7 @@
     </section>
 
     <section class="tarjeta">
-        <h2>Libros</h2>
+        <h2>Libros asignados</h2>
         <table th:if="${!#lists.isEmpty(persona.libros)}">
             <thead>
             <tr><th>Título</th><th>Publicación</th><th>Género</th><th>Páginas</th><th>Autores</th><th>Devolución</th><th></th></tr>
@@ -62,14 +62,14 @@
                 <td th:text="${#temporals.format(libro.fechaDevolucion, 'dd/MM/yyyy')}"></td>
                 <td>
                     <form th:action="@{/personas/{pid}/libros/{lid}/eliminar(pid=${persona.id},lid=${libro.id})}" method="post"
-                          onsubmit="return confirm('¿Quitar este libro?');">
-                        <button type="submit" class="chico peligro">Quitar</button>
+                          onsubmit="return confirm('¿Desasignar este libro? Seguirá disponible en el catálogo.');">
+                        <button type="submit" class="chico peligro">Desasignar</button>
                     </form>
                 </td>
             </tr>
             </tbody>
         </table>
-        <p th:if="${#lists.isEmpty(persona.libros)}" class="vacio">Esta persona no tiene libros.</p>
+        <p th:if="${#lists.isEmpty(persona.libros)}" class="vacio">Esta persona no tiene libros asignados.</p>
     </section>
 
     <section class="tarjeta">
@@ -90,9 +90,12 @@
             </select>
 
             <p th:if="${#lists.isEmpty(librosDisponibles)}" class="ayuda">
-                No hay libros disponibles en el catálogo.
+                No hay libros disponibles (el catálogo está vacío o todos están asignados).
                 Podés crearlos desde <a th:href="@{/libros}">Libros</a>.
             </p>
+
+            <label for="fechaDevolucion">Fecha de devolución (opcional)</label>
+            <input type="date" id="fechaDevolucion" name="fechaDevolucion">
 
             <button type="submit"
                     th:disabled="${#lists.isEmpty(librosDisponibles)}">

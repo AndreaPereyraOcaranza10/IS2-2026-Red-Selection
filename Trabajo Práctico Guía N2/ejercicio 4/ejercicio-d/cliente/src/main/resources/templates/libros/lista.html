@@ -30,28 +30,8 @@
 
     <div th:replace="~{fragments/layout :: alertas}"></div>
 
-
-
-
-
-    <div th:if="${mensaje != null}"
-
-         th:text="${mensaje}">
-
-    </div>
-
-
-
-    <div th:if="${error != null}"
-
-         th:text="${error}">
-
-    </div>
-
-
-
     <p>
-        <a th:href="@{/libros/nuevo}">Nuevo libro</a>
+        <a th:href="@{/libros/nuevo}" class="boton">Nuevo libro</a>
     </p>
 
     <section class="filtro-libros">
@@ -72,7 +52,7 @@
 
             <button type="submit">Buscar libros</button>
 
-            <a th:href="@{/libros}">Limpiar filtro</a>
+            <a th:href="@{/libros}" class="boton secundario">Limpiar filtro</a>
         </form>
 
         <p th:if="${autorId != null}">
@@ -96,6 +76,8 @@
             <th>Páginas</th>
 
             <th>Autores</th>
+
+            <th>Estado</th>
 
             <th>Acciones</th>
 
@@ -151,21 +133,43 @@
 
             <td>
 
-                <a th:href="@{/libros/{id}/editar(id=${libro.id})}">
+                <span th:if="${asignaciones.get(libro.id) == null}">Disponible</span>
 
-                    Editar
+                <span th:if="${asignaciones.get(libro.id) != null}"
 
-                </a>
+                      th:text="${'Asignado a ' + asignaciones.get(libro.id)}"></span>
+
+            </td>
 
 
 
-                <form th:action="@{/libros/{id}/eliminar(id=${libro.id})}"
+            <td>
 
-                      method="post">
+                <div class="acciones">
 
-                    <button type="submit">Eliminar</button>
+                    <a th:href="@{/libros/{id}/editar(id=${libro.id})}" class="boton chico">Editar</a>
 
-                </form>
+
+
+                    <form th:action="@{/libros/{id}/eliminar(id=${libro.id})}"
+
+                          method="post"
+
+                          onsubmit="return confirm('¿Eliminar este libro del catálogo?');">
+
+                        <button type="submit" class="chico peligro"
+
+                                th:disabled="${asignaciones.get(libro.id) != null}"
+
+                                th:title="${asignaciones.get(libro.id) != null
+
+                                        ? 'Está asignado: desasignalo desde la persona para poder eliminarlo'
+
+                                        : 'Eliminar libro'}">Eliminar</button>
+
+                    </form>
+
+                </div>
 
             </td>
 
@@ -175,7 +179,7 @@
 
         <tr th:if="${#lists.isEmpty(libros)}">
 
-            <td colspan="6">No hay libros cargados.</td>
+            <td colspan="7">No hay libros cargados.</td>
 
         </tr>
 

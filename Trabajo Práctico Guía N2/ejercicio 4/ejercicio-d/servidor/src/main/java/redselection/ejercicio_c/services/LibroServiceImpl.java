@@ -1,34 +1,47 @@
 package redselection.ejercicio_c.services;
 
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 import redselection.ejercicio_c.entities.Libro;
+import redselection.ejercicio_c.entities.Persona;
 import redselection.ejercicio_c.patrones.iterador.LibrosPorAutorIterator;
 import redselection.ejercicio_c.repositories.BaseRepository;
 
 import redselection.ejercicio_c.entities.Autor;
 import redselection.ejercicio_c.repositories.AutorRepository;
 import redselection.ejercicio_c.repositories.LibroRepository;
+import redselection.ejercicio_c.repositories.PersonaRepository;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
 public class LibroServiceImpl extends BaseServiceImpl<Libro, Long> implements LibroService {
 
     private final AutorRepository autorRepository;
+    private final LibroRepository libroRepository;
+    private final PersonaRepository personaRepository;
 
     public LibroServiceImpl(
             BaseRepository<Libro, Long> baseRepository,
-            AutorRepository autorRepository) {
+            AutorRepository autorRepository,
+            LibroRepository libroRepository,
+            PersonaRepository personaRepository) {
 
         super(baseRepository);
         this.autorRepository = autorRepository;
+        this.libroRepository = libroRepository;
+        this.personaRepository = personaRepository;
     }
 
+    // El ABM de libros maneja solo los datos del libro. La asignación a una persona
+    // (y su fecha de devolución) se maneja desde PersonaService.asignarLibro / desasignarLibro.
     @Override
     public Libro save(Libro libro) throws Exception {
         validarAutores(libro);
+        libro.setFechaDevolucion(null);
         return super.save(libro);
     }
 
@@ -55,9 +68,34 @@ public class LibroServiceImpl extends BaseServiceImpl<Libro, Long> implements Li
 
     @Override
     public Libro update(Long id, Libro libro) throws Exception {
+        Optional<Libro> existente = libroRepository.findById(id);
+        if (existente.isEmpty()) {
+            throw new Exception("No existe el libro con ID: " + id);
+        }
+
         validarAutores(libro);
         libro.setId(id);
+        // Editar el libro no debe pisar el estado de préstamo que tenga
+        libro.setFechaDevolucion(existente.get().getFechaDevolucion());
         return super.update(id, libro);
+    }
+
+    // Un libro asignado a una persona no se puede eliminar: primero hay que desasignarlo
+    @Override
+    @Transactional
+    public boolean delete(Long id) throws Exception {
+        Optional<Persona> titular = personaRepository.findFirstByLibrosId(id);
+        if (titular.isPresent()) {
+            throw new IllegalStateException("No se puede eliminar el libro porque está asignado a "
+                    + titular.get().getNombre() + " " + titular.get().getApellido()
+                    + ". Desasignalo primero.");
+        }
+        return super.delete(id);
+    }
+
+    @Override
+    public List<Libro> listarDisponibles() {
+        return libroRepository.findDisponibles();
     }
 
     @Override

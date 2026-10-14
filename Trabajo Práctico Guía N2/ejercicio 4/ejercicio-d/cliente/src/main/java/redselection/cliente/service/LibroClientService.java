@@ -57,4 +57,12 @@ public class LibroClientService {
                 ? List.of()
                 : Arrays.asList(respuesta);
     }
+
+    /** Libros del catálogo que no están asignados a ninguna persona. */
+    public List<LibroDTO> listarDisponibles() {
+        LibroDTO[] respuesta = restTemplate.getForObject(
+                baseUrl + "/disponibles", LibroDTO[].class);
+
+        return respuesta == null ? List.of() : Arrays.asList(respuesta);
+    }
 }

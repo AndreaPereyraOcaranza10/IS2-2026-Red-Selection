@@ -6,4 +6,7 @@ import java.util.List;
 
 public interface LibroService extends BaseService<Libro, Long> {
     List<Libro> listarPorAutor(Long autorId);
+
+    // Libros que no están asignados a ninguna persona
+    List<Libro> listarDisponibles();
 }
