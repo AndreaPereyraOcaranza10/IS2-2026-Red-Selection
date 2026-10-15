@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Historia clínica')}"></head>
+<body class="starter-page-page">
+<header th:replace="~{fragments/layout :: header('historias')}"></header>
+
+<main class="main">
+    <div th:replace="~{fragments/layout :: encabezado('Historia clínica', 'Elegí el paciente y el usuario que la carga')}"></div>
+
+    <section class="section">
+        <div class="container" style="max-width:640px">
+            <form th:action="@{/historias/guardar}" method="post">
+                <input type="hidden" name="id" th:value="${historiaId}">
+
+                <div class="mb-3">
+                    <label class="form-label">Paciente</label>
+                    <select name="pacienteId" class="form-select" required>
+                        <option value="">Seleccioná un paciente...</option>
+                        <option th:each="p : ${pacientes}" th:value="${p.id}"
+                                th:selected="${p.id == pacienteSel}"
+                                th:text="${p.apellido + ', ' + p.nombre + ' (' + p.documento + ')'}"></option>
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Usuario</label>
+                    <select name="usuarioId" class="form-select" required>
+                        <option value="">Seleccioná un usuario...</option>
+                        <option th:each="u : ${usuarios}" th:value="${u.id}"
+                                th:selected="${u.id == usuarioSel}"
+                                th:text="${u.nombreUsuario}"></option>
+                    </select>
+                </div>
+
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary">Guardar</button>
+                    <a th:href="@{/historias}" class="btn btn-outline-secondary">Cancelar</a>
+                </div>
+            </form>
+        </div>
+    </section>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+</body>
+</html>

@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+<!-- ========== HEAD ========== -->
+<head th:fragment="head(titulo)">
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+  <title th:text="${titulo} + ' - Consultorio'">Consultorio</title>
+
+  <link th:href="@{/assets/img/favicon.svg}" rel="icon" type="image/svg+xml">
+
+  <link href="https://fonts.googleapis.com" rel="preconnect">
+  <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Montserrat:wght@400;500;600;700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+
+  <link th:href="@{/assets/vendor/bootstrap/css/bootstrap.min.css}" rel="stylesheet">
+  <link th:href="@{/assets/vendor/bootstrap-icons/bootstrap-icons.css}" rel="stylesheet">
+  <link th:href="@{/assets/vendor/aos/aos.css}" rel="stylesheet">
+  <link th:href="@{/assets/vendor/glightbox/css/glightbox.min.css}" rel="stylesheet">
+  <link th:href="@{/assets/vendor/fontawesome-free/css/all.min.css}" rel="stylesheet">
+  <link th:href="@{/assets/vendor/swiper/swiper-bundle.min.css}" rel="stylesheet">
+  <link th:href="@{/assets/css/main.css}" rel="stylesheet">
+  <link th:href="@{/assets/css/clinica.css}" rel="stylesheet">
+</head>
+
+<body>
+
+<!-- ========== HEADER ========== -->
+<header th:fragment="header(activo)" id="header" class="header fixed-top">
+
+  <div class="topbar d-flex align-items-center dark-background">
+    <div class="container d-flex justify-content-center justify-content-md-between">
+      <div class="contact-info d-flex align-items-center">
+        <i class="bi bi-envelope d-flex align-items-center"><a href="mailto:consultorio@ejemplo.com">consultorio@ejemplo.com</a></i>
+        <i class="bi bi-phone d-flex align-items-center ms-4"><span>+54 261 000 0000</span></i>
+      </div>
+    </div>
+  </div>
+
+  <div class="branding d-flex align-items-center">
+    <div class="container position-relative d-flex align-items-center justify-content-between">
+      <a th:href="@{/}" class="logo d-flex align-items-center gap-2">
+        <i class="bi bi-heart-pulse-fill logo-icono"></i>
+        <h1 class="sitename">Consultorio</h1>
+      </a>
+
+      <nav id="navmenu" class="navmenu">
+        <ul>
+          <li><a th:href="@{/}" th:classappend="${activo == 'inicio'} ? 'active'">Inicio</a></li>
+          <li><a th:href="@{/pacientes}" th:classappend="${activo == 'pacientes'} ? 'active'">Pacientes</a></li>
+          <li><a th:href="@{/medicos}" th:classappend="${activo == 'medicos'} ? 'active'">Médicos</a></li>
+          <li><a th:href="@{/usuarios}" th:classappend="${activo == 'usuarios'} ? 'active'">Usuarios</a></li>
+          <li><a th:href="@{/historias}" th:classappend="${activo == 'historias'} ? 'active'">Historias clínicas</a></li>
+        </ul>
+        <i class="mobile-nav-toggle d-xl-none bi bi-list"></i>
+      </nav>
+    </div>
+  </div>
+</header>
+
+<!-- ========== ENCABEZADO DE PÁGINA (título + migas de pan) ========== -->
+<div th:fragment="encabezado(titulo, descripcion)" class="page-title">
+  <div class="heading">
+    <div class="container">
+      <div class="row d-flex justify-content-center text-center">
+        <div class="col-lg-8">
+          <h1 class="heading-title" th:text="${titulo}">Título</h1>
+          <p class="mb-0" th:text="${descripcion}">Descripción</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <nav class="breadcrumbs">
+    <div class="container">
+      <ol>
+        <li><a th:href="@{/}">Inicio</a></li>
+        <li class="current" th:text="${titulo}">Actual</li>
+      </ol>
+    </div>
+  </nav>
+</div>
+
+<!-- ========== MENSAJES (éxito / error) ========== -->
+<div th:fragment="mensajes" class="container mt-4">
+  <div th:if="${exito}" class="alert alert-success alert-dismissible fade show" role="alert">
+    <span th:text="${exito}"></span>
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+  </div>
+  <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+    <span th:text="${error}"></span>
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+  </div>
+</div>
+
+<!-- ========== FOOTER ========== -->
+<footer th:fragment="footer" id="footer" class="footer-16 footer position-relative">
+  <div class="footer-bottom">
+    <div class="container">
+      <div class="bottom-content">
+        <div class="row align-items-center">
+          <div class="col-lg-6">
+            <div class="copyright">
+              <p>© <span class="sitename">Consultorio</span>. Trabajo práctico - Historia clínica.</p>
+            </div>
+          </div>
+          <div class="col-lg-6">
+            <div class="legal-links">
+              <div class="credits">
+                <!-- Los créditos de la plantilla deben mantenerse (licencia gratuita) -->
+                Designed by <a href="https://bootstrapmade.com/">BootstrapMade</a>.
+                Distributed by <a href="https://themewagon.com" target="_blank">ThemeWagon</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<a href="#!" id="scroll-top" class="scroll-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
+<div id="preloader"></div>
+
+<!-- ========== SCRIPTS ========== -->
+<th:block th:fragment="scripts">
+  <script th:src="@{/assets/vendor/bootstrap/js/bootstrap.bundle.min.js}"></script>
+  <script th:src="@{/assets/vendor/aos/aos.js}"></script>
+  <script th:src="@{/assets/vendor/glightbox/js/glightbox.min.js}"></script>
+  <script th:src="@{/assets/vendor/purecounter/purecounter_vanilla.js}"></script>
+  <script th:src="@{/assets/vendor/swiper/swiper-bundle.min.js}"></script>
+  <script th:src="@{/assets/js/main.js}"></script>
+</th:block>
+
+</body>
+</html>

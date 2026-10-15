@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Historia clínica')}"></head>
+<body class="starter-page-page">
+<header th:replace="~{fragments/layout :: header('historias')}"></header>
+
+<main class="main">
+    <div th:replace="~{fragments/layout :: encabezado('Historia clínica', 'Consultas del paciente')}"></div>
+    <div th:replace="~{fragments/layout :: mensajes}"></div>
+
+    <section class="section">
+        <div class="container">
+
+            <!-- Datos del paciente -->
+            <div class="card mb-4">
+                <div class="card-body d-flex align-items-center gap-3">
+                    <img th:if="${historia.paciente.fotoPaciente != null and historia.paciente.fotoPaciente.dataUri != null}"
+                         th:src="${historia.paciente.fotoPaciente.dataUri}" alt="foto"
+                         class="rounded-circle" width="72" height="72" style="object-fit:cover">
+                    <i th:unless="${historia.paciente.fotoPaciente != null and historia.paciente.fotoPaciente.dataUri != null}"
+                       class="bi bi-person-circle text-secondary" style="font-size:4rem"></i>
+                    <div>
+                        <h4 class="mb-1" th:text="${historia.paciente.apellido + ', ' + historia.paciente.nombre}"></h4>
+                        <div class="text-muted">
+                            Documento: <span th:text="${historia.paciente.documento}"></span> ·
+                            Cargada por: <span th:text="${historia.usuario.nombreUsuario}"></span>
+                        </div>
+                    </div>
+                    <div class="ms-auto">
+                        <a th:href="@{/historias/{id}/editar(id=${historia.id})}" class="btn btn-sm btn-outline-secondary">Editar</a>
+                        <a th:href="@{/historias}" class="btn btn-sm btn-outline-primary">Volver</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Consultas -->
+            <h5 class="mb-3">Consultas</h5>
+            <div class="table-responsive mb-4">
+                <table class="table table-hover align-middle">
+                    <thead class="table-light">
+                    <tr><th>Fecha</th><th>Médico</th><th>Detalle</th><th class="text-end">Quitar</th></tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="d : ${historia.detalles}">
+                        <td th:text="${#temporals.format(d.fechaHistoria, 'dd/MM/yyyy')}"></td>
+                        <td th:text="${d.medico.apellido + ', ' + d.medico.nombre}"></td>
+                        <td th:text="${d.detalleHistoria}"></td>
+                        <td class="text-end">
+                            <form th:action="@{/historias/{id}/detalles/{did}/eliminar(id=${historia.id}, did=${d.id})}"
+                                  method="post" onsubmit="return confirm('¿Quitar esta consulta?')">
+                                <button class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
+                            </form>
+                        </td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(historia.detalles)}">
+                        <td colspan="4" class="text-center text-muted">Todavía no hay consultas registradas</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Nueva consulta -->
+            <div class="card">
+                <div class="card-header">Agregar consulta</div>
+                <div class="card-body">
+                    <form th:action="@{/historias/{id}/detalles(id=${historia.id})}" method="post" class="row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label">Fecha</label>
+                            <input type="date" name="fechaHistoria" class="form-control" th:value="${hoy}" required>
+                        </div>
+                        <div class="col-md-8">
+                            <label class="form-label">Médico</label>
+                            <select name="medicoId" class="form-select" required>
+                                <option value="">Seleccioná un médico...</option>
+                                <option th:each="m : ${medicos}" th:value="${m.id}"
+                                        th:text="${m.apellido + ', ' + m.nombre}"></option>
+                            </select>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">Detalle</label>
+                            <textarea name="detalleHistoria" class="form-control" rows="3" required></textarea>
+                        </div>
+                        <div class="col-12">
+                            <button type="submit" class="btn btn-primary">Agregar consulta</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+        </div>
+    </section>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+</body>
+</html>
