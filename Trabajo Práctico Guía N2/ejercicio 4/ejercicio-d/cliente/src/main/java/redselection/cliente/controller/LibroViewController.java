@@ -42,28 +42,29 @@ public class LibroViewController {
 
     @GetMapping
     public String listar(
-            @RequestParam(name = "autorId", required = false) Long autorId,
+            @RequestParam(name = "criterio", required = false, defaultValue = "TITULO") String criterio,
+            @RequestParam(name = "valor", required = false) String valor,
             Model model) {
 
+        boolean hayBusqueda = valor != null && !valor.isBlank();
+
         try {
-            List<LibroDTO> libros = autorId == null
-                    ? libroService.listar()
-                    : libroService.listarPorAutor(autorId);
+            List<LibroDTO> libros = hayBusqueda
+                    ? libroService.buscar(criterio, valor.trim())
+                    : libroService.listar();
 
             model.addAttribute("libros", libros);
-            model.addAttribute("autores", autorService.listar());
-            model.addAttribute("autorId", autorId);
             model.addAttribute("asignaciones", asignaciones());
 
         } catch (RestClientException e) {
             model.addAttribute("libros", List.of());
-            model.addAttribute("autores", List.of());
             model.addAttribute("asignaciones", Map.of());
-            model.addAttribute(
-                    "error",
-                    "No se pudieron cargar los libros. Verificá que el servidor esté funcionando."
-            );
+            model.addAttribute("error", MensajesError.de(e));
         }
+
+        model.addAttribute("criterio", criterio);
+        model.addAttribute("valor", valor);
+        model.addAttribute("etiquetaCriterio", etiqueta(criterio));
 
         return "libros/lista";
     }
@@ -93,7 +94,7 @@ public class LibroViewController {
         } catch (RestClientException e) {
             model.addAttribute("autores", autorService.listar());
             model.addAttribute(
-                    "error", "No se pudo crear el libro: " + e.getMessage());
+                    "error", MensajesError.de(e));
             return "libros/form";
         }
     }
@@ -125,7 +126,7 @@ public class LibroViewController {
             libro.setId(id);
             model.addAttribute("autores", autorService.listar());
             model.addAttribute(
-                    "error", "No se pudo actualizar el libro: " + e.getMessage());
+                    "error", MensajesError.de(e));
             return "libros/form";
         }
     }
@@ -140,6 +141,14 @@ public class LibroViewController {
             redirect.addFlashAttribute("error", MensajesError.de(e));
         }
         return "redirect:/libros";
+    }
+
+    private String etiqueta(String criterio) {
+        return switch (criterio) {
+            case "GENERO" -> "género";
+            case "AUTOR" -> "autor";
+            default -> "título";
+        };
     }
 
     // libroId -> "Nombre Apellido" de la persona que lo tiene asignado (solo es informativo)

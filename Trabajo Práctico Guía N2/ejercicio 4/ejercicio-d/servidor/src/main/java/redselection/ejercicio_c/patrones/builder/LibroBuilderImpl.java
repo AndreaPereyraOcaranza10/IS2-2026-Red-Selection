@@ -2,21 +2,25 @@ package redselection.ejercicio_c.patrones.builder;
 
 import redselection.ejercicio_c.entities.Autor;
 import redselection.ejercicio_c.entities.Libro;
+import redselection.ejercicio_c.patrones.fabrica.LibroFactory;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
 
 public class LibroBuilderImpl implements LibroBuilder {
 
+    private final LibroFactory<? extends Libro> fabrica; // decide qué tipo de libro se va a armar
     private Libro libro; // libro que queremos obtener como resultado
 
-    public LibroBuilderImpl() {
+    // Libro es abstracto: el builder le pide a la fábrica la instancia vacía del tipo que corresponda
+    public LibroBuilderImpl(LibroFactory<? extends Libro> fabrica) {
+        this.fabrica = fabrica;
         reiniciar();
     }
 
     @Override
     public void reiniciar() {
-        this.libro = new Libro();
+        this.libro = fabrica.nuevaInstancia();
         this.libro.setAutores(new ArrayList<>());
     }
 

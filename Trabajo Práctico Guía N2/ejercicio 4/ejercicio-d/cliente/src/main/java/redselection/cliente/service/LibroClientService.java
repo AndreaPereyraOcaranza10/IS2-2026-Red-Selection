@@ -33,9 +33,10 @@ public class LibroClientService {
                 baseUrl + "/{id}", LibroDTO.class, id);
     }
 
+    // El tipo (FISICO / DIGITAL) va en la URL: el servidor elige la fábrica que corresponde
     public LibroDTO crear(LibroDTO libro) {
         return restTemplate.postForObject(
-                baseUrl, libro, LibroDTO.class);
+                baseUrl + "/{tipo}", libro, LibroDTO.class, libro.getTipo());
     }
 
     public void actualizar(Long id, LibroDTO libro) {
@@ -56,6 +57,17 @@ public class LibroClientService {
         return respuesta == null
                 ? List.of()
                 : Arrays.asList(respuesta);
+    }
+
+    // Búsqueda por TITULO, GENERO o AUTOR: el servidor elige la estrategia según el criterio
+    public List<LibroDTO> buscar(String criterio, String valor) {
+        LibroDTO[] respuesta = restTemplate.getForObject(
+                baseUrl + "/buscar?criterio={criterio}&valor={valor}",
+                LibroDTO[].class,
+                criterio,
+                valor == null ? "" : valor);
+
+        return respuesta == null ? List.of() : Arrays.asList(respuesta);
     }
 
     /** Libros del catálogo que no están asignados a ninguna persona. */

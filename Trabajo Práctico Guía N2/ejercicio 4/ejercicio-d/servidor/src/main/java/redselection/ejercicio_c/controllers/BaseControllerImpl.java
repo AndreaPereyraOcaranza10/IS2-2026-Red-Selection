@@ -6,18 +6,23 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import redselection.ejercicio_c.entities.Base;
+import redselection.ejercicio_c.patrones.adaptador.EntityMapper;
 import redselection.ejercicio_c.services.BaseServiceImpl;
 
 
-public abstract class BaseControllerImpl<E extends Base, S extends BaseServiceImpl<E, Long>> implements BaseController<E, Long> {
+public abstract class BaseControllerImpl<E extends Base, D, S extends BaseServiceImpl<E, Long>> implements BaseController<D, Long> {
 
     @Autowired
     protected S servicio;
 
+    // Adaptador Entidad <-> DTO (MapStruct genera la implementación de cada tipo)
+    @Autowired
+    protected EntityMapper<E, D> mapper;
+
     @GetMapping("")
     public ResponseEntity<?> getAll() {
         try {
-            return ResponseEntity.status(HttpStatus.OK).body(servicio.findAll());
+            return ResponseEntity.status(HttpStatus.OK).body(mapper.toDtoList(servicio.findAll()));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("{\"error\":\"Error. Por favor intente más tarde.\"}");
         }
@@ -26,7 +31,7 @@ public abstract class BaseControllerImpl<E extends Base, S extends BaseServiceIm
     @GetMapping("/paged")
     public ResponseEntity<?> getAll(Pageable pageable) {
         try {
-            return ResponseEntity.status(HttpStatus.OK).body(servicio.findAll());
+            return ResponseEntity.status(HttpStatus.OK).body(mapper.toDtoList(servicio.findAll()));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("{\"error\":\"Error. Por favor intente más tarde.\"}");
         }
@@ -35,25 +40,25 @@ public abstract class BaseControllerImpl<E extends Base, S extends BaseServiceIm
     @GetMapping("/{id}")
     public ResponseEntity<?> getOne(@PathVariable Long id){
         try {
-            return ResponseEntity.status(HttpStatus.OK).body(servicio.findById(id));
+            return ResponseEntity.status(HttpStatus.OK).body(mapper.toDto(servicio.findById(id)));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("{\"error\":\"Error. Por favor intente más tarde.\"}");
         }
     }
 
     @PostMapping("")
-    public ResponseEntity<?> save(@RequestBody E entity){
+    public ResponseEntity<?> save(@RequestBody D dto){
         try {
-            return ResponseEntity.status(HttpStatus.OK).body(servicio.save(entity));
+            return ResponseEntity.status(HttpStatus.OK).body(mapper.toDto(servicio.save(mapper.toEntity(dto))));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("{\"error\":\"Error. Por favor intente más tarde.\"}");
         }
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> update(@PathVariable Long id,@RequestBody E entity) {
+    public ResponseEntity<?> update(@PathVariable Long id,@RequestBody D dto) {
         try {
-            return ResponseEntity.status(HttpStatus.OK).body(servicio.update(id, entity));
+            return ResponseEntity.status(HttpStatus.OK).body(mapper.toDto(servicio.update(id, mapper.toEntity(dto))));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("{\"error\":\"Error. Por favor intente más tarde.\"}");
         }

@@ -35,28 +35,27 @@
     </p>
 
     <section class="filtro-libros">
-        <h2>Buscar libros por autor</h2>
+        <h2>Buscar libros</h2>
 
         <form th:action="@{/libros}" method="get">
-            <label for="autorId">Seleccioná un autor:</label>
+            <label for="criterio">Buscar por:</label>
 
-            <select id="autorId" name="autorId">
-                <option value="">Todos los autores</option>
-
-                <option th:each="autor : ${autores}"
-                        th:value="${autor.id}"
-                        th:text="${autor.nombre + ' ' + autor.apellido}"
-                        th:selected="${autorId != null and autor.id == autorId}">
-                </option>
+            <select id="criterio" name="criterio">
+                <option value="TITULO" th:selected="${criterio == 'TITULO'}">Título</option>
+                <option value="GENERO" th:selected="${criterio == 'GENERO'}">Género</option>
+                <option value="AUTOR" th:selected="${criterio == 'AUTOR'}">Autor</option>
             </select>
 
-            <button type="submit">Buscar libros</button>
+            <input type="text" id="valor" name="valor" th:value="${valor}"
+                   placeholder="Escribí lo que querés buscar">
+
+            <button type="submit">Buscar</button>
 
             <a th:href="@{/libros}" class="boton secundario">Limpiar filtro</a>
         </form>
 
-        <p th:if="${autorId != null}">
-            Resultados filtrados por el autor seleccionado.
+        <p th:if="${valor != null and !#strings.isEmpty(valor)}"
+           th:text="${'Resultados de buscar “' + valor + '” por ' + etiquetaCriterio + ': ' + #lists.size(libros) + ' libro(s).'}">
         </p>
     </section>
 
@@ -76,6 +75,8 @@
             <th>Páginas</th>
 
             <th>Autores</th>
+
+            <th>Tipo</th>
 
             <th>Estado</th>
 
@@ -133,6 +134,24 @@
 
             <td>
 
+                <span th:text="${libro.esDigital() ? 'Digital' : 'Físico'}"></span>
+
+                <br>
+
+                <small th:if="${libro.esDigital()}"
+
+                       th:text="${libro.formato + (libro.tamanioMb != null ? ' · ' + libro.tamanioMb + ' MB' : '')}"></small>
+
+                <small th:unless="${libro.esDigital()}"
+
+                       th:text="${libro.ubicacion != null and !libro.ubicacion.isBlank() ? libro.ubicacion : ''}"></small>
+
+            </td>
+
+
+
+            <td>
+
                 <span th:if="${asignaciones.get(libro.id) == null}">Disponible</span>
 
                 <span th:if="${asignaciones.get(libro.id) != null}"
@@ -159,11 +178,9 @@
 
                         <button type="submit" class="chico peligro"
 
-                                th:disabled="${asignaciones.get(libro.id) != null}"
-
                                 th:title="${asignaciones.get(libro.id) != null
 
-                                        ? 'Está asignado: desasignalo desde la persona para poder eliminarlo'
+                                        ? 'Está asignado: el servidor no te va a dejar eliminarlo'
 
                                         : 'Eliminar libro'}">Eliminar</button>
 
@@ -179,7 +196,7 @@
 
         <tr th:if="${#lists.isEmpty(libros)}">
 
-            <td colspan="7">No hay libros cargados.</td>
+            <td colspan="8">No hay libros cargados.</td>
 
         </tr>
 

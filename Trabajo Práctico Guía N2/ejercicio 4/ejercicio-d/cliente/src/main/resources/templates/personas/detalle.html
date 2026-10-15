@@ -47,11 +47,12 @@
         <h2>Libros asignados</h2>
         <table th:if="${!#lists.isEmpty(persona.libros)}">
             <thead>
-            <tr><th>Título</th><th>Publicación</th><th>Género</th><th>Páginas</th><th>Autores</th><th>Devolución</th><th></th></tr>
+            <tr><th>Título</th><th>Tipo</th><th>Publicación</th><th>Género</th><th>Páginas</th><th>Autores</th><th>Devolución</th><th></th></tr>
             </thead>
             <tbody>
             <tr th:each="libro : ${persona.libros}">
                 <td th:text="${libro.titulo}"></td>
+                <td th:text="${libro.esDigital() ? 'Digital' : 'Físico'}"></td>
                 <td th:text="${#temporals.format(libro.fechaPublicacion, 'dd/MM/yyyy')}"></td>
                 <td th:text="${libro.genero}"></td>
                 <td th:text="${libro.paginas}"></td>
@@ -85,7 +86,7 @@
                 <option value="">Seleccioná un libro</option>
                 <option th:each="libro : ${librosDisponibles}"
                         th:value="${libro.id}"
-                        th:text="${libro.titulo}">
+                        th:text="${libro.etiqueta()}">
                 </option>
             </select>
 

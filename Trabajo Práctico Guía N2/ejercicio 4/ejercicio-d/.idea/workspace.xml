@@ -5,28 +5,61 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="d52d5d5f-af95-4beb-978c-c878dba0f2ee" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/../../ejercicio 2/práctica/ejercicio-c/.idea/ejercicio-c.iml" beforeDir="false" afterPath="$PROJECT_DIR$/../../ejercicio 2/práctica/ejercicio-c/.idea/ejercicio-c.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../ejercicio 2/práctica/ejercicio-c/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../../ejercicio 2/práctica/ejercicio-c/.idea/workspace.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/servidor/src/main/java/redselection/ejercicio_c/dto/AutorDTO.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/servidor/src/main/java/redselection/ejercicio_c/dto/DomicilioDTO.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/servidor/src/main/java/redselection/ejercicio_c/dto/LibroDTO.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/servidor/src/main/java/redselection/ejercicio_c/dto/LibroSolicitud.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/servidor/src/main/java/redselection/ejercicio_c/dto/LocalidadDTO.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/servidor/src/main/java/redselection/ejercicio_c/dto/PersonaDTO.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/servidor/src/main/java/redselection/ejercicio_c/entities/LibroDigital.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/servidor/src/main/java/redselection/ejercicio_c/entities/LibroFisico.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/servidor/src/main/java/redselection/ejercicio_c/patrones/adaptador/AutorMapper.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/servidor/src/main/java/redselection/ejercicio_c/patrones/adaptador/DomicilioMapper.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/servidor/src/main/java/redselection/ejercicio_c/patrones/adaptador/EntityMapper.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/servidor/src/main/java/redselection/ejercicio_c/patrones/adaptador/LibroMapper.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/servidor/src/main/java/redselection/ejercicio_c/patrones/adaptador/LocalidadMapper.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/servidor/src/main/java/redselection/ejercicio_c/patrones/adaptador/MapperConfiguracion.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/servidor/src/main/java/redselection/ejercicio_c/patrones/adaptador/PersonaMapper.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/servidor/src/main/java/redselection/ejercicio_c/patrones/estrategia/BuscadorLibros.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/servidor/src/main/java/redselection/ejercicio_c/patrones/estrategia/BusquedaLibroStrategy.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/servidor/src/main/java/redselection/ejercicio_c/patrones/estrategia/BusquedaPorAutor.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/servidor/src/main/java/redselection/ejercicio_c/patrones/estrategia/BusquedaPorGenero.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/servidor/src/main/java/redselection/ejercicio_c/patrones/estrategia/BusquedaPorTitulo.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/servidor/src/main/java/redselection/ejercicio_c/patrones/estrategia/CriterioBusqueda.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/servidor/src/main/java/redselection/ejercicio_c/patrones/estrategia/TextoBusqueda.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/servidor/src/main/java/redselection/ejercicio_c/patrones/fabrica/LibroDigitalFactory.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/servidor/src/main/java/redselection/ejercicio_c/patrones/fabrica/LibroFactory.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/servidor/src/main/java/redselection/ejercicio_c/patrones/fabrica/LibroFactoryProvider.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/servidor/src/main/java/redselection/ejercicio_c/patrones/fabrica/LibroFisicoFactory.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/servidor/src/main/java/redselection/ejercicio_c/patrones/fabrica/TipoLibro.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/compiler.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/compiler.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cliente/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/cliente/pom.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/cliente/src/main/java/redselection/cliente/controller/LibroViewController.java" beforeDir="false" afterPath="$PROJECT_DIR$/cliente/src/main/java/redselection/cliente/controller/LibroViewController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cliente/src/main/java/redselection/cliente/controller/PersonaViewController.java" beforeDir="false" afterPath="$PROJECT_DIR$/cliente/src/main/java/redselection/cliente/controller/PersonaViewController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cliente/src/main/java/redselection/cliente/dto/LibroDTO.java" beforeDir="false" afterPath="$PROJECT_DIR$/cliente/src/main/java/redselection/cliente/dto/LibroDTO.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/cliente/src/main/java/redselection/cliente/service/LibroClientService.java" beforeDir="false" afterPath="$PROJECT_DIR$/cliente/src/main/java/redselection/cliente/service/LibroClientService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cliente/src/main/java/redselection/cliente/service/PersonaClientService.java" beforeDir="false" afterPath="$PROJECT_DIR$/cliente/src/main/java/redselection/cliente/service/PersonaClientService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cliente/src/main/java/redselection/cliente/util/MensajesError.java" beforeDir="false" afterPath="$PROJECT_DIR$/cliente/src/main/java/redselection/cliente/util/MensajesError.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cliente/src/main/resources/templates/libros/form.html" beforeDir="false" afterPath="$PROJECT_DIR$/cliente/src/main/resources/templates/libros/form.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/cliente/src/main/resources/templates/libros/lista.html" beforeDir="false" afterPath="$PROJECT_DIR$/cliente/src/main/resources/templates/libros/lista.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/cliente/src/main/resources/templates/personas/detalle.html" beforeDir="false" afterPath="$PROJECT_DIR$/cliente/src/main/resources/templates/personas/detalle.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cliente/src/main/resources/templates/personas/form.html" beforeDir="false" afterPath="$PROJECT_DIR$/cliente/src/main/resources/templates/personas/form.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cliente/target/classes/redselection/cliente/controller/LibroViewController.class" beforeDir="false" afterPath="$PROJECT_DIR$/cliente/target/classes/redselection/cliente/controller/LibroViewController.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cliente/target/classes/redselection/cliente/dto/LibroDTO.class" beforeDir="false" afterPath="$PROJECT_DIR$/cliente/target/classes/redselection/cliente/dto/LibroDTO.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cliente/target/classes/redselection/cliente/service/LibroClientService.class" beforeDir="false" afterPath="$PROJECT_DIR$/cliente/target/classes/redselection/cliente/service/LibroClientService.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cliente/target/classes/templates/libros/form.html" beforeDir="false" afterPath="$PROJECT_DIR$/cliente/target/classes/templates/libros/form.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/cliente/target/classes/templates/libros/lista.html" beforeDir="false" afterPath="$PROJECT_DIR$/cliente/target/classes/templates/libros/lista.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/cliente/target/classes/templates/personas/detalle.html" beforeDir="false" afterPath="$PROJECT_DIR$/cliente/target/classes/templates/personas/detalle.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cliente/target/classes/templates/personas/form.html" beforeDir="false" afterPath="$PROJECT_DIR$/cliente/target/classes/templates/personas/form.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/servidor/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/servidor/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/servidor/src/main/java/redselection/ejercicio_c/controllers/AutorController.java" beforeDir="false" afterPath="$PROJECT_DIR$/servidor/src/main/java/redselection/ejercicio_c/controllers/AutorController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/servidor/src/main/java/redselection/ejercicio_c/controllers/BaseController.java" beforeDir="false" afterPath="$PROJECT_DIR$/servidor/src/main/java/redselection/ejercicio_c/controllers/BaseController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/servidor/src/main/java/redselection/ejercicio_c/controllers/BaseControllerImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/servidor/src/main/java/redselection/ejercicio_c/controllers/BaseControllerImpl.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/servidor/src/main/java/redselection/ejercicio_c/controllers/LibroController.java" beforeDir="false" afterPath="$PROJECT_DIR$/servidor/src/main/java/redselection/ejercicio_c/controllers/LibroController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/servidor/src/main/java/redselection/ejercicio_c/controllers/LocalidadController.java" beforeDir="false" afterPath="$PROJECT_DIR$/servidor/src/main/java/redselection/ejercicio_c/controllers/LocalidadController.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/servidor/src/main/java/redselection/ejercicio_c/controllers/PersonaController.java" beforeDir="false" afterPath="$PROJECT_DIR$/servidor/src/main/java/redselection/ejercicio_c/controllers/PersonaController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/servidor/src/main/java/redselection/ejercicio_c/repositories/LibroRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/servidor/src/main/java/redselection/ejercicio_c/repositories/LibroRepository.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/servidor/src/main/java/redselection/ejercicio_c/repositories/PersonaRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/servidor/src/main/java/redselection/ejercicio_c/repositories/PersonaRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/servidor/src/main/java/redselection/ejercicio_c/entities/Libro.java" beforeDir="false" afterPath="$PROJECT_DIR$/servidor/src/main/java/redselection/ejercicio_c/entities/Libro.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/servidor/src/main/java/redselection/ejercicio_c/patrones/builder/LibroBuilderImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/servidor/src/main/java/redselection/ejercicio_c/patrones/builder/LibroBuilderImpl.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/servidor/src/main/java/redselection/ejercicio_c/services/LibroService.java" beforeDir="false" afterPath="$PROJECT_DIR$/servidor/src/main/java/redselection/ejercicio_c/services/LibroService.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/servidor/src/main/java/redselection/ejercicio_c/services/LibroServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/servidor/src/main/java/redselection/ejercicio_c/services/LibroServiceImpl.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/servidor/src/main/java/redselection/ejercicio_c/services/PersonaService.java" beforeDir="false" afterPath="$PROJECT_DIR$/servidor/src/main/java/redselection/ejercicio_c/services/PersonaService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/servidor/src/main/java/redselection/ejercicio_c/services/PersonaServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/servidor/src/main/java/redselection/ejercicio_c/services/PersonaServiceImpl.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -59,18 +92,18 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/../../.." />
   </component>
-  <component name="GitHubPullRequestSearchHistory"><![CDATA[{
-  "lastFilter": {
-    "state": "OPEN",
-    "assignee": "AndreaPereyraOcaranza10"
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;AndreaPereyraOcaranza10&quot;
   }
-}]]></component>
-  <component name="GithubPullRequestsUISettings"><![CDATA[{
-  "selectedUrlAndAccountId": {
-    "url": "https://github.com/AndreaPereyraOcaranza10/IS2-2026-Red-Selection.git",
-    "accountId": "529f1de8-c343-4145-b889-31ae41af894f"
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/AndreaPereyraOcaranza10/IS2-2026-Red-Selection.git&quot;,
+    &quot;accountId&quot;: &quot;529f1de8-c343-4145-b889-31ae41af894f&quot;
   }
-}]]></component>
+}</component>
   <component name="MavenImportPreferences">
     <option name="generalSettings">
       <MavenGeneralSettings>
@@ -100,12 +133,17 @@
     "kotlin-language-version-configured": "true",
     "last_opened_file_path": "C:/Users/Andrea/Desktop/ids2/IS2-2026-Red-Selection/Trabajo Práctico Guía N2/ejercicio 4/ejercicio-d",
     "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.jshint": "true",
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.jshint": "",
     "node.js.selected.package.tslint": "(autodetect)",
     "nodejs_package_manager_path": "npm",
+    "project.structure.last.edited": "Project",
+    "project.structure.proportion": "0.15",
+    "project.structure.side.proportion": "0.2",
     "python.packages.toolwindow.project.migrated.to.right.top.v2": "true",
-    "settings.editor.selected.configurable": "preferences.pluginManager"
+    "settings.editor.selected.configurable": "project.propCompiler"
   }
 }]]></component>
   <component name="RecentsManager">
@@ -172,5 +210,9 @@
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
+  </component>
+  <component name="XSLT-Support.FileAssociations.UIState">
+    <expand />
+    <select />
   </component>
 </project>

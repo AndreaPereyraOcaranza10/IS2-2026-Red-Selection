@@ -64,32 +64,42 @@
             </p>
         </fieldset>
 
-        <fieldset>
-            <legend>Libros asignados</legend>
+        <fieldset th:if="${persona.id == null}">
+            <legend>Asignar libros del catálogo (opcional)</legend>
 
             <label for="libroIds">
-                Seleccioná los libros
+                Libros disponibles
             </label>
 
             <select id="libroIds" name="libroIds" multiple size="5">
                 <option th:each="libro : ${librosDisponibles}"
                         th:value="${libro.id}"
-                        th:text="${libro.titulo}">
+                        th:text="${libro.etiqueta()}">
                 </option>
             </select>
 
             <p class="ayuda">
                 Podés seleccionar varios libros manteniendo presionada
-                la tecla Ctrl (o Cmd en Mac).
+                la tecla Ctrl (o Cmd en Mac). Los libros no se crean acá: se asignan los que ya existen.
             </p>
+
+            <label for="fechaDevolucion">
+                Fecha de devolución (opcional, para los libros seleccionados)
+                <input type="date" id="fechaDevolucion" name="fechaDevolucion">
+            </label>
 
             <p th:if="${#lists.isEmpty(librosDisponibles)}"
                class="ayuda">
-                No hay libros en el catálogo.
+                No hay libros disponibles en el catálogo.
                 Podés crearlos desde
                 <a th:href="@{/libros}">Libros</a>.
             </p>
         </fieldset>
+
+        <p th:if="${persona.id != null}" class="ayuda">
+            Los libros de la persona se asignan y desasignan desde su
+            <a th:href="@{/personas/{id}(id=${persona.id})}">detalle</a>.
+        </p>
 
         <div class="barra">
             <a th:href="@{/personas}" class="boton secundario">Cancelar</a>

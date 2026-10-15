@@ -2,8 +2,14 @@ package redselection.ejercicio_c.services;
 
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
+import redselection.ejercicio_c.dto.LibroSolicitud;
 import redselection.ejercicio_c.entities.Libro;
 import redselection.ejercicio_c.entities.Persona;
+import redselection.ejercicio_c.patrones.estrategia.BuscadorLibros;
+import redselection.ejercicio_c.patrones.estrategia.CriterioBusqueda;
+import redselection.ejercicio_c.patrones.fabrica.LibroFactory;
+import redselection.ejercicio_c.patrones.fabrica.LibroFactoryProvider;
+import redselection.ejercicio_c.patrones.fabrica.TipoLibro;
 import redselection.ejercicio_c.patrones.iterador.LibrosPorAutorIterator;
 import redselection.ejercicio_c.repositories.BaseRepository;
 
@@ -23,17 +29,31 @@ public class LibroServiceImpl extends BaseServiceImpl<Libro, Long> implements Li
     private final AutorRepository autorRepository;
     private final LibroRepository libroRepository;
     private final PersonaRepository personaRepository;
+    private final LibroFactoryProvider fabricas;
+    private final BuscadorLibros buscador;
 
     public LibroServiceImpl(
             BaseRepository<Libro, Long> baseRepository,
             AutorRepository autorRepository,
             LibroRepository libroRepository,
-            PersonaRepository personaRepository) {
+            PersonaRepository personaRepository,
+            LibroFactoryProvider fabricas,
+            BuscadorLibros buscador) {
 
         super(baseRepository);
         this.autorRepository = autorRepository;
         this.libroRepository = libroRepository;
         this.personaRepository = personaRepository;
+        this.fabricas = fabricas;
+        this.buscador = buscador;
+    }
+
+    // El servicio no sabe cómo se arma un libro físico o digital: se lo pide a la fábrica del tipo.
+    @Override
+    public Libro crearLibro(TipoLibro tipo, LibroSolicitud solicitud) throws Exception {
+        LibroFactory<?> fabrica = fabricas.obtener(tipo);
+        Libro libro = fabrica.crearLibro(solicitud);
+        return save(libro);
     }
 
     // El ABM de libros maneja solo los datos del libro. La asignación a una persona
@@ -73,6 +93,11 @@ public class LibroServiceImpl extends BaseServiceImpl<Libro, Long> implements Li
             throw new Exception("No existe el libro con ID: " + id);
         }
 
+        // Un libro físico no se convierte en digital (ni al revés): el tipo se define al crearlo
+        if (!existente.get().getClass().equals(libro.getClass())) {
+            throw new IllegalArgumentException("No se puede cambiar el tipo de un libro ya creado.");
+        }
+
         validarAutores(libro);
         libro.setId(id);
         // Editar el libro no debe pisar el estado de préstamo que tenga
@@ -96,6 +121,15 @@ public class LibroServiceImpl extends BaseServiceImpl<Libro, Long> implements Li
     @Override
     public List<Libro> listarDisponibles() {
         return libroRepository.findDisponibles();
+    }
+
+    // El servicio no sabe cómo se busca por título, género o autor: se lo pide al buscador,
+    // que elige la estrategia según el criterio.
+    @Override
+    @Transactional
+    public List<Libro> buscar(String criterio, String valor) {
+        CriterioBusqueda criterioBusqueda = CriterioBusqueda.desde(criterio);
+        return buscador.buscar(criterioBusqueda, valor, baseRepository.findAll());
     }
 
     @Override

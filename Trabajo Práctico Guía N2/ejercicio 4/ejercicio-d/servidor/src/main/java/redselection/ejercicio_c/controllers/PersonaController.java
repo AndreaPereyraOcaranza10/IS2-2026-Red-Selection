@@ -1,10 +1,10 @@
 package redselection.ejercicio_c.controllers;
 
-import org.apache.coyote.Response;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import redselection.ejercicio_c.dto.PersonaDTO;
 import redselection.ejercicio_c.entities.Persona;
 import redselection.ejercicio_c.services.PersonaServiceImpl;
 
@@ -15,11 +15,11 @@ import java.util.NoSuchElementException;
 @RestController
 @CrossOrigin(origins = "*")
 @RequestMapping(path = "/api/v1/personas")
-public class PersonaController extends BaseControllerImpl<Persona, PersonaServiceImpl>{
+public class PersonaController extends BaseControllerImpl<Persona, PersonaDTO, PersonaServiceImpl>{
     @GetMapping("/search")
     public ResponseEntity<?> search (@RequestParam String filtro) {
         try {
-            return ResponseEntity.status(HttpStatus.OK).body(servicio.search(filtro));
+            return ResponseEntity.status(HttpStatus.OK).body(mapper.toDtoList(servicio.search(filtro)));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(("{\"error\":" + e.getMessage() + "}"));
         }
@@ -32,7 +32,7 @@ public class PersonaController extends BaseControllerImpl<Persona, PersonaServic
             @PathVariable Long libroId,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaDevolucion) {
         try {
-            return ResponseEntity.ok(servicio.asignarLibro(personaId, libroId, fechaDevolucion));
+            return ResponseEntity.ok(mapper.toDto(servicio.asignarLibro(personaId, libroId, fechaDevolucion)));
         } catch (NoSuchElementException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", e.getMessage()));
         } catch (IllegalStateException e) {
