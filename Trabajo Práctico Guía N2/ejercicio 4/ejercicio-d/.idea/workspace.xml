@@ -4,7 +4,12 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="d52d5d5f-af95-4beb-978c-c878dba0f2ee" name="Changes" comment="" />
+    <list default="true" id="d52d5d5f-af95-4beb-978c-c878dba0f2ee" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cliente/src/main/java/redselection/cliente/controller/LibroViewController.java" beforeDir="false" afterPath="$PROJECT_DIR$/cliente/src/main/java/redselection/cliente/controller/LibroViewController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cliente/src/main/resources/templates/libros/lista.html" beforeDir="false" afterPath="$PROJECT_DIR$/cliente/src/main/resources/templates/libros/lista.html" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -73,9 +78,10 @@
     "Spring Boot.ClienteApplication.executor": "Run",
     "Spring Boot.PersonaApplication.executor": "Run",
     "codeWithMe.voiceChat.enabledByDefault": "false",
-    "git-widget-placeholder": "andre",
+    "git-widget-placeholder": "main",
+    "ignore.virus.scanning.warn.message": "true",
     "kotlin-language-version-configured": "true",
-    "last_opened_file_path": "C:/Users/Andrea/Desktop/ids2/IS2-2026-Red-Selection/Trabajo Práctico Guía N2/ejercicio 4/ejercicio-d",
+    "last_opened_file_path": "C:/Users/andre/OneDrive/Desktop/IdS2/IS2-2026-Red-Selection/Trabajo Práctico Guía N2/ejercicio 4/ejercicio-d",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.jshint": "true",
     "node.js.detected.package.tslint": "true",
@@ -96,7 +102,21 @@
       <recent name="redselection.ejercicio_c.services" />
     </key>
   </component>
-  <component name="RunManager">
+  <component name="RunManager" selected="Spring Boot.ClienteApplication">
+    <configuration name="ClienteApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" temporary="true" nameIsGenerated="true">
+      <option name="FRAME_DEACTIVATION_UPDATE_POLICY" value="UnknownPolicyInFreeMode" />
+      <module name="ejercicio-c-cliente" />
+      <option name="SPRING_BOOT_MAIN_CLASS" value="redselection.cliente.ClienteApplication" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="redselection.cliente.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
     <configuration name="PersonaApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" temporary="true" nameIsGenerated="true">
       <envs>
         <env name="DB_PASSWORD" value=" " />
@@ -118,6 +138,7 @@
     </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Spring Boot.ClienteApplication" />
         <item itemvalue="Spring Boot.PersonaApplication" />
       </list>
     </recent_temporary>
@@ -125,8 +146,8 @@
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-jdk-30f59d01ecdd-a203e0a19954-intellij.indexing.shared.core-IU-262.10968.63" />
-        <option value="bundled-js-predefined-d6986cc7102b-4abd2a77f808-JavaScript-IU-262.10968.63" />
+        <option value="bundled-jdk-30f59d01ecdd-34e2839f716b-intellij.indexing.shared.core-IU-262.9437.185" />
+        <option value="bundled-js-predefined-d6986cc7102b-4abd2a77f808-JavaScript-IU-262.9437.185" />
       </set>
     </attachedChunks>
   </component>

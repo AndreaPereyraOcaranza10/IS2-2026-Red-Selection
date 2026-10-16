@@ -54,8 +54,32 @@
             <a th:href="@{/libros}" class="boton secundario">Limpiar filtro</a>
         </form>
 
-        <p th:if="${valor != null and !#strings.isEmpty(valor)}"
+        <p th:if="${autorId == null and valor != null and !#strings.isEmpty(valor)}"
            th:text="${'Resultados de buscar “' + valor + '” por ' + etiquetaCriterio + ': ' + #lists.size(libros) + ' libro(s).'}">
+        </p>
+    </section>
+
+    <section class="filtro-libros">
+        <h2>Libros de un autor</h2>
+
+        <form th:action="@{/libros}" method="get">
+            <label for="autorId">Autor:</label>
+
+            <select id="autorId" name="autorId">
+                <option value="">Seleccioná un autor</option>
+                <option th:each="autor : ${autores}"
+                        th:value="${autor.id}"
+                        th:selected="${autorId != null and autorId == autor.id}"
+                        th:text="${autor.nombre + ' ' + autor.apellido}"></option>
+            </select>
+
+            <button type="submit">Ver libros</button>
+
+            <a th:href="@{/libros}" class="boton secundario">Limpiar filtro</a>
+        </form>
+
+        <p th:if="${autorId != null}"
+           th:text="${'Libros del autor seleccionado: ' + #lists.size(libros) + ' libro(s).'}">
         </p>
     </section>
 

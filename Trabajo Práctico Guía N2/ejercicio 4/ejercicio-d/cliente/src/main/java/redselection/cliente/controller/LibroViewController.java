@@ -44,24 +44,36 @@ public class LibroViewController {
     public String listar(
             @RequestParam(name = "criterio", required = false, defaultValue = "TITULO") String criterio,
             @RequestParam(name = "valor", required = false) String valor,
+            @RequestParam(name = "autorId", required = false) Long autorId,
             Model model) {
 
         boolean hayBusqueda = valor != null && !valor.isBlank();
 
         try {
-            List<LibroDTO> libros = hayBusqueda
-                    ? libroService.buscar(criterio, valor.trim())
-                    : libroService.listar();
+            List<LibroDTO> libros;
+
+            if (autorId != null) {
+                // Iterador: el servidor recorre los libros del autor elegido
+                libros = libroService.listarPorAutor(autorId);
+            } else if (hayBusqueda) {
+                // Estrategia: el servidor elige cómo buscar según el criterio
+                libros = libroService.buscar(criterio, valor.trim());
+            } else {
+                libros = libroService.listar();
+            }
 
             model.addAttribute("libros", libros);
             model.addAttribute("asignaciones", asignaciones());
+            model.addAttribute("autores", autorService.listar());
 
         } catch (RestClientException e) {
             model.addAttribute("libros", List.of());
             model.addAttribute("asignaciones", Map.of());
+            model.addAttribute("autores", List.of());
             model.addAttribute("error", MensajesError.de(e));
         }
 
+        model.addAttribute("autorId", autorId);
         model.addAttribute("criterio", criterio);
         model.addAttribute("valor", valor);
         model.addAttribute("etiquetaCriterio", etiqueta(criterio));
