@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Catálogo de libros</title>
+
+    <link rel="stylesheet" th:href="@{/css/estilos.css}">
+
+</head>
+
+
+
+<body>
+
+<div th:replace="~{fragments/layout :: navbar}"></div>
+
+<main class="container">
+
+    <h1>Catálogo de libros</h1>
+
+
+
+    <div th:replace="~{fragments/layout :: alertas}"></div>
+
+    <p>
+        <a th:href="@{/libros/nuevo}" class="boton">Nuevo libro</a>
+    </p>
+
+    <section class="filtro-libros">
+        <h2>Buscar libros</h2>
+
+        <form th:action="@{/libros}" method="get">
+            <label for="criterio">Buscar por:</label>
+
+            <select id="criterio" name="criterio">
+                <option value="TITULO" th:selected="${criterio == 'TITULO'}">Título</option>
+                <option value="GENERO" th:selected="${criterio == 'GENERO'}">Género</option>
+                <option value="AUTOR" th:selected="${criterio == 'AUTOR'}">Autor</option>
+            </select>
+
+            <input type="text" id="valor" name="valor" th:value="${valor}"
+                   placeholder="Escribí lo que querés buscar">
+
+            <button type="submit">Buscar</button>
+
+            <a th:href="@{/libros}" class="boton secundario">Limpiar filtro</a>
+        </form>
+
+        <p th:if="${autorId == null and valor != null and !#strings.isEmpty(valor)}"
+           th:text="${'Resultados de buscar “' + valor + '” por ' + etiquetaCriterio + ': ' + #lists.size(libros) + ' libro(s).'}">
+        </p>
+    </section>
+
+    <section class="filtro-libros">
+        <h2>Libros de un autor</h2>
+
+        <form th:action="@{/libros}" method="get">
+            <label for="autorId">Autor:</label>
+
+            <select id="autorId" name="autorId">
+                <option value="">Seleccioná un autor</option>
+                <option th:each="autor : ${autores}"
+                        th:value="${autor.id}"
+                        th:selected="${autorId != null and autorId == autor.id}"
+                        th:text="${autor.nombre + ' ' + autor.apellido}"></option>
+            </select>
+
+            <button type="submit">Ver libros</button>
+
+            <a th:href="@{/libros}" class="boton secundario">Limpiar filtro</a>
+        </form>
+
+        <p th:if="${autorId != null}"
+           th:text="${'Libros del autor seleccionado: ' + #lists.size(libros) + ' libro(s).'}">
+        </p>
+    </section>
+
+
+    <table>
+
+        <thead>
+
+        <tr>
+
+            <th>Título</th>
+
+            <th>Fecha de publicación</th>
+
+            <th>Género</th>
+
+            <th>Páginas</th>
+
+            <th>Autores</th>
+
+            <th>Tipo</th>
+
+            <th>Estado</th>
+
+            <th>Acciones</th>
+
+        </tr>
+
+        </thead>
+
+
+
+        <tbody>
+
+        <tr th:each="libro : ${libros}">
+
+            <td th:text="${libro.titulo}"></td>
+
+
+
+            <td th:text="${libro.fechaPublicacion != null
+
+                        ? libro.fechaPublicacion : '-'}"></td>
+
+
+
+            <td th:text="${libro.genero}"></td>
+
+
+
+            <td th:text="${libro.paginas}"></td>
+
+
+
+            <td>
+
+                        <span th:if="${#lists.isEmpty(libro.autores)}">
+
+                            Sin autores
+
+                        </span>
+
+
+
+                <span th:each="autor, iter : ${libro.autores}">
+
+                            <span th:text="${autor.nombre + ' ' + autor.apellido}"></span>
+
+                            <span th:if="${!iter.last}">, </span>
+
+                        </span>
+
+            </td>
+
+
+
+            <td>
+
+                <span th:text="${libro.esDigital() ? 'Digital' : 'Físico'}"></span>
+
+                <br>
+
+                <small th:if="${libro.esDigital()}"
+
+                       th:text="${libro.formato + (libro.tamanioMb != null ? ' · ' + libro.tamanioMb + ' MB' : '')}"></small>
+
+                <small th:unless="${libro.esDigital()}"
+
+                       th:text="${libro.ubicacion != null and !libro.ubicacion.isBlank() ? libro.ubicacion : ''}"></small>
+
+            </td>
+
+
+
+            <td>
+
+                <span th:if="${asignaciones.get(libro.id) == null}">Disponible</span>
+
+                <span th:if="${asignaciones.get(libro.id) != null}"
+
+                      th:text="${'Asignado a ' + asignaciones.get(libro.id)}"></span>
+
+            </td>
+
+
+
+            <td>
+
+                <div class="acciones">
+
+                    <a th:href="@{/libros/{id}/editar(id=${libro.id})}" class="boton chico">Editar</a>
+
+
+
+                    <form th:action="@{/libros/{id}/eliminar(id=${libro.id})}"
+
+                          method="post"
+
+                          onsubmit="return confirm('¿Eliminar este libro del catálogo?');">
+
+                        <button type="submit" class="chico peligro"
+
+                                th:title="${asignaciones.get(libro.id) != null
+
+                                        ? 'Está asignado: el servidor no te va a dejar eliminarlo'
+
+                                        : 'Eliminar libro'}">Eliminar</button>
+
+                    </form>
+
+                </div>
+
+            </td>
+
+        </tr>
+
+
+
+        <tr th:if="${#lists.isEmpty(libros)}">
+
+            <td colspan="8">No hay libros cargados.</td>
+
+        </tr>
+
+        </tbody>
+
+    </table>
+
+</main>
+
+
+
+</body>
+
+</html>
