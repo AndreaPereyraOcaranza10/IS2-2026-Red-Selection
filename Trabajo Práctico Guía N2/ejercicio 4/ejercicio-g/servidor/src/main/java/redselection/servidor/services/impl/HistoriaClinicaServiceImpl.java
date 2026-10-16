@@ -6,6 +6,11 @@ import redselection.servidor.model.DetalleHistoriaClinica;
 import redselection.servidor.model.HistoriaClinica;
 import redselection.servidor.repositories.HistoriaClinicaRepository;
 import redselection.servidor.services.HistoriaClinicaService;
+import redselection.servidor.validaciones.ValidaFechaDetalles;
+import redselection.servidor.validaciones.ValidaMedicoDetalles;
+import redselection.servidor.validaciones.ValidaPaciente;
+import redselection.servidor.validaciones.ValidaUsuario;
+import redselection.servidor.validaciones.ValidadorHistoria;
 
 import java.util.List;
 
@@ -14,9 +19,18 @@ public class HistoriaClinicaServiceImpl extends BaseServiceImpl<HistoriaClinica>
 
     private final HistoriaClinicaRepository historiaRepository;
 
+    // Primer eslabón de la cadena de validación (patrón Chain of Responsibility)
+    private final ValidadorHistoria validador;
+
     public HistoriaClinicaServiceImpl(HistoriaClinicaRepository repository) {
         super(repository);
         this.historiaRepository = repository;
+
+        ValidadorHistoria primero = new ValidaPaciente();
+        primero.setSiguiente(new ValidaUsuario())
+                .setSiguiente(new ValidaFechaDetalles())
+                .setSiguiente(new ValidaMedicoDetalles());
+        this.validador = primero;
     }
 
     @Override
@@ -25,19 +39,10 @@ public class HistoriaClinicaServiceImpl extends BaseServiceImpl<HistoriaClinica>
         return historiaRepository.findByPacienteIdAndEliminadoFalse(pacienteId);
     }
 
+    // Paso abstracto del Template Method (BaseServiceImpl): acá se delega en la cadena.
     @Override
     protected void validar(HistoriaClinica h) {
-        if (h.getPaciente() == null || h.getPaciente().getId() == null)
-            throw new IllegalArgumentException("La historia clínica debe tener un paciente");
-        if (h.getUsuario() == null || h.getUsuario().getId() == null)
-            throw new IllegalArgumentException("La historia clínica debe tener un usuario");
-
-        for (DetalleHistoriaClinica d : h.getDetalles()) {
-            if (d.getFechaHistoria() == null)
-                throw new IllegalArgumentException("Cada detalle necesita una fecha");
-            if (d.getMedico() == null || d.getMedico().getId() == null)
-                throw new IllegalArgumentException("Cada detalle necesita un médico");
-        }
+        validador.validar(h);
     }
 
     // Hook: como en DetalleHistoriaClinica la referencia a la historia tiene @JsonIgnore,
