@@ -7,6 +7,19 @@ import redselection.ejercicio_c.patrones.fabrica.LibroFactory;
 import java.time.LocalDate;
 import java.util.ArrayList;
 
+/*
+
+PATRÓN BUILDER:
+
+Construye un Libro paso a paso, asignando sus atributos y autores.
+
+LibroDirector define las recetas de construcción y LibroBuilderImpl
+
+ejecuta cada paso sobre el objeto en construcción.
+
+obtenerResultado() devuelve el libro terminado y reinicia el builder.
+*/
+
 public class LibroBuilderImpl implements LibroBuilder {
 
     private final LibroFactory<? extends Libro> fabrica; // decide qué tipo de libro se va a armar

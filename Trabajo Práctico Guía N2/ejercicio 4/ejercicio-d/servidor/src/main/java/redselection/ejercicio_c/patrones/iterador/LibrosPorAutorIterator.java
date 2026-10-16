@@ -6,6 +6,21 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 
+/*
+
+PATRÓN ITERADOR:
+
+LibrosPorAutorIterator recorre una lista de libros y devuelve
+
+únicamente los que tienen asociado al autor indicado por su ID.
+
+hasNext() busca y prepara el próximo libro válido; next() lo
+
+devuelve. LibroServiceImpl utiliza el iterador para construir
+
+la lista filtrada que devuelve el endpoint del servidor.
+*/
+
 public class LibrosPorAutorIterator implements Iterator<Libro> {
 
     private final Iterator<Libro> iterador;
