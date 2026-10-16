@@ -4,6 +4,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
 import redselection.servidor.model.DetalleHistoriaClinica;
 import redselection.servidor.model.HistoriaClinica;
+import redselection.servidor.patrones.builder.HistoriaClinicaBuilderImpl;
+import redselection.servidor.patrones.builder.HistoriaClinicaDirector;
 import redselection.servidor.repositories.HistoriaClinicaRepository;
 import redselection.servidor.services.HistoriaClinicaService;
 import redselection.servidor.validaciones.ValidaFechaDetalles;
@@ -31,6 +33,28 @@ public class HistoriaClinicaServiceImpl extends BaseServiceImpl<HistoriaClinica>
                 .setSiguiente(new ValidaFechaDetalles())
                 .setSiguiente(new ValidaMedicoDetalles());
         this.validador = primero;
+    }
+
+    /**
+     * La entidad recibida desde el controlador se reconstruye en el servidor con Builder
+     * antes de ejecutar el flujo estándar de validación y persistencia.
+     */
+    @Override
+    @Transactional
+    public HistoriaClinica save(HistoriaClinica historia) {
+        return super.save(construirConBuilder(historia));
+    }
+
+    @Override
+    @Transactional
+    public HistoriaClinica update(String id, HistoriaClinica historia) {
+        return super.update(id, construirConBuilder(historia));
+    }
+
+    private HistoriaClinica construirConBuilder(HistoriaClinica origen) {
+        HistoriaClinicaBuilderImpl builder = new HistoriaClinicaBuilderImpl();
+        HistoriaClinicaDirector director = new HistoriaClinicaDirector(builder);
+        return director.construirDesde(origen);
     }
 
     @Override

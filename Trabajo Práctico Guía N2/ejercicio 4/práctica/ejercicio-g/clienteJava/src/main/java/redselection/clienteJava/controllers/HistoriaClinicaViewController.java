@@ -7,8 +7,10 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import redselection.clienteJava.dto.HistoriaClinicaDTO;
-import redselection.clienteJava.builder.HistoriaClinicaBuilderImpl;
-import redselection.clienteJava.builder.HistoriaClinicaDirector;
+import redselection.clienteJava.dto.PacienteDTO;
+import redselection.clienteJava.dto.UsuarioDTO;
+import redselection.clienteJava.dto.MedicoDTO;
+import redselection.clienteJava.dto.DetalleHistoriaClinicaDTO;
 import redselection.clienteJava.service.HistoriaClinicaClientService;
 import redselection.clienteJava.service.MedicoClientService;
 import redselection.clienteJava.service.PacienteClientService;
@@ -90,19 +92,17 @@ public class HistoriaClinicaViewController {
                           @RequestParam String usuarioId,
                           RedirectAttributes ra) {
         try {
-            HistoriaClinicaBuilderImpl builder = new HistoriaClinicaBuilderImpl();
-            HistoriaClinicaDirector director = new HistoriaClinicaDirector(builder);
-
             if (!StringUtils.hasText(id)) {
-                director.construirNueva(pacienteId, usuarioId);
-                HistoriaClinicaDTO creada = historias.crear(builder.obtenerResultado());
+                HistoriaClinicaDTO nueva = nuevaHistoria(pacienteId, usuarioId);
+                HistoriaClinicaDTO creada = historias.crear(nueva);
                 ra.addFlashAttribute("exito", "Historia clínica creada. Ahora podés agregar consultas.");
                 return "redirect:/historias/" + creada.getId();
             }
 
             HistoriaClinicaDTO existente = historias.obtener(id);
-            director.construirConNuevaCabecera(existente, pacienteId, usuarioId);
-            historias.actualizar(id, builder.obtenerResultado());
+            existente.setPaciente(referenciaPaciente(pacienteId));
+            existente.setUsuario(referenciaUsuario(usuarioId));
+            historias.actualizar(id, existente);
             ra.addFlashAttribute("exito", "Historia clínica actualizada");
             return "redirect:/historias/" + id;
         } catch (Exception e) {
@@ -134,12 +134,15 @@ public class HistoriaClinicaViewController {
                                  RedirectAttributes ra) {
         try {
             HistoriaClinicaDTO existente = historias.obtener(id);
+            DetalleHistoriaClinicaDTO detalle = new DetalleHistoriaClinicaDTO();
+            detalle.setFechaHistoria(fechaHistoria);
+            detalle.setDetalleHistoria(detalleHistoria);
+            MedicoDTO medico = new MedicoDTO();
+            medico.setId(medicoId);
+            detalle.setMedico(medico);
+            existente.getDetalles().add(detalle);
 
-            HistoriaClinicaBuilderImpl builder = new HistoriaClinicaBuilderImpl();
-            new HistoriaClinicaDirector(builder)
-                    .construirConNuevaConsulta(existente, fechaHistoria, detalleHistoria, medicoId);
-
-            historias.actualizar(id, builder.obtenerResultado());
+            historias.actualizar(id, existente);
             ra.addFlashAttribute("exito", "Consulta agregada");
         } catch (Exception e) {
             ra.addFlashAttribute("error", MensajesError.de(e));
@@ -152,11 +155,8 @@ public class HistoriaClinicaViewController {
                                   RedirectAttributes ra) {
         try {
             HistoriaClinicaDTO existente = historias.obtener(id);
-
-            HistoriaClinicaBuilderImpl builder = new HistoriaClinicaBuilderImpl();
-            new HistoriaClinicaDirector(builder).construirSinConsulta(existente, detalleId);
-
-            historias.actualizar(id, builder.obtenerResultado());
+            existente.getDetalles().removeIf(detalle -> detalleId.equals(detalle.getId()));
+            historias.actualizar(id, existente);
             ra.addFlashAttribute("exito", "Consulta eliminada");
         } catch (Exception e) {
             ra.addFlashAttribute("error", MensajesError.de(e));
@@ -173,6 +173,27 @@ public class HistoriaClinicaViewController {
             ra.addFlashAttribute("error", MensajesError.de(e));
         }
         return "redirect:/historias";
+    }
+
+    // El cliente solo prepara DTOs para la petición HTTP; la construcción de entidades
+    // del dominio mediante Builder queda centralizada en el servidor.
+    private HistoriaClinicaDTO nuevaHistoria(String pacienteId, String usuarioId) {
+        HistoriaClinicaDTO historia = new HistoriaClinicaDTO();
+        historia.setPaciente(referenciaPaciente(pacienteId));
+        historia.setUsuario(referenciaUsuario(usuarioId));
+        return historia;
+    }
+
+    private PacienteDTO referenciaPaciente(String id) {
+        PacienteDTO paciente = new PacienteDTO();
+        paciente.setId(id);
+        return paciente;
+    }
+
+    private UsuarioDTO referenciaUsuario(String id) {
+        UsuarioDTO usuario = new UsuarioDTO();
+        usuario.setId(id);
+        return usuario;
     }
 
     private void cargarCombos(Model model) {
