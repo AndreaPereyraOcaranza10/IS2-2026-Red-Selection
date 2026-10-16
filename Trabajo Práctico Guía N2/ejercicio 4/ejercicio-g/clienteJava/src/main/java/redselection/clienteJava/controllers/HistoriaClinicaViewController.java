@@ -6,12 +6,16 @@ import org.springframework.ui.Model;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-import redselection.clienteJava.dto.*;
-import redselection.clienteJava.service.*;
+import redselection.clienteJava.dto.HistoriaClinicaDTO;
+import redselection.clienteJava.builder.HistoriaClinicaBuilderImpl;
+import redselection.clienteJava.builder.HistoriaClinicaDirector;
+import redselection.clienteJava.service.HistoriaClinicaClientService;
+import redselection.clienteJava.service.MedicoClientService;
+import redselection.clienteJava.service.PacienteClientService;
+import redselection.clienteJava.service.UsuarioClientService;
 import redselection.clienteJava.util.MensajesError;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 
 @Controller
@@ -86,19 +90,19 @@ public class HistoriaClinicaViewController {
                           @RequestParam String usuarioId,
                           RedirectAttributes ra) {
         try {
+            HistoriaClinicaBuilderImpl builder = new HistoriaClinicaBuilderImpl();
+            HistoriaClinicaDirector director = new HistoriaClinicaDirector(builder);
+
             if (!StringUtils.hasText(id)) {
-                HistoriaClinicaDTO nueva = new HistoriaClinicaDTO();
-                nueva.setPaciente(refPaciente(pacienteId));
-                nueva.setUsuario(refUsuario(usuarioId));
-                HistoriaClinicaDTO creada = historias.crear(nueva);
+                director.construirNueva(pacienteId, usuarioId);
+                HistoriaClinicaDTO creada = historias.crear(builder.obtenerResultado());
                 ra.addFlashAttribute("exito", "Historia clínica creada. Ahora podés agregar consultas.");
                 return "redirect:/historias/" + creada.getId();
             }
+
             HistoriaClinicaDTO existente = historias.obtener(id);
-            HistoriaClinicaDTO enviar = aEnviar(existente, existente.getDetalles());
-            enviar.setPaciente(refPaciente(pacienteId));
-            enviar.setUsuario(refUsuario(usuarioId));
-            historias.actualizar(id, enviar);
+            director.construirConNuevaCabecera(existente, pacienteId, usuarioId);
+            historias.actualizar(id, builder.obtenerResultado());
             ra.addFlashAttribute("exito", "Historia clínica actualizada");
             return "redirect:/historias/" + id;
         } catch (Exception e) {
@@ -131,14 +135,11 @@ public class HistoriaClinicaViewController {
         try {
             HistoriaClinicaDTO existente = historias.obtener(id);
 
-            List<DetalleHistoriaClinicaDTO> detalles = new ArrayList<>(existente.getDetalles());
-            DetalleHistoriaClinicaDTO nuevo = new DetalleHistoriaClinicaDTO();
-            nuevo.setFechaHistoria(fechaHistoria);
-            nuevo.setDetalleHistoria(detalleHistoria);
-            nuevo.setMedico(refMedico(medicoId));
-            detalles.add(nuevo);
+            HistoriaClinicaBuilderImpl builder = new HistoriaClinicaBuilderImpl();
+            new HistoriaClinicaDirector(builder)
+                    .construirConNuevaConsulta(existente, fechaHistoria, detalleHistoria, medicoId);
 
-            historias.actualizar(id, aEnviar(existente, detalles));
+            historias.actualizar(id, builder.obtenerResultado());
             ra.addFlashAttribute("exito", "Consulta agregada");
         } catch (Exception e) {
             ra.addFlashAttribute("error", MensajesError.de(e));
@@ -151,10 +152,11 @@ public class HistoriaClinicaViewController {
                                   RedirectAttributes ra) {
         try {
             HistoriaClinicaDTO existente = historias.obtener(id);
-            List<DetalleHistoriaClinicaDTO> restantes = existente.getDetalles().stream()
-                    .filter(d -> !detalleId.equals(d.getId()))
-                    .toList();
-            historias.actualizar(id, aEnviar(existente, restantes));
+
+            HistoriaClinicaBuilderImpl builder = new HistoriaClinicaBuilderImpl();
+            new HistoriaClinicaDirector(builder).construirSinConsulta(existente, detalleId);
+
+            historias.actualizar(id, builder.obtenerResultado());
             ra.addFlashAttribute("exito", "Consulta eliminada");
         } catch (Exception e) {
             ra.addFlashAttribute("error", MensajesError.de(e));
@@ -173,47 +175,8 @@ public class HistoriaClinicaViewController {
         return "redirect:/historias";
     }
 
-    // ---------- Ayudas privadas ----------
-
     private void cargarCombos(Model model) {
         model.addAttribute("pacientes", pacientes.listar());
         model.addAttribute("usuarios", usuarios.listar());
-    }
-
-    /** Arma la historia "liviana" que se manda al servidor: solo ids de las referencias. */
-    private HistoriaClinicaDTO aEnviar(HistoriaClinicaDTO original, List<DetalleHistoriaClinicaDTO> detalles) {
-        HistoriaClinicaDTO h = new HistoriaClinicaDTO();
-        h.setId(original.getId());
-        h.setPaciente(refPaciente(original.getPaciente().getId()));
-        h.setUsuario(refUsuario(original.getUsuario().getId()));
-
-        List<DetalleHistoriaClinicaDTO> copia = new ArrayList<>();
-        for (DetalleHistoriaClinicaDTO d : detalles) {
-            DetalleHistoriaClinicaDTO c = new DetalleHistoriaClinicaDTO();
-            c.setFechaHistoria(d.getFechaHistoria());
-            c.setDetalleHistoria(d.getDetalleHistoria());
-            c.setMedico(refMedico(d.getMedico().getId()));
-            copia.add(c);
-        }
-        h.setDetalles(copia);
-        return h;
-    }
-
-    private PacienteDTO refPaciente(String id) {
-        PacienteDTO p = new PacienteDTO();
-        p.setId(id);
-        return p;
-    }
-
-    private UsuarioDTO refUsuario(String id) {
-        UsuarioDTO u = new UsuarioDTO();
-        u.setId(id);
-        return u;
-    }
-
-    private MedicoDTO refMedico(String id) {
-        MedicoDTO m = new MedicoDTO();
-        m.setId(id);
-        return m;
     }
 }
