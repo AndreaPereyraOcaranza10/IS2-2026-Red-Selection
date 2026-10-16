@@ -23,10 +23,16 @@ la lista filtrada que devuelve el endpoint del servidor.
 
 public class LibrosPorAutorIterator implements Iterator<Libro> {
 
+    //iterador	Recorre internamente la lista completa de libros.
     private final Iterator<Libro> iterador;
+
+    //autorId	Guarda el identificador del autor que queremos encontrar.
     private final Long autorId;
 
+    // siguiente	Almacena temporalmente el próximo libro que cumple la condición.
     private Libro siguiente;
+
+    //preparado	Indica si ya se encontró un libro listo para devolver.
     private boolean preparado = false;
 
     public LibrosPorAutorIterator(List<Libro> libros, Long autorId) {
@@ -34,6 +40,7 @@ public class LibrosPorAutorIterator implements Iterator<Libro> {
         this.autorId = autorId;
     }
 
+    //encontrar el próximo libro válido
     @Override
     public boolean hasNext() {
         while (!preparado && iterador.hasNext()) {
@@ -52,6 +59,7 @@ public class LibrosPorAutorIterator implements Iterator<Libro> {
         return preparado;
     }
 
+    //devuelve el libro encontrado
     @Override
     public Libro next() {
         if (!hasNext()) {
