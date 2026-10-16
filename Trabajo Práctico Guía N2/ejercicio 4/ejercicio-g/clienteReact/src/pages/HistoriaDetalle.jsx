@@ -26,17 +26,16 @@ export default function HistoriaDetalle() {
     setConsulta({ ...consulta, [e.target.name]: e.target.value })
   }
 
+    // Agregar y quitar consultas: una sola llamada a la fachada del servidor.
   async function agregar(e) {
     e.preventDefault()
     setGuardando(true)
     try {
-      const h = historia.datos
-      const nuevo = {
+      await historiasApi.agregarConsulta(id, {
         fechaHistoria: consulta.fechaHistoria,
         detalleHistoria: consulta.detalleHistoria,
-        medico: { id: consulta.medicoId },
-      }
-      await historiasApi.actualizar(id, armarHistoria(h, [...h.detalles, nuevo]))
+        medicoId: consulta.medicoId,
+      })
       avisos.exito('Consulta agregada')
       setConsulta(NUEVA_CONSULTA())
       historia.recargar()
@@ -50,9 +49,7 @@ export default function HistoriaDetalle() {
   async function quitar(detalleId) {
     if (!window.confirm('¿Quitar esta consulta?')) return
     try {
-      const h = historia.datos
-      const restantes = h.detalles.filter((d) => d.id !== detalleId)
-      await historiasApi.actualizar(id, armarHistoria(h, restantes))
+      await historiasApi.quitarConsulta(id, detalleId)
       avisos.exito('Consulta eliminada')
       historia.recargar()
     } catch (err) {

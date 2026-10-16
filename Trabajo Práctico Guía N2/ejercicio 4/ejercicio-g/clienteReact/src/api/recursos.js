@@ -18,4 +18,9 @@ export const pacientesApi = crearRecurso('pacientes')
 export const historiasApi = {
   ...crearRecurso('historias-clinicas'),
   listarPorPaciente: (pacienteId) => http(`/historias-clinicas/paciente/${pacienteId}`),
+  // Operaciones de alto nivel: el servidor las resuelve con su fachada (HistoriaClinicaFacade).
+  agregarConsulta: (id, consulta) =>
+    http(`/historias-clinicas/${id}/detalles`, { method: 'POST', body: consulta }),
+  quitarConsulta: (id, detalleId) =>
+    http(`/historias-clinicas/${id}/detalles/${detalleId}`, { method: 'DELETE' }),
 }
