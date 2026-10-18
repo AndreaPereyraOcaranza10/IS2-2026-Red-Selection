@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Usuarios')}"></head>
+<body class="starter-page-page">
+<header th:replace="~{fragments/layout :: header('usuarios')}"></header>
+
+<main class="main">
+    <div th:replace="~{fragments/layout :: encabezado('Usuarios', 'Usuarios que cargan las historias clínicas')}"></div>
+    <div th:replace="~{fragments/layout :: mensajes}"></div>
+
+    <section class="section">
+        <div class="container">
+            <div class="d-flex justify-content-end mb-3">
+                <a th:href="@{/usuarios/nuevo}" class="btn btn-primary"><i class="bi bi-plus-lg"></i> Nuevo usuario</a>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-light">
+                    <tr><th>Usuario</th><th class="text-end">Acciones</th></tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="u : ${usuarios}">
+                        <td th:text="${u.nombreUsuario}"></td>
+                        <td class="text-end">
+                            <a th:href="@{/usuarios/{id}/editar(id=${u.id})}" class="btn btn-sm btn-outline-primary">Editar</a>
+                            <form th:action="@{/usuarios/{id}/eliminar(id=${u.id})}" method="post" class="d-inline"
+                                  onsubmit="return confirm('¿Eliminar este usuario?')">
+                                <button class="btn btn-sm btn-outline-danger">Eliminar</button>
+                            </form>
+                        </td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(usuarios)}">
+                        <td colspan="2" class="text-center text-muted">No hay usuarios cargados</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+</body>
+</html>

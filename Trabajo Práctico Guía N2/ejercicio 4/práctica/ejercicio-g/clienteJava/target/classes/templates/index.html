@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Inicio')}"></head>
+<body class="starter-page-page">
+
+<header th:replace="~{fragments/layout :: header('inicio')}"></header>
+
+<main class="main">
+    <div th:replace="~{fragments/layout :: encabezado('Consultorio médico', 'Gestión de pacientes, médicos e historias clínicas')}"></div>
+
+    <section class="section">
+        <div class="container">
+            <div class="row gy-4">
+
+                <div class="col-md-6 col-lg-3">
+                    <a th:href="@{/pacientes}" class="card h-100 text-center p-4 text-decoration-none">
+                        <i class="bi bi-person-lines-fill fs-1"></i>
+                        <h5 class="mt-3">Pacientes</h5>
+                    </a>
+                </div>
+
+                <div class="col-md-6 col-lg-3">
+                    <a th:href="@{/medicos}" class="card h-100 text-center p-4 text-decoration-none">
+                        <i class="bi bi-heart-pulse fs-1"></i>
+                        <h5 class="mt-3">Médicos</h5>
+                    </a>
+                </div>
+
+                <div class="col-md-6 col-lg-3">
+                    <a th:href="@{/usuarios}" class="card h-100 text-center p-4 text-decoration-none">
+                        <i class="bi bi-people fs-1"></i>
+                        <h5 class="mt-3">Usuarios</h5>
+                    </a>
+                </div>
+
+                <div class="col-md-6 col-lg-3">
+                    <a th:href="@{/historias}" class="card h-100 text-center p-4 text-decoration-none">
+                        <i class="bi bi-journal-medical fs-1"></i>
+                        <h5 class="mt-3">Historias clínicas</h5>
+                    </a>
+                </div>
+
+            </div>
+        </div>
+    </section>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+
+</body>
+</html>

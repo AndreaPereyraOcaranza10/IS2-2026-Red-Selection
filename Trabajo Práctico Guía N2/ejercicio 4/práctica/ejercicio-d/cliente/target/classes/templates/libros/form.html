@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Formulario de libro</title>
+
+    <link rel="stylesheet" th:href="@{/css/estilos.css}">
+
+</head>
+
+
+
+<body>
+
+<div th:replace="~{fragments/layout :: navbar}"></div>
+
+<main class="container">
+
+
+
+    <h1 th:text="${libro.id == null
+
+            ? 'Nuevo libro'
+
+            : 'Editar libro'}">
+
+    </h1>
+
+
+
+    <div th:if="${error != null}"
+
+         th:text="${error}">
+
+    </div>
+
+
+
+    <form th:object="${libro}"
+
+          th:action="${libro.id == null}
+
+                ? @{/libros}
+
+                : @{/libros/{id}(id=${libro.id})}"
+
+          method="post"
+
+          class="formulario">
+
+
+
+        <div>
+
+            <label for="tipo">Tipo de libro</label>
+
+            <select id="tipo" th:if="${libro.id == null}" th:field="*{tipo}">
+
+                <option value="FISICO" th:selected="${libro.tipo == 'FISICO'}">Libro físico</option>
+
+                <option value="DIGITAL" th:selected="${libro.tipo == 'DIGITAL'}">Libro digital</option>
+
+            </select>
+
+            <div th:if="${libro.id != null}">
+
+                <input type="hidden" th:field="*{tipo}">
+
+                <strong th:text="${libro.esDigital() ? 'Libro digital' : 'Libro físico'}"></strong>
+
+                <small>(el tipo no se puede cambiar una vez creado el libro)</small>
+
+            </div>
+
+        </div>
+
+
+
+        <div>
+
+            <label for="titulo">Título</label>
+
+            <input type="text"
+
+                   id="titulo"
+
+                   th:field="*{titulo}"
+
+                   required>
+
+        </div>
+
+
+
+        <div>
+
+            <label for="fechaPublicacion">Fecha de publicación</label>
+
+            <input type="date"
+
+                   id="fechaPublicacion"
+
+                   th:field="*{fechaPublicacion}">
+
+        </div>
+
+
+
+        <div>
+
+            <label for="genero">Género</label>
+
+            <input type="text"
+
+                   id="genero"
+
+                   th:field="*{genero}"
+
+                   required>
+
+        </div>
+
+
+
+        <div>
+
+            <label for="paginas">Cantidad de páginas</label>
+
+            <input type="number"
+
+                   id="paginas"
+
+                   th:field="*{paginas}"
+
+                   min="1"
+
+                   required>
+
+        </div>
+
+
+
+        <div>
+
+            <label for="autores">Autores</label>
+
+
+
+            <select id="autores" name="autorIds" multiple>
+
+                <option th:each="autor : ${autores}"
+
+                        th:value="${autor.id}"
+
+                        th:text="${autor.nombre + ' ' + autor.apellido}"
+
+                        th:selected="${libro.autores != null
+
+                                and #lists.contains(
+
+                                    libro.autores.![id],
+
+                                    autor.id
+
+                                )}">
+
+                </option>
+
+            </select>
+
+
+
+            <small>
+
+                Podés seleccionar varios autores manteniendo presionada
+
+                la tecla Ctrl (o Cmd en Mac).
+
+            </small>
+
+        </div>
+
+
+
+        <div id="campos-fisico">
+
+            <div>
+
+                <label for="ubicacion">Ubicación (estantería)</label>
+
+                <input type="text"
+
+                       id="ubicacion"
+
+                       th:field="*{ubicacion}">
+
+            </div>
+
+        </div>
+
+
+
+        <div id="campos-digital">
+
+            <div>
+
+                <label for="formato">Formato</label>
+
+                <select id="formato" th:field="*{formato}">
+
+                    <option value="">Seleccioná un formato</option>
+
+                    <option value="PDF" th:selected="${libro.formato == 'PDF'}">PDF</option>
+
+                    <option value="EPUB" th:selected="${libro.formato == 'EPUB'}">EPUB</option>
+
+                    <option value="MOBI" th:selected="${libro.formato == 'MOBI'}">MOBI</option>
+
+                </select>
+
+            </div>
+
+            <div>
+
+                <label for="tamanioMb">Tamaño del archivo (MB)</label>
+
+                <input type="number"
+
+                       id="tamanioMb"
+
+                       th:field="*{tamanioMb}"
+
+                       min="0.01"
+
+                       step="0.01">
+
+            </div>
+
+            <div>
+
+                <label for="urlDescarga">URL de descarga</label>
+
+                <input type="url"
+
+                       id="urlDescarga"
+
+                       th:field="*{urlDescarga}">
+
+            </div>
+
+        </div>
+
+
+
+        <div>
+
+            <button type="submit">Guardar libro</button>
+
+            <a th:href="@{/libros}" class="boton secundario">Cancelar</a>
+
+        </div>
+
+
+
+    </form>
+
+
+
+</main>
+
+
+
+<script>
+    // Muestra solo los campos del tipo elegido. Los del otro tipo se deshabilitan para que no se envíen.
+    (function () {
+        var selector = document.getElementById('tipo');
+        var oculto = document.querySelector('input[type=hidden][name=tipo]');
+        var fisico = document.getElementById('campos-fisico');
+        var digital = document.getElementById('campos-digital');
+        var formato = document.getElementById('formato');
+
+        function habilitar(bloque, habilitado) {
+            bloque.hidden = !habilitado;
+            var controles = bloque.querySelectorAll('input, select');
+            Array.prototype.forEach.call(controles, function (c) {
+                c.disabled = !habilitado;
+            });
+        }
+
+        function actualizar() {
+            var tipo = selector ? selector.value : (oculto ? oculto.value : 'FISICO');
+            var esDigital = (tipo === 'DIGITAL');
+            habilitar(fisico, !esDigital);
+            habilitar(digital, esDigital);
+            formato.required = esDigital;
+        }
+
+        if (selector) {
+            selector.addEventListener('change', actualizar);
+        }
+        actualizar();
+    })();
+</script>
+
+</body>
+
+</html>

@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="5ebf40f8-1cf0-4fe4-a564-e7fa388bd73e" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/../../analisis-y-diseño/.$diagrama-base.drawio.bkp" beforeDir="false" afterPath="$PROJECT_DIR$/../../analisis-y-diseño/.$diagrama-base.drawio.bkp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../analisis-y-diseño/diagrama-base.drawio" beforeDir="false" afterPath="$PROJECT_DIR$/../../analisis-y-diseño/diagrama-base.drawio" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../ejercicio-g/clienteJava/src/main/java/redselection/clienteJava/builder/HistoriaClinicaBuilder.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../ejercicio-g/clienteJava/src/main/java/redselection/clienteJava/builder/HistoriaClinicaBuilderImpl.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../ejercicio-g/clienteJava/src/main/java/redselection/clienteJava/builder/HistoriaClinicaDirector.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../ejercicio-g/clienteJava/src/main/java/redselection/clienteJava/controllers/HistoriaClinicaViewController.java" beforeDir="false" afterPath="$PROJECT_DIR$/../../ejercicio-g/clienteJava/src/main/java/redselection/clienteJava/controllers/HistoriaClinicaViewController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../ejercicio-g/servidor/src/main/java/redselection/servidor/services/impl/HistoriaClinicaServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/../../ejercicio-g/servidor/src/main/java/redselection/servidor/services/impl/HistoriaClinicaServiceImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../../../README.md" beforeDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="DBNavigator.Project.Workspace.Settings">
+    <assistant-settings>
+      <credential-settings>
+        <credentials />
+      </credential-settings>
+      <profile-settings>
+        <profiles />
+      </profile-settings>
+      <mcp-server-settings>
+        <workspace-integration value="false" />
+        <mcp-servers />
+        <mcp-tool-approvals />
+      </mcp-server-settings>
+    </assistant-settings>
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Interface" />
+        <option value="Class" />
+        <option value="HTML File" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/../../../.." />
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 6,
+  &quot;fromUser&quot;: false
+}</component>
+  <component name="ProjectId" id="3KO5x2vHzTZkHgYRKY9kng4q7yV" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "DefaultHtmlFileTemplate": "HTML File",
+    "JavaScript Debug.form.html.executor": "Run",
+    "JavaScript Debug.lista.html.executor": "Run",
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "RunOnceActivity.typescript.service.memoryLimit.init": "true",
+    "Spring Boot.ClienteApplication.executor": "Run",
+    "codeWithMe.voiceChat.enabledByDefault": "false",
+    "git-widget-placeholder": "main",
+    "kotlin-language-version-configured": "true",
+    "last_opened_file_path": "/home/guada/Documentos/Ing Software II/IS2-2026-Red-Selection/Trabajo Práctico Guía N2/ejercicio 4/ejercicio-g/clienteJava",
+    "node.js.detected.package.jshint": "true",
+    "node.js.selected.package.jshint": "",
+    "nodejs_package_manager_path": "npm",
+    "settings.editor.selected.configurable": "preferences.pluginManager"
+  }
+}]]></component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-jdk-30f59d01ecdd-a203e0a19954-intellij.indexing.shared.core-IU-262.10968.63" />
+        <option value="bundled-js-predefined-d6986cc7102b-4abd2a77f808-JavaScript-IU-262.10968.63" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="5ebf40f8-1cf0-4fe4-a564-e7fa388bd73e" name="Changes" comment="" />
+      <created>1791416016655</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1791416016655</updated>
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+</project>

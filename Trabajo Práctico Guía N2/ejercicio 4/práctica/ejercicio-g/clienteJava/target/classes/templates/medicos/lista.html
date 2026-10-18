@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Médicos')}"></head>
+<body class="starter-page-page">
+<header th:replace="~{fragments/layout :: header('medicos')}"></header>
+
+<main class="main">
+    <div th:replace="~{fragments/layout :: encabezado('Médicos', 'Profesionales que atienden en el consultorio')}"></div>
+    <div th:replace="~{fragments/layout :: mensajes}"></div>
+
+    <section class="section">
+        <div class="container">
+            <div class="d-flex justify-content-end mb-3">
+                <a th:href="@{/medicos/nuevo}" class="btn btn-primary"><i class="bi bi-plus-lg"></i> Nuevo médico</a>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-light">
+                    <tr><th>Nombre</th><th>Apellido</th><th>Documento</th><th class="text-end">Acciones</th></tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="m : ${medicos}">
+                        <td th:text="${m.nombre}"></td>
+                        <td th:text="${m.apellido}"></td>
+                        <td th:text="${m.documento}"></td>
+                        <td class="text-end">
+                            <a th:href="@{/medicos/{id}/editar(id=${m.id})}" class="btn btn-sm btn-outline-primary">Editar</a>
+                            <form th:action="@{/medicos/{id}/eliminar(id=${m.id})}" method="post" class="d-inline"
+                                  onsubmit="return confirm('¿Eliminar este médico?')">
+                                <button class="btn btn-sm btn-outline-danger">Eliminar</button>
+                            </form>
+                        </td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(medicos)}">
+                        <td colspan="4" class="text-center text-muted">No hay médicos cargados</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+</body>
+</html>
