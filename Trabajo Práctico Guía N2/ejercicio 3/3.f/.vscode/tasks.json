@@ -1,0 +1,18 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Compilar carrito",
+            "type": "process",
+            "command": "powershell.exe",
+            "args": [
+                "-NoProfile",
+                "-Command",
+                "$ErrorActionPreference = 'Stop'; New-Item -ItemType Directory -Force backend/build | Out-Null; $fuentes = (Get-ChildItem backend/src -Recurse -Filter *.java).FullName; & javac --release 17 -encoding UTF-8 -d backend/build $fuentes; exit $LASTEXITCODE"
+            ],
+            "options": { "cwd": "${workspaceFolder}" },
+            "problemMatcher": [],
+            "group": { "kind": "build", "isDefault": true }
+        }
+    ]
+}

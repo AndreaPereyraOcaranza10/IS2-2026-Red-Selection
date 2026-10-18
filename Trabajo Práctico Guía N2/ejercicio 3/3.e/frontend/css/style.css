@@ -35,8 +35,7 @@ button {
 }
 
 .topbar h1,
-.section-heading h2,
-.pattern-note h2 {
+.section-heading h2 {
   margin: 0;
   line-height: 1.1;
   letter-spacing: 0;
@@ -79,8 +78,7 @@ button {
 }
 
 .catalogo,
-.cart-panel,
-.pattern-note {
+.cart-panel {
   background: rgba(255, 255, 255, 0.86);
   border: 1px solid #e6e0d7;
   box-shadow: 0 18px 45px rgba(36, 44, 52, 0.08);
@@ -286,25 +284,6 @@ button {
   margin: 12px 0 0;
   color: #315c42;
   font-weight: 700;
-}
-
-.pattern-note {
-  width: min(1180px, calc(100% - 32px));
-  margin: 0 auto 32px;
-  padding: 22px;
-  border-radius: 8px;
-}
-
-.pattern-note p {
-  max-width: 860px;
-  margin: 10px 0 0;
-  color: #4f5d6f;
-}
-
-code {
-  padding: 2px 6px;
-  border-radius: 6px;
-  background: #ece6dc;
 }
 
 @media (max-width: 860px) {
