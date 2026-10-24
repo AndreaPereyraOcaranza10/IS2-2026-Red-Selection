@@ -1,0 +1,456 @@
+<!doctype html>
+<!--
+    FRAGMENTOS THYMELEAF REUTILIZABLES
+    ==================================
+    Este archivo NO es una página, es una "biblioteca" de trozos de HTML
+    (th:fragment) que las demás páginas incluyen con th:replace / th:insert.
+
+    Ventaja: el header, el footer, los <link> del <head> y los <script>
+    finales estaban duplicados en las 7 páginas del template original.
+    Ahora viven en un solo lugar: si cambiás el logo, un link del menú o
+    el footer, lo hacés una sola vez acá y se refleja en todo el sitio.
+
+    Cómo se usa desde cualquier página:
+        <div th:replace="~{tienda/fragments/fragments :: header}"></div>
+        <div th:replace="~{tienda/fragments/fragments :: footer}"></div>
+        <th:block th:replace="~{tienda/fragments/fragments :: head-assets}"></th:block>
+        <th:block th:replace="~{tienda/fragments/fragments :: scripts}"></th:block>
+
+    Variables de modelo que se esperan desde el Controller (opcional,
+    el fragment funciona igual si no las mandás porque no hay th:each
+    todavía sobre el menú, solo sobre el carrito):
+        - cartItems      : List<CartItem>  (para el mini-carrito del header)
+        - cartItemCount  : int             (disponible para mostrar cantidades fuera del header)
+-->
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head>
+    <title>fragments</title>
+</head>
+
+<body>
+
+    <!-- ======================================================= -->
+    <!-- FRAGMENT: head-assets                                    -->
+    <!-- Favicon, fuentes y hojas de estilo comunes a toda página -->
+    <!-- ======================================================= -->
+    <th:block th:fragment="head-assets">
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <!-- Favicon -->
+        <link rel="icon" type="icon" th:href="@{/assets/images/favicon.png}" href="assets/images/favicon.png" />
+
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&display=swap" rel="stylesheet">
+
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+        <link rel="stylesheet" th:href="@{/assets/css/styles.css}" href="assets/css/styles.css">
+        <!-- TODO: en Spring Boot conviene mover swiper a /static/webjars o a un CDN -->
+        <link rel="stylesheet" th:href="@{/node_modules/swiper/swiper-bundle.css}"
+            href="node_modules/swiper/swiper-bundle.css">
+        <link rel="stylesheet" th:href="@{/assets/css/custom.css}" href="assets/css/custom.css">
+    </th:block>
+
+    <!-- ======================================================= -->
+    <!-- FRAGMENT: header                                         -->
+    <!-- Header desktop + menu hamburguesa + menu mobile completo -->
+    <!-- ======================================================= -->
+    <th:block th:fragment="header">
+
+        <!-- Header -->
+        <header class="store-header bg-gray-dark sticky top-0 z-50">
+            <div class="store-header__inner container mx-auto px-4 lg:px-8 flex justify-between items-center">
+                <!-- Left section: Logo -->
+                <a th:href="@{/}" href="index.html" class="flex items-center">
+                    <div>
+                        <img th:src="@{/assets/images/logo-zero-white.png}"
+                            src="assets/images/logo-zero-white.png" alt="Zero" class="store-header__logo h-14 w-auto mr-4">
+                    </div>
+                </a>
+
+                <!-- Hamburger menu (for mobile) -->
+                <div class="flex lg:hidden">
+                    <button id="hamburger" class="text-white focus:outline-none">
+                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M4 6h16M4 12h16m-7 6h7"></path>
+                        </svg>
+                    </button>
+                </div>
+
+                <!-- Center section: Menu -->
+                <nav class="store-header__nav hidden lg:flex md:flex-grow justify-center">
+                    <ul class="flex justify-center space-x-4 text-white">
+                        <li><a th:href="@{/}" href="index.html" class="hover:text-secondary font-semibold">Inicio</a></li>
+
+                        <!-- Men Dropdown -->
+                        <li class="relative group hidden" x-data="{ open: false }">
+                            <a th:href="@{/shop}" href="shop.html" @mouseover="open = true" @mouseleave="open = false"
+                                class="hover:text-secondary font-semibold flex items-center">
+                                Hombres
+                                <i
+                                    :class="open ? 'fas fa-chevron-up ml-1 text-xs' : 'fas fa-chevron-down ml-1 text-xs'"></i>
+                            </a>
+                            <ul x-show="open" @mouseover="open = true" @mouseleave="open = false"
+                                class="absolute left-0 bg-white text-black space-y-2 mt-1 p-2 rounded shadow-lg"
+                                x-transition:enter="transition ease-out duration-100"
+                                x-transition:enter-start="opacity-0 scale-90"
+                                x-transition:enter-end="opacity-100 scale-100"
+                                x-transition:leave="transition ease-in duration-100"
+                                x-transition:leave-start="opacity-100 scale-100"
+                                x-transition:leave-end="opacity-0 scale-90">
+                                <!--
+                              Sugerencia: si tenés categorías dinámicas, reemplazá estos 3 <li>
+                              por un th:each, ej:
+                              <li th:each="cat : ${menCategories}">
+                                  <a th:href="@{/shop(categoria=${cat.name})}" th:text="${cat.name}">Categoría</a>
+                              </li>
+                          -->
+                                <li><a th:href="@{/shop}" href="shop.html"
+                                        class="min-w-40 block px-4 py-2 hover:bg-primary hover:text-white rounded">Novedades</a></li>
+                                <li><a th:href="@{/shop}" href="shop.html"
+                                        class="min-w-40 block px-4 py-2 hover:bg-primary hover:text-white rounded">Indumentaria</a></li>
+                                <li><a th:href="@{/shop}" href="shop.html"
+                                        class="min-w-40 block px-4 py-2 hover:bg-primary hover:text-white rounded">Accesorios</a></li>
+                            </ul>
+                        </li>
+
+                        <!-- Women Dropdown -->
+                        <li class="relative group hidden" x-data="{ open: false }">
+                            <a th:href="@{/shop}" href="shop.html" @mouseover="open = true" @mouseleave="open = false"
+                                class="hover:text-secondary font-semibold flex items-center">
+                                Mujeres
+                                <i
+                                    :class="open ? 'fas fa-chevron-up ml-1 text-xs' : 'fas fa-chevron-down ml-1 text-xs'"></i>
+                            </a>
+                            <ul x-show="open" @mouseover="open = true" @mouseleave="open = false"
+                                class="absolute left-0 bg-white text-black space-y-2 mt-1 p-2 rounded shadow-lg"
+                                x-transition:enter="transition ease-out duration-100"
+                                x-transition:enter-start="opacity-0 scale-90"
+                                x-transition:enter-end="opacity-100 scale-100"
+                                x-transition:leave="transition ease-in duration-100"
+                                x-transition:leave-start="opacity-100 scale-100"
+                                x-transition:leave-end="opacity-0 scale-90">
+                                <li><a th:href="@{/shop}" href="shop.html"
+                                        class="min-w-40 block px-4 py-2 hover:bg-primary hover:text-white rounded">Novedades</a></li>
+                                <li><a th:href="@{/shop}" href="shop.html"
+                                        class="min-w-40 block px-4 py-2 hover:bg-primary hover:text-white rounded">Indumentaria</a></li>
+                                <li><a th:href="@{/shop}" href="shop.html"
+                                        class="min-w-40 block px-4 py-2 hover:bg-primary hover:text-white rounded">Accesorios</a></li>
+                            </ul>
+                        </li>
+
+                        <li><a th:href="@{/shop}" href="shop.html" class="hover:text-secondary font-semibold">Tienda</a>
+                        </li>
+                    </ul>
+                </nav>
+
+                <!-- Right section: Buttons (for desktop) -->
+                <div class="store-header__actions hidden lg:flex items-center gap-2 relative">
+                    <th:block sec:authorize="isAnonymous()">
+                        <a th:href="@{/registro}"
+                            class="bg-primary border border-primary hover:bg-transparent text-white hover:text-primary font-semibold px-4 py-2 rounded-full inline-block text-sm">Crear cuenta</a>
+                        <a th:href="@{/login}"
+                            class="bg-transparent border border-white hover:bg-white text-white hover:text-gray-900 font-semibold px-4 py-2 rounded-full inline-block text-sm">Ingresar</a>
+                    </th:block>
+
+                    <th:block sec:authorize="isAuthenticated()">
+                        <a sec:authorize="hasAnyRole('ADMINISTRATIVO','JEFE')" th:href="@{/admin}"
+                            class="store-header__admin-link bg-amber-500/20 border border-amber-500 hover:bg-amber-500 text-white hover:text-white font-semibold px-3 py-1.5 rounded-full inline-flex items-center text-xs transition">
+                            <i class="fas fa-cog mr-1.5"></i> Panel administrador
+                        </a>
+                        <a sec:authorize="hasRole('CLIENTE')" th:href="@{/completar-perfil}"
+                            class="store-header__icon-button transition" aria-label="Mi Perfil" title="Mi Perfil">
+                            <i class="fas fa-user-circle" aria-hidden="true"></i>
+                        </a>
+                        <a sec:authorize="hasAnyRole('ADMINISTRATIVO','JEFE')" th:href="@{/admin/perfil}"
+                            class="store-header__icon-button transition" aria-label="Mi Perfil" title="Mi Perfil">
+                            <i class="fas fa-user-circle" aria-hidden="true"></i>
+                        </a>
+                        <form th:action="@{/logout}" method="post" class="inline">
+                            <button type="submit" class="store-header__icon-button transition cursor-pointer"
+                                title="Cerrar Sesión">
+                                <i class="fas fa-sign-out-alt text-lg"></i>
+                            </button>
+                        </form>
+                    </th:block>
+                    <div class="relative group cart-wrapper">
+                        <a class="store-header__icon-button" th:href="@{/cart}" href="/cart.html" aria-label="Ver carrito">
+                            <img th:src="@{/assets/images/cart-shopping.svg}" src="assets/images/cart-shopping.svg"
+                                alt="Cart" class="h-6 w-6 group-hover:scale-120">
+                        </a>
+                        <!-- Mini-carrito: reemplazamos los 2 items fijos por un th:each sobre cartItems -->
+                        <div class="absolute right-0 mt-1 w-80 bg-white shadow-lg p-4 rounded hidden group-hover:block">
+                            <div class="space-y-4">
+                                <div th:each="cartItem, iterStat : ${cartItems}"
+                                    class="flex items-center justify-between pb-4 border-b border-gray-line"
+                                    th:classappend="${iterStat.last} ? 'border-b-0 pb-0' : ''">
+                                    <div class="flex items-center">
+                                        <img th:src="@{${cartItem.imageUrl}}" src="/assets/images/single-product/1.jpg"
+                                            alt="Product" class="h-12 w-12 object-cover rounded mr-2">
+                                        <div>
+                                            <p class="font-semibold" th:text="${cartItem.name}">Vestido negro de verano</p>
+                                            <p class="text-sm">Cantidad: <span th:text="${cartItem.quantity}">1</span>
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <p class="font-semibold" th:text="${'$' + cartItem.price}">$25.00</p>
+                                </div>
+                                <p th:if="${#lists.isEmpty(cartItems)}" class="text-sm text-gray-500">Tu carrito está vacío.</p>
+                            </div>
+                            <a th:href="@{/cart}" href="/cart.html"
+                                class="block text-center mt-4 border border-primary bg-primary hover:bg-transparent text-white hover:text-primary py-2 rounded-full font-semibold">Ver carrito</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Mobile menu -->
+        <nav id="mobile-menu-placeholder" class="mobile-menu hidden flex-col items-center space-y-8 lg:hidden">
+            <ul class="w-full">
+                <li><a th:href="@{/}" href="index.html" class="hover:text-secondary font-bold block py-2">Inicio</a></li>
+
+                <!-- Men Dropdown -->
+                <li class="relative group hidden" x-data="{ open: false }">
+                    <a @click="open = !open; $event.preventDefault()"
+                        class="hover:text-secondary font-bold  py-2 flex justify-center items-center cursor-pointer">
+                        <span>Hombres</span>
+                        <span @click.stop="open = !open">
+                            <i
+                                :class="open ? 'fas fa-chevron-up text-xs ml-2' : 'fas fa-chevron-down text-xs ml-2'"></i>
+                        </span>
+                    </a>
+                    <ul class="mobile-dropdown-menu space-y-2" x-show="open" x-transition>
+                        <li><a th:href="@{/shop}" href="shop.html"
+                                class="hover:text-secondary font-bold block pt-2 pb-3">Ver colección</a></li>
+                        <li><a th:href="@{/product}" href="single-product-page.html"
+                                class="hover:text-secondary font-bold block py-2">Novedades para hombre</a></li>
+                        <li><a th:href="@{/product}" href="single-product-page.html"
+                                class="hover:text-secondary font-bold block py-2">Indumentaria</a></li>
+                        <li><a th:href="@{/product}" href="single-product-page.html"
+                                class="hover:text-secondary font-bold block py-2">Accesorios</a></li>
+                    </ul>
+                </li>
+
+                <!-- Women Dropdown -->
+                <li class="relative group hidden" x-data="{ open: false }">
+                    <a @click="open = !open; $event.preventDefault()"
+                        class="hover:text-secondary font-bold py-2 flex justify-center items-center cursor-pointer">
+                        <span>Mujeres</span>
+                        <span @click.stop="open = !open">
+                            <i
+                                :class="open ? 'fas fa-chevron-up text-xs ml-2' : 'fas fa-chevron-down text-xs ml-2'"></i>
+                        </span>
+                    </a>
+                    <ul class="mobile-dropdown-menu pl-4 space-y-2" x-show="open" x-transition>
+                        <li><a th:href="@{/shop}" href="shop.html"
+                                class="hover:text-secondary font-bold block py-2">Ver colección</a></li>
+                        <li><a th:href="@{/product}" href="single-product-page.html"
+                                class="hover:text-secondary font-bold block py-2">Novedades para mujer</a></li>
+                        <li><a th:href="@{/product}" href="single-product-page.html"
+                                class="hover:text-secondary font-bold block py-2">Indumentaria</a></li>
+                        <li><a th:href="@{/product}" href="single-product-page.html"
+                                class="hover:text-secondary font-bold block py-2">Accesorios</a></li>
+                    </ul>
+                </li>
+
+                <li><a th:href="@{/shop}" href="shop.html" class="hover:text-secondary font-bold block py-2">Tienda</a>
+                </li>
+            </ul>
+            <div class="flex flex-col mt-6 space-y-2 items-center w-full px-4">
+                <div sec:authorize="isAnonymous()" class="flex flex-col space-y-2 w-full items-center">
+                    <a th:href="@{/registro}"
+                        class="bg-primary hover:bg-transparent text-white hover:text-primary border border-primary font-semibold px-4 py-2 rounded-full flex items-center justify-center w-full max-w-[200px]">Crear cuenta</a>
+                    <a th:href="@{/login}"
+                        class="bg-transparent hover:bg-white text-white hover:text-gray-900 border border-white font-semibold px-4 py-2 rounded-full flex items-center justify-center w-full max-w-[200px]">Ingresar</a>
+                </div>
+                <div sec:authorize="isAuthenticated()" class="flex flex-col space-y-2 w-full items-center">
+                    <a sec:authorize="hasAnyRole('ADMINISTRATIVO','JEFE')" th:href="@{/admin}"
+                        class="bg-amber-500 text-white font-semibold px-4 py-2 rounded-full flex items-center justify-center w-full max-w-[200px]">Panel
+                        administrador</a>
+                    <a sec:authorize="hasRole('CLIENTE')" th:href="@{/completar-perfil}"
+                        class="bg-white/20 text-white font-semibold px-4 py-2 rounded-full flex items-center justify-center w-full max-w-[200px]">Mi
+                        Perfil</a>
+                    <a sec:authorize="hasAnyRole('ADMINISTRATIVO','JEFE')" th:href="@{/admin/perfil}"
+                        class="bg-white/20 text-white font-semibold px-4 py-2 rounded-full flex items-center justify-center w-full max-w-[200px]">Mi Perfil</a>
+                    <form th:action="@{/logout}" method="post" class="w-full text-center">
+                        <button type="submit" class="text-red-400 font-semibold py-2">Cerrar Sesión</button>
+                    </form>
+                </div>
+                <a th:href="@{/cart}"
+                    class="bg-primary hover:bg-transparent text-white hover:text-primary border border-primary font-semibold px-4 py-2 rounded-full flex items-center justify-center w-full max-w-[200px]">Carrito</a>
+            </div>
+        </nav>
+
+    </th:block>
+
+    <!-- ======================================================= -->
+    <!-- FRAGMENT: footer                                        -->
+    <!-- ======================================================= -->
+    <th:block th:fragment="footer">
+
+        <!-- Footer -->
+        <footer class="border-t border-gray-line">
+            <!-- Top part -->
+            <div class="container mx-auto px-4 py-10">
+                <div class="flex flex-wrap -mx-4">
+                    <!-- Menu 1 -->
+                    <div class="w-full sm:w-1/6 px-4 mb-8">
+                        <h3 class="text-lg font-semibold mb-4">Tienda</h3>
+                        <ul>
+                            <li><a th:href="@{/shop}" href="/shop.html" class="hover:text-primary">Ver todos</a></li>
+                            <li><a th:href="@{/tienda/envios}" class="hover:text-primary">Env&iacute;os</a></li>
+                            <li><a th:href="@{/product}" href="/single-product-page.html"
+                                    class="hover:text-primary">Mujeres</a></li>
+                            <li><a th:href="@{/shop}" href="/shop.html" class="hover:text-primary">Hombres</a></li>
+                            <li><a th:href="@{/product}" href="/single-product-page.html"
+                                    class="hover:text-primary">Calzado</a></li>
+                            <li><a th:href="@{/product}" href="/single-product-page.html"
+                                    class="hover:text-primary">Accesorios</a></li>
+                        </ul>
+                    </div>
+                    <!-- Menu 2 -->
+                    <div class="w-full sm:w-1/6 px-4 mb-8">
+                        <h3 class="text-lg font-semibold mb-4">Enlaces</h3>
+                        <ul>
+                            <li><a th:href="@{/shop}" href="/shop.html" class="hover:text-primary">Tienda</a></li>
+                            <li><a th:href="@{/product}" href="/single-product-page.html"
+                                    class="hover:text-primary">Productos</a></li>
+                            <li><a th:href="@{/checkout}" href="/checkout.html" class="hover:text-primary">Finalizar compra</a>
+                            </li>
+                        </ul>
+                    </div>
+                    <!-- Menu 3 -->
+                    <div class="w-full sm:w-1/6 px-4 mb-8">
+                        <h3 class="text-lg font-semibold mb-4">Mi cuenta</h3>
+                        <ul>
+                            <li><a th:href="@{/cart}" href="/cart.html" class="hover:text-primary">Carrito</a></li>
+                            <li><a th:href="@{/registro}" href="/registro"
+                                    class="hover:text-primary">Crear cuenta</a></li>
+                            <li><a th:href="@{/login}" href="/login" class="hover:text-primary">Ingresar</a>
+                            </li>
+                        </ul>
+                    </div>
+                    <!-- Social Media -->
+                    <div class="w-full sm:w-1/6 px-4 mb-8">
+                        <h3 class="text-lg font-semibold mb-4">Seguinos</h3>
+                        <ul>
+                            <li class="flex items-center mb-2">
+                                <img th:src="@{/assets/images/social_icons/facebook.svg}"
+                                    src="/assets/images/social_icons/facebook.svg" alt="Facebook"
+                                    class="w-4 h-4 transition-transform transform hover:scale-110 mr-2">
+                                <a href="https://www.facebook.com/" target="_blank" rel="noopener noreferrer" class="hover:text-primary">Facebook</a>
+                            </li>
+                            <li class="flex items-center mb-2">
+                                <img th:src="@{/assets/images/social_icons/twitter.svg}"
+                                    src="/assets/images/social_icons/twitter.svg" alt="Twitter"
+                                    class="w-4 h-4 transition-transform transform hover:scale-110 mr-2">
+                                <a href="https://x.com/" target="_blank" rel="noopener noreferrer" class="hover:text-primary">Twitter</a>
+                            </li>
+                            <li class="flex items-center mb-2">
+                                <img th:src="@{/assets/images/social_icons/instagram.svg}"
+                                    src="/assets/images/social_icons/instagram.svg" alt="Instagram"
+                                    class="w-4 h-4 transition-transform transform hover:scale-110 mr-2">
+                                <a href="https://www.instagram.com/" target="_blank" rel="noopener noreferrer" class="hover:text-primary">Instagram</a>
+                            </li>
+                            <li class="flex items-center mb-2">
+                                <img th:src="@{/assets/images/social_icons/pinterest.svg}"
+                                    src="/assets/images/social_icons/pinterest.svg" alt="Pinterest"
+                                    class="w-4 h-4 transition-transform transform hover:scale-110 mr-2">
+                                <a href="https://www.pinterest.com/" target="_blank" rel="noopener noreferrer" class="hover:text-primary">Pinterest</a>
+                            </li>
+                            <li class="flex items-center mb-2">
+                                <img th:src="@{/assets/images/social_icons/youtube.svg}"
+                                    src="/assets/images/social_icons/youtube.svg" alt="YouTube"
+                                    class="w-4 h-4 transition-transform transform hover:scale-110 mr-2">
+                                <a href="https://www.youtube.com/watch?v=dQw4w9WgXcQ" target="_blank" rel="noopener noreferrer" class="hover:text-primary">YouTube</a>
+                            </li>
+                        </ul>
+                    </div>
+                    <!-- Contact Information -->
+                    <div class="w-full sm:w-2/6 px-4 mb-8">
+                        <h3 class="text-lg font-semibold mb-4">Zero, en movimiento</h3>
+                        <p><img th:src="@{/assets/images/logo-zero-black.png}" src="assets/images/logo-zero-black.png"
+                                alt="Zero" class="h-[60px] mb-4"></p>
+                        <p>Indumentaria deportiva para acompañarte todos los días.</p>
+                        <p class="my-4">Comodidad, movimiento y estilo en una sola colección.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bottom part -->
+            <div class="py-6 border-t border-gray-line">
+                <div class="container mx-auto px-4 flex flex-wrap justify-between items-center">
+                    <!-- Copyright and Links -->
+                    <div class="w-full lg:w-3/4 text-center lg:text-left mb-4 lg:mb-0">
+                        <p class="mb-2 font-bold">&copy; <span
+                                th:text="${#calendars.format(#calendars.createNow(),'yyyy')} ?: '2024'">2024</span> Zero. Todos los derechos reservados.</p>
+                        <ul class="flex justify-center lg:justify-start space-x-4 mb-4 lg:mb-0">
+                            <li><a th:href="@{/}" href="/" class="hover:text-primary">Privacidad</a></li>
+                            <li><a th:href="@{/}" href="/" class="hover:text-primary">Términos y condiciones</a></li>
+                            <li><a th:href="@{/shop}" href="/shop" class="hover:text-primary">Ayuda</a></li>
+                        </ul>
+                        <p class="text-sm mt-4">Descubrí prendas y accesorios deportivos diseñados para moverse con vos.</p>
+                    </div>
+                    <!-- Payment Icons -->
+                    <div class="w-full lg:w-1/4 text-center lg:text-right">
+                        <img th:src="@{/assets/images/social_icons/paypal.svg}"
+                            src="/assets/images/social_icons/paypal.svg" alt="PayPal" class="inline-block h-8 mr-2">
+                        <img th:src="@{/assets/images/social_icons/stripe.svg}"
+                            src="/assets/images/social_icons/stripe.svg" alt="Stripe" class="inline-block h-8 mr-2">
+                        <img th:src="@{/assets/images/social_icons/visa.svg}" src="/assets/images/social_icons/visa.svg"
+                            alt="Visa" class="inline-block h-8">
+                    </div>
+                </div>
+            </div>
+        </footer>
+
+    </th:block>
+
+    <!-- ======================================================= -->
+    <!-- FRAGMENT: productCard(product)                           -->
+    <!-- Tarjeta de producto reutilizable en Home y en Shop.       -->
+    <!-- Se le pasa un objeto "product" con, por ejemplo:          -->
+    <!--   product.id, product.name, product.imageUrl,             -->
+    <!--   product.category, product.price, product.oldPrice       -->
+    <!-- (product.oldPrice puede ser null si no hay descuento)      -->
+    <!-- ======================================================= -->
+    <div th:fragment="productCard(product)" class="store-product-card bg-white p-3 rounded-lg shadow-lg" th:if="${product != null}">
+        <img th:src="@{${product.imageUrl}}" src="/assets/images/products/1.jpg" th:alt="${product.name}" alt="Producto"
+            class="store-product-card__image product-image-square mb-4 rounded-lg">
+        <a th:href="@{'/product/' + ${product.id}}" href="single-product-page.html" th:text="${product.name}"
+            class="store-product-card__title text-lg font-semibold mb-2">Nombre del producto</a>
+        <p class="store-product-card__category my-2" th:text="${product.category}">Categoría</p>
+        <div class="store-product-card__price flex items-center mb-4">
+            <span class="text-lg font-bold text-primary" th:text="${'$' + product.price}">$19.99</span>
+            <span class="text-sm line-through ml-2" th:if="${product.oldPrice != null}"
+                th:text="${'$' + product.oldPrice}">$24.99</span>
+        </div>
+        <!-- Ajustá la action al endpoint real que agrega al carrito -->
+        <form class="store-product-card__form" th:action="@{/cart/add}" method="post">
+            <input type="hidden" name="productId" th:value="${product.id}">
+            <button type="submit"
+                th:disabled="${!product.inStock}"
+                th:text="${product.inStock} ? 'Agregar al carrito' : 'Sin stock'"
+                th:style="${!product.inStock} ? 'background-color: #64748b; border-color: #64748b; color: #ffffff;' : ''"
+                class="bg-primary border border-transparent hover:bg-transparent hover:border-primary text-white hover:text-primary font-semibold py-2 px-4 rounded-full w-full disabled:opacity-100 disabled:cursor-not-allowed">Agregar al carrito</button>
+        </form>
+    </div>
+
+    <!-- ======================================================= -->
+    <!-- FRAGMENT: scripts                                        -->
+    <!-- Scripts comunes de fin de <body>. Si una página necesita -->
+    <!-- un script extra (ej. swiper solo en index), agregalo     -->
+    <!-- DESPUÉS de este th:replace en esa página puntual.        -->
+    <!-- ======================================================= -->
+    <th:block th:fragment="scripts">
+        <!-- CDN externo: no lleva th:src, @{...} es solo para recursos propios de la app -->
+        <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+        <script th:src="@{/assets/js/script.js}" src="assets/js/script.js"></script>
+    </th:block>
+
+</body>
+
+</html>

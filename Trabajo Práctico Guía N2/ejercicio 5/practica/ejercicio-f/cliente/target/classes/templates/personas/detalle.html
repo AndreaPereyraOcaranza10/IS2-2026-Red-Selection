@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Detalle de persona</title>
+    <link rel="stylesheet" th:href="@{/css/estilos.css}">
+</head>
+<body>
+<div th:replace="~{fragments/layout :: navbar}"></div>
+
+<main>
+    <h1 th:text="${persona.nombre + ' ' + persona.apellido}">Persona</h1>
+
+    <div th:replace="~{fragments/layout :: alertas}"></div>
+
+    <section class="tarjeta">
+        <h2>Datos personales</h2>
+        <dl>
+            <dt>Nombre</dt><dd th:text="${persona.nombre}"></dd>
+            <dt>Apellido</dt><dd th:text="${persona.apellido}"></dd>
+            <dt>DNI</dt><dd th:text="${persona.dni}"></dd>
+        </dl>
+    </section>
+
+    <section class="tarjeta">
+        <h2>Domicilio</h2>
+        <dl th:if="${persona.domicilio.id != null}">
+            <dt>Calle</dt><dd th:text="${persona.domicilio.calle}"></dd>
+            <dt>Número</dt><dd th:text="${persona.domicilio.numero}"></dd>
+            <dt>Localidad</dt><dd th:text="${persona.domicilio.localidad.denominacion}"></dd>
+            <dt>Latitud</dt><dd th:text="${persona.domicilio.latitud}"></dd>
+            <dt>Longitud</dt><dd th:text="${persona.domicilio.longitud}"></dd>
+        </dl>
+        <p th:if="${persona.domicilio.id != null
+                    and persona.domicilio.latitud != null and !persona.domicilio.latitud.isBlank()
+                    and persona.domicilio.longitud != null and !persona.domicilio.longitud.isBlank()}">
+            <a th:href="${'https://www.google.com/maps?q=' + persona.domicilio.latitud + ',' + persona.domicilio.longitud}"
+               target="_blank" rel="noopener noreferrer" class="boton">Ver en Google Maps</a>
+        </p>
+        <p th:if="${persona.domicilio.id == null}" class="vacio">Sin domicilio cargado.</p>
+    </section>
+
+    <section class="tarjeta">
+        <h2>Libros</h2>
+        <table th:if="${!#lists.isEmpty(persona.libros)}">
+            <thead>
+            <tr><th>Título</th><th>Año</th><th>Género</th><th>Páginas</th><th>Autores</th><th></th></tr>
+            </thead>
+            <tbody>
+            <tr th:each="libro : ${persona.libros}">
+                <td th:text="${libro.titulo}"></td>
+                <td th:text="${libro.fecha}"></td>
+                <td th:text="${libro.genero}"></td>
+                <td th:text="${libro.paginas}"></td>
+                <td>
+                    <span th:each="a, st : ${libro.autores}"
+                          th:text="${a.nombre + ' ' + a.apellido + (st.last ? '' : ', ')}"></span>
+                </td>
+                <td>
+                    <form th:action="@{/personas/{pid}/libros/{lid}/eliminar(pid=${persona.id},lid=${libro.id})}" method="post"
+                          onsubmit="return confirm('¿Quitar este libro?');">
+                        <button type="submit" class="chico peligro">Quitar</button>
+                    </form>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+        <p th:if="${#lists.isEmpty(persona.libros)}" class="vacio">Esta persona no tiene libros.</p>
+    </section>
+
+    <section class="tarjeta">
+        <h2>Agregar libro</h2>
+        <form th:object="${nuevoLibro}" th:action="@{/personas/{id}/libros(id=${persona.id})}" method="post" class="formulario">
+            <label>Título
+                <input type="text" th:field="*{titulo}" required>
+            </label>
+            <label>Año
+                <input type="number" th:field="*{fecha}" min="0" required>
+            </label>
+            <label>Género
+                <input type="text" th:field="*{genero}" required>
+            </label>
+            <label>Páginas
+                <input type="number" th:field="*{paginas}" min="1" required>
+            </label>
+            <label>Autores (Ctrl/Cmd para elegir más de uno)
+                <select name="autorIds" multiple size="5">
+                    <option th:each="a : ${autores}" th:value="${a.id}" th:text="${a.nombre + ' ' + a.apellido}"></option>
+                </select>
+            </label>
+            <p th:if="${#lists.isEmpty(autores)}" class="ayuda">
+                No hay autores cargados. Agregalos desde <a th:href="@{/autores}">Autores</a>.
+            </p>
+            <button type="submit">Agregar libro</button>
+        </form>
+    </section>
+
+    <div class="barra">
+        <a th:href="@{/personas}" class="boton secundario">← Volver</a>
+        <a th:href="@{/personas/{id}/editar(id=${persona.id})}" class="boton">Editar</a>
+    </div>
+</main>
+</body>
+</html>

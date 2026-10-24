@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+
+<head>
+  <title>Zero - Administraci&oacute;n</title>
+  <th:block th:replace="~{admin/fragments/fragments :: head-assets}"></th:block>
+</head>
+
+<body>
+  <div th:replace="~{admin/fragments/fragments :: sidebarTopbar(activePage='dashboard')}"></div>
+
+  <main id="content" class="content py-10">
+    <div class="container-fluid">
+      <header class="mb-6">
+        <h1 class="fs-3 mb-1">Panel de administraci&oacute;n</h1>
+        <p class="text-secondary mb-0">Resumen de ventas cobradas y actividad de la tienda.</p>
+      </header>
+
+      <section class="row g-3 mb-4" aria-label="Ventas cobradas por medio de pago">
+        <div class="col-12 col-md-4">
+          <article class="card h-100 p-4 rounded-2 bg-warning bg-opacity-10 border border-warning border-opacity-25">
+            <div class="d-flex align-items-center gap-3">
+              <div class="icon-shape icon-md bg-warning text-white rounded-2"><i class="ti ti-cash fs-4"></i></div>
+              <div>
+                <h2 class="mb-2 fs-6">Ventas cobradas en efectivo</h2>
+                <p class="mb-0 fs-3 fw-bold" th:text="${ventasEfectivo}">0</p>
+                <span class="small text-secondary">ventas</span>
+              </div>
+            </div>
+          </article>
+        </div>
+        <div class="col-12 col-md-4">
+          <article class="card h-100 p-4 rounded-2 bg-info bg-opacity-10 border border-info border-opacity-25">
+            <div class="d-flex align-items-center gap-3">
+              <div class="icon-shape icon-md bg-info text-white rounded-2"><i class="ti ti-building-bank fs-4"></i></div>
+              <div>
+                <h2 class="mb-2 fs-6">Ventas cobradas por transferencia</h2>
+                <p class="mb-0 fs-3 fw-bold" th:text="${ventasTransferencia}">0</p>
+                <span class="small text-secondary">ventas</span>
+              </div>
+            </div>
+          </article>
+        </div>
+        <div class="col-12 col-md-4">
+          <article class="card h-100 p-4 rounded-2 bg-success bg-opacity-10 border border-success border-opacity-25">
+            <div class="d-flex align-items-center gap-3">
+              <div class="icon-shape icon-md bg-success text-white rounded-2"><i class="ti ti-wallet fs-4"></i></div>
+              <div>
+                <h2 class="mb-2 fs-6">Ventas cobradas por billetera virtual</h2>
+                <p class="mb-0 fs-3 fw-bold" th:text="${ventasBilletera}">0</p>
+                <span class="small text-secondary">ventas</span>
+              </div>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="card-header bg-transparent px-4 py-3">
+          <h2 class="h5 mb-0">Informaci&oacute;n general</h2>
+        </div>
+        <div class="card-body p-4">
+          <p class="text-secondary mb-4">Estado actual de los registros de la tienda.</p>
+          <div class="row text-center g-3">
+            <div class="col-12 col-md-4">
+              <p class="fs-2 fw-bold mb-1" th:text="${clientesActivos}">0</p>
+              <span class="text-secondary">Clientes activos</span>
+            </div>
+            <div class="col-12 col-md-4 border-start border-end">
+              <p class="fs-2 fw-bold mb-1" th:text="${proveedoresActivos}">0</p>
+              <span class="text-secondary">Proveedores activos</span>
+            </div>
+            <div class="col-12 col-md-4">
+              <p class="fs-2 fw-bold mb-1" th:text="${pedidosRegistrados}">0</p>
+              <span class="text-secondary">Pedidos registrados</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div class="row mt-4">
+        <div class="col-12">
+          <div th:replace="~{admin/fragments/fragments :: pageFooter}"></div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <th:block th:replace="~{admin/fragments/fragments :: scripts}"></th:block>
+</body>
+</html>

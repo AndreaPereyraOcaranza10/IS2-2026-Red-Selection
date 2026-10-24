@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Autores</title>
+    <link rel="stylesheet" th:href="@{/css/estilos.css}">
+</head>
+<body>
+<div th:replace="~{fragments/layout :: navbar}"></div>
+
+<main>
+    <h1>Autores</h1>
+
+    <div th:replace="~{fragments/layout :: alertas}"></div>
+
+    <form th:object="${nuevoAutor}" th:action="@{/autores}" method="post" class="formulario">
+        <fieldset>
+            <legend>Nuevo autor</legend>
+            <label>Nombre
+                <input type="text" th:field="*{nombre}" required>
+            </label>
+            <label>Apellido
+                <input type="text" th:field="*{apellido}" required>
+            </label>
+            <label>Biografía
+                <input type="text" th:field="*{biografia}" maxlength="1500">
+            </label>
+            <button type="submit">Agregar</button>
+        </fieldset>
+    </form>
+
+    <table>
+        <thead>
+        <tr><th>Nombre</th><th>Apellido</th><th>Biografía</th></tr>
+        </thead>
+        <tbody>
+        <tr th:each="a : ${autores}">
+            <td th:text="${a.nombre}"></td>
+            <td th:text="${a.apellido}"></td>
+            <td th:text="${a.biografia}"></td>
+        </tr>
+        <tr th:if="${#lists.isEmpty(autores)}">
+            <td colspan="3" class="vacio">No hay autores cargados.</td>
+        </tr>
+        </tbody>
+    </table>
+</main>
+</body>
+</html>

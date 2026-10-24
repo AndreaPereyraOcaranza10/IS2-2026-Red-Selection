@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+
+<head>
+  <title th:text="'Error 404 - Zero'">Error 404 - Zero</title>
+  <th:block th:replace="~{admin/fragments/fragments :: head-assets}"></th:block>
+</head>
+
+<body>
+
+<div class="container d-flex align-items-center justify-content-center min-vh-100">
+    <div class="" style="max-width: 500px; width: 100%;">
+        <div class="text-center">
+            <div class="mb-4">
+                <a th:href="@{/}" href="index.html" class="d-inline-block mb-4">
+                    <img th:src="@{/admin/images/logo-zero-black.png}" src="/admin/images/logo-zero-black.png"
+                         alt="Zero" width="120" height="120" style="object-fit: contain;">
+                </a>
+            </div>
+
+            <h1 class="display-1 fw-bold text-primary mb-2">404</h1>
+            <h2 class="card-title h4 mb-3">Página no encontrada</h2>
+            <p class="text-muted mb-4">La página que buscás no existe o fue movida.</p>
+
+            <a th:href="@{/admin}" href="index.html" class="btn btn-primary">Ir al panel principal</a>
+        </div>
+    </div>
+</div>
+
+  <th:block th:replace="~{admin/fragments/fragments :: scripts}"></th:block>
+
+
+</body>
+
+</html>

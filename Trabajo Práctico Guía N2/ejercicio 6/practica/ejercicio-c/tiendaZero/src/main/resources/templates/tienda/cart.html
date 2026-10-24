@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Mi carrito | Zero</title>
+    <th:block th:replace="~{tienda/fragments/fragments :: head-assets}"></th:block>
+</head>
+<body class="cart-page">
+<div th:replace="~{tienda/fragments/fragments :: header}"></div>
+
+<main class="cart-main">
+    <div class="cart-container">
+        <header class="cart-heading">
+            <div>
+                <span class="cart-eyebrow">TU SELECCI&Oacute;N ZERO</span>
+                <h1>Mi carrito</h1>
+                <p>Revis&aacute; tus productos antes de continuar con la compra.</p>
+            </div>
+            <a th:href="@{/shop}" class="cart-continue-link"><i class="fas fa-arrow-left"></i> Seguir explorando</a>
+        </header>
+
+        <p th:if="${mensajeExito}" class="cart-alert cart-alert--success" th:text="${mensajeExito}"></p>
+        <p th:if="${mensajeError}" class="cart-alert cart-alert--error" th:text="${mensajeError}"></p>
+
+        <section th:if="${cartItems != null and #lists.isEmpty(cartItems)}" class="cart-empty">
+            <span class="cart-empty__icon"><i class="fas fa-bag-shopping"></i></span>
+            <h2>Tu carrito est&aacute; vac&iacute;o</h2>
+            <p>Explor&aacute; la tienda y encontr&aacute; algo para vos.</p>
+            <a th:href="@{/shop}" class="cart-primary-link">Explorar productos</a>
+        </section>
+
+        <div th:if="${cartItems != null and !#lists.isEmpty(cartItems)}" class="cart-layout">
+            <section class="cart-products-panel">
+                <div class="cart-products-heading">
+                    <h2>Productos</h2>
+                    <span th:text="${#lists.size(cartItems)} + ' productos'">0 productos</span>
+                </div>
+
+                <article th:each="item : ${cartItems}" class="cart-product">
+                    <a th:href="@{'/product/' + ${item.id}}" class="cart-product__image-link">
+                        <img th:src="@{${item.imageUrl}}" th:alt="${item.name}" class="cart-product__image">
+                    </a>
+                    <div class="cart-product__info">
+                        <span class="cart-product__label">INDUMENTARIA ZERO</span>
+                        <a th:href="@{'/product/' + ${item.id}}" class="cart-product__name" th:text="${item.name}">Producto</a>
+                        <span class="cart-product__unit-price" th:text="${'$ ' + #numbers.formatDecimal(item.price, 1, 2)}">$ 0,00 c/u</span>
+                    </div>
+                    <div class="cart-quantity">
+                        <span class="cart-quantity__label">Cantidad</span>
+                        <div class="cart-quantity__control">
+                            <form th:action="@{'/cart/update/' + ${item.id}}" method="post">
+                                <button type="submit" name="quantity" th:value="${item.quantity - 1}" th:disabled="${item.quantity <= 1}" aria-label="Disminuir cantidad">&minus;</button>
+                            </form>
+                            <strong th:text="${item.quantity}">1</strong>
+                            <form th:action="@{'/cart/update/' + ${item.id}}" method="post">
+                                <button type="submit" name="quantity" th:value="${item.quantity + 1}" aria-label="Aumentar cantidad">+</button>
+                            </form>
+                        </div>
+                    </div>
+                    <div class="cart-product__line-total">
+                        <span>Importe</span>
+                        <strong th:text="${'$ ' + #numbers.formatDecimal(item.lineTotal, 1, 2)}">$ 0,00</strong>
+                    </div>
+                    <form th:action="@{'/cart/remove/' + ${item.id}}" method="post" class="cart-product__remove-form">
+                        <button type="submit" aria-label="Quitar producto" title="Quitar producto" class="cart-remove-button"><i class="fas fa-trash-can"></i></button>
+                    </form>
+                </article>
+
+                <form th:action="@{/cart/clear}" method="post" class="cart-clear-form">
+                    <button type="submit" class="cart-clear-button"><i class="far fa-trash-can"></i> Vaciar carrito</button>
+                </form>
+            </section>
+
+            <aside class="cart-summary">
+                <div class="cart-summary__heading">
+                    <span class="cart-summary__icon"><i class="fas fa-receipt"></i></span>
+                    <h2>Resumen de compra</h2>
+                </div>
+                <div class="cart-summary__lines">
+                    <div><span>Subtotal</span><strong th:text="${'$ ' + #numbers.formatDecimal(cartSubtotal, 1, 2)}">$ 0,00</strong></div>
+                    <div><span>Impuestos</span><strong th:text="${'$ ' + #numbers.formatDecimal(cartTaxes, 1, 2)}">$ 0,00</strong></div>
+                    <div><span>Env&iacute;o</span><strong th:text="${'$ ' + #numbers.formatDecimal(cartShipping, 1, 2)}">$ 0,00</strong></div>
+                </div>
+                <div class="cart-summary__total"><span>Total</span><strong th:text="${'$ ' + #numbers.formatDecimal(cartTotal, 1, 2)}">$ 0,00</strong></div>
+                <a th:href="@{/checkout}" class="cart-checkout-link"><i class="fas fa-lock"></i> Continuar con la compra</a>
+                <p class="cart-summary__secure"><i class="fas fa-shield-halved"></i> Compra segura. Revis&aacute; la direcci&oacute;n y el pago en el siguiente paso.</p>
+            </aside>
+        </div>
+    </div>
+</main>
+
+<div th:replace="~{tienda/fragments/fragments :: footer}"></div>
+<th:block th:replace="~{tienda/fragments/fragments :: scripts}"></th:block>
+</body>
+</html>

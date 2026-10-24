@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title th:text="${product != null ? product.name + ' | Zero' : 'Producto | Zero'}">Producto | Zero</title>
+    <th:block th:replace="~{tienda/fragments/fragments :: head-assets}"></th:block>
+</head>
+<body class="product-page">
+<div th:replace="~{tienda/fragments/fragments :: header}"></div>
+
+<main th:if="${product != null}" class="product-main">
+    <div class="product-container">
+        <nav class="product-breadcrumb" aria-label="Ruta de navegación">
+            <a th:href="@{/}">Inicio</a><i class="fas fa-chevron-right"></i>
+            <a th:href="@{/shop}">Tienda</a><i class="fas fa-chevron-right"></i>
+            <a th:href="@{/shop(categoria=${product.category})}" th:text="${product.category}">Categoría</a>
+            <i class="fas fa-chevron-right"></i><span th:text="${product.name}">Producto</span>
+        </nav>
+
+        <section class="product-hero">
+            <div class="product-gallery">
+                <div class="product-gallery__image-wrap">
+                    <span class="product-stock-badge" th:classappend="${product.inStock} ? 'product-stock-badge--available' : 'product-stock-badge--unavailable'">
+                        <i th:class="${product.inStock} ? 'fas fa-check' : 'fas fa-xmark'"></i>
+                        <span th:text="${product.inStock} ? 'Disponible' : 'Sin stock'">Disponible</span>
+                    </span>
+                    <img class="product-gallery__image" th:src="@{${product.mainImageUrl}}" th:alt="${product.name}">
+                </div>
+            </div>
+
+            <div class="product-information">
+                <div class="product-tags">
+                    <span class="product-tag" th:text="${product.category}">Categoría</span>
+                    <span class="product-tag product-tag--muted" th:if="${product.subcategory != null and !#strings.isEmpty(product.subcategory)}" th:text="${product.subcategory}">Subcategoría</span>
+                </div>
+
+                <h1 class="product-title" th:text="${product.name}">Nombre del producto</h1>
+                <p class="product-sku" th:if="${product.sku != null and !#strings.isEmpty(product.sku)}">Código de producto <strong th:text="${product.sku}">SKU</strong></p>
+
+                <div class="product-price-block">
+                    <span th:if="${product.oldPrice != null}" class="product-old-price" th:text="${'$ ' + #numbers.formatDecimal(product.oldPrice, 1, 2)}">$ 0,00</span>
+                    <strong class="product-price" th:text="${'$ ' + #numbers.formatDecimal(product.price, 1, 2)}">$ 0,00</strong>
+                    <span th:if="${product.oldPrice != null}" class="product-offer-label">Precio promocional</span>
+                </div>
+
+                <div class="product-facts">
+                    <div><span>Categoría</span><strong th:text="${product.category}">Categoría</strong></div>
+                    <div th:if="${product.subcategory != null and !#strings.isEmpty(product.subcategory)}"><span>Subcategoría</span><strong th:text="${product.subcategory}">Subcategoría</strong></div>
+                    <div th:if="${product.talle != null and product.talle != '-'}"><span>Talle</span><strong th:text="${product.talle}">Talle</strong></div>
+                    <div><span>Marca</span><strong th:text="${product.brand}">Zero</strong></div>
+                </div>
+
+                <form class="product-buy-form store-product-card__form" th:action="@{/cart/add}" method="post">
+                    <input type="hidden" name="productId" th:value="${product.id}">
+                    <label for="quantity">Cantidad</label>
+                    <div class="product-buy-row">
+                        <div class="product-quantity-control">
+                            <button id="decrease" type="button" aria-label="Disminuir cantidad" disabled>&minus;</button>
+                            <input id="quantity" name="quantity" type="number" value="1" min="1" readonly aria-label="Cantidad seleccionada">
+                            <button id="increase" type="button" aria-label="Aumentar cantidad" th:disabled="${!product.inStock}">+</button>
+                        </div>
+                        <button type="submit" class="product-add-button" th:disabled="${!product.inStock}"
+                                th:text="${product.inStock} ? 'Agregar al carrito' : 'Sin stock'"
+                                th:style="${!product.inStock} ? 'background-color: #64748b; border-color: #64748b; color: #ffffff;' : ''">
+                            Agregar al carrito
+                        </button>
+                    </div>
+                    <p class="product-cart-feedback" aria-live="polite"></p>
+                </form>
+
+                <div class="product-delivery-note"><i class="fas fa-truck-fast"></i><span>La dirección de entrega se confirma al finalizar la compra.</span></div>
+            </div>
+        </section>
+
+        <section class="product-description-panel" th:if="${product.description != null and !#strings.isEmpty(product.description)}">
+            <div class="product-description-panel__icon"><i class="fas fa-circle-info"></i></div>
+            <div><span class="product-section-eyebrow">DETALLES</span><h2>Acerca del producto</h2><p th:text="${product.description}">Descripción del producto.</p></div>
+        </section>
+
+        <section class="related-products" th:if="${relatedProducts != null and !#lists.isEmpty(relatedProducts)}">
+            <div class="related-products__heading"><div><span class="product-section-eyebrow">SELECCI&Oacute;N ZERO</span><h2>Seguí explorando</h2></div><a th:href="@{/shop}">Ver toda la tienda <i class="fas fa-arrow-right"></i></a></div>
+            <div class="related-products__grid">
+                <article th:each="relatedProduct : ${relatedProducts}" class="related-product-card">
+                    <div th:replace="~{tienda/fragments/fragments :: productCard(product=${relatedProduct})}"></div>
+                </article>
+            </div>
+        </section>
+    </div>
+</main>
+
+<main th:unless="${product != null}" class="product-not-found">
+    <div><span><i class="fas fa-box-open"></i></span><h1>Producto no disponible</h1><p>No encontramos este producto en la tienda.</p><a th:href="@{/shop}">Volver a la tienda</a></div>
+</main>
+
+<div th:replace="~{tienda/fragments/fragments :: footer}"></div>
+<th:block th:replace="~{tienda/fragments/fragments :: scripts}"></th:block>
+</body>
+</html>

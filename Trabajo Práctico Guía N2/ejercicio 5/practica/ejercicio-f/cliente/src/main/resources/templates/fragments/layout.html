@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Layout</title>
+</head>
+<body>
+<nav th:fragment="navbar" class="navbar">
+    <span class="marca">Red Selection</span>
+    <a th:href="@{/personas}">Personas</a>
+    <a th:href="@{/localidades}">Localidades</a>
+    <a th:href="@{/autores}">Autores</a>
+    <form th:action="@{/logout}" method="post" class="salir" th:if="${usuarioActual}">
+        <span class="usuario" th:text="${usuarioActual}"></span>
+        <button type="submit" class="secundario chico">Salir</button>
+    </form>
+</nav>
+
+<div th:fragment="alertas">
+    <div th:if="${mensaje}" class="alerta ok" th:text="${mensaje}"></div>
+    <div th:if="${error}" class="alerta error" th:text="${error}"></div>
+</div>
+</body>
+</html>
