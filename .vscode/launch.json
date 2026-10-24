@@ -3,6 +3,13 @@
     "configurations": [
         {
             "type": "java",
+            "name": "ServidorCarrito",
+            "request": "launch",
+            "mainClass": "ServidorCarrito",
+            "projectName": ""
+        },
+        {
+            "type": "java",
             "name": "TiendaZeroApplication",
             "request": "launch",
             "mainClass": "com.tienda.zero.TiendaZeroApplication",

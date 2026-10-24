@@ -1,0 +1,15 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Iniciar carrito con mapa",
+            "request": "launch",
+            "mainClass": "carrito.ServidorCarrito",
+            "cwd": "${workspaceFolder}",
+            "classPaths": ["${workspaceFolder}/backend/build"],
+            "preLaunchTask": "Compilar carrito",
+            "console": "integratedTerminal"
+        }
+    ]
+}
