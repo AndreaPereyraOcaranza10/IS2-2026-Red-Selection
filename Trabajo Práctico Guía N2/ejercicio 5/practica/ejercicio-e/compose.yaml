@@ -1,0 +1,16 @@
+services:
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.8.1
+    command: ["start-dev", "--import-realm"]
+    ports:
+      - "127.0.0.1:8081:8080"
+    environment:
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD:?Definir KEYCLOAK_ADMIN_PASSWORD}
+      OAUTH2_CLIENT_SECRET: ${OAUTH2_CLIENT_SECRET:?Definir OAUTH2_CLIENT_SECRET}
+    volumes:
+      - ./keycloak/mascotas-realm.json:/opt/keycloak/data/import/mascotas-realm.json:ro
+      - keycloak-data:/opt/keycloak/data
+
+volumes:
+  keycloak-data:

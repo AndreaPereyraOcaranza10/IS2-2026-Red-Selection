@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="es" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="">
+  <meta name="author" content="">
+
+  <title>Tinder de Mascota - Registro</title>
+
+  <!-- Bootstrap core CSS -->
+  <link href="/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+
+  <!-- Custom fonts for this template -->
+  <link href="https://fonts.googleapis.com/css?family=Catamaran:100,200,300,400,500,600,700,800,900" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css?family=Lato:100,100i,300,300i,400,400i,700,700i,900,900i" rel="stylesheet">
+
+  <!-- Custom styles for this template -->
+  <link href="/css/one-page-wonder.min.css" rel="stylesheet">
+
+</head>
+
+<body>
+
+  <!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-dark navbar-custom fixed-top">
+    <div class="container">
+      <a class="navbar-brand" href="/">Tinder de Mascota</a>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarResponsive">
+        <ul class="navbar-nav ml-auto">
+          <li class="nav-item">
+            <a class="nav-link" href="/registro">Registro</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/login">Log In</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/inicio">Inicio</a>
+          </li>  
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <header>
+      <h1 style="margin-top:80px; text-align: center;"> Mascotas De Baja</h1>
+  </header>
+
+  <section>
+    <div class="container">
+      <div class="row align-items-center">
+        <div class="col-lg-12 order-lg-12">
+            
+         <br/>
+            
+            <table class="table table-light table-hover">
+                <thead>
+                    <tr class="bg-black text-white">
+                        <th>Foto</th>
+                        <th>Nombre</th>
+                        <th>Sexo</th>
+                        <th>Tipo</th>
+                        <th>Acciones</th>
+                        
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="mascota : ${mascotas}">
+                        <td>
+                            <img th:if="${mascota.foto != null}" th:src="${'/foto/mascota/' + mascota.id}" alt="" style="max-height: 60px; border-radius: 100%">
+                            <img th:if="${mascota.foto == null}" src="/img/m1.jpeg" alt="" style="max-height: 60px; border-radius: 100%">
+                                
+                        </td>
+                        <td th:text="${mascota.nombre}"></td>
+                        <td th:text="${mascota.sexo}"></td>
+                        <td th:text="${mascota.tipo}"></td>
+                        
+                        <td>
+                           <a th:href="@{/mascota/editar-perfil(id=__${mascota.id}__,accion=Actualizar)}">Editar</a> -
+                           <a th:href="@{/mascota/editar-perfil(id=__${mascota.id}__,accion=Alta)}">Dar Alta</a>
+                        </td>
+                    </tr>                  
+                </tbody>
+                          
+            </table>
+            
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- Footer -->
+  <footer class="py-5 bg-black">
+    <div class="container">
+      <p class="m-0 text-center text-white small">Copyright &copy; Tinder de Mascotas - Sprint 2025</p>
+    </div>
+    <!-- /.container -->
+  </footer>
+
+  <!-- Bootstrap core JavaScript -->
+  <script src="/vendor/jquery/jquery.min.js"></script>
+  <script src="/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+</body>
+
+</html>
