@@ -1,0 +1,44 @@
+spring:
+  application:
+    name: CatalogueManagement
+
+  datasource:
+    url: jdbc:h2:mem:CatalogueManagement
+    driverClassName: org.h2.Driver
+    username: sa
+    password:
+
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    hibernate:
+      ddl-auto: update
+
+  h2:
+    console:
+      enabled: true
+
+  graphql:
+    schema:
+      locations: classpath:graphql/
+    path: /graphql
+
+otel:
+  #exporter
+  exporter:
+    otlp:
+      endpoint: http://localhost:4317
+      protocol: grpc
+
+  #disable logs only export traces and metrics
+  logs:
+    exporter: none
+
+  # Resource attributes (tags for the service)
+  resource:
+    attributes:
+      service.name: CatalogueManagement
+
+  # Traces configuration
+  traces:
+    sampler: always_on
+
