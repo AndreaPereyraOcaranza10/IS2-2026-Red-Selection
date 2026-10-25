@@ -1,0 +1,32 @@
+pipeline {
+    agent any
+
+    tools {
+        maven 'Maven'
+    }
+
+    stages {
+        stage('Compile & Test') {
+            steps {
+                // Compila y ejecuta los tests del equipo
+                sh 'mvn clean test'
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                // Construye la imagen usando el Dockerfile de tiendazero
+                sh 'docker build -t tiendazero:latest .'
+            }
+        }
+    }
+
+    post {
+        success {
+            echo '¡Pipeline exitoso! La imagen tiendazero:latest se generó correctamente.'
+        }
+        failure {
+            echo 'El pipeline falló durante las pruebas o el build.'
+        }
+    }
+}
