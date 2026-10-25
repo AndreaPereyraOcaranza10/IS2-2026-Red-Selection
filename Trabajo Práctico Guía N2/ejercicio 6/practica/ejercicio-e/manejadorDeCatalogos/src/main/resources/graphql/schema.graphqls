@@ -1,0 +1,63 @@
+
+"""
+Represents a book in the catalogue.
+"""
+type Book {
+    id: ID!
+    name: String!
+    isbnNumber: String!
+    publishDate: String!
+    price: Float!
+    bookType: BookType!
+}
+
+"""
+Supported types of books.
+"""
+enum BookType {
+    HARDCOVER
+    SOFTCOVER
+    EBOOK
+}
+
+type Query {
+    """
+    Get all books in the catalogue.
+    """
+    getAllBooks: [Book!]!
+
+    """
+    Get a specific book by ID.
+    """
+    getBookById(id: ID!): Book
+}
+
+type Mutation {
+    """
+    Add a new book.
+    """
+    addBook(
+        name: String!
+        isbnNumber: String!
+        publishDate: String!
+        price: Float!
+        bookType: BookType!
+    ): Book
+
+    """
+    Update an existing book by ID.
+    """
+    updateBook(
+        id: ID!
+        name: String
+        isbnNumber: String
+        publishDate: String
+        price: Float
+        bookType: BookType
+    ): Book
+
+    """
+    Delete a book by ID.
+    """
+    deleteBook(id: ID!): Boolean
+}
