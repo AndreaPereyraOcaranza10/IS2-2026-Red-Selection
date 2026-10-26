@@ -8,15 +8,17 @@ pipeline {
     stages {
         stage('Compile & Test') {
             steps {
-                // Compila y ejecuta los tests del equipo
-                sh 'mvn clean test'
+                dir('Trabajo Práctico Guía N2/ejercicio 6/practica/ejercicio-c/tiendaZero') {
+                    sh 'mvn clean test'
+                }
             }
         }
 
         stage('Build Docker Image') {
             steps {
-                // Construye la imagen usando el Dockerfile de tiendazero
-                sh 'docker build -t tiendazero:latest .'
+                dir('Trabajo Práctico Guía N2/ejercicio 6/practica/ejercicio-c/tiendaZero') {
+                    sh 'docker build -t tiendazero:latest .'
+                }
             }
         }
     }
