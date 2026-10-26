@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+  <title>Empresas</title>
+  <th:block th:replace="~{admin/fragments/fragments :: head-assets}"></th:block>
+</head>
+<body>
+<div th:replace="~{admin/fragments/fragments :: sidebarTopbar(activePage='empresas')}"></div>
+<main id="content" class="content py-10">
+  <div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center gap-3 mb-3">
+      <h1 class="mb-0">Empresas</h1>
+      <a th:href="@{/admin/empresas/nueva}" class="btn btn-primary d-inline-flex align-items-center gap-1">
+        <i class="ti ti-plus"></i> Nueva empresa
+      </a>
+    </div>
+
+    <div class="alert alert-success alert-dismissible fade show mb-4" role="alert" th:if="${mensajeExito != null}">
+      <i class="ti ti-check me-2 fs-5"></i>
+      <span th:text="${mensajeExito}">Operacion exitosa</span>
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+    </div>
+    <div class="alert alert-danger alert-dismissible fade show mb-4" role="alert" th:if="${mensajeError != null}">
+      <i class="ti ti-alert-circle me-2 fs-5"></i>
+      <span th:text="${mensajeError}">Ocurrio un error</span>
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+    </div>
+
+    <div class="card">
+      <div class="card-body">
+        <div class="table-responsive">
+          <table class="table table-striped align-middle">
+            <thead>
+            <tr>
+              <th>Razon social</th>
+              <th>CUIT</th>
+              <th>Tipo</th>
+              <th>Direccion</th>
+              <th>Contacto</th>
+              <th class="text-end">Acciones</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="empresa : ${empresas}">
+              <td class="fw-semibold" th:text="${empresa.razonSocial}">Zero SA</td>
+              <td th:text="${empresa.cuit}">30123456789</td>
+              <td th:text="${empresa.tipoEmpresa == T(com.tienda.zero.enums.TipoEmpresa).SEDE_CENTRAL ? 'Sede central' : 'Sucursal'}">Sede central</td>
+              <td>
+                <span th:text="|${empresa.direccion.calle} ${empresa.direccion.numeracion}|">Calle 123</span>
+                <small class="d-block text-muted" th:text="${empresa.direccion.localidad.nombre}">Localidad</small>
+              </td>
+              <td>
+                <span th:if="${empresa.contacto instanceof T(com.tienda.zero.model.ContactoCorreoElectronico)}"
+                      th:text="${empresa.contacto.email}">correo@empresa.com</span>
+                <span th:if="${empresa.contacto instanceof T(com.tienda.zero.model.ContactoTelefonico)}"
+                      th:text="${empresa.contacto.telefono}">261 555 0000</span>
+              </td>
+              <td class="text-end text-nowrap">
+                <a th:href="@{/admin/empresas/{id}/editar(id=${empresa.id})}"
+                   class="btn btn-sm btn-outline-primary" title="Editar empresa" aria-label="Editar empresa">
+                  <i class="ti ti-pencil"></i>
+                </a>
+                <form th:action="@{/admin/empresas/{id}/eliminar(id=${empresa.id})}" method="post"
+                      class="d-inline" onsubmit="return confirm('¿Eliminar esta empresa?');">
+                  <button type="submit" class="btn btn-sm btn-outline-danger" title="Eliminar empresa" aria-label="Eliminar empresa">
+                    <i class="ti ti-trash"></i>
+                  </button>
+                </form>
+              </td>
+            </tr>
+            <tr th:if="${empresas == null or #lists.isEmpty(empresas)}">
+              <td colspan="6" class="text-center py-4 text-muted">No hay empresas registradas</td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+<th:block th:replace="~{admin/fragments/fragments :: scripts}"></th:block>
+</body>
+</html>

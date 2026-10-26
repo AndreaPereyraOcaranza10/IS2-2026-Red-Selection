@@ -1,0 +1,147 @@
+<!doctype html>
+<!--
+    FRAGMENTOS THYMELEAF REUTILIZABLES — Zero
+    ===============================================================
+    Igual que en el otro template: acá vive una sola vez el topbar, el
+    sidebar, los favicons y el <script> final, que antes estaban
+    copiados y pegados en index.html, inventory.html, create-product.html,
+    reports.html y docs.html.
+
+    Uso desde cualquier página del dashboard:
+        <div th:replace="~{admin/fragments/fragments :: sidebarTopbar(activePage='inventory')}"></div>
+        ...
+        <div th:replace="~{admin/fragments/fragments :: pageFooter}"></div>
+        <th:block th:replace="~{admin/fragments/fragments :: scripts}"></th:block>
+        <th:block th:replace="~{admin/fragments/fragments :: head-assets}"></th:block>
+
+    "activePage" controla qué link del sidebar recibe la clase "active"
+    (en el HTML original ese "active" estaba pisado siempre en "Dashboard",
+    lo dejamos dinámico). Valores usados: 'dashboard', 'inventory',
+    'create-product', 'reports', 'docs'.
+
+    404-error.html NO usa estos fragments:
+    son páginas de layout "standalone" (sin topbar/sidebar) en el template
+    original, así que solo usan head-assets y scripts.
+-->
+<html xmlns:th="http://www.thymeleaf.org">
+<head><title>fragments</title></head>
+<body>
+
+<!-- ======================================================= -->
+<!-- FRAGMENT: head-assets                                    -->
+<!-- Favicons comunes a toda página.                          -->
+<!-- OJO: este template compila su CSS con Vite (SCSS ->      -->
+<!-- assets/css/*.css). En dev, main.js importa el .scss      -->
+<!-- directo; en producción hay que correr "npm run build" y  -->
+<!-- referenciar acá el .css ya compilado (ver README).        -->
+<!-- ======================================================= -->
+<th:block th:fragment="head-assets">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- Google Fonts Poppins -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Bootstrap 5.3 CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+    <!-- Tabler Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.47.0/tabler-icons.min.css">
+    <!-- Admin Dashboard Theme CSS -->
+    <link rel="stylesheet" th:href="@{/admin/css/theme.css}" href="/admin/css/theme.css">
+    <!-- Favicons -->
+    <link rel="apple-touch-icon" sizes="180x180" th:href="@{/assets/images/favicon_io/apple-touch-icon.png}" href="./assets/images/favicon_io/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" th:href="@{/assets/images/favicon_io/favicon-32x32.png}" href="./assets/images/favicon_io/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" th:href="@{/assets/images/favicon_io/favicon-16x16.png}" href="./assets/images/favicon_io/favicon-16x16.png">
+</th:block>
+
+<!-- ======================================================= -->
+<!-- FRAGMENT: sidebarTopbar(activePage)                      -->
+<!-- ======================================================= -->
+<th:block th:fragment="sidebarTopbar(activePage)">
+
+  <div id="overlay" class="overlay"></div>
+  <!-- TOPBAR -->
+  <nav id="topbar" class="navbar bg-white border-bottom fixed-top topbar px-3">
+    <button id="toggleBtn" class="d-none d-lg-inline-flex btn btn-light btn-icon btn-sm ">
+      <i class="ti ti-layout-sidebar-left-expand"></i>
+    </button>
+
+    <!-- MOBILE -->
+    <button id="mobileBtn" class="btn btn-light btn-icon btn-sm d-lg-none me-2">
+      <i class="ti ti-layout-sidebar-left-expand"></i>
+    </button>
+    <div class="ms-auto d-flex align-items-center gap-2">
+      <!-- Navbar nav -->
+      <ul class="list-unstyled d-flex align-items-center mb-0 gap-1">
+        <li>
+          <a th:href="@{/}" class="btn btn-outline-primary btn-sm d-inline-flex align-items-center gap-1">
+            <i class="ti ti-arrow-left"></i>
+            <span class="d-none d-sm-inline">Salir del panel</span>
+            <span class="d-sm-none">Inicio</span>
+          </a>
+        </li>
+        <!-- Pages link -->
+
+        <li class="ms-2 me-3 flex-shrink-0">
+          <a class="d-inline-flex" th:href="@{/admin/perfil}" href="/admin/perfil" aria-label="Modificar datos personales">
+            <img th:src="${currentUser != null ? currentUser.avatarUrl : '/assets/images/avatar/avatar-1.jpg'}" src="./assets/images/avatar/avatar-1.jpg" alt="" class="avatar avatar-sm rounded-circle" />
+          </a>
+        </li>
+      </ul>
+    </div>
+
+  </nav>
+
+  <!-- SIDEBAR -->
+  <aside id="sidebar" class="sidebar">
+    <div class="logo-area">
+      <a th:href="@{/}" href="index.html" class="d-inline-flex align-items-center" aria-label="Ir a Zero">
+        <img th:src="@{/admin/images/logo-zero-black.png}" src="/admin/images/logo-zero-black.png"
+          alt="Zero" class="admin-brand-logo">
+      </a>
+    </div>
+    <ul class="nav flex-column">
+      <li class="px-4 py-2"><small class="nav-text">Principal</small></li>
+      <li><a class="nav-link" th:classappend="${activePage == 'dashboard'} ? 'active'" th:href="@{/admin}" href="index.html"><i class="ti ti-home"></i><span
+            class="nav-text">Panel principal</span></a></li>
+      <li><a class="nav-link" th:classappend="${activePage == 'inventory'} ? 'active'" th:href="@{/inventory}" href="inventory.html"><i class="ti ti-box-seam"></i><span
+            class="nav-text">Inventario</span></a></li>
+      <li><a class="nav-link" th:classappend="${activePage == 'create-product'} ? 'active'" th:href="@{/products/new}" href="create-product.html"><i class="ti ti-plus"></i><span class="nav-text">Agregar producto</span></a></li>
+      <li><a class="nav-link" th:classappend="${activePage == 'ordenes'} ? 'active'" th:href="@{/admin/ordenes}"><i class="ti ti-truck"></i><span class="nav-text">Órdenes de compra</span></a></li>
+      <li><a class="nav-link" th:classappend="${activePage == 'facturas'} ? 'active'" th:href="@{/admin/facturas}"><i class="ti ti-receipt-2"></i><span class="nav-text">Facturas</span></a></li>
+      <li><a class="nav-link" th:classappend="${activePage == 'proveedores'} ? 'active'" th:href="@{/admin/proveedores}"><i class="ti ti-building-store"></i><span class="nav-text">Proveedores</span></a></li>
+      <li><a class="nav-link" th:classappend="${activePage == 'empresas'} ? 'active'" th:href="@{/admin/empresas}"><i class="ti ti-building"></i><span class="nav-text">Empresas</span></a></li>
+      <li><a class="nav-link" th:classappend="${activePage == 'empleados'} ? 'active'" th:href="@{/admin/empleados}"><i class="ti ti-users"></i><span class="nav-text">Empleados</span></a></li>
+    <li><a class="nav-link" th:classappend="${activePage == 'reports'} ? 'active'" th:href="@{/reports}" href="reports.html"><i class="ti ti-receipt"></i><span class="nav-text">Reportes</span></a>
+      </li>
+    </ul>
+
+  </aside>
+
+</th:block>
+
+<!-- ======================================================= -->
+<!-- FRAGMENT: pageFooter                                     -->
+<!-- Pie de página (copyright) repetido dentro del <main> de  -->
+<!-- cada página del dashboard.                                -->
+<!-- ======================================================= -->
+<th:block th:fragment="pageFooter">
+  <footer class="text-center py-2 mt-6 text-secondary ">
+    <p class="mb-0">Copyright © <span th:text="${#calendars.format(#calendars.createNow(),'yyyy')} ?: '2026'">2026</span> Zero. Panel de administración.</p>
+  </footer>
+</th:block>
+
+<!-- ======================================================= -->
+<!-- FRAGMENT: scripts                                        -->
+<!-- ======================================================= -->
+<th:block th:fragment="scripts">
+    <!-- Bootstrap 5.3 Bundle JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- ApexCharts -->
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    <!-- Sidebar Toggle Script -->
+    <script th:src="@{/admin/js/sidebar.js}" src="/admin/js/sidebar.js"></script>
+</th:block>
+
+</body>
+</html>

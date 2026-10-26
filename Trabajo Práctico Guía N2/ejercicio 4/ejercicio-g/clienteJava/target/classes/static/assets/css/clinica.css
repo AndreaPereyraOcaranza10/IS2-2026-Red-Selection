@@ -1,0 +1,179 @@
+/* ============================================================
+   Estilos propios del consultorio (se cargan después de main.css)
+   ============================================================ */
+
+:root {
+    --clinica-radius: 14px;
+    --clinica-sombra: 0 6px 24px rgba(17, 35, 68, 0.08);
+    --clinica-borde: #e3eaf6;
+    --clinica-fondo: #f4f8ff;
+}
+
+/* ---------- Fondo general de las páginas internas ---------- */
+body.starter-page-page {
+    background-color: var(--clinica-fondo);
+}
+
+main .section {
+    padding-top: 40px;
+    padding-bottom: 60px;
+}
+
+/* ---------- Botones ---------- */
+.btn {
+    border-radius: 10px;
+    font-weight: 500;
+    padding: 0.5rem 1rem;
+    transition: transform .15s ease, box-shadow .15s ease, background-color .15s ease;
+}
+.btn-sm {
+    padding: 0.3rem 0.7rem;
+    border-radius: 8px;
+}
+.btn:hover {
+    transform: translateY(-1px);
+}
+.btn-primary {
+    --bs-btn-bg: var(--accent-color);
+    --bs-btn-border-color: var(--accent-color);
+    --bs-btn-hover-bg: #1249b3;
+    --bs-btn-hover-border-color: #1249b3;
+    --bs-btn-active-bg: #0f3d96;
+    --bs-btn-active-border-color: #0f3d96;
+    box-shadow: 0 4px 12px rgba(23, 92, 221, 0.25);
+}
+.btn-outline-primary {
+    --bs-btn-color: var(--accent-color);
+    --bs-btn-border-color: var(--accent-color);
+    --bs-btn-hover-bg: var(--accent-color);
+    --bs-btn-hover-border-color: var(--accent-color);
+}
+
+/* ---------- Tablas dentro de una "tarjeta" ---------- */
+.table-responsive {
+    background: #fff;
+    border-radius: var(--clinica-radius);
+    box-shadow: var(--clinica-sombra);
+    border: 1px solid var(--clinica-borde);
+    overflow: hidden;
+}
+.table-responsive .table {
+    margin-bottom: 0;
+}
+.table > thead.table-light th {
+    background: #eaf1ff;
+    color: var(--heading-color);
+    font-family: var(--heading-font);
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    border-bottom: 1px solid var(--clinica-borde);
+    padding: 0.9rem 1rem;
+}
+.table > tbody > tr > td {
+    padding: 0.85rem 1rem;
+    border-color: #eef2fa;
+}
+.table-hover > tbody > tr:hover > * {
+    background-color: #f7faff;
+}
+.table td img.rounded-circle {
+    border: 2px solid #fff;
+    box-shadow: 0 2px 8px rgba(17, 35, 68, 0.18);
+}
+
+/* ---------- Formularios (los que están directamente en la página) ---------- */
+main .section > .container > form {
+    background: #fff;
+    border: 1px solid var(--clinica-borde);
+    border-radius: var(--clinica-radius);
+    box-shadow: var(--clinica-sombra);
+    padding: 2rem;
+}
+.form-label {
+    font-weight: 500;
+    color: var(--heading-color);
+    margin-bottom: .35rem;
+}
+.form-control,
+.form-select {
+    border-radius: 10px;
+    border: 1px solid #d3deef;
+    padding: 0.6rem 0.85rem;
+}
+.form-control:focus,
+.form-select:focus {
+    border-color: var(--accent-color);
+    box-shadow: 0 0 0 .2rem rgba(23, 92, 221, 0.15);
+}
+
+/* ---------- Tarjetas ---------- */
+.card {
+    border: 1px solid var(--clinica-borde);
+    border-radius: var(--clinica-radius);
+    box-shadow: var(--clinica-sombra);
+}
+.card-header {
+    background: #eaf1ff;
+    color: var(--heading-color);
+    font-family: var(--heading-font);
+    font-weight: 600;
+    border-bottom: 1px solid var(--clinica-borde);
+    border-radius: var(--clinica-radius) var(--clinica-radius) 0 0 !important;
+}
+
+/* Tarjetas de la página de inicio (son enlaces) */
+a.card {
+    color: var(--heading-color);
+    transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+}
+a.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 14px 32px rgba(23, 92, 221, 0.18);
+    border-color: var(--accent-color);
+}
+a.card .bi {
+    color: var(--accent-color);
+}
+
+/* ---------- Avisos ---------- */
+.alert {
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 4px 14px rgba(17, 35, 68, 0.08);
+}
+.alert-success { border-left: 5px solid #198754; }
+.alert-danger  { border-left: 5px solid #dc3545; }
+
+/* ---------- Insignias ---------- */
+.badge {
+    font-weight: 500;
+    padding: .45em .75em;
+    border-radius: 20px;
+}
+
+/* ---------- Encabezado de página ---------- */
+.page-title .heading h1 {
+    letter-spacing: .01em;
+}
+
+/* ---------- Detalle de historia: separar los títulos de sección ---------- */
+main h5.mb-3 {
+    font-family: var(--heading-font);
+    color: var(--heading-color);
+    font-weight: 600;
+}
+
+/* ---------- Pantallas chicas ---------- */
+@media (max-width: 576px) {
+    main .section > .container > form {
+        padding: 1.25rem;
+    }
+}
+
+.logo-icono {
+    font-size: 1.9rem;
+    color: var(--accent-color);
+    line-height: 1;
+}

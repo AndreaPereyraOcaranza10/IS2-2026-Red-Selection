@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Médico')}"></head>
+<body class="starter-page-page">
+<header th:replace="~{fragments/layout :: header('medicos')}"></header>
+
+<main class="main">
+    <div th:replace="~{fragments/layout :: encabezado('Médico', 'Completá los datos del médico')}"></div>
+
+    <section class="section">
+        <div class="container" style="max-width:640px">
+            <form th:action="@{/medicos/guardar}" th:object="${medico}" method="post">
+                <input type="hidden" th:field="*{id}">
+                <div class="mb-3">
+                    <label class="form-label">Nombre</label>
+                    <input type="text" class="form-control" th:field="*{nombre}" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Apellido</label>
+                    <input type="text" class="form-control" th:field="*{apellido}" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Documento</label>
+                    <input type="text" class="form-control" th:field="*{documento}" required>
+                </div>
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary">Guardar</button>
+                    <a th:href="@{/medicos}" class="btn btn-outline-secondary">Cancelar</a>
+                </div>
+            </form>
+        </div>
+    </section>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+</body>
+</html>

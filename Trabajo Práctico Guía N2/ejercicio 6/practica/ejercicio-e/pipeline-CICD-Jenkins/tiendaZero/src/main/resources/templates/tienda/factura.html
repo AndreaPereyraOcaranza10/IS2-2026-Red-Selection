@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title th:text="${'Factura ' + factura.numeroFactura + ' | Zero'}">Factura | Zero</title>
+    <th:block th:if="${!administrador}" th:insert="~{tienda/fragments/fragments :: head-assets}"></th:block>
+    <th:block th:if="${administrador}" th:insert="~{admin/fragments/fragments :: head-assets}"></th:block>
+    <link rel="stylesheet" th:href="@{/assets/css/factura.css}">
+</head>
+<body>
+<th:block th:if="${!administrador}" th:insert="~{tienda/fragments/fragments :: header}"></th:block>
+<th:block th:if="${administrador}" th:insert="~{admin/fragments/fragments :: sidebarTopbar(activePage='facturas')}"></th:block>
+<main th:class="${administrador ? 'content factura-main' : 'factura-main'}" id="content">
+    <div class="factura-toolbar">
+        <a th:href="${administrador ? '/admin/facturas' : '/orders'}">Volver a <span th:text="${administrador ? 'Facturas' : 'Mis pedidos'}"></span></a>
+        <button type="button" onclick="window.print()" title="Imprimir factura" aria-label="Imprimir factura"><i th:class="${administrador ? 'ti ti-printer' : 'fas fa-print'}" aria-hidden="true"></i> Imprimir</button>
+    </div>
+    <p class="factura-error" th:if="${mensajeError}" th:text="${mensajeError}"></p>
+    <article class="factura-sheet">
+        <header class="factura-heading">
+            <div><strong class="factura-brand">ZERO</strong><h1>Factura de compra</h1></div>
+            <div class="factura-number"><span>N&uacute;mero de factura</span><strong th:text="${#numbers.formatInteger(factura.numeroFactura, 8)}"></strong><span th:text="${#dates.format(factura.fechaFactura, 'dd/MM/yyyy')}"></span></div>
+        </header>
+        <section class="factura-data">
+            <div><h2>Cliente</h2><strong th:text="${factura.nombreCliente + ' ' + factura.apellidoCliente}"></strong>
+                <p th:if="${!#strings.isEmpty(factura.documentoCliente)}" th:text="${'Documento: ' + factura.documentoCliente}"></p>
+                <p th:text="${factura.domicilioCliente}"></p><p th:text="${factura.correoCliente}"></p>
+            </div>
+            <div><h2>Orden de compra</h2><p class="factura-reference" th:text="${factura.ordenCompra.identificadorCompra}"></p>
+                <p th:text="${'Forma de pago: ' + #strings.replace(factura.formaDePago.tipoPago.name(), '_', ' ')}"></p>
+                <strong th:switch="${factura.estado.name()}"><span th:case="'PAGADA'">Pagada</span><span th:case="'ANULADA'">Anulada</span><span th:case="*">Pendiente de pago</span></strong>
+            </div>
+        </section>
+        <div class="factura-table-wrapper">
+            <table class="factura-table"><thead><tr><th>Producto</th><th>Cantidad</th><th>Precio unitario</th><th>Subtotal</th></tr></thead>
+                <tbody><tr th:each="detalle : ${factura.detalles}" th:if="${!detalle.eliminado}">
+                    <td><strong th:text="${detalle.nombreProducto}"></strong><small th:text="${detalle.codigoProducto}"></small></td>
+                    <td th:text="${detalle.cantidad}"></td>
+                    <td th:text="${'$ ' + #numbers.formatDecimal(detalle.subtotal / detalle.cantidad, 1, 2)}"></td>
+                    <td th:text="${'$ ' + #numbers.formatDecimal(detalle.subtotal, 1, 2)}"></td>
+                </tr></tbody>
+            </table>
+        </div>
+        <footer class="factura-total"><span>Total ARS</span><strong th:text="${'$ ' + #numbers.formatDecimal(factura.totalPagado, 1, 2)}"></strong></footer>
+    </article>
+    <form class="factura-payment" th:if="${!administrador and factura.estado.name() == 'SIN_DEFINIR' and factura.ordenCompra.estadoOrdenCompra.name() == 'PENDIENTE_PAGO' and factura.ordenCompra.formaPago.name() == 'BILLETERA_VIRTUAL'}" th:action="@{/orders/{id}/pay(id=${factura.ordenCompra.id})}" method="post">
+        <button type="submit">Continuar al pago</button>
+    </form>
+</main>
+<th:block th:if="${!administrador}" th:insert="~{tienda/fragments/fragments :: footer}"></th:block>
+<th:block th:if="${!administrador}" th:insert="~{tienda/fragments/fragments :: scripts}"></th:block>
+<th:block th:if="${administrador}" th:insert="~{admin/fragments/fragments :: scripts}"></th:block>
+</body>
+</html>
