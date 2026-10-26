@@ -6,10 +6,11 @@ pipeline {
     }
 
     stages {
-        stage('Compile & Test') {
+        stage('Compile & Package') {
             steps {
                 dir('Trabajo Práctico Guía N2/ejercicio 6/practica/ejercicio-c/tiendaZero') {
-                    sh 'mvn clean test'
+                    // Empaqueta el proyecto omitiendo los tests que requieren BD externa
+                    sh 'mvn clean package -DskipTests'
                 }
             }
         }
@@ -28,7 +29,7 @@ pipeline {
             echo '¡Pipeline exitoso! La imagen tiendazero:latest se generó correctamente.'
         }
         failure {
-            echo 'El pipeline falló durante las pruebas o el build.'
+            echo 'El pipeline falló durante el empaquetado o la creación de la imagen.'
         }
     }
 }
