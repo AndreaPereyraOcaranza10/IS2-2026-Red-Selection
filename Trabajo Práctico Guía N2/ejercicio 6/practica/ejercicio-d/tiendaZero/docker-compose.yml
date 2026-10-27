@@ -1,0 +1,44 @@
+services:
+  tienda_zero_db:
+    image: mysql:8.4
+    container_name: tienda_zero_db
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: tienda_zero
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?Definí MYSQL_ROOT_PASSWORD en .env}
+    volumes:
+      - tienda_zero_data_v2:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-p$${MYSQL_ROOT_PASSWORD}"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
+    # No se publica MySQL al exterior; la aplicación accede por la red interna de Compose.
+
+  tienda_zero_app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: tienda_zero_app
+    restart: unless-stopped
+    depends_on:
+      tienda_zero_db:
+        condition: service_healthy
+    ports:
+      - "${APP_PORT:-8080}:8080"
+    environment:
+      DB_URL: "jdbc:mysql://tienda_zero_db:3306/tienda_zero?createDatabaseIfNotExist=true&allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=America/Argentina/Mendoza"
+      DB_USERNAME: root
+      DB_PASSWORD: ${MYSQL_ROOT_PASSWORD:?Definí MYSQL_ROOT_PASSWORD en .env}
+      MAIL_PASSWORD: ${MAIL_PASSWORD:-}
+      MERCADOPAGO_ACCESS_TOKEN: ${MERCADOPAGO_ACCESS_TOKEN:-}
+      MERCADOPAGO_BASE_URL: ${MERCADOPAGO_BASE_URL:-http://localhost:8080}
+      MERCADOPAGO_WEBHOOK_URL: ${MERCADOPAGO_WEBHOOK_URL:-}
+      MERCADOPAGO_WEBHOOK_SECRET: ${MERCADOPAGO_WEBHOOK_SECRET:-}
+      APP_ACTIVACION_URL: ${APP_ACTIVACION_URL:-http://localhost:8080/activar-cuenta}
+      APP_TIENDA_URL: ${APP_TIENDA_URL:-http://localhost:8080}
+    mem_limit: 768m
+
+volumes:
+  tienda_zero_data_v2:

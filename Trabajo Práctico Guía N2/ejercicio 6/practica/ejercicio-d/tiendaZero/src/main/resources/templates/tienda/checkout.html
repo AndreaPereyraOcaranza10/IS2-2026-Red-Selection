@@ -1,0 +1,41 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Confirmar compra - Zero</title>
+    <th:block th:replace="~{tienda/fragments/fragments :: head-assets}"></th:block>
+</head>
+<body>
+<div th:replace="~{tienda/fragments/fragments :: header}"></div>
+<section class="bg-white py-16">
+    <div class="container mx-auto px-4 max-w-3xl">
+        <h1 class="text-2xl font-semibold mb-6">Confirmar compra</h1>
+        <p th:if="${mensajeError}" class="text-red-600 mb-4" th:text="${mensajeError}"></p>
+        <p th:if="${cart != null and #lists.isEmpty(cart.items)}" class="mb-4">El carrito esta vacio.</p>
+        <form th:if="${cart != null and !#lists.isEmpty(cart.items)}" th:action="@{/checkout}" method="post" class="bg-white rounded-lg shadow-md p-6">
+            <h2 class="text-lg font-semibold mb-3">Resumen</h2>
+            <div th:each="item : ${cart.items}" class="flex justify-between border-b py-2">
+                <span><span th:text="${item.nombre}">Producto</span> x <span th:text="${item.cantidad}">1</span></span>
+                <span th:text="${'$' + item.subtotal}">$0.00</span>
+            </div>
+            <p class="font-semibold text-right mt-4">Total: <span th:text="${'$' + cart.total}">$0.00</span></p>
+            <label for="address" class="block mt-6 mb-2">Direccion de entrega</label>
+            <input id="address" name="address" required maxlength="250" class="w-full px-3 py-2 border rounded" placeholder="Calle, numero, localidad">
+            <label for="formaPago" class="block mt-6 mb-2">Forma de pago</label>
+            <select id="formaPago" name="formaPago" required class="w-full px-3 py-2 border rounded bg-white">
+                <option value="">Seleccionar forma de pago</option>
+                <option th:each="forma : ${formasPago}"
+                        th:value="${forma}"
+                        th:text="${checkoutCliente ? 'Mercado Pago' : forma}">EFECTIVO</option>
+            </select>
+            <p th:if="${checkoutCliente}" class="mt-2 text-sm text-gray-600">Los clientes solo pueden pagar con billetera virtual. Efectivo y transferencia deben ser cobrados por un empleado.</p>
+            <p th:if="${checkoutCliente}" class="mt-4 text-sm text-gray-600">Al confirmar, se crea la orden y serás redirigido a Mercado Pago para completar el pago de forma segura.</p>
+            <p th:unless="${checkoutCliente}" class="mt-4 text-sm text-gray-600">Si elegís Mercado Pago, la orden se creará como pendiente de pago y serás redirigido al checkout de Mercado Pago.</p>
+            <button type="submit" class="bg-primary text-white py-2 px-5 rounded-full mt-6">Continuar al pago</button>
+        </form>
+        <a th:href="@{/cart}" class="inline-block mt-4">Volver al carrito</a>
+    </div>
+</section>
+<div th:replace="~{tienda/fragments/fragments :: footer}"></div>
+<th:block th:replace="~{tienda/fragments/fragments :: scripts}"></th:block>
+</body>
+</html>
