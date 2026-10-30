@@ -1,0 +1,20 @@
+{$SITE_ADDRESS} {
+    encode zstd gzip
+    header {
+        X-Content-Type-Options nosniff
+        X-Frame-Options DENY
+        Referrer-Policy no-referrer
+        Permissions-Policy "camera=(), microphone=(), geolocation=()"
+        -Server
+    }
+    @backend path /api/* /oauth2/* /login/oauth2/* /swagger-ui/* /v3/api-docs* /actuator/health
+    handle @backend {
+        reverse_proxy backend:8080
+    }
+    handle {
+        root * /srv
+        try_files {path} /index.html
+        header Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
+        file_server
+    }
+}

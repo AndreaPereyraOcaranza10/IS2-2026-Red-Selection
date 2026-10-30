@@ -1,0 +1,15 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:atlas;MODE=PostgreSQL;DB_CLOSE_DELAY=-1
+    username: sa
+    password: ""
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+  flyway:
+    enabled: false
+app:
+  jwt-secret: test-only-0123456789012345678901234567890123456789
+  frontend-url: http://localhost:5173
+  google-client-id: ""
+  google-client-secret: ""

@@ -1,0 +1,30 @@
+{
+  "name": "atlas-abm",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 0.0.0.0",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview --host 0.0.0.0"
+  },
+  "dependencies": {
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1",
+    "react-router-dom": "^7.9.3",
+    "axios": "^1.12.2",
+    "react-hook-form": "^7.63.0",
+    "zod": "^4.1.11",
+    "@hookform/resolvers": "^5.2.2",
+    "lucide-react": "^0.544.0"
+  },
+  "devDependencies": {
+    "typescript": "~5.9.2",
+    "vite": "^7.1.7",
+    "@vitejs/plugin-react": "^5.0.3",
+    "@types/react": "^19.1.16",
+    "@types/react-dom": "^19.1.9",
+    "tailwindcss": "^4.1.13",
+    "@tailwindcss/vite": "^4.1.13"
+  }
+}

@@ -1,0 +1,10 @@
+.tools/
+**/target/
+**/node_modules/
+**/dist/
+**/__pycache__/
+.env
+*.log
+.idea/
+.vscode/
+*.tsbuildinfo
