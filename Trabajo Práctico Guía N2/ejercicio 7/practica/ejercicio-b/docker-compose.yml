@@ -1,0 +1,217 @@
+services:
+  mongodb:
+    image: mongo
+    container_name: mongo_db
+    ports:
+      - "${MONGO_DB_PORT}:27017"
+    volumes:
+      - mongo:/data/db
+    restart: always
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=${MONGO_DB_USERNAME}
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_DB_PASSWORD}
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--username", "${MONGO_DB_USERNAME}", "--password", "${MONGO_DB_PASSWORD}", "--authenticationDatabase", "admin", "--eval", "db.adminCommand('ping').ok"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+    networks:
+      - microservices
+  postgresql:
+    container_name: postgresql_db
+    image: postgres
+    restart: always
+    environment:
+      - POSTGRES_USER=${POSTGRESQL_DB_USERNAME}
+      - POSTGRES_PASSWORD=${POSTGRESQL_DB_PASSWORD}
+      - POSTGRES_DB=${PRODUCT_DB_NAME}
+      - PGDATA=/data/postgres
+    volumes:
+      - postgres:/data/postgres
+    ports:
+      - "${POSTGRESQL_DB_PORT}:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRESQL_DB_USERNAME} -d ${PRODUCT_DB_NAME}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    networks:
+      - microservices
+
+  config-server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        APP_MODULE: config-server
+        APP_PORT: 8888
+    container_name: config-server
+    ports:
+      - "${CONFIG_SERVER_PORT}:8888"
+
+    networks:
+      - microservices
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8888/actuator/health"]
+      interval: 20s
+      timeout: 3s
+      retries: 5
+      start_period: 20s
+    restart: on-failure
+  
+  discovery-server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        APP_MODULE: discovery-server
+        APP_PORT: 8761
+    container_name: discovery-server
+    depends_on:
+      config-server:
+        condition: service_healthy
+    ports:
+      - "${EUREKA_SERVER_PORT}:8761"
+    environment:
+      - SPRING_CONFIG_IMPORT=configserver:http://config-server:${CONFIG_SERVER_PORT}
+    networks:
+      - microservices
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8761/actuator/health"]
+      interval: 20s
+      timeout: 3s
+      retries: 5
+      start_period: 30s
+    restart: on-failure
+
+  customer-microservice:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        APP_MODULE: microservices/customer-microservice
+        APP_PORT: 8091
+    container_name: customer-microservice
+    depends_on:
+      config-server:
+        condition: service_healthy
+      discovery-server:
+        condition: service_healthy
+      mongodb:
+        condition: service_healthy
+    ports:
+      - "${CUSTOMER_MICROSERVICE_PORT}:8091"
+    environment:
+      - SPRING_CONFIG_IMPORT=configserver:http://config-server:${CONFIG_SERVER_PORT}
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery-server:${EUREKA_SERVER_PORT}/eureka/
+      - SPRING_MONGODB_URI=mongodb://${MONGO_DB_USERNAME}:${MONGO_DB_PASSWORD}@mongodb:${MONGO_DB_PORT}/${CUSTOMER_DB_NAME}?authSource=admin
+    networks:
+      - microservices
+
+  product-microservice:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        APP_MODULE: microservices/product-microservice
+        APP_PORT: 8092
+    container_name: product-microservice
+    depends_on:
+      config-server:
+        condition: service_healthy
+      discovery-server:
+        condition: service_healthy
+      postgresql:
+        condition: service_healthy
+    ports:
+      - "${PRODUCT_MICROSERVICE_PORT}:8092"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgresql:${POSTGRESQL_DB_PORT}/${PRODUCT_DB_NAME}
+      - SPRING_DATASOURCE_USERNAME=${POSTGRESQL_DB_USERNAME}
+      - SPRING_DATASOURCE_PASSWORD=${POSTGRESQL_DB_PASSWORD}
+      - SPRING_CONFIG_IMPORT=configserver:http://config-server:${CONFIG_SERVER_PORT}
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery-server:${EUREKA_SERVER_PORT}/eureka/
+    networks:
+      - microservices
+
+  cart-microservice:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        APP_MODULE: microservices/cart-microservice
+        APP_PORT: 8093
+    container_name: cart-microservice
+    depends_on:
+      config-server:
+        condition: service_healthy
+      discovery-server:
+        condition: service_healthy
+      mongodb:
+        condition: service_healthy
+    ports:
+      - "${CART_MICROSERVICE_PORT}:8093"
+    volumes:
+      - ./microservices/cart-microservice/logs:/app/logs
+    environment:
+      - SPRING_MONGODB_URI=mongodb://${MONGO_DB_USERNAME}:${MONGO_DB_PASSWORD}@mongodb:${MONGO_DB_PORT}/${CART_DB_NAME}?authSource=admin
+      - SPRING_CONFIG_IMPORT=configserver:http://config-server:${CONFIG_SERVER_PORT}
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery-server:${EUREKA_SERVER_PORT}/eureka/ 
+    networks:
+      - microservices
+
+  api-gateway:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        APP_MODULE: api-gateway
+        APP_PORT: 8222
+    container_name: api-gateway
+    depends_on:
+      config-server:
+        condition: service_healthy
+      discovery-server:
+        condition: service_healthy
+    ports:
+      - "${API_GATEWAY_PORT}:8222"
+    environment:
+      - SPRING_CONFIG_IMPORT=configserver:http://config-server:${CONFIG_SERVER_PORT}
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery-server:${EUREKA_SERVER_PORT}/eureka/
+    networks:
+      - microservices
+
+  prometheus:
+    image: prom/prometheus:v3.5.0
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - "${PROMETHEUS_PORT}:9090"
+    networks:
+      - microservices
+
+  grafana:
+    image: grafana/grafana:12.2.0
+    ports:
+      - "${GRAFANA_PORT}:3000"
+    volumes:
+      - grafana-data:/var/lib/grafana
+    environment:
+      - GF_SECURITY_ADMIN_USER=${GRAFANA_ADMIN_USER}
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD}
+    depends_on:
+      - prometheus
+    networks:
+      - microservices
+
+volumes:
+  mongo:
+  postgres:
+  grafana-data:
+
+
+networks:
+  microservices:
+    driver: bridge

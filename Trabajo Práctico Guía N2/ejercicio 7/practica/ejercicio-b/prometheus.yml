@@ -1,0 +1,14 @@
+global:
+  scrape_interval: 15s
+
+scrape_configs:
+  - job_name: 'ecommerce-microservices'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets:
+          - 'config-server:8888'
+          - 'discovery-server:8761'
+          - 'customer-microservice:8091'
+          - 'product-microservice:8092'
+          - 'cart-microservice:8093'
+          - 'api-gateway:8222'

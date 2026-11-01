@@ -1,0 +1,63 @@
+spring:
+  cloud:
+    gateway:
+      server:
+        webflux:
+          routes:
+            - id: customer-microservice
+              uri: lb://customer-microservice
+              predicates:
+                - Path=/api/v1/customers/**
+              filters:
+                - PreserveHostHeader
+                - RewritePath=/api/v1/customers/v3/api-docs, /v3/api-docs    
+            - id: product-microservice
+              uri: lb://product-microservice
+              predicates:
+                - Path=/api/v1/products/**
+              filters:
+                - PreserveHostHeader
+                - RewritePath=/api/v1/products/v3/api-docs, /v3/api-docs
+            - id: cart-microservice
+              uri: lb://cart-microservice
+              predicates:
+                - Path=/api/v1/*/cart/**
+              filters:
+                - PreserveHostHeader
+                - RewritePath=/api/v1/(?<customerId>[^/]+)/cart/v3/api-docs, /v3/api-docs
+
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_CLIENT_SERVICEURL_DEFAULTZONE:http://localhost:8761/eureka/}
+
+logging:
+  level:
+    root: DEBUG
+    org.springframework.cloud.gateway: TRACE
+    org.springframework.http.server.reactive: DEBUG
+    org.springframework.web.reactive: DEBUG
+    reactor.ipc.netty: DEBUG
+    reactor.netty: DEBUG
+
+server:
+  port: 8222
+
+management: 
+    endpoints:
+        web:
+            exposure:
+                include: health, info, prometheus
+    endpoint:
+        health:
+            show-details: always 
+
+springdoc:
+  swagger-ui:
+    urls:
+      - name: Customer Microservice
+        url: /api/v1/customers/v3/api-docs
+      - name: Product Microservice
+        url: /api/v1/products/v3/api-docs
+      - name: Cart Microservice
+        url: /api/v1/demo-customer/cart/v3/api-docs

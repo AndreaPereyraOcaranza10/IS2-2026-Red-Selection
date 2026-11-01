@@ -1,0 +1,41 @@
+HELP.md
+target/
+!.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
+
+### STS ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+
+### IntelliJ IDEA ###
+.idea
+*.iws
+*.iml
+*.ipr
+
+### NetBeans ###
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+build/
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+### VS Code ###
+.vscode/
+
+### Ignore log files ###
+*.log
+*.gz
+
+# Ignorar archivos de configuración sensibles (LO DEJO EN CONTROL DE VERSIONES 
+# PARA QUE PUEDAN USARLO SI QUIEREN, PERO DEBERÍA ESTAR EXCLUIDO)
+# *.env 
