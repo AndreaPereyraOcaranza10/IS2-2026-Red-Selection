@@ -1,0 +1,40 @@
+server:
+  port: 8060
+
+spring:
+  application:
+    name: api-gateway
+  config:
+    import: "optional:configserver:http://localhost:8088"
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8080/realms/davinchicoder
+  cloud:
+    gateway:
+      server:
+        webflux:
+          httpclient:
+            connect-timeout: 3000
+            response-timeout: 5s
+          default-filters:
+            - RemoveRequestHeader=Cookie
+            - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin
+            - name: RequestRateLimiter
+              args:
+                bucket4j-rate-limiter.capacity: 20
+                bucket4j-rate-limiter.refillTokens: 10
+                bucket4j-rate-limiter.refillPeriod: 1s
+                bucket4j-rate-limiter.requestedTokens: 1
+          routes:
+            - id: employee-service
+              uri: lb://employee-service
+              predicates:
+                - Path=/api/v1/employees/**
+            - id: department-service
+              uri: lb://department-service
+              predicates:
+                - Path=/api/v1/departments/**
+  cache:
+    type: caffeine

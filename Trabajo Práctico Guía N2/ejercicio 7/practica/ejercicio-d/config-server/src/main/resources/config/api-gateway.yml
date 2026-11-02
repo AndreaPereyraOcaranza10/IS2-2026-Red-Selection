@@ -1,0 +1,23 @@
+server:
+  port: 8060
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:8761/eureka/
+
+
+spring:
+  cloud:
+    gateway:
+      server:
+        webflux:
+          routes:
+            - id: employee-service
+              uri: lb://employee-service
+              predicates:
+                - Path=/api/v1/employees/**
+            - id: department-service
+              uri: lb://department-service
+              predicates:
+                - Path=/api/v1/departments/**

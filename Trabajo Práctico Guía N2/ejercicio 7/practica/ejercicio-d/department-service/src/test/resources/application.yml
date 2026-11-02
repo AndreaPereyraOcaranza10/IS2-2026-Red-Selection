@@ -1,0 +1,13 @@
+eureka:
+  client:
+    enabled: false
+
+spring:
+  config:
+    import: "optional:configserver:"
+  cloud:
+    openfeign:
+      client:
+        config:
+          employee-service:
+            url: http://localhost:8082

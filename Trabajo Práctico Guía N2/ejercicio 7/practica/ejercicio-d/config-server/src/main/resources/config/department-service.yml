@@ -1,0 +1,69 @@
+server:
+  port: 8083
+
+spring:
+  cloud:
+    discovery:
+      enabled: true
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:8761/eureka/
+
+
+management:
+  tracing:
+    sampling:
+      probability: 1.0
+  health:
+    circuitbreakers:
+      enabled: true
+  endpoints:
+    web:
+      exposure:
+        include: health,refresh
+  endpoint:
+    health:
+      show-details: always
+
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      department-service:
+        registerHealthIndicator: true
+        eventConsumerBufferSize: 10
+        failureRateThreshold: 50
+        minimumNumberOfCalls: 5
+        automaticTransitionFromOpenToHalfOpenEnabled: true
+        waitDurationInOpenState: 5s
+        permittedNumberOfCallsInHalfOpenState: 3
+        slidingWindowSize: 10
+        slidingWindowType: COUNT_BASED
+  retry:
+    instances:
+      department-service:
+        maxRetryAttempts: 5
+        waitDuration: 10s
+  ratelimiter:
+    instances:
+      department-service:
+        limitForPeriod: 10
+        limitRefreshPeriod: 5s
+        timeoutDuration: 10s
+        registerHealthIndicator: true
+        eventConsumerBufferSize: 100
+  timelimiter:
+    instances:
+      department-service:
+        timeoutDuration: 2s
+        cancelRunningFuture: true
+  bulkhead:
+    instances:
+      department-service:
+        maxWaitDuration: 5s
+        maxConcurrentCalls: 5
+
+default:
+  message: Hi
