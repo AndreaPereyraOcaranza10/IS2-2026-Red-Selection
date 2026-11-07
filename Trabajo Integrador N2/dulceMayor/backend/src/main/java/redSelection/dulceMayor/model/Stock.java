@@ -35,6 +35,8 @@ public class Stock extends Base {
     @JoinColumn(name = "producto_id", nullable = false)
     private Producto producto;
 
-    //agregar relacion con detallefactura
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "detalle_factura_id")   // nullable: los INGRESO/AJUSTE no tienen factura
+    private DetalleFactura detalleFactura;
 
 }
