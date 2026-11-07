@@ -1,0 +1,14 @@
+<component name="libraryTable">
+  <library name="Maven: org.projectlombok:lombok:1.18.46" type="java-imported" external-system-id="Maven">
+    <properties groupId="org.projectlombok" artifactId="lombok" version="1.18.46" baseVersion="1.18.46" />
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/org/projectlombok/lombok/1.18.46/lombok-1.18.46.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$MAVEN_REPOSITORY$/org/projectlombok/lombok/1.18.46/lombok-1.18.46-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$MAVEN_REPOSITORY$/org/projectlombok/lombok/1.18.46/lombok-1.18.46-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

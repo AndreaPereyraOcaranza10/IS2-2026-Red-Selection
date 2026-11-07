@@ -174,7 +174,7 @@ En Linux/macOS usá `./mvnw verify`. Las pruebas cubren la precarga idempotente,
 3. Desde el directorio del proyecto en el VPS:
 
 ```sh
-cp .env.example .env
+cp .env .env
 chmod 600 .env
 openssl rand -hex 32
 openssl rand -hex 32

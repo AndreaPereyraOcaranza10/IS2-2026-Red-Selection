@@ -1,0 +1,15 @@
+# Prueba local de los dos fronts como contenedores estáticos (sin backend: usa la API simulada).
+#   docker compose -f docker-compose.frontend.yml up --build
+# preventista -> http://localhost:8081   transportista -> http://localhost:8082
+# En producción estos servicios se suman al docker-compose.yml del proyecto (ver README).
+services:
+  preventista:
+    build:
+      context: .
+      args: { APP: preventista, VITE_USE_MOCK: "true" }
+    ports: ["8081:80"]
+  transportista:
+    build:
+      context: .
+      args: { APP: transportista, VITE_USE_MOCK: "true" }
+    ports: ["8082:80"]
