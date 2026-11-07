@@ -1,0 +1,14 @@
+<component name="libraryTable">
+  <library name="Maven: com.h2database:h2:2.4.240" type="java-imported" external-system-id="Maven">
+    <properties groupId="com.h2database" artifactId="h2" version="2.4.240" baseVersion="2.4.240" />
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/com/h2database/h2/2.4.240/h2-2.4.240.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$MAVEN_REPOSITORY$/com/h2database/h2/2.4.240/h2-2.4.240-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$MAVEN_REPOSITORY$/com/h2database/h2/2.4.240/h2-2.4.240-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

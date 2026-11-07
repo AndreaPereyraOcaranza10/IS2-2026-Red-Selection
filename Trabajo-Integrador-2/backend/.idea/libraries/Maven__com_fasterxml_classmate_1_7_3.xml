@@ -1,0 +1,14 @@
+<component name="libraryTable">
+  <library name="Maven: com.fasterxml:classmate:1.7.3" type="java-imported" external-system-id="Maven">
+    <properties groupId="com.fasterxml" artifactId="classmate" version="1.7.3" baseVersion="1.7.3" />
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/com/fasterxml/classmate/1.7.3/classmate-1.7.3.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$MAVEN_REPOSITORY$/com/fasterxml/classmate/1.7.3/classmate-1.7.3-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$MAVEN_REPOSITORY$/com/fasterxml/classmate/1.7.3/classmate-1.7.3-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

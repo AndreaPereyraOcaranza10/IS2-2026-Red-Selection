@@ -1,0 +1,14 @@
+<component name="libraryTable">
+  <library name="Maven: org.junit.platform:junit-platform-engine:6.0.3" type="java-imported" external-system-id="Maven">
+    <properties groupId="org.junit.platform" artifactId="junit-platform-engine" version="6.0.3" baseVersion="6.0.3" />
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/org/junit/platform/junit-platform-engine/6.0.3/junit-platform-engine-6.0.3.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$MAVEN_REPOSITORY$/org/junit/platform/junit-platform-engine/6.0.3/junit-platform-engine-6.0.3-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$MAVEN_REPOSITORY$/org/junit/platform/junit-platform-engine/6.0.3/junit-platform-engine-6.0.3-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

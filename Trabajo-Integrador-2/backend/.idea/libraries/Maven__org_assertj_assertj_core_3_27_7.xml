@@ -1,0 +1,14 @@
+<component name="libraryTable">
+  <library name="Maven: org.assertj:assertj-core:3.27.7" type="java-imported" external-system-id="Maven">
+    <properties groupId="org.assertj" artifactId="assertj-core" version="3.27.7" baseVersion="3.27.7" />
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/org/assertj/assertj-core/3.27.7/assertj-core-3.27.7.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$MAVEN_REPOSITORY$/org/assertj/assertj-core/3.27.7/assertj-core-3.27.7-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$MAVEN_REPOSITORY$/org/assertj/assertj-core/3.27.7/assertj-core-3.27.7-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>
