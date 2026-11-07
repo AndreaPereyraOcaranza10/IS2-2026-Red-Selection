@@ -2,7 +2,7 @@ package redSelection.dulceMayor.service;
 
 import org.springframework.stereotype.Service;
 import redSelection.dulceMayor.dto.DireccionNormalizadaDTO;
-import redSelection.dulceMayor.dto.UbicacionResuelta;
+import redSelection.dulceMayor.dto.UbicacionResueltaDTO;
 import redSelection.dulceMayor.dto.UnidadTerritorialDTO;
 import redSelection.dulceMayor.exception.ReglaNegocioException;
 import redSelection.dulceMayor.patrones.adapter.UbicacionProvider;
@@ -40,17 +40,17 @@ public class UbicacionService {
       Verifica que el departamento pertenezca a la provincia y la localidad al departamento.
       Los nombres que se guardan son los oficiales de la API, no los que mande el cliente.
      */
-    public UbicacionResuelta resolver(String provinciaId, String departamentoId, String localidadId) {
+    public UbicacionResueltaDTO resolver(String provinciaId, String departamentoId, String localidadId) {
         validarId(provinciaId, "provincia");
         validarId(departamentoId, "departamento");
         validarId(localidadId, "localidad");
         UnidadTerritorialDTO provincia = buscar(proveedor.provincias(), provinciaId, "La provincia");
         UnidadTerritorialDTO departamento = buscar(proveedor.departamentos(provinciaId), departamentoId, "El departamento");
         UnidadTerritorialDTO localidad = buscar(proveedor.localidades(departamentoId), localidadId, "La localidad");
-        return new UbicacionResuelta(provincia, departamento, localidad);
+        return new UbicacionResueltaDTO(provincia, departamento, localidad);
     }
 
-    public Optional<DireccionNormalizadaDTO> geocodificar(String calle, String numeracion, UbicacionResuelta ubicacion) {
+    public Optional<DireccionNormalizadaDTO> geocodificar(String calle, String numeracion, UbicacionResueltaDTO ubicacion) {
         return proveedor.normalizarDireccion(calle, numeracion,
                 ubicacion.provincia().id(), ubicacion.departamento().id());
     }

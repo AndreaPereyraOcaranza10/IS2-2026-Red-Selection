@@ -2,36 +2,32 @@ import { useState } from 'react';
 import { Icon } from './Icon.jsx';
 import { useToast } from './Toast.jsx';
 import { formatDistance } from '../utils/format.js';
-import { optimizeStops, startingPoint } from '../utils/routing.js';
+import { startingPoint } from '../utils/routing.js';
 
 /**
- * Ordena `pending` por el camino más corto desde `origin`, guarda el orden en el backend (`saveOrder(ids)`)
- * y devuelve el recorrido { order, distanceKm, durationMin, geometry, source, origin }.
- * Con una sola parada pendiente no hay nada que ordenar: no se llama al backend.
+ * Pide al backend ordenar las paradas pendientes por el camino más corto desde `origin` (`optimize(origin)`, de la
+ * Facade de la app). El backend guarda el nuevo orden y devuelve el recorrido:
+ * { route, distanceKm, durationMin, geometry, source, origin }.
  */
-export async function optimizeAndSave(origin, pending, saveOrder) {
-  const result = await optimizeStops(origin, pending);
-  if (pending.length > 1) await saveOrder(result.order);
-  return { ...result, origin };
-}
+export const optimizeAndSave = (origin, optimize) => optimize(origin);
 
 /** Pin de "Tu ubicación" para el mapa cuando hay un recorrido optimizado. */
 export const originPin = (origin) => ({ id: 'me', text: '★', lat: origin.lat, lng: origin.lng, status: 'vis', label: 'Tu ubicación' });
 
 /**
- * Estado del botón "Optimizar ruta": calcula, guarda y deja `plan` con el recorrido para dibujarlo.
- * `reload` recarga la ruta desde la API; `clear()` descarta el trazado cuando quedó viejo (visita, refresco).
+ * Estado del botón "Optimizar ruta": pide el cálculo al backend y deja `plan` con el recorrido para dibujarlo.
+ * `optimize` es la operación de la Facade; `reload` recarga la ruta desde la API; `clear()` descarta el trazado cuando quedó viejo (visita, refresco).
  */
-export function useRouteOptimizer(saveOrder, reload) {
+export function useRouteOptimizer(optimizeRoute, reload) {
   const toast = useToast();
   const [plan, setPlan] = useState(null);
   const [optimizing, setOptimizing] = useState(false);
 
-  async function optimize(pending) {
+  async function optimize() {
     setOptimizing(true);
     try {
       const origin = await startingPoint();
-      const result = await optimizeAndSave(origin, pending, saveOrder);
+      const result = await optimizeAndSave(origin, optimizeRoute);
       await reload();
       setPlan(result);
       toast('Ruta optimizada: ya tenés las paradas en el mejor orden');

@@ -17,6 +17,7 @@ export * from './components/Field.jsx';
 export * from './hooks/hooks.js';
 export * from './api/http.js';
 export * from './api/ApiError.js';
+export * from './api/routeApi.js';
 export * from './auth/AuthContext.jsx';
 export * from './auth/LoginPage.jsx';
 export * from './auth/ChangePasswordPage.jsx';

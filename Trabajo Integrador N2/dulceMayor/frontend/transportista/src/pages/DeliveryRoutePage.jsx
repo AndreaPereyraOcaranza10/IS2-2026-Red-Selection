@@ -11,7 +11,7 @@ export default function DeliveryRoutePage() {
   const navigate = useNavigate();
   const directions = useDirections();
   const route = useAsync(deliveryApi.route, []);
-  const { plan, optimizing, optimize, clear } = useRouteOptimizer(deliveryApi.saveRouteOrder, route.reload);
+  const { plan, optimizing, optimize, clear } = useRouteOptimizer(deliveryApi.optimizeRoute, route.reload);
   const reload = () => {
     clear(); // el trazado queda viejo ante cualquier cambio de la ruta
     return route.reload();
@@ -51,7 +51,7 @@ export default function DeliveryRoutePage() {
                     <div style={{ height: '100%', width: `${(done / r.stops.length) * 100}%`, background: 'var(--ok)' }} />
                   </div>
                 </div>
-                {pending.length > 1 && <OptimizeRouteButton label="Optimizar mi reparto" optimizing={optimizing} optimized={!!plan} onClick={() => optimize(pending)} />}
+                {pending.length > 1 && <OptimizeRouteButton label="Optimizar mi reparto" optimizing={optimizing} optimized={!!plan} onClick={optimize} />}
                 {plan && <RoutePlanBanner plan={plan} count={pending.length} title="Reparto optimizado" />}
                 {next ? (
                   <StopCard stop={next} highlight actionLabel="Ir a la entrega" onAction={() => navigate(`/entrega/${next.id}`)} onSelect={() => navigate(`/reparto/${next.id}`)} />

@@ -19,12 +19,10 @@ function useNextEfficientStop(order, serverNext) {
     let alive = true;
     (async () => {
       try {
-        const before = await preventistaApi.route();
-        const pending = before.stops.filter(isPending);
-        if (!pending.length) return alive && setRes({ status: 'done' });
-        const plan = await optimizeAndSave({ lat: cur.lat, lng: cur.lng }, pending, preventistaApi.saveRouteOrder);
-        const after = pending.length > 1 ? await preventistaApi.route() : before;
-        const left = after.stops.filter(isPending);
+        // El backend reordena lo que queda desde el comercio recién visitado y devuelve la ruta y el recorrido.
+        const plan = await optimizeAndSave({ lat: cur.lat, lng: cur.lng }, preventistaApi.optimizeRoute);
+        const left = plan.route.stops.filter(isPending);
+        if (!left.length) return alive && setRes({ status: 'done' });
         if (alive) setRes({ status: 'ok', next: left[0], left, plan });
       } catch {
         if (alive) setRes({ status: 'fallback', next: serverNext });

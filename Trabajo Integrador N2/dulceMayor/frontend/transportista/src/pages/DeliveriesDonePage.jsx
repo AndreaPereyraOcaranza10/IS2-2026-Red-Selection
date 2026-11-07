@@ -36,7 +36,7 @@ export default function DeliveriesDonePage() {
                       <p className="sec small">{s.address}</p>
                       <div className="row small muted">
                         <span className="grow" style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
-                          <Icon name="clock" size={14} /> {formatTime(s.deliveredAt)} hs · {PAYMENT_LABEL[s.paymentMethod]}
+                          <Icon name="clock" size={14} /> {formatTime(s.deliveredAt)} hs{s.paymentMethod ? ` · ${PAYMENT_LABEL[s.paymentMethod]}` : ''}
                         </span>
                         <b style={{ color: 'var(--text)', fontSize: 16 }}>{fmt(s.total)}</b>
                       </div>

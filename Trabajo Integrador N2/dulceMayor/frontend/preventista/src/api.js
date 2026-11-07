@@ -1,11 +1,15 @@
-import { api } from '@dulcemayor/shared';
+import { api, createRouteApi } from '@dulcemayor/shared';
+
+const routes = createRouteApi('preventista');
 
 /** Facade de la API REST para el preventista: las pantallas no conocen URLs ni verbos HTTP. */
 export const preventistaApi = {
-  route: () => api.get('/api/preventor/route/today'),
-  saveRouteOrder: (stopIds) => api.put('/api/preventor/route/order', { stopIds }),
+  // Rutas: backend real (`/api/rutas/**`). El orden y el recorrido los calcula el backend.
+  route: routes.route,
+  optimizeRoute: routes.optimizeRoute,
+  markVisited: routes.markVisited,
+  // Pendientes de backend (pedidos, promociones, puntos de venta): contrato del README.
   zone: () => api.get('/api/preventor/zone'),
-  markVisited: (stopId) => api.post(`/api/preventor/route/stops/${stopId}/visit`),
   products: () => api.get('/api/products'),
   validatePromo: (code) => api.post('/api/promotions/validate', { code }),
   createOrder: (dto) => api.post('/api/orders', dto),

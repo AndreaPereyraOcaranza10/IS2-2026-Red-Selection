@@ -13,7 +13,7 @@ export default function RoutePage() {
   const navigate = useNavigate();
   const directions = useDirections();
   const route = useAsync(preventistaApi.route, []);
-  const { plan, optimizing, optimize, clear } = useRouteOptimizer(preventistaApi.saveRouteOrder, route.reload);
+  const { plan, optimizing, optimize, clear } = useRouteOptimizer(preventistaApi.optimizeRoute, route.reload);
   // Cualquier cambio externo (visita, refresco) deja viejo el trazado: se descarta y se puede volver a optimizar.
   const reload = () => {
     clear();
@@ -67,7 +67,7 @@ export default function RoutePage() {
                     <div style={{ height: '100%', width: `${(done / r.stops.length) * 100}%`, background: 'var(--ok)' }} />
                   </div>
                 </div>
-                {pending.length > 1 && <OptimizeRouteButton optimizing={optimizing} optimized={!!plan} onClick={() => optimize(pending)} />}
+                {pending.length > 1 && <OptimizeRouteButton optimizing={optimizing} optimized={!!plan} onClick={optimize} />}
                 {plan && <RoutePlanBanner plan={plan} count={pending.length} />}
                 {next ? (
                   <StopCard stop={next} highlight actionLabel="Cómo llegar" onAction={() => directions(stopDestination(next))} onSelect={() => setSelected(next)} />

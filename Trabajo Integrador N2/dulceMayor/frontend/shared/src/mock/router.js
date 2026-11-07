@@ -5,6 +5,7 @@
  */
 import { ApiError } from '../api/ApiError.js';
 import { INITIAL_PASSWORD } from '../utils/password.js';
+import { NOT_HANDLED, routeRoutes } from './routes.js';
 
 const DELAY = import.meta.env.MODE === 'test' ? 0 : 250;
 const iso = (day, time) => `2026-11-${String(day).padStart(2, '0')}T${time}:00-03:00`;
@@ -17,31 +18,6 @@ const USERS = {
   'preventista.mza': { id: 1, username: 'preventista.mza', fullName: 'Preventista Mendoza', role: 'PREVENTOR', password: INITIAL_PASSWORD, mustChangePassword: true },
   'despacho.mza': { id: 2, username: 'despacho.mza', fullName: 'Despacho Mendoza', role: 'ALMACENERO', password: INITIAL_PASSWORD, mustChangePassword: true },
 };
-
-// El estado "ya cambió la clave" sobrevive a recargas (y a los reinicios de Vite) mientras dure la pestaña,
-// igual que la sesión: así el mock se comporta como un backend con base de datos.
-const PW_KEY = 'dm-mock-passwords';
-const loadPasswords = () => {
-  try {
-    return JSON.parse(sessionStorage.getItem(PW_KEY)) || {};
-  } catch {
-    return {};
-  }
-};
-const savePasswords = () => {
-  try {
-    const out = {};
-    Object.values(USERS).forEach((u) => {
-      if (!u.mustChangePassword) out[u.username] = u.password;
-    });
-    sessionStorage.setItem(PW_KEY, JSON.stringify(out));
-  } catch {
-    /* sin sessionStorage: el estado queda solo en memoria */
-  }
-};
-Object.entries(loadPasswords()).forEach(([name, password]) => {
-  if (USERS[name]) Object.assign(USERS[name], { password, mustChangePassword: false });
-});
 
 const PRODUCTS = [
   { id: 1, name: 'Alfajor triple chocolate', presentation: 'Bulto x 24 unidades', price: 18400, category: 'Alfajores', stock: 120 },
@@ -66,12 +42,10 @@ const POINTS = [
   { id: 9, name: 'Kiosco Aconcagua', address: 'Sarmiento 140, Godoy Cruz', distanceKm: 3.8, ...pos(288, 40), contactName: 'Marta Paz', phone: '261 555-0204', paymentMethod: 'EFECTIVO', items: [] },
 ];
 const ROUTE = [1, 2, 3, 4, 5, 6];
-const SEED_DELIVERY_ORDER = [1, 2, 6, 4, 3, 5]; // idem para el reparto: entregadas primero y el resto sin optimizar
-const SEED_VISIT_ORDER = [1, 2, 5, 3, 6, 4]; // las visitadas primero; el resto desordenado a propósito para poder optimizarlo
 
 const db = {
-  deliveryOrder: SEED_DELIVERY_ORDER.slice(),
-  visitOrder: SEED_VISIT_ORDER.slice(), // orden de visita del preventista, tal como la asignó el supervisor (sin optimizar)
+  visitOrder: [1, 2, 5, 3, 6, 4], // orden de visita asignado por el supervisor (sin optimizar)
+  deliveryOrder: [1, 2, 6, 4, 3, 5], // idem para el reparto: entregadas primero, resto sin optimizar
   visited: new Set([1, 2]),
   delivered: new Map([[1, iso(6, '09:42')], [2, iso(6, '10:25')]]),
   seq: 1043,
@@ -93,13 +67,8 @@ export function resetMock() {
     u.password = INITIAL_PASSWORD;
     u.mustChangePassword = true;
   });
-  try {
-    sessionStorage.removeItem(PW_KEY);
-  } catch {
-    /* noop */
-  }
-  db.visitOrder = SEED_VISIT_ORDER.slice();
-  db.deliveryOrder = SEED_DELIVERY_ORDER.slice();
+  db.visitOrder = [1, 2, 5, 3, 6, 4];
+  db.deliveryOrder = [1, 2, 6, 4, 3, 5];
   db.visited = new Set([1, 2]);
   db.delivered = new Map([[1, iso(6, '09:42')], [2, iso(6, '10:25')]]);
   db.seq = 1043;
@@ -120,9 +89,8 @@ const order = (o) => ({
 });
 const visitStop = (id, i) => { const p = POINTS.find((x) => x.id === id); return { id, sequence: i + 1, name: p.name, address: p.address, distanceKm: p.distanceKm, lat: p.lat, lng: p.lng, contactName: p.contactName, phone: p.phone, status: db.visited.has(id) ? 'VISITADO' : 'PENDIENTE' }; };
 const deliveryStop = (id, i) => { const p = POINTS.find((x) => x.id === id); return { id, sequence: i + 1, name: p.name, address: p.address, distanceKm: p.distanceKm, lat: p.lat, lng: p.lng, contactName: p.contactName, status: db.delivered.has(id) ? 'ENTREGADO' : 'PENDIENTE', deliveredAt: db.delivered.get(id) || null, paymentMethod: p.paymentMethod, total: orderTotal(p.items) }; };
-const instruction = (m) => (m === 'EFECTIVO' ? 'Cobrar en efectivo al entregar' : m === 'TRANSFERENCIA' ? `Alias: ${ALIAS}` : 'Pago con billetera virtual (QR del comercio)');
 const nextVisit = () => { const i = db.visitOrder.findIndex((id) => !db.visited.has(id)); return i < 0 ? null : visitStop(db.visitOrder[i], i); };
-const nextDelivery = () => { const i = db.deliveryOrder.findIndex((id) => !db.delivered.has(id)); return i < 0 ? null : deliveryStop(db.deliveryOrder[i], i); };
+const instruction = (m) => (m === 'EFECTIVO' ? 'Cobrar en efectivo al entregar' : m === 'TRANSFERENCIA' ? `Alias: ${ALIAS}` : 'Pago con billetera virtual (QR del comercio)');
 
 const sessionUser = (token) => (token?.startsWith('mock.') ? USERS[token.slice(5)] : null);
 const userDto = (u) => ({ id: u.id, username: u.username, fullName: u.fullName, role: u.role, mustChangePassword: u.mustChangePassword });
@@ -149,20 +117,20 @@ export async function mockRequest(method, path, body, token) {
     }
     user.password = body.newPassword;
     user.mustChangePassword = false;
-    savePasswords();
     return session(user);
   }
   if (user.mustChangePassword) {
     throw new ApiError(403, 'Tenés que cambiar tu clave antes de continuar.', { code: 'PASSWORD_CHANGE_REQUIRED' });
   }
 
+  const r = routeRoutes(key, p, body, q, { db, POINTS, orderTotal });
+  if (r !== NOT_HANDLED) return r;
+
   let m;
   switch (key) {
     case 'GET /api/products':
       return PRODUCTS.filter((x) => x.stock > 0).map(product); // el backend oculta los ítems sin stock
 
-    case 'GET /api/preventor/route/today':
-      return { date: '2026-11-06', kmRemaining: 8.4, stops: db.visitOrder.map(visitStop) };
     case 'GET /api/preventor/zone':
       return POINTS.map((x) => ({ ...visitStop(x.id, 0), inRoute: db.visitOrder.includes(x.id), sequence: undefined }));
 
@@ -202,35 +170,7 @@ export async function mockRequest(method, path, body, token) {
     case 'GET /api/geo/reverse':
       return { address: 'Av. España 1020, Ciudad de Mendoza', lat: Number(q.get('lat')), lng: Number(q.get('lng')) };
 
-    case 'GET /api/delivery/route/today':
-      return { date: '2026-11-06', kmRemaining: 8.4, stops: db.deliveryOrder.map(deliveryStop) };
     default:
-  }
-
-  if (key === 'PUT /api/delivery/route/order') {
-    const pending = db.deliveryOrder.filter((id) => !db.delivered.has(id));
-    const ids = body.stopIds || [];
-    if (ids.length !== pending.length || !pending.every((id) => ids.includes(id))) {
-      throw new ApiError(400, 'El nuevo orden debe incluir todas las entregas pendientes.', { errors: [{ field: 'stopIds', message: 'Entregas inválidas' }] });
-    }
-    db.deliveryOrder = db.deliveryOrder.filter((id) => db.delivered.has(id)).concat(ids);
-    return { stops: db.deliveryOrder.map(deliveryStop) };
-  }
-
-  if (key === 'PUT /api/preventor/route/order') {
-    // Reordena las paradas PENDIENTES; las ya visitadas conservan su lugar al comienzo.
-    const pending = db.visitOrder.filter((id) => !db.visited.has(id));
-    const ids = body.stopIds || [];
-    if (ids.length !== pending.length || !pending.every((id) => ids.includes(id))) {
-      throw new ApiError(400, 'El nuevo orden debe incluir todas las paradas pendientes.', { errors: [{ field: 'stopIds', message: 'Paradas inválidas' }] });
-    }
-    db.visitOrder = db.visitOrder.filter((id) => db.visited.has(id)).concat(ids);
-    return { stops: db.visitOrder.map(visitStop) };
-  }
-
-  if ((m = p.match(/^\/api\/preventor\/route\/stops\/(\d+)\/visit$/)) && method === 'POST') {
-    db.visited.add(Number(m[1]));
-    return null; // 204 No Content
   }
 
   if ((m = p.match(/^\/api\/orders\/(\d+)$/)) && method === 'GET') {
@@ -256,13 +196,6 @@ export async function mockRequest(method, path, body, token) {
     };
   }
 
-  if ((m = p.match(/^\/api\/delivery\/stops\/(\d+)\/deliver$/)) && method === 'POST') {
-    const id = Number(m[1]);
-    if (!db.deliveryOrder.includes(id)) throw new ApiError(404, 'No encontramos la entrega.', { code: 'NOT_FOUND' });
-    db.delivered.set(id, new Date().toISOString());
-    const next = nextDelivery();
-    return { delivered: deliveryStop(id, db.deliveryOrder.indexOf(id)), nextStop: next, emailSent: !!next }; // el backend avisa por mail al próximo comercio
-  }
 
   throw new ApiError(404, `Ruta no encontrada: ${method} ${p}`, { code: 'NOT_FOUND' });
 }

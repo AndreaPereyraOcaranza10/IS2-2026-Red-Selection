@@ -1,6 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
-import { api, setAuthToken, setUnauthorizedHandler } from '../api/http.js';
+import { api, setActor, setAuthToken, setUnauthorizedHandler } from '../api/http.js';
 
 const KEY = 'dm.session';
 const Ctx = createContext(null);
@@ -8,7 +8,10 @@ const Ctx = createContext(null);
 function load() {
   try {
     const s = JSON.parse(sessionStorage.getItem(KEY));
-    if (s?.token) setAuthToken(s.token);
+    if (s?.token) {
+      setAuthToken(s.token);
+      setActor(s.user);
+    }
     return s;
   } catch {
     return null;
@@ -16,7 +19,7 @@ function load() {
 }
 
 /**
- * Sesión JWT. El backend responde { token, user: { id, username, fullName, role, mustChangePassword } }.
+ * Sesión JWT. El backend responde { token, user: { id, employeeId?, username, fullName, role, mustChangePassword } }.
  * El token vive en sessionStorage (se pierde al cerrar la pestaña).
  */
 export function AuthProvider({ children }) {
@@ -25,6 +28,7 @@ export function AuthProvider({ children }) {
   const persist = useCallback((s) => {
     setSession(s);
     setAuthToken(s?.token ?? null);
+    setActor(s?.user);
     try {
       if (s) sessionStorage.setItem(KEY, JSON.stringify(s));
       else sessionStorage.removeItem(KEY);

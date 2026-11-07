@@ -5,11 +5,17 @@ export const USE_MOCK = import.meta.env.VITE_USE_MOCK === 'true';
 const BASE_URL = import.meta.env.VITE_API_URL ?? '';
 
 let token = null;
+let actor = null;
 let onUnauthorized = () => {};
 
 export const setAuthToken = (t) => {
   token = t;
 };
+/** Usuario de la sesión: el backend identifica al empleado de las rutas por `employeeId` (o por `id`). */
+export const setActor = (user) => {
+  actor = user ?? null;
+};
+export const getActorId = () => actor?.employeeId ?? actor?.id ?? null;
 export const setUnauthorizedHandler = (fn) => {
   onUnauthorized = fn;
 };
@@ -42,9 +48,11 @@ async function request(method, path, body) {
     if (res.status === 204) return null;
     const data = await res.json().catch(() => null);
     if (!res.ok) {
-      throw new ApiError(res.status, data?.message || 'Ocurrió un error inesperado.', {
+      // El backend responde ProblemDetail ({ detail, errores: { campo: mensaje } }).
+      const fieldErrors = data?.errors ?? (data?.errores ? Object.entries(data.errores).map(([field, message]) => ({ field, message })) : undefined);
+      throw new ApiError(res.status, data?.detail || data?.message || 'Ocurrió un error inesperado.', {
         code: data?.code,
-        errors: data?.errors,
+        errors: fieldErrors,
       });
     }
     return data;
@@ -58,5 +66,6 @@ export const api = {
   get: (path) => request('GET', path),
   post: (path, body) => request('POST', path, body ?? {}),
   put: (path, body) => request('PUT', path, body),
+  patch: (path, body) => request('PATCH', path, body),
   delete: (path) => request('DELETE', path),
 };
