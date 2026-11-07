@@ -4,6 +4,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import redSelection.dulceMayor.dto.CatalogoProductoDTO;
+import redSelection.dulceMayor.dto.CategoriaRespuestaDTO;
+import redSelection.dulceMayor.dto.ProductoRespuestaDTO;
 import redSelection.dulceMayor.exception.RecursoNoEncontradoException;
 import redSelection.dulceMayor.exception.ReglaNegocioException;
 import redSelection.dulceMayor.model.Producto;
@@ -22,224 +24,66 @@ import java.util.Locale;
 @Service
 public class CatalogoService {
 
-    private final ProductoRepository productoRepository;
-    private final CategoriaRepository categoriaRepository;
-    private final StockRepository stockRepository;
-    private final VigenciaPrecioRepository vigenciaPrecioRepository;
+    private final ProductoService productoService;
+    private final CategoriaService categoriaService;
 
-    public CatalogoService(
-            ProductoRepository productoRepository,
-            CategoriaRepository categoriaRepository,
-            StockRepository stockRepository,
-            VigenciaPrecioRepository vigenciaPrecioRepository) {
-
-        this.productoRepository = productoRepository;
-        this.categoriaRepository = categoriaRepository;
-        this.stockRepository = stockRepository;
-        this.vigenciaPrecioRepository = vigenciaPrecioRepository;
+    public CatalogoService(ProductoService productoService, CategoriaService categoriaService) {
+        this.productoService = productoService;
+        this.categoriaService = categoriaService;
     }
 
-    // =====================================================
-    // LISTAR PRODUCTOS DEL CATALOGO
-    // =====================================================
-
     @Transactional(readOnly = true)
-    public List<CatalogoProductoDTO> listar(
-            String busqueda,
-            String categoria,
-            boolean incluirSinStock) {
-
-        String textoBusqueda = normalizar(busqueda);
+    public List<CatalogoProductoDTO> listar(String busqueda, String categoria, boolean incluirSinStock) {
+        String texto = normalizar(busqueda);
         String filtroCategoria = normalizar(categoria);
 
-        return productoRepository.findByEliminadoFalse()
-                .stream()
-
-                // Filtrar por disponibilidad
-                .filter(producto ->
-                        incluirSinStock ||
-                                obtenerStock(producto.getId()) > 0
-                )
-
-                // Filtrar por texto
-                .filter(producto ->
-                        textoBusqueda.isEmpty() ||
-                                coincideTexto(producto, textoBusqueda)
-                )
-
-                // Filtrar por categoría o subcategoría
-                .filter(producto ->
-                        filtroCategoria.isEmpty() ||
-                                coincideCategoria(producto, filtroCategoria)
-                )
-
+        return productoService.listar().stream()
+                .filter(p -> incluirSinStock || p.disponible())                       // sin stock no se muestra
+                .filter(p -> texto.isEmpty() || coincideTexto(p, texto))
+                .filter(p -> filtroCategoria.isEmpty() || coincideCategoria(p, filtroCategoria))
                 .map(this::convertirADTO)
                 .toList();
     }
 
-    // =====================================================
-    // BUSCAR UN PRODUCTO
-    // =====================================================
-
     @Transactional(readOnly = true)
     public CatalogoProductoDTO buscar(String id) {
-
-        Producto producto = productoRepository
-                .findByIdAndEliminadoFalse(id)
-                .orElseThrow(() ->
-                        new RecursoNoEncontradoException(
-                                "Producto", id
-                        )
-                );
-
-        return convertirADTO(producto);
+        return convertirADTO(productoService.obtener(id));
     }
-
-    // =====================================================
-    // LISTAR CATEGORIAS
-    // =====================================================
 
     @Transactional(readOnly = true)
     public List<String> categorias() {
-
-        return categoriaRepository.findByEliminadoFalse()
-                .stream()
-                .map(categoria -> categoria.getNombre())
+        return categoriaService.listar().stream()
+                .map(CategoriaRespuestaDTO::nombre)
                 .sorted(String.CASE_INSENSITIVE_ORDER)
                 .toList();
     }
 
-    // =====================================================
-    // CONVERSION DE PRODUCTO A DTO
-    // =====================================================
-
-    private CatalogoProductoDTO convertirADTO(Producto producto) {
-
-        BigDecimal precio = obtenerPrecio(producto.getId());
-
-        long stock = obtenerStock(producto.getId());
-
-        int unidades = producto.getUnidadesPorPresentacion();
-
+    private CatalogoProductoDTO convertirADTO(ProductoRespuestaDTO p) {
+        BigDecimal precio = p.precio();
+        int unidades = p.unidadesPorPresentacion();
         BigDecimal precioPorUnidad = precio != null && unidades > 0
-                ? precio.divide(
-                BigDecimal.valueOf(unidades),
-                2,
-                RoundingMode.HALF_UP
-        )
+                ? precio.divide(BigDecimal.valueOf(unidades), 2, RoundingMode.HALF_UP)
                 : null;
 
         return new CatalogoProductoDTO(
-                producto.getId(),
-                producto.getNombre(),
-                producto.getMarca(),
-                producto.getSubCategoria()
-                        .getCategoria()
-                        .getNombre(),
-                producto.getSubCategoria().getNombre(),
-                producto.getPresentacion(),
-                unidades,
-                precio,
-                precioPorUnidad,
-                stock,
-                producto.getStockMinimo(),
-                stock > 0,
-                producto.isEnOferta(),
-                producto.getDescripcion(),
-                producto.getImagen() != null
-                        ? producto.getImagen().getId()
-                        : null
-        );
+                p.id(), p.nombre(), p.marca(), p.categoria(), p.subCategoria(),
+                p.presentacion(), unidades, precio, precioPorUnidad,
+                p.stockActual(), p.stockMinimo(), p.disponible(), p.enOferta(),
+                p.descripcion(), p.imagenId());
     }
 
-    // =====================================================
-    // OBTENER PRECIO VIGENTE
-    // =====================================================
-
-    private BigDecimal obtenerPrecio(String productoId) {
-
-        List<VigenciaPrecio> vigencias =
-                vigenciaPrecioRepository.vigentesEn(
-                        productoId,
-                        LocalDate.now()
-                );
-
-        if (vigencias.size() > 1) {
-            throw new ReglaNegocioException(
-                    "El producto tiene más de un precio vigente: "
-                            + productoId
-            );
-        }
-
-        return vigencias.isEmpty()
-                ? null
-                : vigencias.get(0).getPrecio();
-    }
-
-    // =====================================================
-    // OBTENER STOCK ACTUAL
-    // =====================================================
-
-    private long obtenerStock(String productoId) {
-
-        return stockRepository.stockActual(productoId);
-    }
-
-    // =====================================================
-    // BUSQUEDA POR TEXTO
-    // =====================================================
-
-    private boolean coincideTexto(
-            Producto producto,
-            String busqueda) {
-
+    private boolean coincideTexto(ProductoRespuestaDTO p, String busqueda) {
         String texto = String.join(" ",
-                valor(producto.getNombre()),
-                valor(producto.getCodigo()),
-                valor(producto.getMarca()),
-                valor(producto.getDescripcion()),
-                valor(producto.getSubCategoria().getNombre()),
-                valor(producto.getSubCategoria()
-                        .getCategoria().getNombre())
-        ).toLowerCase(Locale.ROOT);
-
+                valor(p.nombre()), valor(p.codigo()), valor(p.marca()), valor(p.descripcion()),
+                valor(p.subCategoria()), valor(p.categoria())).toLowerCase(Locale.ROOT);
         return texto.contains(busqueda);
     }
 
-    // =====================================================
-    // FILTRAR POR CATEGORIA
-    // =====================================================
-
-    private boolean coincideCategoria(
-            Producto producto,
-            String categoria) {
-
-        String nombreCategoria = normalizar(
-                producto.getSubCategoria()
-                        .getCategoria().getNombre()
-        );
-
-        String nombreSubCategoria = normalizar(
-                producto.getSubCategoria().getNombre()
-        );
-
-        return nombreCategoria.equals(categoria) ||
-                nombreSubCategoria.equals(categoria);
+    private boolean coincideCategoria(ProductoRespuestaDTO p, String categoria) {
+        return normalizar(p.categoria()).equals(categoria) || normalizar(p.subCategoria()).equals(categoria);
     }
 
-    // =====================================================
-    // UTILIDADES
-    // =====================================================
+    private String normalizar(String texto) { return texto == null ? "" : texto.trim().toLowerCase(Locale.ROOT); }
 
-    private String normalizar(String texto) {
-
-        return texto == null
-                ? ""
-                : texto.trim().toLowerCase(Locale.ROOT);
-    }
-
-    private String valor(String texto) {
-
-        return texto == null ? "" : texto;
-    }
+    private String valor(String texto) { return texto == null ? "" : texto; }
 }

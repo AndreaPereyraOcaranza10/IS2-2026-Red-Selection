@@ -5,11 +5,16 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="f4c4a2a5-2a9d-46b9-9146-d7ea60de3809" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/../../Trabajo Integrador N2/dulceMayor/backend/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/../../Trabajo Integrador N2/dulceMayor/backend/.gitignore" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/compiler.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/compiler.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" />
+      <change afterPath="$PROJECT_DIR$/../../Trabajo Integrador N2/dulceMayor/backend/src/main/java/redSelection/dulceMayor/dto/MovimientoStockRespuestaDTO.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Trabajo Integrador N2/dulceMayor/backend/src/main/java/redSelection/dulceMayor/controller/ProductoController.java" beforeDir="false" afterPath="$PROJECT_DIR$/../../Trabajo Integrador N2/dulceMayor/backend/src/main/java/redSelection/dulceMayor/controller/ProductoController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Trabajo Integrador N2/dulceMayor/backend/src/main/java/redSelection/dulceMayor/dto/MovimientoStockDTO.java" beforeDir="false" afterPath="$PROJECT_DIR$/../../Trabajo Integrador N2/dulceMayor/backend/src/main/java/redSelection/dulceMayor/dto/MovimientoStockDTO.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Trabajo Integrador N2/dulceMayor/backend/src/main/java/redSelection/dulceMayor/dto/ProductoActualizarDTO.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Trabajo Integrador N2/dulceMayor/backend/src/main/java/redSelection/dulceMayor/dto/ProductoCrearDTO.java" beforeDir="false" afterPath="$PROJECT_DIR$/../../Trabajo Integrador N2/dulceMayor/backend/src/main/java/redSelection/dulceMayor/dto/ProductoCrearDTO.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Trabajo Integrador N2/dulceMayor/backend/src/main/java/redSelection/dulceMayor/service/BaseService.java" beforeDir="false" afterPath="$PROJECT_DIR$/../../Trabajo Integrador N2/dulceMayor/backend/src/main/java/redSelection/dulceMayor/service/BaseService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Trabajo Integrador N2/dulceMayor/backend/src/main/java/redSelection/dulceMayor/service/CatalogoService.java" beforeDir="false" afterPath="$PROJECT_DIR$/../../Trabajo Integrador N2/dulceMayor/backend/src/main/java/redSelection/dulceMayor/service/CatalogoService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Trabajo Integrador N2/dulceMayor/backend/src/main/java/redSelection/dulceMayor/service/ProductoService.java" beforeDir="false" afterPath="$PROJECT_DIR$/../../Trabajo Integrador N2/dulceMayor/backend/src/main/java/redSelection/dulceMayor/service/ProductoService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Trabajo Integrador N2/dulceMayor/backend/src/main/resources/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/../../Trabajo Integrador N2/dulceMayor/backend/src/main/resources/application.properties" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/dulcemayor.iml" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

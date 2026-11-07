@@ -33,7 +33,6 @@ public record ProductoCrearDTO(
 
         String imagenId,
 
-        @NotNull
         @Positive
         BigDecimal precioInicial,
 

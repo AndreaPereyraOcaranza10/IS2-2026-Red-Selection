@@ -31,7 +31,8 @@ public abstract class BaseService<E extends Base, REQ, RES> {
         antesDeGuardar(entidad);                  // hook
         E guardada = repository.save(entidad);
         despuesDeGuardar(guardada);               // hook
-        return aRespuesta(guardada);              // paso abstracto
+        despuesDeCrear(guardada, solicitud);      // hook (necesita datos del request, ej. precio o stock inicial)
+        return aRespuesta(guardada);              // paso abstracto           // paso abstracto
     }
 
     @Transactional(readOnly = true)
@@ -93,4 +94,12 @@ public abstract class BaseService<E extends Base, REQ, RES> {
         return repository.findByIdAndEliminadoFalse(id)
                 .orElseThrow(() -> new RecursoNoEncontradoException(nombreRecurso(), id));
     }
+
+    protected void despuesDeCrear(E entidad, REQ solicitud) { }
+
+    @Transactional(readOnly = true)
+    public E obtenerEntidad(String id) {
+        return buscarEntidad(id);
+    }
+
 }

@@ -8,7 +8,5 @@ public record MovimientoStockDTO(
         int movimiento,
 
         @NotNull
-        TipoMovimientoStock tipoMovimiento,
-
-        String observacion
+        TipoMovimientoStock tipoMovimiento
 ) {}
