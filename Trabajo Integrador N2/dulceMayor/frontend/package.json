@@ -1,0 +1,31 @@
+{
+  "name": "dulce-mayor-frontend",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "shared",
+    "preventista",
+    "transportista"
+  ],
+  "scripts": {
+    "dev:preventista": "npm run dev -w preventista",
+    "dev:transportista": "npm run dev -w transportista",
+    "build": "npm run build -w preventista && npm run build -w transportista",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-router-dom": "^6.28.0",
+    "leaflet": "^1.9.4"
+  },
+  "devDependencies": {
+    "@testing-library/react": "^16.1.0",
+    "@testing-library/dom": "^10.4.0",
+    "@vitejs/plugin-react": "^4.3.4",
+    "jsdom": "^25.0.1",
+    "vite": "^5.4.11",
+    "vitest": "^2.1.8"
+  }
+}
