@@ -39,14 +39,18 @@ export default function DeliveryDetailPage() {
                 </article>
               </div>
               <div className="col">
-                <h2>Medio de pago</h2>
-                <article className="card row">
-                  <Icon name={s.paymentMethod === 'EFECTIVO' ? 'cash' : 'tag'} size={28} />
-                  <div className="grow">
-                    <b>{PAYMENT_LABEL[s.paymentMethod]}</b>
-                    <p className="small sec">{d.paymentInstruction}</p>
-                  </div>
-                </article>
+                {s.paymentMethod && (
+                  <>
+                    <h2>Medio de pago</h2>
+                    <article className="card row">
+                      <Icon name={s.paymentMethod === 'EFECTIVO' ? 'cash' : 'tag'} size={28} />
+                      <div className="grow">
+                        <b>{PAYMENT_LABEL[s.paymentMethod]}</b>
+                        <p className="small sec">{d.paymentInstruction}</p>
+                      </div>
+                    </article>
+                  </>
+                )}
                 <h2>Trazabilidad</h2>
                 <article className="card"><Timeline order={{ state: d.state, trace: d.trace }} /></article>
               </div>

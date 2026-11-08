@@ -1,4 +1,4 @@
-import { api, createRouteApi } from '@dulcemayor/shared';
+import { ApiError, USE_MOCK, api, createRouteApi } from '@dulcemayor/shared';
 
 const routes = createRouteApi('transportista');
 
@@ -8,6 +8,19 @@ export const deliveryApi = {
   route: routes.route,
   optimizeRoute: routes.optimizeRoute,
   deliver: routes.deliver,
-  // Detalle de la entrega (productos, instrucción de pago): pendiente de backend (pedidos y facturación).
-  stop: (id) => api.get(`/api/delivery/stops/${id}`),
+  // Detalle de la entrega. Con el backend real se arma desde la ruta (comercio, dirección y total del pedido);
+  // los productos y el medio de pago llegan cuando el backend sume pedidos y facturación.
+  stop: async (id) => {
+    if (USE_MOCK) return api.get(`/api/delivery/stops/${id}`);
+    const route = await routes.route();
+    const stop = route.stops.find((s) => String(s.id) === String(id));
+    if (!stop) throw new ApiError(404, 'No encontramos la entrega.', { code: 'NOT_FOUND' });
+    return {
+      stop,
+      state: stop.status === 'ENTREGADO' ? 'ENTREGADO' : 'EN_REPARTO',
+      items: [],
+      paymentInstruction: '',
+      trace: { events: [], carrier: null },
+    };
+  },
 };

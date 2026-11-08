@@ -70,7 +70,7 @@ describe('Adapter de rutas (DTO del backend -> modelo de las pantallas)', () => 
 describe('Contrato de rutas contra el backend simulado', () => {
   beforeEach(async () => {
     resetMock();
-    const login = await mockRequest('POST', '/api/auth/login', { username: 'despacho.mza', password: 'dulcemayor' });
+    const login = await mockRequest('POST', '/api/auth/login', { username: 'transportista.mza', password: 'dulcemayor' });
     const session = await mockRequest('POST', '/api/auth/first-login/change-password', { newPassword: 'Dulce#Mza24' }, login.token);
     setAuthToken(session.token);
     setActor(session.user);
@@ -102,9 +102,16 @@ describe('Contrato de rutas contra el backend simulado', () => {
       'GET',
       '/api/ruteo/trayecto?desdeLat=-32.89&desdeLng=-68.84&hastaLat=-32.9&hastaLng=-68.85',
       undefined,
-      'mock.despacho.mza',
+      'mock.transportista.mza',
     );
     expect(t.distanciaKm).toBeGreaterThan(0);
     expect(t.geometria[0]).toEqual([-32.89, -68.84]);
+  });
+  it('con el backend real, lo que aún está simulado no vuelve a pedir el cambio de clave', async () => {
+    // El login lo resolvió el servidor: el mock recibe al usuario como "confiable" (sin clave inicial pendiente).
+    const productos = await mockRequest('GET', '/api/products', undefined, 'mock.preventista.mza', { confiable: true });
+    expect(Array.isArray(productos)).toBe(true);
+    // Sin ese modo (demo 100% simulada) sigue exigiendo el cambio de clave inicial.
+    await expect(mockRequest('GET', '/api/products', undefined, 'mock.preventista.mza')).rejects.toThrow('cambiar tu clave');
   });
 });

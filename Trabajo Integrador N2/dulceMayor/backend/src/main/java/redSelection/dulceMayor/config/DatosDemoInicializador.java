@@ -1,0 +1,209 @@
+package redSelection.dulceMayor.config;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.ApplicationArguments;
+import org.springframework.boot.ApplicationRunner;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.context.annotation.Profile;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+import redSelection.dulceMayor.enums.EstadoPedido;
+import redSelection.dulceMayor.enums.Rol;
+import redSelection.dulceMayor.enums.TipoContacto;
+import redSelection.dulceMayor.enums.TipoDocumento;
+import redSelection.dulceMayor.enums.TipoEmpresa;
+import redSelection.dulceMayor.model.ClienteMinorista;
+import redSelection.dulceMayor.model.ContactoCorreoElectronico;
+import redSelection.dulceMayor.model.Direccion;
+import redSelection.dulceMayor.model.DulceMayor;
+import redSelection.dulceMayor.model.Empleado;
+import redSelection.dulceMayor.model.Pedido;
+import redSelection.dulceMayor.model.Preventista;
+import redSelection.dulceMayor.model.ResponsableComercio;
+import redSelection.dulceMayor.model.Transportista;
+import redSelection.dulceMayor.model.Usuario;
+import redSelection.dulceMayor.repository.ClienteMinoristaRepository;
+import redSelection.dulceMayor.repository.DireccionRepository;
+import redSelection.dulceMayor.repository.DulceMayorRepository;
+import redSelection.dulceMayor.repository.EmpleadoRepository;
+import redSelection.dulceMayor.repository.PedidoRepository;
+import redSelection.dulceMayor.repository.PreventistaRepository;
+import redSelection.dulceMayor.repository.ResponsableComercioRepository;
+import redSelection.dulceMayor.repository.TransportistaRepository;
+import redSelection.dulceMayor.repository.UsuarioRepository;
+import redSelection.dulceMayor.service.AuthService;
+
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * Datos de demostración para poder probar el sistema de punta a punta: la casa central, tres empleados con la
+ * clave inicial (hay que cambiarla en el primer ingreso), seis comercios de Mendoza asignados al preventista
+ * y cuatro pedidos ya facturados para que el transportista tenga qué repartir.
+ * Corre solo si todavía no existe el usuario "preventista.mza" (se puede repetir sin duplicar), no corre con el
+ * perfil "prod" y se apaga con app.demo-data=false. Las direcciones y coordenadas son de ejemplo.
+ */
+@Component
+@Profile("!prod")
+@ConditionalOnProperty(name = "app.demo-data", havingValue = "true", matchIfMissing = true)
+public class DatosDemoInicializador implements ApplicationRunner {
+
+    private static final Logger log = LoggerFactory.getLogger(DatosDemoInicializador.class);
+
+    private final UsuarioRepository usuarioRepository;
+    private final PreventistaRepository preventistaRepository;
+    private final TransportistaRepository transportistaRepository;
+    private final EmpleadoRepository empleadoRepository;
+    private final DulceMayorRepository dulceMayorRepository;
+    private final DireccionRepository direccionRepository;
+    private final ResponsableComercioRepository responsableRepository;
+    private final ClienteMinoristaRepository clienteRepository;
+    private final PedidoRepository pedidoRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final String correoResponsables;
+
+    public DatosDemoInicializador(UsuarioRepository usuarioRepository,
+                                  PreventistaRepository preventistaRepository,
+                                  TransportistaRepository transportistaRepository,
+                                  EmpleadoRepository empleadoRepository,
+                                  DulceMayorRepository dulceMayorRepository,
+                                  DireccionRepository direccionRepository,
+                                  ResponsableComercioRepository responsableRepository,
+                                  ClienteMinoristaRepository clienteRepository,
+                                  PedidoRepository pedidoRepository,
+                                  PasswordEncoder passwordEncoder,
+                                  @Value("${app.demo.correo-responsables:}") String correoResponsables) {
+        this.usuarioRepository = usuarioRepository;
+        this.preventistaRepository = preventistaRepository;
+        this.transportistaRepository = transportistaRepository;
+        this.empleadoRepository = empleadoRepository;
+        this.dulceMayorRepository = dulceMayorRepository;
+        this.direccionRepository = direccionRepository;
+        this.responsableRepository = responsableRepository;
+        this.clienteRepository = clienteRepository;
+        this.pedidoRepository = pedidoRepository;
+        this.passwordEncoder = passwordEncoder;
+        this.correoResponsables = correoResponsables == null ? "" : correoResponsables.trim();
+    }
+
+    @Override
+    @Transactional
+    public void run(ApplicationArguments args) {
+        if (usuarioRepository.findByNombreUsuarioIgnoreCase("preventista.mza").isPresent()) {
+            return;
+        }
+        log.info("Cargando datos de demostración (clave inicial de los empleados: '{}')...", AuthService.CLAVE_INICIAL);
+
+        crearCasaCentralSiNoExiste();
+
+        Preventista preventista = preventistaRepository.save(Preventista.builder()
+                .nombre("Martín").apellido("Gómez")
+                .tipoDocumento(TipoDocumento.DNI).numeroDocumento("30111222")
+                .zonaAsignada("Gran Mendoza")
+                .usuario(usuarioEmpleado("preventista.mza", Rol.PREVENTISTA))
+                .build());
+        transportistaRepository.save(Transportista.builder()
+                .nombre("Diego").apellido("Rojas")
+                .tipoDocumento(TipoDocumento.DNI).numeroDocumento("28333444")
+                .patenteVehiculo("AA123BB")
+                .usuario(usuarioEmpleado("transportista.mza", Rol.TRANSPORTISTA))
+                .build());
+        empleadoRepository.save(Empleado.builder()
+                .nombre("Carla").apellido("Ledesma")
+                .tipoDocumento(TipoDocumento.DNI).numeroDocumento("27555666")
+                .usuario(usuarioEmpleado("admin.mza", Rol.ADMINISTRATIVO))
+                .build());
+
+        List<ClienteMinorista> clientes = new ArrayList<>();
+        clientes.add(comercio(preventista, "Kiosco El Sol", "Lucía", "Fernández", "30111001",
+                "Av. San Martín", "1250", "Ciudad", "50007", "Capital", -32.8943, -68.8441));
+        clientes.add(comercio(preventista, "Almacén Don Pepe", "José", "Ruiz", "30111002",
+                "Belgrano", "480", "Ciudad", "50007", "Capital", -32.8962, -68.8397));
+        clientes.add(comercio(preventista, "Drugstore 24 hs", "María", "Gómez", "30111003",
+                "Las Heras", "220", "Ciudad", "50007", "Capital", -32.8867, -68.8419));
+        clientes.add(comercio(preventista, "Autoservicio La Esquina", "Carlos", "Díaz", "30111004",
+                "Av. Godoy Cruz", "1830", "Godoy Cruz", "50035", "Godoy Cruz", -32.9189, -68.8591));
+        clientes.add(comercio(preventista, "Kiosco Las Palmeras", "Ana", "Morales", "30111005",
+                "Mitre", "765", "Guaymallén", "50042", "Guaymallén", -32.8878, -68.8190));
+        clientes.add(comercio(preventista, "Maxikiosco Cuyo", "Pablo", "Sosa", "30111006",
+                "Boulogne Sur Mer", "90", "Las Heras", "50049", "Las Heras", -32.8583, -68.8420));
+
+        // Los primeros cuatro comercios tienen un pedido ya facturado: el transportista los recibe en su ruta.
+        BigDecimal[] totales = {new BigDecimal("55700.00"), new BigDecimal("71250.00"),
+                new BigDecimal("98400.00"), new BigDecimal("83300.00")};
+        for (int i = 0; i < totales.length; i++) {
+            pedidoRepository.save(Pedido.builder()
+                    .fechaHoraCarga(LocalDateTime.now().minusDays(1).minusMinutes(i * 10L))
+                    .estado(EstadoPedido.FACTURADO)
+                    .cliente(clientes.get(i))
+                    .preventista(preventista)
+                    .subtotal(totales[i])
+                    .total(totales[i])
+                    .build());
+        }
+        log.info("Datos de demostración listos: usuarios preventista.mza, transportista.mza y admin.mza.");
+    }
+
+    private Usuario usuarioEmpleado(String nombreUsuario, Rol rol) {
+        return Usuario.builder()
+                .nombreUsuario(nombreUsuario)
+                .clave(passwordEncoder.encode(AuthService.CLAVE_INICIAL))
+                .rol(rol)
+                .primerIngreso(true)
+                .build();
+    }
+
+    private void crearCasaCentralSiNoExiste() {
+        boolean existe = dulceMayorRepository.findByEliminadoFalse().stream()
+                .anyMatch(d -> d.getTipoEmpresa() == TipoEmpresa.SEDE_CENTRAL);
+        if (existe) {
+            return;
+        }
+        dulceMayorRepository.save(DulceMayor.builder()
+                .razonSocial("Dulce Mayor S.A.").cuit("30-70000000-1")
+                .nombre("Casa Central").tipoEmpresa(TipoEmpresa.SEDE_CENTRAL)
+                .aliasTransferencia("dulce.mayor.mza")
+                .direccion(direccion("Av. España", "1020", "Ciudad", "50007", "Capital", -32.8895, -68.8458))
+                .build());
+    }
+
+    private ClienteMinorista comercio(Preventista preventista, String nombreComercio, String nombreResp,
+                                      String apellidoResp, String dniResp, String calle, String numero,
+                                      String localidad, String departamentoId, String departamento,
+                                      double latitud, double longitud) {
+        List<redSelection.dulceMayor.model.Contacto> contactos = new ArrayList<>();
+        if (!correoResponsables.isEmpty()) {
+            contactos.add(ContactoCorreoElectronico.builder()
+                    .tipoContacto(TipoContacto.LABORAL).principal(true).email(correoResponsables).build());
+        }
+        ResponsableComercio responsable = responsableRepository.save(ResponsableComercio.builder()
+                .nombre(nombreResp).apellido(apellidoResp)
+                .tipoDocumento(TipoDocumento.DNI).numeroDocumento(dniResp)
+                .contactos(contactos)
+                .build());
+        return clienteRepository.save(ClienteMinorista.builder()
+                .razonSocial(nombreComercio).cuit("20-" + dniResp + "-3")
+                .direccion(direccion(calle, numero, localidad, departamentoId, departamento, latitud, longitud))
+                .nombreComercio(nombreComercio)
+                .responsable(responsable)
+                .preventistaAsignado(preventista)
+                .build());
+    }
+
+    /** Provincia de Mendoza (id Georef 50). Los ids de departamento y localidad son de ejemplo. */
+    private Direccion direccion(String calle, String numeracion, String localidad, String departamentoId,
+                                String departamento, double latitud, double longitud) {
+        return direccionRepository.save(Direccion.builder()
+                .calle(calle).numeracion(numeracion)
+                .latitud(latitud).longitud(longitud)
+                .provinciaId("50").provinciaNombre("Mendoza")
+                .departamentoId(departamentoId).departamentoNombre(departamento)
+                .localidadId(departamentoId + "010").localidadNombre(localidad)
+                .build());
+    }
+}

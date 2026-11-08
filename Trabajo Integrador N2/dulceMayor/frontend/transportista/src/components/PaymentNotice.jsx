@@ -5,6 +5,7 @@ import { Icon, PAYMENT_LABEL, fmt } from '@dulcemayor/shared';
  * (Strategy: Efectivo / Transferencia / Billetera QR), así que acá no hay alias hardcodeado.
  */
 export default function PaymentNotice({ method, total, instruction }) {
+  if (!method) return null; // el backend todavía no informa el medio de pago
   if (method === 'EFECTIVO') {
     return (
       <div className="cash">

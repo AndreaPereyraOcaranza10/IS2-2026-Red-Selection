@@ -15,8 +15,8 @@ const CARRIER = { name: 'Marcos Giménez', vehicle: 'Utilitario · AB 123 CD' };
 const ALIAS = 'dulcemayor.mza';
 
 const USERS = {
-  'preventista.mza': { id: 1, username: 'preventista.mza', fullName: 'Preventista Mendoza', role: 'PREVENTOR', password: INITIAL_PASSWORD, mustChangePassword: true },
-  'despacho.mza': { id: 2, username: 'despacho.mza', fullName: 'Despacho Mendoza', role: 'ALMACENERO', password: INITIAL_PASSWORD, mustChangePassword: true },
+  'preventista.mza': { id: 1, username: 'preventista.mza', fullName: 'Preventista Mendoza', role: 'PREVENTISTA', password: INITIAL_PASSWORD, mustChangePassword: true },
+  'transportista.mza': { id: 2, username: 'transportista.mza', fullName: 'Transporte Mendoza', role: 'TRANSPORTISTA', password: INITIAL_PASSWORD, mustChangePassword: true },
 };
 
 const PRODUCTS = [
@@ -96,7 +96,11 @@ const sessionUser = (token) => (token?.startsWith('mock.') ? USERS[token.slice(5
 const userDto = (u) => ({ id: u.id, username: u.username, fullName: u.fullName, role: u.role, mustChangePassword: u.mustChangePassword });
 const session = (u) => ({ token: `mock.${u.username}`, user: userDto(u) });
 
-export async function mockRequest(method, path, body, token) {
+/**
+ * `opciones.confiable`: con el backend real el login ya lo resolvió el servidor, así que lo simulado no vuelve a
+ * pedir la clave ni el cambio de clave inicial.
+ */
+export async function mockRequest(method, path, body, token, opciones = {}) {
   await new Promise((r) => setTimeout(r, DELAY));
   const [p, qs] = path.split('?');
   const q = new URLSearchParams(qs || '');
@@ -119,7 +123,7 @@ export async function mockRequest(method, path, body, token) {
     user.mustChangePassword = false;
     return session(user);
   }
-  if (user.mustChangePassword) {
+  if (user.mustChangePassword && !opciones.confiable) {
     throw new ApiError(403, 'Tenés que cambiar tu clave antes de continuar.', { code: 'PASSWORD_CHANGE_REQUIRED' });
   }
 
