@@ -10,6 +10,11 @@ async function request(path, init = {}) {
   const response = await fetch(API_BASE + path, { ...init, headers });
   if (!response.ok) {
     const body = await response.json().catch(() => null);
+    const isAuthenticationRequest = path.endsWith("/auth/login") || path.endsWith("/auth/register");
+    if (response.status === 401 && !isAuthenticationRequest) {
+      sessionStorage.removeItem("dulcemayor.account");
+      if (window.location.pathname !== "/ingresar") window.location.replace("/ingresar");
+    }
     throw new Error(body?.detail || body?.message || `Error ${response.status}`);
   }
   if (response.status === 204) return;

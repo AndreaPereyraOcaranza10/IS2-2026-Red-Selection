@@ -1,10 +1,10 @@
 import { jsx, jsxs } from "react/jsx-runtime";
-import { LayoutDashboard, Menu, Search, ShoppingBag, UserRound, X } from "lucide-react";
+import { LayoutDashboard, LogOut, Menu, Search, ShoppingBag, UserRound, X } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { ADMIN_ROLES } from "../config";
 import { DollarQuoteBadge } from "./DollarQuoteBadge";
-export function Header({ count, account, onCartClick, onOrdersClick, onLoginClick, onProfileClick, onAdminClick }) {
+export function Header({ count, account, onCartClick, onOrdersClick, onLoginClick, onProfileClick, onAdminClick, onLogoutClick }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const canManage = Boolean(account && ADMIN_ROLES.includes(account.role));
   return /* @__PURE__ */ jsx("header", { className: "site-header", children: /* @__PURE__ */ jsxs("div", { className: "header-inner", children: [
@@ -35,6 +35,10 @@ export function Header({ count, account, onCartClick, onOrdersClick, onLoginClic
         account ? onProfileClick() : onLoginClick();
         setMenuOpen(false);
       }, children: account ? "Mi perfil" : "Ingresar a mi cuenta" })
+      ,account && /* @__PURE__ */ jsxs("button", { className: "nav-link mobile-logout", onClick: () => {
+        onLogoutClick();
+        setMenuOpen(false);
+      }, children: [/* @__PURE__ */ jsx(LogOut, { size: 15 }), " Cerrar sesión"] })
     ] }),
     /* @__PURE__ */ jsxs("div", { className: "header-actions", children: [
       canManage && /* @__PURE__ */ jsxs("button", { className: "admin-shortcut", onClick: onAdminClick, "aria-label": "Ir al panel administrativo", title: "Panel administrativo", children: [
@@ -49,6 +53,10 @@ export function Header({ count, account, onCartClick, onOrdersClick, onLoginClic
         /* @__PURE__ */ jsx(UserRound, { size: 17 }),
         " ",
         /* @__PURE__ */ jsx("span", { children: "Ingresar" })
+      ] }),
+      account && /* @__PURE__ */ jsxs("button", { className: "login-button logout-button", onClick: onLogoutClick, children: [
+        /* @__PURE__ */ jsx(LogOut, { size: 16 }),
+        /* @__PURE__ */ jsx("span", { children: "Cerrar sesión" })
       ] }),
       /* @__PURE__ */ jsxs("button", { className: "cart-button", onClick: onCartClick, children: [
         /* @__PURE__ */ jsx(ShoppingBag, { size: 17 }),

@@ -49,6 +49,12 @@ function App() {
   const goTo = (path) => {
     navigate(path);
   };
+  const logout = () => {
+    sessionStorage.removeItem(ACCOUNT_STORAGE_KEY);
+    setAccount(null);
+    setCartOpen(false);
+    navigate(ROUTES.login);
+  };
   const addProduct = (id) => setQuantities((previous) => ({ ...previous, [String(id)]: (previous[String(id)] || 0) + 1 }));
   const handleOrder = async () => {
     if (!account) {
@@ -78,7 +84,8 @@ function App() {
       onOrdersClick: () => goTo(ROUTES.orders),
       onLoginClick: () => goTo(ROUTES.login),
       onProfileClick: () => goTo(ROUTES.profile),
-      onAdminClick: () => goTo(ROUTES.admin)
+      onAdminClick: () => goTo(ROUTES.admin),
+      onLogoutClick: logout
     }
   );
   const footerActions = /* @__PURE__ */ jsxs(Fragment, { children: [
