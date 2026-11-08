@@ -116,7 +116,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/categorias/**", "/api/subcategorias/**", "/api/imagenes/**", "/api/productos/**")
                         .hasRole("ADMINISTRATIVO")
                         // Cambio de clave: cualquier usuario logueado (incluso con la clave inicial pendiente)
-                        .requestMatchers(HttpMethod.POST, "/api/auth/first-login/change-password", "/api/auth/logout")
+                        .requestMatchers(HttpMethod.POST, "/api/auth/first-login/change-password", "/api/auth/change-password", "/api/auth/logout")
                         .authenticated()
                         // Deny-by-default: lo que no está declarado arriba se rechaza. Un endpoint nuevo sin regla
                         // explícita queda cerrado (403) en lugar de quedar abierto a cualquier logueado.

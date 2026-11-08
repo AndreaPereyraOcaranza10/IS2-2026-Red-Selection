@@ -264,3 +264,5 @@
 .ops-app .ops-table .table-state.state-stock{background:#a61b1b!important;color:#fff!important;border-color:#791313!important;font-weight:800}
 .ops-app .ops-table .table-state.state-loaded{background:#17623a!important;color:#fff!important;border-color:#10472a!important;font-weight:800}
 .ops-app .ops-table .table-state.state-invoice{background:#754b00!important;color:#fff!important;border-color:#563700!important;font-weight:800}
+
+.password-change-section{display:flex;flex-direction:column;gap:14px}.password-change-section .profile-form-footer{padding-bottom:0}.password-required-page .profile-heading{margin:22px 0}

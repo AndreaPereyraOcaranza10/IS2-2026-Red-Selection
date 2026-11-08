@@ -8,6 +8,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import redSelection.dulceMayor.dto.CambioClaveDTO;
+import redSelection.dulceMayor.dto.CambioClaveUsuarioDTO;
 import redSelection.dulceMayor.dto.LoginDTO;
 import redSelection.dulceMayor.dto.SesionDTO;
 import redSelection.dulceMayor.exception.CuentaBloqueadaException;
@@ -110,6 +111,24 @@ public class AuthService {
     }
 
     /** Mismas reglas que muestra el front: 8+ caracteres, mayúscula y número, un símbolo, distinta de la inicial. */
+    @Transactional
+    public SesionDTO cambiarClave(UsuarioAutenticado actual, CambioClaveUsuarioDTO dto) {
+        Usuario usuario = usuarioRepository.findByIdAndEliminadoFalse(actual.getId())
+                .filter(Usuario::isActivo)
+                .orElseThrow(() -> new BadCredentialsException("Credenciales invalidas"));
+        if (usuario.isPrimerIngreso()) {
+            throw new ReglaNegocioException("Debes cambiar la clave inicial antes de continuar.");
+        }
+        if (usuario.getClave() == null || !passwordEncoder.matches(dto.currentPassword(), usuario.getClave())) {
+            throw new ReglaNegocioException("La clave actual es incorrecta.");
+        }
+        validarClaveNueva(dto.newPassword());
+        usuario.setClave(passwordEncoder.encode(dto.newPassword()));
+        usuario.revocarTokens();
+        usuarioRepository.save(usuario);
+        return sesion(usuario);
+    }
+
     private void validarClaveNueva(String clave) {
         if (clave.length() < 8) {
             throw new ReglaNegocioException("La clave debe tener al menos 8 caracteres.");

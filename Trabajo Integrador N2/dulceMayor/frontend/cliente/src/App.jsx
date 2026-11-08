@@ -13,6 +13,7 @@ import { OrdersPage } from "./pages/OrdersPage";
 import { ProfilePage } from "./pages/ProfilePage";
 import { LoginPage } from "./pages/LoginPage";
 import { OperationsDashboardPage } from "./pages/OperationsDashboardPage";
+import { ForcedPasswordPage } from "./pages/ForcedPasswordPage";
 function readAccount() {
   try {
     const value = sessionStorage.getItem(ACCOUNT_STORAGE_KEY);
@@ -55,6 +56,15 @@ function App() {
     setCartOpen(false);
     navigate(ROUTES.login);
   };
+  const persistAccount = (session) => {
+    setAccount(session);
+    sessionStorage.setItem(ACCOUNT_STORAGE_KEY, JSON.stringify(session));
+  };
+  useEffect(() => {
+    if (account?.mustChangePassword && location.pathname !== "/cambiar-clave") {
+      navigate("/cambiar-clave", { replace: true });
+    }
+  }, [account, location.pathname, navigate]);
   const addProduct = (id) => setQuantities((previous) => ({ ...previous, [String(id)]: (previous[String(id)] || 0) + 1 }));
   const handleOrder = async () => {
     if (!account) {
@@ -120,15 +130,15 @@ function App() {
       ] }) }),
       /* @__PURE__ */ jsx(Route, { path: ROUTES.profile, element: /* @__PURE__ */ jsxs(Fragment, { children: [
         header,
-        /* @__PURE__ */ jsx(ProfilePage, { onBack: () => goTo(ROUTES.home) })
+        /* @__PURE__ */ jsx(ProfilePage, { onBack: () => goTo(ROUTES.home), onPasswordChanged: persistAccount })
       ] }) }),
+      /* @__PURE__ */ jsx(Route, { path: "/cambiar-clave", element: /* @__PURE__ */ jsx(ForcedPasswordPage, { account, onComplete: (session) => { persistAccount(session); goTo(ADMIN_ROLES.includes(session.role) ? ROUTES.admin : ROUTES.home); } }) }),
       /* @__PURE__ */ jsx(Route, { path: ROUTES.login, element: /* @__PURE__ */ jsxs(Fragment, { children: [
         header,
         /* @__PURE__ */ jsx(LoginPage, { onSuccess: async (email, password) => {
           const session = await api.login(email, password);
-          setAccount(session);
-          sessionStorage.setItem(ACCOUNT_STORAGE_KEY, JSON.stringify(session));
-          goTo(ADMIN_ROLES.includes(session.role) ? ROUTES.admin : ROUTES.home);
+          persistAccount(session);
+          goTo(session.mustChangePassword ? "/cambiar-clave" : ADMIN_ROLES.includes(session.role) ? ROUTES.admin : ROUTES.home);
         }, onStaff: () => goTo(ROUTES.admin) })
       ] }) }),
       /* @__PURE__ */ jsx(Route, { path: "/admin/*", element: /* @__PURE__ */ jsx(OperationsDashboardPage, { onBack: () => goTo(ROUTES.home) }) }),
