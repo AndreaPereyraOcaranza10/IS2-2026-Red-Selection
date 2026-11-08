@@ -278,13 +278,9 @@ export function OperationsDashboardPage({ onBack }) {
     }
   };
   const changeStock = async (product, stock) => {
-    try {
-      const updated = await api.updateStock(product.id, stock);
-      setInventory((previous) => previous.map((item) => item.id === product.id ? updated : item));
-      setNotice(`Stock actualizado: ${product.name} \xB7 ${stock} unidades.`);
-    } catch (cause) {
-      setNotice(cause instanceof Error ? cause.message : "No se pudo actualizar el stock.");
-    }
+    const updated = await api.updateStock(product.id, stock);
+    setInventory((previous) => previous.map((item) => item.id === product.id ? updated : item));
+    setNotice(`Stock actualizado: ${product.name} \xB7 ${stock} unidades.`);
   };
   const createManualOrderDone = () => {
     setManualOrderOpen(false);

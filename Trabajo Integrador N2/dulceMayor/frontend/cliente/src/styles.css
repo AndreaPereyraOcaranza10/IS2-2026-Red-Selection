@@ -132,6 +132,7 @@
 @media(max-width:720px){.main-nav{min-width:0;max-width:100vw}}
 /* State polish: make feedback distinct, readable and consistent. */
 :focus-visible{outline:3px solid rgba(194,24,91,.28);outline-offset:3px}
+.public-branch-map{display:block;width:100%;height:170px;margin-top:12px;border:0;border-radius:7px;background:var(--color-surface-dim)}.branch-directions{display:inline-block;margin-top:8px;color:var(--color-brand-primary);font-size:11px;font-weight:700}.branch-photo-slot{min-height:58px!important;padding:10px!important;display:flex;align-items:center;justify-content:center;color:var(--color-outline);font-size:11px;text-align:center}.branch-photos{display:flex;gap:8px;overflow-x:auto;padding:12px 12px 0;scroll-snap-type:x proximity}.branch-photos img{width:100%;min-width:100%;height:170px;object-fit:cover;border-radius:7px;scroll-snap-align:start}.branch-photo-upload{display:flex;flex-direction:column;gap:7px;padding:10px 12px;border:1px dashed var(--color-outline-variant);border-radius:6px;color:var(--color-brand-primary);font-size:11px}.branch-photo-upload>span{display:flex;align-items:center;gap:7px;font-weight:700}.branch-photo-upload input{font-size:11px}.branch-photo-upload small{color:var(--color-outline);font-size:10px}.detail-price{display:flex;flex-direction:column;gap:5px;padding:8px 0}.detail-price>span,.detail-price>small,.detail-stock{color:var(--color-outline);font-size:11px}.detail-price>strong{color:var(--color-brand-deep);font:700 27px 'Plus Jakarta Sans'}.detail-description{color:var(--color-outline);font-size:12px;line-height:1.6}.detail-stock.available{color:var(--color-secondary)}.detail-stock.unavailable{color:var(--color-error)}.quantity-stepper button:disabled{opacity:.5;cursor:not-allowed}.detail-add:disabled{opacity:.6;cursor:not-allowed}
 .add-button{min-height:40px;border-radius:8px;transition:background-color .18s ease,border-color .18s ease,color .18s ease,transform .18s ease,box-shadow .18s ease}
 .add-button:hover{transform:translateY(-1px);box-shadow:0 5px 12px var(--color-shadow-brand-soft)}
 .add-button.added{background:var(--color-success-soft);border-color:rgba(0,121,107,.2);color:var(--color-secondary-deep);box-shadow:none}
@@ -263,6 +264,81 @@
 .ops-app .stock-alerts .alert-pill.warning{background:#702208!important;color:#fff!important;border:1px solid #511805!important;font-weight:800}
 .ops-app .ops-table .table-state.state-stock{background:#a61b1b!important;color:#fff!important;border-color:#791313!important;font-weight:800}
 .ops-app .ops-table .table-state.state-loaded{background:#17623a!important;color:#fff!important;border-color:#10472a!important;font-weight:800}
+html,body,#root{width:100%;max-width:100%}body{min-width:0}#root{min-width:0;overflow-x:clip}
+@media(max-width:650px){body{min-width:0;overflow-x:clip}#root,.site-header,.header-inner,.main-nav,.hero,.catalog-section,.branches-section,.site-footer,.detail-page,.orders-page,.profile-page,.login-page,.ops-app,.ops-main{min-width:0;max-width:100%}.header-inner,.hero,.catalog-section,.branches-section,.site-footer,.detail-page,.orders-page,.profile-page,.login-page{width:100%}}
+
+/* Mobile operations dashboard */
+@media(max-width:650px){
+  .ops-app{min-height:100dvh;background:var(--color-surface-dim)}
+  .ops-sidebar{padding:10px 12px 0;background:var(--color-surface);box-shadow:0 2px 8px var(--color-shadow-brand-soft)}
+  .ops-logo{min-height:42px;padding:0 0 9px;gap:9px}
+  .ops-logo>span{width:34px;height:34px;border-radius:10px;font-size:14px}
+  .ops-logo b{font-size:14px}
+  .ops-logo small{font-size:8px}
+  .ops-new-order{top:10px;right:12px;width:auto;min-width:40px;height:36px;padding:0 10px;font-size:10px;white-space:nowrap}
+  .ops-new-order svg{width:16px;height:16px;flex:none}
+  .ops-sidebar nav{margin:0 -12px;padding:4px 12px 9px;gap:6px;scrollbar-width:none}
+  .ops-sidebar nav::-webkit-scrollbar{display:none}
+  .ops-nav-item{height:38px;padding:0 11px;gap:7px;border:1px solid transparent;border-radius:8px;font-size:10px;white-space:nowrap}
+  .ops-nav-item svg{width:15px;height:15px;flex:none}
+  .ops-nav-item.active{border-color:var(--color-outline-variant)}
+  .ops-topbar{height:48px;padding:0 14px}
+  .ops-topbar>div:first-child{gap:6px;min-width:0}
+  .ops-topbar>div:first-child b{font-size:11px;white-space:nowrap}
+  .ops-topbar>div:first-child span{font-size:9px;white-space:nowrap}
+  .ops-top-actions{gap:8px}
+  .ops-top-actions>button{width:34px;height:34px;border-radius:9px}
+  .ops-user-avatar{width:32px;height:32px;flex:none}
+  .ops-content{padding:17px 14px 26px}
+  .ops-breadcrumb{gap:6px;margin-bottom:14px;font-size:9px;flex-wrap:wrap}
+  .ops-heading{align-items:center;gap:12px;margin-bottom:18px}
+  .ops-heading>div:first-child{min-width:0}
+  .ops-heading h1{font-size:clamp(20px,6vw,25px);line-height:1.2}
+  .ops-heading p{max-width:34ch;font-size:10px;line-height:1.45}
+  .ops-heading>div:last-child{flex:none;gap:7px}
+  .ops-secondary,.ops-primary{width:40px;height:40px;justify-content:center;padding:0;border-radius:10px;font-size:0}
+  .ops-secondary svg,.ops-primary svg{width:17px;height:17px}
+  .ops-kpi-title{align-items:flex-start;gap:8px;margin-bottom:11px}
+  .ops-kpi-title>b{font-size:12px}
+  .ops-kpi-title>span{font-size:9px;white-space:nowrap;padding-top:2px}
+  .kpi-grid{gap:9px}
+  .kpi-card{min-height:126px;padding:12px;border-radius:10px}
+  .kpi-icon{width:32px;height:32px;border-radius:8px}
+  .kpi-icon svg{width:16px;height:16px}
+  .kpi-card>small{left:53px;right:8px;top:17px;font-size:10px;line-height:1.35}
+  .kpi-card>strong{font-size:23px;margin:12px 0 10px}
+  .kpi-card>strong em{font-size:10px}
+  .kpi-card>button{font-size:9px;line-height:1.4;text-align:left}
+  .ops-middle-grid{gap:10px;margin-top:12px}
+  .dispatch-card,.quick-actions,.orders-table-card,.stock-alerts{border-radius:10px}
+  .dispatch-card>header{padding:13px}
+  .dispatch-card h2,.quick-actions h2,.stock-alerts h2{font-size:12px}
+  .dispatch-card header small,.stock-alerts header small{font-size:9px}
+  .dispatch-progress{padding:13px}
+  .dispatch-progress>div:first-child>b,.dispatch-meta{font-size:9px}
+  .dispatch-progress>div:first-child>strong{font-size:18px}
+  .dispatch-footer{padding:11px 13px;font-size:9px;line-height:1.4}
+  .dispatch-footer span{width:auto;margin:0 0 0 auto}
+  .quick-actions{display:block;padding:14px}
+  .quick-actions h2{margin-bottom:10px}
+  .quick-actions button{min-height:42px;height:auto;margin-top:8px;padding:8px 10px;border-radius:8px;font-size:10px;text-align:left}
+  .quick-actions button svg{width:16px;height:16px;flex:none}
+  .orders-table-card{margin-top:12px}
+}
+@media(max-width:380px){
+  .ops-content{padding-right:12px;padding-left:12px}
+  .ops-heading{align-items:flex-start}
+  .ops-heading p{max-width:27ch}
+  .kpi-grid{grid-template-columns:minmax(0,1fr)}
+  .kpi-card{min-height:112px}
+  .kpi-card>strong{margin:8px 0}
+  .dispatch-footer span{width:100%;margin:3px 0 0 17px}
+}
 .ops-app .ops-table .table-state.state-invoice{background:#754b00!important;color:#fff!important;border-color:#563700!important;font-weight:800}
 
 .password-change-section{display:flex;flex-direction:column;gap:14px}.password-change-section .profile-form-footer{padding-bottom:0}.password-required-page .profile-heading{margin:22px 0}
+.cart-item{grid-template-columns:58px minmax(0,1fr) auto auto;gap:9px}.cart-item>div{min-width:0}.cart-item>div>b{overflow-wrap:anywhere}.cart-remove{width:32px;height:32px;display:grid;place-items:center;border:1px solid var(--color-surface-dim);border-radius:7px;background:var(--color-surface);color:var(--color-error);cursor:pointer}.cart-remove:hover{background:var(--color-surface-dim);border-color:var(--color-error)}.add-button:disabled{opacity:.62;cursor:not-allowed;transform:none;box-shadow:none}.quantity-stepper button:disabled{opacity:.45;cursor:not-allowed}
+.ops-site-link{height:34px;padding:0 11px;display:inline-flex;align-items:center;justify-content:center;gap:7px;border:1px solid var(--color-surface-dim);border-radius:8px;background:var(--color-surface);color:var(--color-brand-primary);font-size:10px;font-weight:700;text-decoration:none;white-space:nowrap}
+.ops-site-link svg{width:15px;height:15px;flex:none}
+.ops-site-link:hover{background:var(--color-surface-dim);border-color:var(--color-primary-soft)}
+@media(max-width:650px){.ops-site-link{width:34px;height:34px;padding:0;border-radius:9px}.ops-site-link span{display:none}}

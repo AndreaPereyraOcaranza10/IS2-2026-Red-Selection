@@ -13,15 +13,15 @@
   color-scheme:light;
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{height:100%;margin:0}
+html,body{height:100%;width:100%;max-width:100%;margin:0}
 body{background:var(--subtle);color:var(--text);font:400 16px/24px var(--font);overflow:hidden}
 button,input,select{font:inherit;color:inherit}
 button{cursor:pointer;border:0;background:none;padding:0}
 :focus-visible{outline:3px solid var(--secondary);outline-offset:2px}
 h1,h2,h3,p{margin:0}
-.app-root{position:relative;height:100%;width:100%;max-width:1040px;margin:0 auto;background:var(--bg);overflow:hidden}
+.app-root{position:relative;height:100%;width:100%;min-width:0;max-width:min(1040px,100vw);margin:0 auto;background:var(--bg);overflow:hidden}
 @media(min-width:1100px){.app-root{box-shadow:0 0 0 1px var(--border)}}
-.screen{position:absolute;inset:0;display:flex;flex-direction:column;background:var(--bg)}
+.screen{position:absolute;inset:0;width:100%;min-width:0;max-width:100%;display:flex;flex-direction:column;background:var(--bg)}
 .in-right{animation:inR .28s ease-out}.in-left{animation:inL .28s ease-out}.in-fade{animation:inF .2s ease-out}
 @keyframes inR{from{transform:translateX(100%)}to{transform:none}}
 @keyframes inL{from{transform:translateX(-30%);opacity:.4}to{transform:none;opacity:1}}
@@ -35,7 +35,8 @@ h1,h2,h3,p{margin:0}
 .icon-btn:active{background:var(--subtle)}
 .icon-btn.pri{color:var(--primary)}
 /* main */
-.main{flex:1;overflow-y:auto;overscroll-behavior:contain;padding:16px;display:flex;flex-direction:column;gap:16px;position:relative}
+.main{flex:1;width:100%;min-width:0;max-width:100%;overflow-y:auto;overflow-x:clip;overscroll-behavior:contain;padding:16px;display:flex;flex-direction:column;gap:16px;position:relative}
+.main>*{min-width:0;max-width:100%}
 .main.flush{padding:0;gap:0}
 @media(min-width:768px){.main{padding:24px}}
 @media(min-width:1100px){.main{padding:32px}}
@@ -72,7 +73,7 @@ h1,h2,h3,p{margin:0}
 .tag.ok{background:var(--ok-bg);color:var(--ok)}.tag.low{background:var(--warn-bg);color:var(--warn)}
 h2{font-size:18px;line-height:24px;font-weight:700}
 .muted{color:var(--muted)}.sec{color:var(--text-2)}.small{font-size:14px;line-height:20px;font-weight:600}.cap{font-size:12px;line-height:16px;font-weight:600}
-.row{display:flex;align-items:center;gap:12px}.col{display:flex;flex-direction:column;gap:12px}.grow{flex:1;min-width:0}
+.row{display:flex;align-items:center;gap:12px;min-width:0;max-width:100%}.row>*{min-width:0}.col{display:flex;flex-direction:column;gap:12px;min-width:0;max-width:100%}.grow{flex:1;min-width:0}
 .price{font-size:20px;line-height:24px;font-weight:800;color:var(--primary)}
 /* stop card */
 .stop{overflow:hidden;padding:0}
