@@ -32,8 +32,4 @@ build/
 ### VS Code ###
 .vscode/
 
-<<<<<<< Updated upstream
 .env
-=======
-.env
->>>>>>> Stashed changes
