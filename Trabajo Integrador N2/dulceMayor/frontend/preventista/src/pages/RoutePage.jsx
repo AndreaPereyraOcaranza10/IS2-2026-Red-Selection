@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  Async, EmptyState, Fab, IconButton, Layout, MapView, OptimizeRouteButton, RoutePlanBanner, StopCard, SwipeRow,
+  Async, EmptyState, Fab, Greeting, IconButton, Layout, MapView, OptimizeRouteButton, RoutePlanBanner, StopCard, SwipeRow,
   capitalize, originPin, stopDestination, useAsync, useDirections, useRefresh, useRouteOptimizer,
 } from '@dulcemayor/shared';
 import { preventistaApi } from '../api.js';
@@ -58,6 +58,7 @@ export default function RoutePage() {
                 <MapView pins={pins} route={!plan} line={plan ? plan.geometry : null} onPinClick={(id) => setSelected(r.stops.find((s) => s.id === id))} />
               </div>
               <div className="col">
+                <Greeting shortcuts={[{ to: '/catalogo', label: 'Catálogo', icon: 'cat' }, { to: '/pedido', label: 'Nuevo pedido', icon: 'ped' }]} />
                 <div>
                   <h2>{today}</h2>
                   <p className="small sec">

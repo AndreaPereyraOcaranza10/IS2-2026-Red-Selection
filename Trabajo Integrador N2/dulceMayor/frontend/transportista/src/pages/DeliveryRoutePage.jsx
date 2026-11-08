@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { Async, EmptyState, IconButton, Layout, MapView, OptimizeRouteButton, RoutePlanBanner, StopCard, SwipeRow, originPin, stopDestination, useAsync, useDirections, useRefresh, useRouteOptimizer } from '@dulcemayor/shared';
+import { Async, EmptyState, Greeting, IconButton, Layout, MapView, OptimizeRouteButton, RoutePlanBanner, StopCard, SwipeRow, originPin, stopDestination, useAsync, useDirections, useRefresh, useRouteOptimizer } from '@dulcemayor/shared';
 import { deliveryApi } from '../api.js';
 import DeliveryNav from '../components/DeliveryNav.jsx';
 
@@ -42,6 +42,7 @@ export default function DeliveryRoutePage() {
                 <MapView pins={plan ? [originPin(plan.origin), ...pins] : pins} route={!plan} line={plan ? plan.geometry : null} onPinClick={(id) => navigate(`/reparto/${id}`)} />
               </div>
               <div className="col">
+                <Greeting shortcuts={[{ to: '/mapa', label: 'Mapa', icon: 'map' }, { to: '/entregas', label: 'Entregas hechas', icon: 'done' }]} />
                 <div>
                   <h2>Ruta de reparto de hoy</h2>
                   <p className="small sec">

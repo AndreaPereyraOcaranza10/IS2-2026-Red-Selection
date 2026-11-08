@@ -4,6 +4,7 @@ import { Icon } from './Icon.jsx';
 import { ToastProvider } from './Toast.jsx';
 import { DirectionsProvider } from './Directions.jsx';
 import { usePullToRefresh } from '../hooks/hooks.js';
+import { useAuth } from '../auth/AuthContext.jsx';
 
 /** Contenedor raíz de la app: columna centrada de 1040px + host de snackbars. */
 export function AppRoot({ children }) {
@@ -53,6 +54,7 @@ export function IconButton({ icon, label, onClick, badge, primary = true, size =
  */
 export function Layout({ title, back, backTo = '/', actions, bar, nav, fab, flush, onRefresh, refreshing, children }) {
   const navigate = useNavigate();
+  const { logout } = useAuth() ?? {};
   const mainRef = useRef(null);
   usePullToRefresh(mainRef, onRefresh);
 
@@ -72,6 +74,12 @@ export function Layout({ title, back, backTo = '/', actions, bar, nav, fab, flus
           )}
           <h1>{title}</h1>
           {actions}
+          {/* Pantallas raíz: botón para cerrar sesión (descarta el token; RequireAuth redirige a /login). */}
+          {!back && logout && (
+            <button className="icon-btn" onClick={logout} aria-label="Cerrar sesión" title="Cerrar sesión">
+              <Icon name="logout" />
+            </button>
+          )}
         </header>
       ) : null}
       <main className={`main ${flush ? 'flush' : ''}`} ref={mainRef}>
