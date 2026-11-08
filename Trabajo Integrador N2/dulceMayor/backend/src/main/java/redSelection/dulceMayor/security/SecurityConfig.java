@@ -55,9 +55,14 @@ public class SecurityConfig {
                                 "No tenés permisos para esta operación.", "FORBIDDEN")))
                 .authorizeHttpRequests(a -> a
                         // Público
-                        .requestMatchers(HttpMethod.POST, "/api/auth/login").permitAll()
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/auth/login", "/api/auth/register").permitAll()
                         .requestMatchers("/actuator/health", "/error").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/catalogo/**", "/api/ubicacion/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/products/**", "/api/exchange-rate/**",
+                                "/api/locations/**", "/api/companies/branches").permitAll()
+                        .requestMatchers("/api/admin/**").hasRole("ADMINISTRATIVO")
+                        .requestMatchers(HttpMethod.PATCH, "/api/orders/*/status").hasRole("ADMINISTRATIVO")
                         // Cada empleado ve solo su ruta
                         .requestMatchers(HttpMethod.GET, "/api/rutas/preventista/{id}/hoy").access(propia(Rol.PREVENTISTA))
                         .requestMatchers(HttpMethod.GET, "/api/rutas/transportista/{id}/hoy").access(propia(Rol.TRANSPORTISTA))

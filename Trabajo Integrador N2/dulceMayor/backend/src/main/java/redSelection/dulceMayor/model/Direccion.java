@@ -27,6 +27,9 @@ public class Direccion extends Base {
 
     private String barrio;
     private String referencia;
+    private String manzanaPiso;
+    private String casaDepartamento;
+    private String codigoPostal;
     private Double latitud;
     private Double longitud;
 

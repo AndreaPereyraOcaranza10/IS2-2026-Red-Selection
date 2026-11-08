@@ -23,7 +23,7 @@ public abstract class Empresa extends Base {
     @Column(nullable = false)
     private String cuit;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinColumn(name = "direccion_id", nullable = false)
     private Direccion direccion;
 

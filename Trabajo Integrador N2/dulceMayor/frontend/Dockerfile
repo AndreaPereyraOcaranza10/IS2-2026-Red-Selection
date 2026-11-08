@@ -1,6 +1,7 @@
 # Dockerfile multi-stage del frontend. Una imagen por app:
 #   docker build --build-arg APP=preventista   -t dulcemayor-preventista .
 #   docker build --build-arg APP=transportista -t dulcemayor-transportista .
+#   docker build --build-arg APP=cliente       -t dulcemayor-cliente .
 
 # ---------- 1) build ----------
 FROM node:20-alpine AS build
@@ -15,6 +16,7 @@ COPY package.json ./
 COPY shared/package.json shared/
 COPY preventista/package.json preventista/
 COPY transportista/package.json transportista/
+COPY cliente/package.json cliente/
 RUN npm install --no-audit --no-fund
 
 COPY shared shared
