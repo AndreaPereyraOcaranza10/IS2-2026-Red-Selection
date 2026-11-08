@@ -3,13 +3,20 @@
   "version": "1.0.0",
   "private": true,
   "type": "module",
-  "workspaces": ["shared", "preventista", "transportista", "cliente"],
+  "workspaces": [
+    "shared",
+    "preventista",
+    "transportista",
+    "cliente",
+    "admin"
+  ],
   "scripts": {
     "dev:preventista": "npm run dev -w preventista",
     "dev:transportista": "npm run dev -w transportista",
     "dev:cliente": "npm run dev -w cliente",
-    "build": "npm run build -w preventista && npm run build -w transportista && npm run build -w cliente",
-    "test": "vitest run"
+    "build": "npm run build -w preventista && npm run build -w transportista && npm run build -w cliente && npm run build -w admin",
+    "test": "vitest run",
+    "dev:admin": "npm run dev -w admin"
   },
   "dependencies": {
     "react": "^18.3.1",

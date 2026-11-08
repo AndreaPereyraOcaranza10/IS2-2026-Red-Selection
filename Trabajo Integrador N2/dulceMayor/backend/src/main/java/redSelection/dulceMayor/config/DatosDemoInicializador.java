@@ -108,6 +108,11 @@ public class DatosDemoInicializador implements ApplicationRunner {
                     .build());
             log.info("Jefe administrativo listo: usuario jefe.mza (clave inicial '{}').", AuthService.CLAVE_INICIAL);
         }
+        // Mantener disponible la cuenta demo aunque la base ya tuviera datos parciales.
+        if (usuarioRepository.findByNombreUsuarioIgnoreCase("admin.mza").isEmpty()) {
+            usuarioRepository.save(usuarioEmpleado("admin.mza", Rol.ADMINISTRATIVO));
+            log.info("Administrativo de demostracion listo: usuario admin.mza (clave inicial '{}').", AuthService.CLAVE_INICIAL);
+        }
     }
 
     private void cargarDatosBase() {

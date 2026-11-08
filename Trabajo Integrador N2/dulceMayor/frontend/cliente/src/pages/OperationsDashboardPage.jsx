@@ -29,7 +29,7 @@ const stateLabels = { CARGADO: "Cargado", PENDIENTE_STOCK: "Pendiente de stock",
 const nextState = { CARGADO: "FACTURADO", FACTURADO: "EN_REPARTO", EN_REPARTO: "ENTREGADO" };
 const currency = new Intl.NumberFormat("es-AR", { style: "currency", currency: "ARS", maximumFractionDigits: 0 });
 const moneyCompact = new Intl.NumberFormat("es-AR", { style: "currency", currency: "ARS", notation: "compact", maximumFractionDigits: 2 });
-const orderId = (id) => `#DM-${id.slice(0, 5).toUpperCase()}`;
+const orderId = (id) => `#DM-${String(id).slice(0, 5).toUpperCase()}`;
 const orderDate = (date) => new Date(date).toLocaleString("es-AR", { dateStyle: "short", timeStyle: "short" });
 const isInvoiced = (order) => Boolean(order.invoicedAt) || ["FACTURADO", "EN_REPARTO", "ENTREGADO"].includes(order.status);
 function ManualOrderModal({ products, onClose, onCreated }) {

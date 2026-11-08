@@ -18,6 +18,8 @@ const ALIAS = 'dulcemayor.mza';
 const USERS = {
   'preventista.mza': { id: 1, username: 'preventista.mza', fullName: 'Preventista Mendoza', role: 'PREVENTISTA', password: INITIAL_PASSWORD, mustChangePassword: true },
   'transportista.mza': { id: 2, username: 'transportista.mza', fullName: 'Transporte Mendoza', role: 'TRANSPORTISTA', password: INITIAL_PASSWORD, mustChangePassword: true },
+  'admin.mza': { id: 3, username: 'admin.mza', fullName: 'Administracion Mendoza', role: 'ADMINISTRATIVO', password: INITIAL_PASSWORD, mustChangePassword: true },
+  'jefe.mza': { id: 4, username: 'jefe.mza', fullName: 'Jefatura Mendoza', role: 'JEFE_ADMINISTRATIVO', password: INITIAL_PASSWORD, mustChangePassword: true },
 };
 
 const PRODUCTS = [

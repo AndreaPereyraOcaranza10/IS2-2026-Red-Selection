@@ -62,7 +62,7 @@ export function LoginPage({ title, allowedRoles, demoUser, home = '/' }) {
           value={password}
           autoComplete="current-password"
           onChange={(e) => setPassword(e.target.value)}
-          help={`Primer ingreso: la clave inicial es «${INITIAL_PASSWORD}»`}
+          help={USE_MOCK ? `Demo: clave inicial ${INITIAL_PASSWORD}` : 'El acceso se valida contra los usuarios de la base del backend.'}
           right={
             <button type="button" className="icon-btn" style={{ marginRight: -12 }} onClick={() => setShow((s) => !s)} aria-label="Mostrar clave">
               <Icon name="eye" />
