@@ -154,7 +154,8 @@ public class ProductoService extends BaseService<Producto, ProductoCrearDTO, Pro
         return new ProductoRespuestaDTO(
                 p.getId(), p.getCodigo(), p.getNombre(), p.getDescripcion(), p.getMarca(),
                 p.getPresentacion(), p.getUnidadesPorPresentacion(),
-                p.getSubCategoria().getCategoria().getNombre(), p.getSubCategoria().getNombre(),
+                p.getSubCategoria().getCategoria().getId(), p.getSubCategoria().getCategoria().getNombre(),
+                p.getSubCategoria().getId(), p.getSubCategoria().getNombre(),
                 precioService.precioVigente(p.getId(), LocalDate.now()).orElse(null),
                 stockActual, p.getStockMinimo(), p.isEnOferta(), stockActual > 0,
                 p.getImagen() != null ? p.getImagen().getId() : null);

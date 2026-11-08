@@ -48,13 +48,14 @@ async function request(method, path, body) {
     }
     let res;
     try {
+      const isFormData = typeof FormData !== 'undefined' && body instanceof FormData;
       res = await fetch(BASE_URL + path, {
         method,
         headers: {
-          'Content-Type': 'application/json',
+          ...(!isFormData ? { 'Content-Type': 'application/json' } : {}),
           ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },
-        body: body === undefined ? undefined : JSON.stringify(body),
+        body: body === undefined ? undefined : isFormData ? body : JSON.stringify(body),
       });
     } catch {
       throw new ApiError(0, 'No pudimos conectarnos. Revisá tu conexión a internet y volvé a intentar.', {
@@ -81,6 +82,7 @@ async function request(method, path, body) {
 export const api = {
   get: (path) => request('GET', path),
   post: (path, body) => request('POST', path, body ?? {}),
+  upload: (path, formData) => request('POST', path, formData),
   put: (path, body) => request('PUT', path, body),
   patch: (path, body) => request('PATCH', path, body),
   delete: (path) => request('DELETE', path),

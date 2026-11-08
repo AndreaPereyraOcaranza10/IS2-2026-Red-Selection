@@ -15,6 +15,7 @@ export * from './components/Timeline.jsx';
 export * from './components/States.jsx';
 export * from './components/Greeting.jsx';
 export * from './components/Field.jsx';
+export * from './components/ProductsAdminPage.jsx';
 export * from './components/SelectField.jsx';
 export * from './hooks/hooks.js';
 export * from './hooks/lookup.js'; 

@@ -14,7 +14,9 @@ public record ProductoRespuestaDTO(
         Presentacion presentacion,
         int unidadesPorPresentacion,
 
+        String categoriaId,
         String categoria,
+        String subCategoriaId,
         String subCategoria,
 
         BigDecimal precio,
