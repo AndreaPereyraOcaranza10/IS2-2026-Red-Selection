@@ -70,7 +70,8 @@ public class SecurityConfig {
                                 "No tenés permisos para esta operación.", "FORBIDDEN")))
                 .authorizeHttpRequests(a -> a
                         // Público
-                        .requestMatchers(HttpMethod.POST, "/api/auth/login").permitAll()
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/auth/login", "/api/auth/register").permitAll()
                         .requestMatchers("/actuator/health", "/error").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/catalogo/**", "/api/ubicacion/**").permitAll()
                         // Las imágenes del catálogo se muestran en el sitio público (<img> no manda token); los ids son UUID
@@ -78,6 +79,11 @@ public class SecurityConfig {
                         // Cada empleado ve solo su ruta (el administrativo y el jefe ven cualquiera).
                         // Nota de diseño: el administrativo NO registra visitas ni entregas, aunque pueda ver rutas;
                         // eso es a propósito: quien opera la ruta es el preventista/transportista dueño de la parada.
+                        .requestMatchers(HttpMethod.GET, "/api/products/**", "/api/exchange-rate/**",
+                                "/api/locations/**", "/api/companies/branches").permitAll()
+                        .requestMatchers("/api/admin/**").hasRole("ADMINISTRATIVO")
+                        .requestMatchers(HttpMethod.PATCH, "/api/orders/*/status").hasRole("ADMINISTRATIVO")
+                        // Cada empleado ve solo su ruta
                         .requestMatchers(HttpMethod.GET, "/api/rutas/preventista/{id}/hoy").access(propia(Rol.PREVENTISTA))
                         .requestMatchers(HttpMethod.GET, "/api/rutas/transportista/{id}/hoy").access(propia(Rol.TRANSPORTISTA))
                         .requestMatchers(HttpMethod.POST, "/api/rutas/paradas/*/visita").hasRole("PREVENTISTA")

@@ -3,15 +3,12 @@
   "version": "1.0.0",
   "private": true,
   "type": "module",
-  "workspaces": [
-    "shared",
-    "preventista",
-    "transportista"
-  ],
+  "workspaces": ["shared", "preventista", "transportista", "cliente"],
   "scripts": {
     "dev:preventista": "npm run dev -w preventista",
     "dev:transportista": "npm run dev -w transportista",
-    "build": "npm run build -w preventista && npm run build -w transportista",
+    "dev:cliente": "npm run dev -w cliente",
+    "build": "npm run build -w preventista && npm run build -w transportista && npm run build -w cliente",
     "test": "vitest run"
   },
   "dependencies": {
