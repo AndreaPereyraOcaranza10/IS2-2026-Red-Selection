@@ -2,6 +2,7 @@ package redSelection.dulceMayor.service;
 
 import org.springframework.stereotype.Service;
 import redSelection.dulceMayor.dto.DireccionNormalizadaDTO;
+import redSelection.dulceMayor.dto.UbicacionInversaDTO;
 import redSelection.dulceMayor.dto.UbicacionResueltaDTO;
 import redSelection.dulceMayor.dto.UnidadTerritorialDTO;
 import redSelection.dulceMayor.exception.ReglaNegocioException;
@@ -53,6 +54,15 @@ public class UbicacionService {
     public Optional<DireccionNormalizadaDTO> geocodificar(String calle, String numeracion, UbicacionResueltaDTO ubicacion) {
         return proveedor.normalizarDireccion(calle, numeracion,
                 ubicacion.provincia().id(), ubicacion.departamento().id());
+    }
+
+    /** Provincia y departamento de unas coordenadas dentro de Argentina; vacío si Georef no las ubica. */
+    public Optional<UbicacionInversaDTO> inversa(double latitud, double longitud) {
+        // La forma negada también rechaza NaN.
+        if (!(latitud >= -56 && latitud <= -21 && longitud >= -74 && longitud <= -53)) {
+            throw new ReglaNegocioException("Las coordenadas están fuera de Argentina");
+        }
+        return proveedor.ubicarCoordenadas(latitud, longitud);
     }
 
     private UnidadTerritorialDTO buscar(List<UnidadTerritorialDTO> opciones, String id, String descripcion) {

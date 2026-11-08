@@ -12,10 +12,9 @@ const PENDIENTES_DE_BACKEND = [
   '/api/products',
   '/api/promotions',
   '/api/orders',
-  '/api/points-of-sale',
-  '/api/geo/',
   '/api/delivery/',
 ];
+
 const simulado = (path) => USE_MOCK || PENDIENTES_DE_BACKEND.some((p) => path.startsWith(p));
 const BASE_URL = import.meta.env.VITE_API_URL ?? '';
 

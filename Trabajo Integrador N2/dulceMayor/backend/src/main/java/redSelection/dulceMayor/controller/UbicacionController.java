@@ -1,9 +1,11 @@
 package redSelection.dulceMayor.controller;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import redSelection.dulceMayor.dto.UbicacionInversaDTO;
 import redSelection.dulceMayor.dto.UnidadTerritorialDTO;
 import redSelection.dulceMayor.service.UbicacionService;
 
@@ -33,5 +35,13 @@ public class UbicacionController {
     @GetMapping("/localidades")
     public List<UnidadTerritorialDTO> localidades(@RequestParam String departamentoId) {
         return ubicacionService.localidades(departamentoId);
+    }
+
+    /** "Usar mi ubicación": provincia y departamento de unas coordenadas. 204 si no se pudieron determinar. */
+    @GetMapping("/inversa")
+    public ResponseEntity<UbicacionInversaDTO> inversa(@RequestParam double lat, @RequestParam double lon) {
+        return ubicacionService.inversa(lat, lon)
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.noContent().build());
     }
 }

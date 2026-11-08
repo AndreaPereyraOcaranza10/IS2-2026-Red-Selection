@@ -1,5 +1,6 @@
 import { api, getActorId } from './http.js';
 
+
 /**
  * Adapter de la API de rutas del backend (`/api/rutas/**`, DTOs en español) hacia el modelo que usan las pantallas
  * (paradas con `name`, `address`, `lat`, `status`...). Las pantallas no conocen ni las URLs ni los nombres del backend.

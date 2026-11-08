@@ -15,7 +15,7 @@
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{height:100%;margin:0}
 body{background:var(--subtle);color:var(--text);font:400 16px/24px var(--font);overflow:hidden}
-button,input{font:inherit;color:inherit}
+button,input,select{font:inherit;color:inherit}
 button{cursor:pointer;border:0;background:none;padding:0}
 :focus-visible{outline:3px solid var(--secondary);outline-offset:2px}
 h1,h2,h3,p{margin:0}
@@ -101,6 +101,8 @@ h2{font-size:18px;line-height:24px;font-weight:700}
 .field label{font-size:14px;line-height:20px;font-weight:600;color:var(--text-2)}
 .input{display:flex;align-items:center;gap:8px;height:56px;padding:0 16px;background:var(--surface);border:1px solid var(--border-strong);border-radius:var(--r-md)}
 .input input{flex:1;min-width:0;border:0;outline:0;background:none;height:100%;font-size:16px}
+.input select{flex:1;min-width:0;border:0;outline:0;background:none;height:100%;font-size:16px;appearance:none;-webkit-appearance:none;cursor:pointer}
+.input select:disabled{color:var(--muted);cursor:not-allowed}
 .input:focus-within{border:3px solid var(--secondary);padding:0 14px}
 .field.err .input{border:2px solid var(--err);padding:0 15px}.field.ok .input{border:2px solid var(--ok);padding:0 15px}
 .help{font-size:12px;line-height:16px;font-weight:600;color:var(--muted)}.field.err .help{color:var(--err)}.field.ok .help{color:var(--ok)}

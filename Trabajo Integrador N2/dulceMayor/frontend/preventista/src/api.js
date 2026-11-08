@@ -1,4 +1,4 @@
-import { api, createRouteApi } from '@dulcemayor/shared';
+import { api, createRouteApi, locationApi, pointOfSaleApi } from '@dulcemayor/shared';
 
 const routes = createRouteApi('preventista');
 
@@ -8,13 +8,18 @@ export const preventistaApi = {
   route: routes.route,
   optimizeRoute: routes.optimizeRoute,
   markVisited: routes.markVisited,
-  // Pendientes de backend (pedidos, promociones, puntos de venta): contrato del README.
+  // Puntos de venta, responsables y ubicación (Georef): backend real.
+  createPointOfSale: pointOfSaleApi.create,
+  searchResponsibles: pointOfSaleApi.searchResponsibles,
+  provinces: locationApi.provinces,
+  departments: locationApi.departments,
+  localities: locationApi.localities,
+  locate: locationApi.locate,
+  // Pendientes de backend (pedidos, promociones, zona): contrato del README.
   zone: () => api.get('/api/preventor/zone'),
   products: () => api.get('/api/products'),
   validatePromo: (code) => api.post('/api/promotions/validate', { code }),
   createOrder: (dto) => api.post('/api/orders', dto),
   orders: () => api.get('/api/orders'),
   order: (id) => api.get(`/api/orders/${id}`),
-  createPointOfSale: (dto) => api.post('/api/points-of-sale', dto),
-  reverseGeocode: (lat, lng) => api.get(`/api/geo/reverse?lat=${lat}&lng=${lng}`),
 };

@@ -66,6 +66,13 @@ public class SecurityConfig {
                         .requestMatchers("/api/rutas/*/orden", "/api/rutas/*/optimizar")
                         .hasAnyRole("PREVENTISTA", "TRANSPORTISTA")
                         .requestMatchers("/api/ruteo/**").hasAnyRole("PREVENTISTA", "TRANSPORTISTA", "ADMINISTRATIVO")
+                        // Puntos de venta: el preventista da de alta y ve SOLO los suyos (lo exige PuntoVentaService);
+                        // dar de baja es del administrativo
+                        .requestMatchers(HttpMethod.DELETE, "/api/puntos-venta/**").hasRole("ADMINISTRATIVO")
+                        .requestMatchers("/api/puntos-venta/**").hasAnyRole("PREVENTISTA", "ADMINISTRATIVO")
+                        // Responsables: el preventista solo busca (para elegir uno ya cargado); el resto es administración
+                        .requestMatchers(HttpMethod.GET, "/api/responsables/buscar").hasAnyRole("PREVENTISTA", "ADMINISTRATIVO")
+                        .requestMatchers("/api/responsables/**").hasRole("ADMINISTRATIVO")
                         // Gestión de productos: solo administración
                         .requestMatchers("/api/productos/**").hasRole("ADMINISTRATIVO")
                         // Todo lo demás exige estar logueado (incluye /api/auth/first-login/change-password)

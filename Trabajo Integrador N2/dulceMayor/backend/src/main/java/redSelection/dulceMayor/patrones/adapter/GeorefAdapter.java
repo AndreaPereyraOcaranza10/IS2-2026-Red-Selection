@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientException;
 import redSelection.dulceMayor.dto.DireccionNormalizadaDTO;
+import redSelection.dulceMayor.dto.UbicacionInversaDTO;
 import redSelection.dulceMayor.dto.UnidadTerritorialDTO;
 import redSelection.dulceMayor.exception.ServicioExternoException;
 
@@ -111,6 +112,32 @@ public class GeorefAdapter implements UbicacionProvider {
         }
     }
 
+    @Override
+    public Optional<UbicacionInversaDTO> ubicarCoordenadas(double latitud, double longitud) {
+        try {
+            RespuestaInversa r = cliente.get()
+                    .uri(u -> u.path("/ubicacion")
+                            .queryParam("lat", latitud)
+                            .queryParam("lon", longitud)
+                            .build())
+                    .retrieve().body(RespuestaInversa.class);
+            if (r == null || r.ubicacion() == null) {
+                return Optional.empty();
+            }
+            Item provincia = r.ubicacion().provincia();
+            Item departamento = r.ubicacion().departamento();
+            if (provincia == null || provincia.id() == null || departamento == null || departamento.id() == null) {
+                return Optional.empty();
+            }
+            return Optional.of(new UbicacionInversaDTO(
+                    new UnidadTerritorialDTO(provincia.id(), provincia.nombre()),
+                    new UnidadTerritorialDTO(departamento.id(), departamento.nombre())));
+        } catch (RestClientException ex) {
+            // Mejor esfuerzo, igual que la geocodificación: si falla, el formulario se completa a mano.
+            return Optional.empty();
+        }
+    }
+
     // ---------- Caché con vigencia (si la API falla, se usa el dato vencido) ----------
 
     private record Entrada(Object valor, Instant vence) { }
@@ -150,4 +177,6 @@ public class GeorefAdapter implements UbicacionProvider {
     private record Ubicacion(Double lat, Double lon) { }
     private record DireccionGeoref(String nomenclatura, Ubicacion ubicacion) { }
     private record RespuestaDirecciones(List<DireccionGeoref> direcciones) { }
+    private record UbicadoEn(Item provincia, Item departamento) { }
+    private record RespuestaInversa(UbicadoEn ubicacion) { }
 }

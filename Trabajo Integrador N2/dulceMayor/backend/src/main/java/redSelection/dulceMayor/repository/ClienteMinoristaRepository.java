@@ -10,4 +10,5 @@ public interface ClienteMinoristaRepository extends BaseRepository<ClienteMinori
     boolean existsByCuitAndEliminadoFalse(String cuit);
     List<ClienteMinorista> findByPreventistaAsignadoIdAndEliminadoFalse(String preventistaId);
     List<ClienteMinorista> findByResponsableIdAndEliminadoFalse(String responsableId);
+    boolean existsByCuitAndIdNotAndEliminadoFalse(String cuit, String id);
 }

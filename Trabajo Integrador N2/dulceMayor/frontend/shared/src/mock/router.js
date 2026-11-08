@@ -1,3 +1,5 @@
+import { pointOfSaleRoutes, resetPointOfSaleMock } from './pointOfSale.js';
+
 /**
  * API simulada en memoria. Respeta EXACTAMENTE los contratos REST del README
  * (rutas, DTOs y códigos de estado), así que para pasar al backend real alcanza con
@@ -74,6 +76,7 @@ export function resetMock() {
   db.seq = 1043;
   db.orders = SEED_ORDERS.slice();
   POINTS.length = SEED_POINTS;
+  resetPointOfSaleMock();
 }
 
 /* ---------- mappers (Entidad -> DTO) ---------- */
@@ -131,6 +134,10 @@ export async function mockRequest(method, path, body, token, opciones = {}) {
   const r = routeRoutes(key, p, body, q, { db, POINTS, orderTotal });
   if (r !== NOT_HANDLED) return r;
 
+  const pv = pointOfSaleRoutes(key, p, body, q, { db, POINTS });
+  if (pv !== NOT_HANDLED) return pv;
+
+
   let m;
   switch (key) {
     case 'GET /api/products':
@@ -157,23 +164,6 @@ export async function mockRequest(method, path, body, token, opciones = {}) {
       db.visited.add(pt.id); // tomar el pedido cuenta como visita
       return { order: order(o), nextStop: nextVisit() };
     }
-
-    case 'POST /api/points-of-sale': {
-      const errors = [];
-      if (!body.name?.trim()) errors.push({ field: 'name', message: 'Ingresá el nombre del comercio' });
-      if (String(body.cuit || '').replace(/\D/g, '').length !== 11) errors.push({ field: 'cuit', message: 'El CUIT tiene que tener 11 dígitos' });
-      if (!body.contactName?.trim()) errors.push({ field: 'contactName', message: 'Ingresá el responsable' });
-      if (!/^\S+@\S+\.\S+$/.test(body.email || '')) errors.push({ field: 'email', message: 'Revisá el correo: falta el @ o el dominio' });
-      if (!body.phone?.trim()) errors.push({ field: 'phone', message: 'Ingresá un teléfono' });
-      if (!body.address?.trim()) errors.push({ field: 'address', message: 'Ingresá la dirección' });
-      if (errors.length) throw new ApiError(400, 'Datos inválidos', { errors });
-      const id = POINTS.length + 1;
-      POINTS.push({ id, name: body.name, address: body.address, distanceKm: 1, lat: body.lat ?? -32.89, lng: body.lng ?? -68.846, contactName: body.contactName, phone: body.phone, paymentMethod: 'EFECTIVO', items: [] });
-      return { id, name: body.name };
-    }
-
-    case 'GET /api/geo/reverse':
-      return { address: 'Av. España 1020, Ciudad de Mendoza', lat: Number(q.get('lat')), lng: Number(q.get('lng')) };
 
     default:
   }
@@ -204,3 +194,25 @@ export async function mockRequest(method, path, body, token, opciones = {}) {
 
   throw new ApiError(404, `Ruta no encontrada: ${method} ${p}`, { code: 'NOT_FOUND' });
 }
+
+/* 
+
+    case 'POST /api/points-of-sale': {
+      const errors = [];
+      if (!body.name?.trim()) errors.push({ field: 'name', message: 'Ingresá el nombre del comercio' });
+      if (String(body.cuit || '').replace(/\D/g, '').length !== 11) errors.push({ field: 'cuit', message: 'El CUIT tiene que tener 11 dígitos' });
+      if (!body.contactName?.trim()) errors.push({ field: 'contactName', message: 'Ingresá el responsable' });
+      if (!/^\S+@\S+\.\S+$/.test(body.email || '')) errors.push({ field: 'email', message: 'Revisá el correo: falta el @ o el dominio' });
+      if (!body.phone?.trim()) errors.push({ field: 'phone', message: 'Ingresá un teléfono' });
+      if (!body.address?.trim()) errors.push({ field: 'address', message: 'Ingresá la dirección' });
+      if (errors.length) throw new ApiError(400, 'Datos inválidos', { errors });
+      const id = POINTS.length + 1;
+      POINTS.push({ id, name: body.name, address: body.address, distanceKm: 1, lat: body.lat ?? -32.89, lng: body.lng ?? -68.846, contactName: body.contactName, phone: body.phone, paymentMethod: 'EFECTIVO', items: [] });
+      return { id, name: body.name };
+    }
+
+    case 'GET /api/geo/reverse':
+      return { address: 'Av. España 1020, Ciudad de Mendoza', lat: Number(q.get('lat')), lng: Number(q.get('lng')) };
+
+
+*/

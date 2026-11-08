@@ -133,8 +133,10 @@ El empleado va en la URL por `user.employeeId` (o `user.id`) de la sesión. Erro
 | `POST /api/promotions/validate` | `{ code }` | `{ valid, discountPercent }` | 200 |
 | `POST /api/orders` | `{ pointOfSaleId, promoCode?, items:[{productId,quantity}] }` | `{ order: OrderDTO, nextStop: StopDTO \| null }` | 201 · 400 |
 | `GET /api/orders` · `GET /api/orders/{id}` | — | `OrderDTO[]` · `OrderDTO` | 200 · 404 |
-| `POST /api/points-of-sale` | `{ name, cuit, contactName, email, phone, address, lat?, lng? }` | `{ id, name }` | 201 · 400 |
-| `GET /api/geo/reverse?lat=&lng=` | — | `{ address, lat, lng }` | 200 |
+| `POST /api/puntos-venta` | `{ nombreComercio, razonSocial?, cuit, direccion: { calle, numeracion, barrio?, referencia?, provinciaId, departamentoId, localidadId, latitud?, longitud? }, responsableId? \| responsableNuevo?: { nombre, apellido, tipoDocumento, numeroDocumento, email, telefono, tipoTelefono? } }` (exactamente uno de los dos responsables) | `PuntoVentaRespuestaDTO` (queda asignado al preventista y en su ruta de hoy) | 201 · 400 · 403 · 404 · 422 |
+| `GET /api/responsables/buscar?q=` | — | `ResponsableRespuestaDTO[]` (máx. 20, documento enmascarado; `q` ≥ 2 caracteres) | 200 · 422 |
+| `GET /api/ubicacion/provincias` · `/departamentos?provinciaId=` · `/localidades?departamentoId=` | — | `{ id, nombre }[]` (API Georef, públicos) | 200 · 422 · 503 |
+| `GET /api/ubicacion/inversa?lat=&lon=` ("Usar mi ubicación") | — | `{ provincia, departamento }` · sin cuerpo si Georef no la ubica | 200 · 204 · 422 |
 
 **Transportista (`ALMACENERO`)**
 
@@ -186,7 +188,7 @@ OrderDTO         { id, state: CARGADO|PENDIENTE_STOCK|FACTURADO|EN_REPARTO|ENTRE
 ```bash
 npm install
 npm run dev:preventista      # http://localhost:5173  usuario: preventista.mza
-npm run dev:transportista    # http://localhost:5174  usuario: despacho.mza
+npm run dev:transportista    # http://localhost:5174  usuario: transportista.mza
 npm run dev:cliente          # http://localhost:5175  usuario: cliente@demo.com / cliente123 (o registrarse)
 npm run dev:admin            # http://localhost:5176  usuarios: admin.mza, jefe.mza (clave inicial dulcemayor)
 npm test                     # 21 tests

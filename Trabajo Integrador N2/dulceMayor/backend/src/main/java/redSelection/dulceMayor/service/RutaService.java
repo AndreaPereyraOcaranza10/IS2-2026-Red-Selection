@@ -132,6 +132,22 @@ public class RutaService {
         return aDTO(ruta);
     }
 
+    /**
+     * Un comercio recién dado de alta se suma como parada pendiente a la ruta de hoy del preventista.
+     * Si hoy todavía no consultó su ruta no hace falta nada: se arma sola con los comercios asignados.
+     */
+    @Transactional
+    public void incorporarARutaDeHoy(String preventistaId, ClienteMinorista cliente) {
+        rutaRepository.findByResponsableIdAndFechaAndTipoRuta(preventistaId, LocalDate.now(), TipoRuta.PREVENTA)
+                .ifPresent(ruta -> {
+                    agregarParada(ruta, cliente, null);
+                    if (ruta.getEstado() == EstadoRuta.FINALIZADA) {
+                        ruta.setEstado(EstadoRuta.EN_CURSO);   // volvió a tener una parada pendiente
+                    }
+                    rutaRepository.save(ruta);
+                });
+    }
+
     private void despacharFacturados(RutaDiaria ruta, Transportista transportista) {
         List<Pedido> facturados = pedidoRepository.findByEstadoOrderByFechaHoraCargaAsc(EstadoPedido.FACTURADO);
         if (facturados.isEmpty()) {

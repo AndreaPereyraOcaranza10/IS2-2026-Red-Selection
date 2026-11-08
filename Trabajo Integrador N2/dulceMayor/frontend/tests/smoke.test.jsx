@@ -105,6 +105,80 @@ describe('Preventista', () => {
     expect(screen.getAllByRole('article').map((a) => a.textContent)).not.toEqual(before); // el orden cambió
   });
 
+    // ----- Alta de punto de venta -----
+  const pick = async (label, optionName) => {
+    const select = screen.getByLabelText(label);
+    await waitFor(() => expect(within(select).getByRole('option', { name: optionName })).toBeTruthy());
+    fireEvent.change(select, { target: { value: within(select).getByRole('option', { name: optionName }).value } });
+  };
+  async function openPointOfSaleForm() {
+    await loginAndChangePassword();
+    await text('Mi ruta de hoy');
+    fireEvent.click(await screen.findByRole('button', { name: 'Nuevo punto de venta' }));
+    await text('Alta de punto de venta');
+  }
+  async function fillCommerceAndAddress() {
+    type('Nombre del comercio', 'Kiosco La Plaza');
+    type('CUIT', '20123456789');
+    await waitFor(() => expect(screen.getByLabelText('Provincia').value).toBe('50')); // Mendoza viene preseleccionada
+    await pick('Departamento', 'Godoy Cruz');
+    await pick('Localidad', 'Godoy Cruz');
+    type('Calle', 'Av. Godoy Cruz');
+    type('Número', '1830');
+  }
+
+  it('da de alta un punto de venta con un responsable NUEVO y lo suma a la ruta', async () => {
+    mount(PreventistaApp);
+    await openPointOfSaleForm();
+    await fillCommerceAndAddress();
+    fireEvent.click(screen.getByRole('button', { name: 'Cargar uno nuevo' }));
+    type('Nombre', 'Lucía');
+    type('Apellido', 'Fernández');
+    type('Número de documento', '30123456');
+    type('Correo', 'lucia@correo.com');
+    type('Teléfono', '2615550100');
+    fireEvent.click(screen.getByRole('button', { name: /Guardar punto de venta/ }));
+    await text('Mi ruta de hoy');
+    await waitFor(() => expect(screen.getByTestId('map').getAttribute('data-pins')).toBe('7')); // los 6 de siempre + el nuevo
+    expect(screen.getAllByText('Kiosco La Plaza').length).toBeGreaterThan(0);
+  });
+
+  it('da de alta un punto de venta eligiendo un responsable EXISTENTE', async () => {
+    mount(PreventistaApp);
+    await openPointOfSaleForm();
+    await fillCommerceAndAddress();
+    type('Buscar responsable', 'raul');
+    fireEvent.click(await screen.findByRole('radio', { name: /Raúl Vega/ }));
+    expect(await screen.findByLabelText('Responsable elegido')).toBeTruthy();
+    fireEvent.click(screen.getByRole('button', { name: /Guardar punto de venta/ }));
+    await text('Mi ruta de hoy');
+    await waitFor(() => expect(screen.getByTestId('map').getAttribute('data-pins')).toBe('7'));
+  });
+
+  it('en el alta, los nombres no aceptan números y la numeración y el teléfono solo números', async () => {
+    mount(PreventistaApp);
+    await openPointOfSaleForm();
+    fireEvent.click(screen.getByRole('button', { name: 'Cargar uno nuevo' }));
+    type('Nombre', 'Ana2 Mar1a');
+    type('Apellido', 'Pérez 3');
+    type('Número', '12a3');
+    type('Teléfono', '261-555 0100');
+    expect(screen.getByLabelText('Nombre').value).toBe('Ana Mara');
+    expect(screen.getByLabelText('Apellido').value).toBe('Pérez ');
+    expect(screen.getByLabelText('Número').value).toBe('123');
+    expect(screen.getByLabelText('Teléfono').value).toBe('2615550100');
+  });
+
+  it('no guarda un punto de venta incompleto y marca los campos', async () => {
+    mount(PreventistaApp);
+    await openPointOfSaleForm();
+    fireEvent.click(screen.getByRole('button', { name: /Guardar punto de venta/ }));
+    expect(await text('Ingresá el nombre del comercio')).toBeTruthy();
+    expect(screen.getByText('Ingresá la calle')).toBeTruthy();
+    expect(screen.getByText('Elegí un responsable de la lista o cargá uno nuevo')).toBeTruthy();
+    expect(screen.getByText('Alta de punto de venta')).toBeTruthy(); // sigue en la pantalla
+  });
+
   it('muestra al transportista en la trazabilidad de un pedido en reparto', async () => {
     mount(PreventistaApp);
     await loginAndChangePassword();
