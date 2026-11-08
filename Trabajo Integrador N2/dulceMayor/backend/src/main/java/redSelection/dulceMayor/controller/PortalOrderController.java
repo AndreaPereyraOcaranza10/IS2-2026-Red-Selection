@@ -174,17 +174,20 @@ public class PortalOrderController {
 
     private boolean isStaff(Authentication authentication) {
         return authentication != null && authentication.getAuthorities().stream()
-                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMINISTRATIVO"));
+                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMINISTRATIVO")
+                        || a.getAuthority().equals("ROLE_JEFE_ADMINISTRATIVO"));
     }
 
     private OrderResponse toResponse(Pedido pedido) {
         List<OrderLineResponse> lines = pedido.getItems().stream()
                 .map(i -> new OrderLineResponse(i.getProducto().getId(), i.getProducto().getNombre(),
                         i.getCantidad(), i.getPrecioUnitario(), i.getSubtotal())).toList();
-        String invoicedAt = facturas.findByPedidoId(pedido.getId()).map(f -> f.getFechaFactura().toString()).orElse(null);
+        FacturaCliente factura = facturas.findByPedidoId(pedido.getId()).orElse(null);
+        String invoicedAt = factura == null ? null : factura.getFechaFactura().toString();
+        String invoiceId = factura == null ? null : factura.getId();
         return new OrderResponse(pedido.getId(), pedido.getCliente().getNombreComercio(),
                 pedido.getEstado().name(), "A_COORDINAR", pedido.getFechaHoraCarga().toString(),
-                invoicedAt, pedido.getTotal(), lines);
+                invoicedAt, invoiceId, pedido.getTotal(), lines);
     }
 
     public record OrderRequest(String clientName, String paymentMethod,
@@ -194,6 +197,6 @@ public class PortalOrderController {
     public record OrderLineResponse(String productId, String productName, int quantity,
                                     BigDecimal unitPrice, BigDecimal total) {}
     public record OrderResponse(String id, String clientName, String status, String paymentMethod,
-                                String createdAt, String invoicedAt, BigDecimal total,
+                                String createdAt, String invoicedAt, String invoiceId, BigDecimal total,
                                 List<OrderLineResponse> items) {}
 }

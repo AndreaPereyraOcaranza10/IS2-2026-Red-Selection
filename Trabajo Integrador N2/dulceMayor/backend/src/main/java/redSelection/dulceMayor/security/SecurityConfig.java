@@ -98,6 +98,9 @@ public class SecurityConfig {
                         // Responsables: el preventista solo busca (para elegir uno ya cargado); el resto es administración
                         .requestMatchers(HttpMethod.GET, "/api/responsables/buscar").hasAnyRole("PREVENTISTA", "ADMINISTRATIVO")
                         .requestMatchers("/api/responsables/**").hasRole("ADMINISTRATIVO")
+                        // Portal: pedidos y perfil del cliente (el administrativo ve y carga pedidos de cualquiera)
+                        .requestMatchers("/api/orders", "/api/orders/*").hasAnyRole("CLIENTE", "ADMINISTRATIVO")
+                        .requestMatchers("/api/profile").hasAnyRole("CLIENTE", "ADMINISTRATIVO")
                         // Pagos: administración inicia, confirma y anula; el cliente solo consulta los de SUS facturas
                         // (esa pertenencia la exige PagoService). El cliente no elige el medio: lo acuerda facturación.
                         .requestMatchers(HttpMethod.GET, "/api/facturas/*/pagos", "/api/pagos/*")
