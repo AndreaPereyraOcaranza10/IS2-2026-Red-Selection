@@ -23,9 +23,11 @@ import java.util.Optional;
 public class JwtAuthFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
+    private final ControlDeSesion controlDeSesion;
 
-    public JwtAuthFilter(JwtService jwtService) {
+    public JwtAuthFilter(JwtService jwtService, ControlDeSesion controlDeSesion) {
         this.jwtService = jwtService;
+        this.controlDeSesion = controlDeSesion;
     }
 
     @Override
@@ -34,7 +36,8 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         String cabecera = request.getHeader(HttpHeaders.AUTHORIZATION);
         if (cabecera != null && cabecera.startsWith("Bearer ")) {
             Optional<UsuarioAutenticado> encontrado = jwtService.validar(cabecera.substring(7).trim());
-            if (encontrado.isPresent()) {
+            // Además de la firma y el vencimiento, el usuario tiene que seguir activo y no haber revocado el token
+            if (encontrado.isPresent() && controlDeSesion.estaVigente(encontrado.get())) {
                 UsuarioAutenticado usuario = encontrado.get();
                 if (usuario.isPrimerIngreso() && !request.getRequestURI().startsWith("/api/auth/")) {
                     SecurityJson.responder(response, 403, "Forbidden",

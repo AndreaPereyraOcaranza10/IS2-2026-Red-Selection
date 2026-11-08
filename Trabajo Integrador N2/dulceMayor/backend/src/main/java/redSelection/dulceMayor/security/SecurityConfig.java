@@ -6,6 +6,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authorization.AuthorizationDecision;
 import org.springframework.security.authorization.AuthorizationManager;
+import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
+import org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -39,8 +41,21 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
+    /**
+     * Jerarquía de roles: el Jefe Administrativo puede todo lo del Administrativo y lo del Preventista.
+     * Es static para que Spring la cree temprano (la usan las reglas por URL). Las reglas hasRole("ADMINISTRATIVO")
+     * ya lo incluyen sin repetir al jefe en cada una.
+     */
     @Bean
-    SecurityFilterChain cadenaDeSeguridad(HttpSecurity http, JwtService jwtService) throws Exception {
+    static RoleHierarchy roleHierarchy() {
+        return RoleHierarchyImpl.withDefaultRolePrefix()
+                .role("JEFE_ADMINISTRATIVO").implies("ADMINISTRATIVO", "PREVENTISTA")
+                .build();
+    }
+
+    @Bean
+    SecurityFilterChain cadenaDeSeguridad(HttpSecurity http, JwtService jwtService,
+                                          ControlDeSesion controlDeSesion) throws Exception {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(Customizer.withDefaults())
@@ -58,7 +73,11 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/auth/login").permitAll()
                         .requestMatchers("/actuator/health", "/error").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/catalogo/**", "/api/ubicacion/**").permitAll()
-                        // Cada empleado ve solo su ruta
+                        // Las imágenes del catálogo se muestran en el sitio público (<img> no manda token); los ids son UUID
+                        .requestMatchers(HttpMethod.GET, "/api/imagenes/*").permitAll()
+                        // Cada empleado ve solo su ruta (el administrativo y el jefe ven cualquiera).
+                        // Nota de diseño: el administrativo NO registra visitas ni entregas, aunque pueda ver rutas;
+                        // eso es a propósito: quien opera la ruta es el preventista/transportista dueño de la parada.
                         .requestMatchers(HttpMethod.GET, "/api/rutas/preventista/{id}/hoy").access(propia(Rol.PREVENTISTA))
                         .requestMatchers(HttpMethod.GET, "/api/rutas/transportista/{id}/hoy").access(propia(Rol.TRANSPORTISTA))
                         .requestMatchers(HttpMethod.POST, "/api/rutas/paradas/*/visita").hasRole("PREVENTISTA")
@@ -73,22 +92,38 @@ public class SecurityConfig {
                         // Responsables: el preventista solo busca (para elegir uno ya cargado); el resto es administración
                         .requestMatchers(HttpMethod.GET, "/api/responsables/buscar").hasAnyRole("PREVENTISTA", "ADMINISTRATIVO")
                         .requestMatchers("/api/responsables/**").hasRole("ADMINISTRATIVO")
-                        // Gestión de productos: solo administración
-                        .requestMatchers("/api/productos/**").hasRole("ADMINISTRATIVO")
-                        // Todo lo demás exige estar logueado (incluye /api/auth/first-login/change-password)
-                        .anyRequest().authenticated())
-                .addFilterBefore(new JwtAuthFilter(jwtService), UsernamePasswordAuthenticationFilter.class);
+                        // Pagos: administración inicia, confirma y anula; el cliente solo consulta los de SUS facturas
+                        // (esa pertenencia la exige PagoService). El cliente no elige el medio: lo acuerda facturación.
+                        .requestMatchers(HttpMethod.GET, "/api/facturas/*/pagos", "/api/pagos/*")
+                        .hasAnyRole("CLIENTE", "ADMINISTRATIVO")
+                        .requestMatchers("/api/facturas/*/pagos", "/api/pagos/**").hasRole("ADMINISTRATIVO")
+                        // Solo el Jefe Administrativo: usuarios, estadísticas y reportes globales
+                        .requestMatchers("/api/usuarios/**", "/api/estadisticas/**", "/api/reportes/globales/**")
+                        .hasRole("JEFE_ADMINISTRATIVO")
+                        // Gestión de productos, categorías e imágenes: solo administración
+                        // (las categorías se pueden LEER por empleados de campo; escribir es del administrativo)
+                        .requestMatchers(HttpMethod.GET, "/api/categorias/**", "/api/subcategorias/**")
+                        .hasAnyRole("PREVENTISTA", "ADMINISTRATIVO")
+                        .requestMatchers("/api/categorias/**", "/api/subcategorias/**", "/api/imagenes/**", "/api/productos/**")
+                        .hasRole("ADMINISTRATIVO")
+                        // Cambio de clave: cualquier usuario logueado (incluso con la clave inicial pendiente)
+                        .requestMatchers(HttpMethod.POST, "/api/auth/first-login/change-password", "/api/auth/logout")
+                        .authenticated()
+                        // Deny-by-default: lo que no está declarado arriba se rechaza. Un endpoint nuevo sin regla
+                        // explícita queda cerrado (403) en lugar de quedar abierto a cualquier logueado.
+                        .anyRequest().denyAll())
+                .addFilterBefore(new JwtAuthFilter(jwtService, controlDeSesion), UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
 
-    /** El rol indicado y el id de la URL igual al empleadoId del token; ADMINISTRATIVO accede a cualquiera. */
+    /** El rol indicado y el id de la URL igual al empleadoId del token; ADMINISTRATIVO y JEFE_ADMINISTRATIVO acceden a cualquiera. */
     private AuthorizationManager<RequestAuthorizationContext> propia(Rol rol) {
         return (autenticacion, contexto) -> {
             Authentication auth = autenticacion.get();
             if (auth == null || !(auth.getPrincipal() instanceof UsuarioAutenticado usuario)) {
                 return new AuthorizationDecision(false);
             }
-            if (usuario.getRol() == Rol.ADMINISTRATIVO) {
+            if (usuario.getRol().esAdministracion()) {
                 return new AuthorizationDecision(true);
             }
             String id = contexto.getVariables().get("id");

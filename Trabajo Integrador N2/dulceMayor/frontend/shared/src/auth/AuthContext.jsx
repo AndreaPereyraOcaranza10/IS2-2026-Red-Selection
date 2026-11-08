@@ -55,7 +55,11 @@ export function AuthProvider({ children }) {
         persist(res);
         return res.user;
       },
-      logout: () => persist(null),
+      /** Avisa al servidor para que revoque el token (best-effort) y limpia la sesión local. */
+      logout: () => {
+        if (session?.token) api.post('/api/auth/logout').catch(() => {});
+        persist(null);
+      },
     }),
     [session, persist],
   );

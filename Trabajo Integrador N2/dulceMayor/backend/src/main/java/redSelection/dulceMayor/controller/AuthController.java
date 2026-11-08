@@ -29,6 +29,13 @@ public class AuthController {
         return ResponseEntity.ok(authService.login(dto));
     }
 
+    /** Cierra la sesión en el servidor: el token deja de ser válido aunque no haya vencido. */
+    @PostMapping("/logout")
+    public ResponseEntity<Void> logout(@AuthenticationPrincipal UsuarioAutenticado usuario) {
+        authService.cerrarSesion(usuario);
+        return ResponseEntity.noContent().build();
+    }
+
     /** Cambio obligatorio de la clave inicial. Devuelve una sesión nueva (sin primerIngreso). */
     @PostMapping("/first-login/change-password")
     public ResponseEntity<SesionDTO> cambiarClaveInicial(@AuthenticationPrincipal UsuarioAutenticado usuario,

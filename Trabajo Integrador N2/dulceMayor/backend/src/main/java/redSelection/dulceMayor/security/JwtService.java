@@ -4,6 +4,8 @@ import com.nimbusds.jose.jwk.source.ImmutableSecret;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.env.Environment;
+import org.springframework.core.env.Profiles;
 import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtClaimsSet;
@@ -41,10 +43,14 @@ public class JwtService {
     private final Duration validez;
 
     public JwtService(@Value("${app.jwt.secret:" + SECRETO_DE_DESARROLLO + "}") String secreto,
-                      @Value("${app.jwt.horas-validez:12}") long horasValidez) {
+                      @Value("${app.jwt.horas-validez:12}") long horasValidez,
+                      Environment entorno) {
         byte[] bytes = secreto.getBytes(StandardCharsets.UTF_8);
         if (bytes.length < 32) {
             throw new IllegalStateException("app.jwt.secret debe tener al menos 32 caracteres (firma HS256).");
+        }
+        if (SECRETO_DE_DESARROLLO.equals(secreto) && entorno.acceptsProfiles(Profiles.of("prod"))) {
+            throw new IllegalStateException("En producción JWT_SECRET es obligatorio y no puede ser el secreto de desarrollo.");
         }
         if (SECRETO_DE_DESARROLLO.equals(secreto)) {
             log.warn("Se está usando el secreto JWT de desarrollo. En producción definí JWT_SECRET.");
@@ -64,7 +70,8 @@ public class JwtService {
                 .expiresAt(ahora.plus(validez))
                 .claim("usuario", usuario.getNombreUsuario())
                 .claim("rol", usuario.getRol().name())
-                .claim("primerIngreso", usuario.isPrimerIngreso());
+                .claim("primerIngreso", usuario.isPrimerIngreso())
+                .claim("ver", usuario.getVersionToken());
         if (empleadoId != null) {
             claims.claim("empleadoId", empleadoId);
         }
@@ -77,12 +84,14 @@ public class JwtService {
         try {
             Jwt jwt = decoder.decode(token);
             Boolean primerIngreso = jwt.getClaim("primerIngreso");
+            Number version = jwt.getClaim("ver");   // un token sin versión (anterior a este cambio) queda invalidado
             return Optional.of(new UsuarioAutenticado(
                     jwt.getSubject(),
                     jwt.getClaimAsString("usuario"),
                     Rol.valueOf(jwt.getClaimAsString("rol")),
                     Boolean.TRUE.equals(primerIngreso),
-                    jwt.getClaimAsString("empleadoId")));
+                    jwt.getClaimAsString("empleadoId"),
+                    version == null ? -1 : version.intValue()));
         } catch (JwtException | IllegalArgumentException ex) {
             return Optional.empty();
         }

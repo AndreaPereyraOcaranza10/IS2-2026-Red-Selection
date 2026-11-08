@@ -34,6 +34,16 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
         return ProblemDetail.forStatusAndDetail(HttpStatus.UNPROCESSABLE_ENTITY, ex.getMessage());
     }
 
+    @ExceptionHandler(CuentaBloqueadaException.class)
+    ResponseEntity<ProblemDetail> cuentaBloqueada(CuentaBloqueadaException ex) {
+        ProblemDetail problema = ProblemDetail.forStatusAndDetail(HttpStatus.LOCKED, ex.getMessage());
+        problema.setProperty("code", "ACCOUNT_LOCKED");
+        problema.setProperty("retryAfterSeconds", ex.getSegundosRestantes());
+        return ResponseEntity.status(HttpStatus.LOCKED)
+                .header(HttpHeaders.RETRY_AFTER, String.valueOf(ex.getSegundosRestantes()))
+                .body(problema);
+    }
+
     @ExceptionHandler(AuthenticationException.class)
     ProblemDetail noAutenticado(AuthenticationException ex) {
         String detalle = ex instanceof DisabledException ? ex.getMessage() : "Credenciales inválidas";

@@ -1,13 +1,16 @@
 package redSelection.dulceMayor.service;
 
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.DisabledException;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import redSelection.dulceMayor.dto.CambioClaveDTO;
 import redSelection.dulceMayor.dto.LoginDTO;
 import redSelection.dulceMayor.dto.SesionDTO;
+import redSelection.dulceMayor.exception.CuentaBloqueadaException;
 import redSelection.dulceMayor.exception.ReglaNegocioException;
 import redSelection.dulceMayor.model.Persona;
 import redSelection.dulceMayor.model.Usuario;
@@ -16,6 +19,8 @@ import redSelection.dulceMayor.repository.UsuarioRepository;
 import redSelection.dulceMayor.security.JwtService;
 import redSelection.dulceMayor.security.UsuarioAutenticado;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 /**
@@ -32,30 +37,61 @@ public class AuthService {
     private final PersonaRepository personaRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
+    private final int maxIntentos;
+    private final Duration duracionBloqueo;
 
     public AuthService(UsuarioRepository usuarioRepository,
                        PersonaRepository personaRepository,
                        PasswordEncoder passwordEncoder,
-                       JwtService jwtService) {
+                       JwtService jwtService,
+                       @Value("${app.seguridad.max-intentos:5}") int maxIntentos,
+                       @Value("${app.seguridad.minutos-bloqueo:15}") long minutosBloqueo) {
         this.usuarioRepository = usuarioRepository;
         this.personaRepository = personaRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
+        this.maxIntentos = maxIntentos;
+        this.duracionBloqueo = Duration.ofMinutes(minutosBloqueo);
     }
 
-    @Transactional(readOnly = true)
+    /**
+     * noRollbackFor: al fallar el login se lanza una excepción, pero el contador de intentos fallidos
+     * TIENE que quedar guardado; sin esto la transacción haría rollback y el bloqueo nunca se activaría.
+     */
+    @Transactional(noRollbackFor = AuthenticationException.class)
     public SesionDTO login(LoginDTO dto) {
+        LocalDateTime ahora = LocalDateTime.now();
         Usuario usuario = usuarioRepository.findByNombreUsuarioIgnoreCase(dto.username().trim())
                 .filter(u -> !u.isEliminado())
                 .orElseThrow(() -> new BadCredentialsException("Credenciales inválidas"));
+        // Bloqueada: ni se mira la clave, así un atacante no puede seguir probando durante el bloqueo.
+        if (usuario.estaBloqueado(ahora)) {
+            throw new CuentaBloqueadaException(Duration.between(ahora, usuario.getBloqueadoHasta()).toSeconds());
+        }
         // Un cliente que entra con Google no tiene clave local: no puede ingresar por acá.
         if (usuario.getClave() == null || !passwordEncoder.matches(dto.password(), usuario.getClave())) {
+            usuario.registrarFallo(maxIntentos, duracionBloqueo, ahora);
+            usuarioRepository.save(usuario);
+            if (usuario.estaBloqueado(ahora)) {
+                throw new CuentaBloqueadaException(duracionBloqueo.toSeconds());
+            }
             throw new BadCredentialsException("Credenciales inválidas");
         }
         if (!usuario.isActivo()) {
             throw new DisabledException("Tu usuario está desactivado. Consultá con administración.");
         }
+        usuario.registrarAcierto();
+        usuarioRepository.save(usuario);
         return sesion(usuario);
+    }
+
+    /** Logout real: sube la versión de token del usuario, con lo que todos sus JWT emitidos dejan de valer. */
+    @Transactional
+    public void cerrarSesion(UsuarioAutenticado actual) {
+        usuarioRepository.findByIdAndEliminadoFalse(actual.getId()).ifPresent(u -> {
+            u.revocarTokens();
+            usuarioRepository.save(u);
+        });
     }
 
     @Transactional
@@ -68,6 +104,7 @@ public class AuthService {
         validarClaveNueva(dto.newPassword());
         usuario.setClave(passwordEncoder.encode(dto.newPassword()));
         usuario.setPrimerIngreso(false);
+        usuario.revocarTokens();   // el token del primer ingreso (con la clave inicial) deja de servir
         usuarioRepository.save(usuario);
         return sesion(usuario);
     }

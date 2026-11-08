@@ -18,8 +18,8 @@ import java.util.List;
 
 /**
  * PATRÓN: Template Method (capa Service). Un punto de venta es un ClienteMinorista.
- * - El alta lo asigna al preventista logueado y lo suma a su ruta de hoy.
- * - Control de propiedad: el preventista solo lista, consulta y modifica los suyos (el administrativo, todos).
+ * - El alta lo asigna al preventista logueado y, si ya tiene ruta armada hoy, lo suma como parada pendiente.
+ * - Control de propiedad: un preventista solo lista, consulta y modifica los suyos (el administrativo, todos).
  */
 @Service
 public class PuntoVentaService extends BaseService<ClienteMinorista, PuntoVentaCrearDTO, PuntoVentaRespuestaDTO> {
@@ -106,7 +106,7 @@ public class PuntoVentaService extends BaseService<ClienteMinorista, PuntoVentaC
         exigirPropiedad(cliente);
     }
 
-    /** Ya guardado: si el preventista tiene ruta armada hoy, el comercio aparece como parada pendiente. */
+    /** El punto de venta ya está guardado: si el preventista tiene ruta armada hoy, aparece como parada pendiente. */
     @Override
     protected void despuesDeCrear(ClienteMinorista cliente, PuntoVentaCrearDTO dto) {
         if (cliente.getPreventistaAsignado() != null) {
@@ -152,7 +152,7 @@ public class PuntoVentaService extends BaseService<ClienteMinorista, PuntoVentaC
         return responsableService.obtenerEntidad(dto.responsableId());   // 404 si no existe
     }
 
-    /** El preventista logueado; el administrativo da de alta comercios sin preventista (se asigna después). */
+    /** El preventista logueado; el administrativo da de alta comercios sin preventista (se le asignan después). */
     private Preventista preventistaActual() {
         UsuarioAutenticado usuario = usuarioActual.obtener();
         if (usuario.getRol() != Rol.PREVENTISTA) {
@@ -163,7 +163,7 @@ public class PuntoVentaService extends BaseService<ClienteMinorista, PuntoVentaC
 
     private void exigirPropiedad(ClienteMinorista cliente) {
         UsuarioAutenticado usuario = usuarioActual.obtener();
-        if (usuario.getRol() == Rol.ADMINISTRATIVO) {
+        if (usuario.getRol().esAdministracion()) {
             return;
         }
         Preventista dueno = cliente.getPreventistaAsignado();
@@ -183,7 +183,7 @@ public class PuntoVentaService extends BaseService<ClienteMinorista, PuntoVentaC
         return dto.razonSocial() == null || dto.razonSocial().isBlank() ? nombreComercio : dto.razonSocial().trim();
     }
 
-    /** Siempre XX-XXXXXXXX-X (igual que los datos demo), así la unicidad es consistente. */
+    /** Se guarda siempre como XX-XXXXXXXX-X (igual que los datos de demostración) para que la unicidad sea consistente. */
     private static String cuitConGuiones(String cuit) {
         String d = cuit.replaceAll("\\D", "");
         return d.substring(0, 2) + "-" + d.substring(2, 10) + "-" + d.substring(10);

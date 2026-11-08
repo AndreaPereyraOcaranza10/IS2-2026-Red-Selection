@@ -1,14 +1,19 @@
 package redSelection.dulceMayor.enums;
 
 /**
- * Roles del sistema según el diagrama de clases y especificación:
- * - ADMIN: Administrador con acceso al panel y gestión general. --> mismo rol que el almacenero
- * - CLIENTE: Cliente de la tienda que puede comprar y gestionar su perfil.
- * Un único rol por usuario. El Jefe hereda los permisos de Administrativo y Preventista (RoleHierarchy)
+ * Roles del sistema. Un único rol por usuario.
+ * El JEFE_ADMINISTRATIVO hereda ADMINISTRATIVO y PREVENTISTA: la jerarquía se declara una sola vez
+ * (bean RoleHierarchy en SecurityConfig) y vale para todas las reglas por URL.
  */
 public enum Rol {
     CLIENTE,
     PREVENTISTA,
     TRANSPORTISTA,
-    ADMINISTRATIVO
+    ADMINISTRATIVO,
+    JEFE_ADMINISTRATIVO;
+
+    /** Para los chequeos hechos en código (ownership), que no pasan por RoleHierarchy: ¿tiene acceso administrativo? */
+    public boolean esAdministracion() {
+        return this == ADMINISTRATIVO || this == JEFE_ADMINISTRATIVO;
+    }
 }

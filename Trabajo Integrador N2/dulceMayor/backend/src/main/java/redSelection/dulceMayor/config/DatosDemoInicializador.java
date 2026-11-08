@@ -100,6 +100,14 @@ public class DatosDemoInicializador implements ApplicationRunner {
         if (usuarioRepository.findByNombreUsuarioIgnoreCase("preventista2.mza").isEmpty()) {
             cargarSegundoPreventista();
         }
+        if (usuarioRepository.findByNombreUsuarioIgnoreCase("jefe.mza").isEmpty()) {
+            empleadoRepository.save(Empleado.builder()
+                    .nombre("Sofía").apellido("Navarro")
+                    .tipoDocumento(TipoDocumento.DNI).numeroDocumento("24888999")
+                    .usuario(usuarioEmpleado("jefe.mza", Rol.JEFE_ADMINISTRATIVO))
+                    .build());
+            log.info("Jefe administrativo listo: usuario jefe.mza (clave inicial '{}').", AuthService.CLAVE_INICIAL);
+        }
     }
 
     private void cargarDatosBase() {
