@@ -112,7 +112,8 @@ export async function mockRequest(method, path, body, token, opciones = {}) {
     return session(u);
   }
 
-  const user = sessionUser(token);
+  // Con el backend real, cualquier empleado válido (p. ej. preventista2.mza) puede no estar en el mock: se lo acepta igual.
+  const user = sessionUser(token) ?? (opciones.confiable && token?.startsWith('mock.') ? { id: 0, username: token.slice(5), mustChangePassword: false } : null);
   if (!user) throw new ApiError(401, 'Tu sesión venció. Volvé a ingresar.', { code: 'UNAUTHORIZED' });
 
   if (key === 'POST /api/auth/first-login/change-password') {

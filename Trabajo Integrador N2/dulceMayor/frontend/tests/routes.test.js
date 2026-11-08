@@ -114,4 +114,9 @@ describe('Contrato de rutas contra el backend simulado', () => {
     // Sin ese modo (demo 100% simulada) sigue exigiendo el cambio de clave inicial.
     await expect(mockRequest('GET', '/api/products', undefined, 'mock.preventista.mza')).rejects.toThrow('cambiar tu clave');
   });
+  it('con el backend real, un empleado que no está en el mock (preventista2.mza) no es expulsado', async () => {
+    const productos = await mockRequest('GET', '/api/products', undefined, 'mock.preventista2.mza', { confiable: true });
+    expect(Array.isArray(productos)).toBe(true);
+    await expect(mockRequest('GET', '/api/products', undefined, 'mock.preventista2.mza')).rejects.toThrow('Tu sesión venció');
+  });
 });

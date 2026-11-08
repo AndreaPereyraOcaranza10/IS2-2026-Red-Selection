@@ -45,7 +45,7 @@ import java.util.List;
  * Datos de demostración para poder probar el sistema de punta a punta: la casa central, tres empleados con la
  * clave inicial (hay que cambiarla en el primer ingreso), seis comercios de Mendoza asignados al preventista
  * y cuatro pedidos ya facturados para que el transportista tenga qué repartir.
- * Corre solo si todavía no existe el usuario "preventista.mza" (se puede repetir sin duplicar), no corre con el
+ * Cada bloque corre solo si su usuario ("preventista.mza", "preventista2.mza") todavía no existe, así que se puede repetir sin duplicar. No corre con el
  * perfil "prod" y se apaga con app.demo-data=false. Las direcciones y coordenadas son de ejemplo.
  */
 @Component
@@ -94,9 +94,15 @@ public class DatosDemoInicializador implements ApplicationRunner {
     @Override
     @Transactional
     public void run(ApplicationArguments args) {
-        if (usuarioRepository.findByNombreUsuarioIgnoreCase("preventista.mza").isPresent()) {
-            return;
+        if (usuarioRepository.findByNombreUsuarioIgnoreCase("preventista.mza").isEmpty()) {
+            cargarDatosBase();
         }
+        if (usuarioRepository.findByNombreUsuarioIgnoreCase("preventista2.mza").isEmpty()) {
+            cargarSegundoPreventista();
+        }
+    }
+
+    private void cargarDatosBase() {
         log.info("Cargando datos de demostración (clave inicial de los empleados: '{}')...", AuthService.CLAVE_INICIAL);
 
         crearCasaCentralSiNoExiste();
@@ -114,7 +120,7 @@ public class DatosDemoInicializador implements ApplicationRunner {
                 .usuario(usuarioEmpleado("transportista.mza", Rol.TRANSPORTISTA))
                 .build());
         empleadoRepository.save(Empleado.builder()
-                .nombre("Carla").apellido("Ledesma")
+                .nombre("Alex").apellido("Chen")
                 .tipoDocumento(TipoDocumento.DNI).numeroDocumento("27555666")
                 .usuario(usuarioEmpleado("admin.mza", Rol.ADMINISTRATIVO))
                 .build());
@@ -147,6 +153,22 @@ public class DatosDemoInicializador implements ApplicationRunner {
                     .build());
         }
         log.info("Datos de demostración listos: usuarios preventista.mza, transportista.mza y admin.mza.");
+    }
+
+    /** Segundo preventista con dos comercios propios: sirve para probar que cada uno solo opera lo suyo. */
+    private void cargarSegundoPreventista() {
+        crearCasaCentralSiNoExiste();
+        Preventista preventista = preventistaRepository.save(Preventista.builder()
+                .nombre("Max").apellido("Price")
+                .tipoDocumento(TipoDocumento.DNI).numeroDocumento("31222333")
+                .zonaAsignada("Sur de Mendoza")
+                .usuario(usuarioEmpleado("preventista2.mza", Rol.PREVENTISTA))
+                .build());
+        comercio(preventista, "Kiosco Los Andes", "Rosa", "Vega", "30111007",
+                "Ozamis Sur", "310", "Maipú", "50056", "Maipú", -32.9731, -68.7863);
+        comercio(preventista, "Almacén La Vid", "Hugo", "Paz", "30111008",
+                "San Martín", "1500", "Luján de Cuyo", "50063", "Luján de Cuyo", -33.0386, -68.8786);
+        log.info("Segundo preventista listo: usuario preventista2.mza (clave inicial '{}').", AuthService.CLAVE_INICIAL);
     }
 
     private Usuario usuarioEmpleado(String nombreUsuario, Rol rol) {
