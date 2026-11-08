@@ -1,6 +1,6 @@
 import { Fragment, jsx, jsxs } from "react/jsx-runtime";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { ArrowLeft, BadgeCheck, FileText, LoaderCircle, Package, QrCode, RefreshCw, Search, Truck } from "lucide-react";
+import { ArrowLeft, BadgeCheck, FileText, LoaderCircle, Package, RefreshCw, Search, Truck } from "lucide-react";
 import { api } from "../api";
 const money = new Intl.NumberFormat("es-AR", { style: "currency", currency: "ARS", minimumFractionDigits: 2 });
 const dateTime = (value) => new Intl.DateTimeFormat("es-AR", { dateStyle: "medium", timeStyle: "short" }).format(new Date(value));
@@ -128,7 +128,6 @@ export function OrdersPage({ onBack, onProfile }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [query, setQuery] = useState("");
-  const [copied, setCopied] = useState(false);
   const loadOrders = useCallback(() => {
     setLoading(true);
     setError("");
@@ -202,39 +201,13 @@ export function OrdersPage({ onBack, onProfile }) {
           /* @__PURE__ */ jsx("span", { children: /* @__PURE__ */ jsx(BadgeCheck, {}) }),
           /* @__PURE__ */ jsxs("div", { children: [
             /* @__PURE__ */ jsx("b", { children: "Medios de pago mayoristas" }),
-            /* @__PURE__ */ jsx("small", { children: "Us\xE1 estos datos para realizar una transferencia" })
+            /* @__PURE__ */ jsx("small", { children: "La informaci\xF3n de pago se habilitar\xE1 cuando est\xE9 integrada a un pedido." })
           ] })
         ] }),
         /* @__PURE__ */ jsxs("div", { className: "payment-content", children: [
-          /* @__PURE__ */ jsxs("div", { className: "bank-data", children: [
-            /* @__PURE__ */ jsx("b", { children: "Transferencia bancaria" }),
-            /* @__PURE__ */ jsx("small", { children: "Banco de la Naci\xF3n Argentina" }),
-            /* @__PURE__ */ jsx("span", { children: "Titular" }),
-            /* @__PURE__ */ jsx("strong", { children: "Distribuidora Dulce Mayor S.A." }),
-            /* @__PURE__ */ jsx("span", { children: "Alias" }),
-            /* @__PURE__ */ jsxs("div", { className: "copy-row", children: [
-              /* @__PURE__ */ jsx("b", { children: "DULCE.MAYOR.PAGOS" }),
-              /* @__PURE__ */ jsxs("button", { onClick: () => {
-                void navigator.clipboard?.writeText("DULCE.MAYOR.PAGOS");
-                setCopied(true);
-              }, children: [
-                /* @__PURE__ */ jsx(BadgeCheck, {}),
-                " ",
-                copied ? "Copiado" : "Copiar alias"
-              ] })
-            ] }),
-            /* @__PURE__ */ jsx("span", { children: "CBU" }),
-            /* @__PURE__ */ jsx("b", { children: "0110599520000012345678" })
-          ] }),
-          /* @__PURE__ */ jsxs("div", { className: "payment-qr-placeholder", children: [
-            /* @__PURE__ */ jsx("span", { children: /* @__PURE__ */ jsx(QrCode, {}) }),
-            /* @__PURE__ */ jsx("b", { children: "Pago con c\xF3digo QR" }),
-            /* @__PURE__ */ jsx("p", { children: "Pr\xF3ximamente vas a poder escanear aqu\xED el c\xF3digo para pagar." }),
-            /* @__PURE__ */ jsx("small", { children: "Espacio reservado para el QR" })
-          ] }),
-          /* @__PURE__ */ jsxs("p", { children: [
+          /* @__PURE__ */ jsxs("p", { className: "payment-unavailable", children: [
             /* @__PURE__ */ jsx(BadgeCheck, {}),
-            " Inform\xE1 el n\xFAmero de pedido al realizar el pago."
+            " Todav\xEDa no hay medios de pago configurados para mostrar."
           ] })
         ] })
       ] })

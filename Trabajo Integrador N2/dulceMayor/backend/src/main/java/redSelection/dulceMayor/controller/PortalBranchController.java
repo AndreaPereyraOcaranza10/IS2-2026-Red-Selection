@@ -10,10 +10,13 @@ import org.springframework.web.server.ResponseStatusException;
 import redSelection.dulceMayor.dto.UbicacionResueltaDTO;
 import redSelection.dulceMayor.enums.TipoContacto;
 import redSelection.dulceMayor.enums.TipoEmpresa;
+import redSelection.dulceMayor.enums.TipoImagen;
 import redSelection.dulceMayor.model.ContactoCorreoElectronico;
 import redSelection.dulceMayor.model.Direccion;
 import redSelection.dulceMayor.model.DulceMayor;
+import redSelection.dulceMayor.model.Imagen;
 import redSelection.dulceMayor.repository.DulceMayorRepository;
+import redSelection.dulceMayor.service.ImagenService;
 import redSelection.dulceMayor.service.UbicacionService;
 
 import java.util.List;
@@ -22,10 +25,12 @@ import java.util.List;
 public class PortalBranchController {
     private final DulceMayorRepository sucursales;
     private final UbicacionService ubicaciones;
+    private final ImagenService imagenes;
 
-    public PortalBranchController(DulceMayorRepository sucursales, UbicacionService ubicaciones) {
+    public PortalBranchController(DulceMayorRepository sucursales, UbicacionService ubicaciones, ImagenService imagenes) {
         this.sucursales = sucursales;
         this.ubicaciones = ubicaciones;
+        this.imagenes = imagenes;
     }
 
     @GetMapping("/api/companies/branches")
@@ -89,6 +94,23 @@ public class PortalBranchController {
         return toResponse(sucursales.save(branch));
     }
 
+    @PostMapping("/api/admin/companies/branches/{id}/images")
+    @Transactional
+    public BranchResponse addImage(@PathVariable String id, @Valid @RequestBody BranchImageRequest request) {
+        DulceMayor branch = findBranch(id);
+        Imagen image = imagenes.obtenerEntidad(request.imagenId());
+        if (image.getTipoImagen() != TipoImagen.FOTO_SUCURSAL) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "La imagen no es una foto de sucursal.");
+        }
+        boolean alreadyAttached = branch.getImagenes().stream().anyMatch(existing -> existing.getId().equals(image.getId()));
+        long photoCount = branch.getImagenes().stream().filter(existing -> existing.getTipoImagen() == TipoImagen.FOTO_SUCURSAL).count();
+        if (!alreadyAttached && photoCount >= 5) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cada sucursal puede tener hasta 5 fotos.");
+        }
+        if (!alreadyAttached) branch.getImagenes().add(image);
+        return toResponse(branch);
+    }
+
     @DeleteMapping("/api/admin/companies/branches/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @Transactional
@@ -123,9 +145,12 @@ public class PortalBranchController {
         String email = branch.getContactos().stream()
                 .filter(c -> !c.isEliminado() && c instanceof ContactoCorreoElectronico)
                 .map(c -> ((ContactoCorreoElectronico) c).getEmail()).findFirst().orElse("");
+        List<String> photos = branch.getImagenes().stream()
+                .filter(image -> !image.isEliminado() && image.getTipoImagen() == TipoImagen.FOTO_SUCURSAL)
+                .map(image -> "/api/imagenes/" + image.getId()).toList();
         return new BranchResponse(branch.getId(), branch.getRazonSocial(), branch.getCuit(), d.getCalle(),
                 d.getNumeracion(), d.getBarrio(), d.getManzanaPiso(), d.getCasaDepartamento(), d.getReferencia(),
-                d.getLocalidadId(), d.getLocalidadNombre(), d.getDepartamentoId(), d.getDepartamentoNombre(), d.getProvinciaId(), d.getProvinciaNombre(), email);
+                d.getLocalidadId(), d.getLocalidadNombre(), d.getDepartamentoId(), d.getDepartamentoNombre(), d.getProvinciaId(), d.getProvinciaNombre(), email, photos);
     }
 
     public record BranchRequest(@NotBlank String razonSocial, @NotBlank String cuit,
@@ -133,7 +158,9 @@ public class PortalBranchController {
                                 String barrio, String manzanaPiso, String casaDepartamento, String referencia,
                                 @NotBlank String provinciaId, @NotBlank String departamentoId,
                                 @NotBlank String localidadId, @Email @NotBlank String email) {}
+    public record BranchImageRequest(@NotBlank String imagenId) {}
     public record BranchResponse(String id, String razonSocial, String cuit, String calle, String numeracion,
                                  String barrio, String manzanaPiso, String casaDepartamento, String referencia,
-                                 String localidadId, String localidad, String departamentoId, String departamento, String provinciaId, String provincia, String email) {}
+                                 String localidadId, String localidad, String departamentoId, String departamento,
+                                 String provinciaId, String provincia, String email, List<String> photos) {}
 }

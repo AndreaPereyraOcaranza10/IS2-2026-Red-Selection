@@ -1,6 +1,6 @@
 import { Fragment, jsx, jsxs } from "react/jsx-runtime";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Building2, LoaderCircle, MapPin, Pencil, Plus, Search, Trash2, X } from "lucide-react";
+import { Building2, ImagePlus, LoaderCircle, MapPin, Pencil, Plus, Search, Trash2, X } from "lucide-react";
 import { api } from "../api";
 const blankForm = () => ({ razonSocial: "", cuit: "", calle: "", numeracion: "", barrio: "", manzanaPiso: "", casaDepartamento: "", referencia: "", localidadId: "", provinciaId: "", departamentoId: "", email: "" });
 export function BranchesAdmin() {
@@ -11,6 +11,7 @@ export function BranchesAdmin() {
   const [provinceId, setProvinceId] = useState("");
   const [departmentId, setDepartmentId] = useState("");
   const [form, setForm] = useState(blankForm());
+  const [photoFiles, setPhotoFiles] = useState([]);
   const [editing, setEditing] = useState(null);
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
@@ -34,9 +35,12 @@ export function BranchesAdmin() {
     api.provinces().then(setProvinces).catch((cause) => setError(cause instanceof Error ? cause.message : "No se pudieron cargar las provincias."));
   }, [loadBranches]);
   const visible = useMemo(() => branches.filter((branch) => `${branch.razonSocial} ${branch.cuit} ${branch.localidad} ${branch.departamento} ${branch.provincia}`.toLowerCase().includes(query.toLowerCase())), [branches, query]);
+  const existingPhotoCount = editing ? branches.find((branch) => branch.id === editing)?.photos?.length || 0 : 0;
+  const remainingPhotoSlots = Math.max(0, 5 - existingPhotoCount);
   const newBranch = () => {
     setEditing(null);
     setForm(blankForm());
+    setPhotoFiles([]);
     setProvinceId("");
     setDepartmentId("");
     setDepartments([]);
@@ -48,6 +52,7 @@ export function BranchesAdmin() {
     setError("");
     setEditing(branch.id);
     setForm({ razonSocial: branch.razonSocial, cuit: branch.cuit, calle: branch.calle, numeracion: branch.numeracion, barrio: branch.barrio || "", manzanaPiso: branch.manzanaPiso || "", casaDepartamento: branch.casaDepartamento || "", referencia: branch.referencia || "", localidadId: branch.localidadId, provinciaId: branch.provinciaId, departamentoId: branch.departamentoId, email: branch.email || "" });
+    setPhotoFiles([]);
     setOpen(true);
     const province = provinces.find((item) => item.name === branch.provincia);
     if (!province) return;
@@ -86,7 +91,19 @@ export function BranchesAdmin() {
     setError("");
     try {
       const saved = editing ? await api.updateBranch(editing, form) : await api.createBranch(form);
-      setNotice(editing ? `Sucursal ${saved.razonSocial} actualizada.` : `Sucursal ${saved.razonSocial} creada.`);
+      let photoError = "";
+      for (const file of photoFiles) {
+        try {
+          await api.uploadBranchPhoto(saved.id, file);
+        } catch (cause) {
+          photoError = cause instanceof Error ? cause.message : "No se pudieron cargar todas las fotos.";
+          break;
+        }
+      }
+      setNotice(photoError
+        ? `Sucursal ${saved.razonSocial} guardada, pero no se pudieron cargar todas las fotos: ${photoError}`
+        : editing ? `Sucursal ${saved.razonSocial} actualizada.` : `Sucursal ${saved.razonSocial} creada.`);
+      setPhotoFiles([]);
       setOpen(false);
       await loadBranches();
     } catch (cause) {
@@ -246,6 +263,12 @@ export function BranchesAdmin() {
             "Referencia",
             /* @__PURE__ */ jsx("input", { value: form.referencia || "", onChange: (event) => set("referencia", event.target.value) })
           ] })
+        ] }),
+        /* @__PURE__ */ jsxs("label", { className: "branch-photo-upload", children: [
+          /* @__PURE__ */ jsxs("span", { children: [/* @__PURE__ */ jsx(ImagePlus, { size: 16 }), " Fotos de la sucursal"] }),
+          /* @__PURE__ */ jsx("input", { type: "file", accept: "image/png,image/jpeg,image/webp", multiple: true, disabled: remainingPhotoSlots === 0, onChange: (event) => setPhotoFiles(Array.from(event.target.files || []).slice(0, remainingPhotoSlots)) }),
+          /* @__PURE__ */ jsx("small", { children: `Podés agregar hasta ${remainingPhotoSlots} foto${remainingPhotoSlots === 1 ? "" : "s"}. PNG, JPG o WEBP; máximo 2 MB cada una.` }),
+          photoFiles.length > 0 && /* @__PURE__ */ jsx("small", { children: `${photoFiles.length} foto${photoFiles.length === 1 ? " seleccionada" : "s seleccionadas"}` })
         ] }),
         error && /* @__PURE__ */ jsx("p", { className: "manual-error", role: "alert", children: error }),
         /* @__PURE__ */ jsxs("footer", { children: [

@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import redSelection.dulceMayor.dto.CambioClaveDTO;
+import redSelection.dulceMayor.dto.CambioClaveUsuarioDTO;
 import redSelection.dulceMayor.dto.LoginDTO;
 import redSelection.dulceMayor.dto.SesionDTO;
 import redSelection.dulceMayor.security.UsuarioAutenticado;
@@ -37,6 +38,12 @@ public class AuthController {
     }
 
     /** Cambio obligatorio de la clave inicial. Devuelve una sesión nueva (sin primerIngreso). */
+    @PostMapping("/change-password")
+    public ResponseEntity<SesionDTO> cambiarClave(@AuthenticationPrincipal UsuarioAutenticado usuario,
+                                                   @Valid @RequestBody CambioClaveUsuarioDTO dto) {
+        return ResponseEntity.ok(authService.cambiarClave(usuario, dto));
+    }
+
     @PostMapping("/first-login/change-password")
     public ResponseEntity<SesionDTO> cambiarClaveInicial(@AuthenticationPrincipal UsuarioAutenticado usuario,
                                                          @Valid @RequestBody CambioClaveDTO dto) {

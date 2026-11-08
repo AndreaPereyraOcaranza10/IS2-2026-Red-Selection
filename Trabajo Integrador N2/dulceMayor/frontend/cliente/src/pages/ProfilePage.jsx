@@ -2,6 +2,7 @@ import { jsx, jsxs } from "react/jsx-runtime";
 import { useEffect, useState } from "react";
 import { ArrowLeft, BadgeCheck, Check, LoaderCircle, Save, UserRound } from "lucide-react";
 import { api } from "../api";
+import { PasswordChangeForm } from "../components/PasswordChangeForm.jsx";
 const emptyProfile = {
   nombre: "",
   apellido: "",
@@ -29,7 +30,7 @@ function normalizeProfile(data) {
   const values = { ...emptyProfile, ...data };
   return Object.fromEntries(Object.entries(values).map(([key, value]) => [key, key === "sexo" ? value ?? null : value ?? ""]));
 }
-export function ProfilePage({ onBack }) {
+export function ProfilePage({ onBack, onPasswordChanged }) {
   const [profile, setProfile] = useState(emptyProfile);
   const [provinces, setProvinces] = useState([]);
   const [departments, setDepartments] = useState([]);
@@ -258,6 +259,7 @@ export function ProfilePage({ onBack }) {
           saving ? "Guardando..." : "Guardar cambios"
         ] })
       ] })
-    ] })
+    ] }),
+    !loading && /* @__PURE__ */ jsx(PasswordChangeForm, { onSuccess: onPasswordChanged })
   ] });
 }
