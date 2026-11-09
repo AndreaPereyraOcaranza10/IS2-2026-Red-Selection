@@ -82,6 +82,12 @@
 			<artifactId>mysql-connector-j</artifactId>
 			<scope>runtime</scope>
 		</dependency>
+		<!-- BK-14: base en memoria para los tests (arrancan con la base vacía, sin MySQL ni .env) -->
+		<dependency>
+			<groupId>com.h2database</groupId>
+			<artifactId>h2</artifactId>
+			<scope>test</scope>
+		</dependency>
 		<!-- BK-05: PDF de la factura -->
 		<dependency>
 			<groupId>com.github.librepdf</groupId>
