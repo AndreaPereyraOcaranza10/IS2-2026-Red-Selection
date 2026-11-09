@@ -6,9 +6,11 @@ import redSelection.dulceMayor.exception.RecursoNoEncontradoException;
 import redSelection.dulceMayor.model.FacturaCliente;
 import redSelection.dulceMayor.repository.FacturaClienteRepository;
 
+import java.util.Optional;
+
 /**
- * Acceso a facturas para otros servicios (así PagoService no toca el repository ajeno).
- * Si Andrea ya tiene un FacturaClienteService con la facturación (BK-05), unir este método ahí.
+ * Acceso a facturas para otros servicios (así PagoService y EntregaService no tocan el repository ajeno).
+ * Si Andrea ya tiene un FacturaClienteService con la facturación (BK-05), unir estos métodos ahí.
  */
 @Service
 public class FacturaClienteService {
@@ -23,5 +25,11 @@ public class FacturaClienteService {
     public FacturaCliente obtenerEntidad(String id) {
         return facturaRepository.findByIdAndEliminadoFalse(id)
                 .orElseThrow(() -> new RecursoNoEncontradoException("Factura", id));
+    }
+
+    /** La factura de un pedido, si ya fue emitida (el pedido puede no estar facturado todavía). */
+    @Transactional(readOnly = true)
+    public Optional<FacturaCliente> buscarPorPedido(String pedidoId) {
+        return facturaRepository.findByPedidoId(pedidoId).filter(f -> !f.isEliminado());
     }
 }

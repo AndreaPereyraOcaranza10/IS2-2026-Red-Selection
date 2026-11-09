@@ -21,12 +21,20 @@ import java.util.Optional;
 @Component
 public class NotificacionFacade {
 
-    private static final String ASUNTO_POR_DEFECTO = "Tu pedido de Dulce Mayor es el próximo en reparto";
-    private static final String CUERPO_POR_DEFECTO =
+    public static final String ASUNTO_POR_DEFECTO = "Tu pedido de Dulce Mayor es el próximo en reparto";
+    public static final String CUERPO_POR_DEFECTO =
             "<p>Hola {{responsable}},</p>"
                     + "<p>El reparto de Dulce Mayor está en camino a <b>{{comercio}}</b> ({{direccion}}). "
                     + "Es tu turno: por favor, tené a mano el pago ({{pedido}}).</p>"
                     + "<p>¡Gracias por elegirnos!</p>";
+
+    private static final String ASUNTO_ACCESO = "Tu acceso a Dulce Mayor";
+    private static final String CUERPO_ACCESO =
+            "<p>Hola {{nombre}},</p>"
+                    + "<p>Ya podés ingresar a Dulce Mayor para ver tus pedidos y facturas.</p>"
+                    + "<p>Usuario: <b>{{usuario}}</b><br>Clave temporal: <b>{{clave}}</b></p>"
+                    + "<p>Por seguridad, al ingresar por primera vez vas a tener que elegir una clave nueva. "
+                    + "Si no esperabas este correo, ignoralo.</p>";
 
     private final DulceMayorRepository dulceMayorRepository;
     private final ConfiguracionCorreoEmpresaRepository configuracionRepository;
@@ -60,6 +68,21 @@ public class NotificacionFacade {
                 .valor("comercio", cliente.getNombreComercio())
                 .valor("direccion", direccion.getCalle() + " " + direccion.getNumeracion() + ", " + direccion.getLocalidadNombre())
                 .valor("pedido", parada.getPedido() != null ? "pedido " + parada.getPedido().getId() : "tu pedido")
+                .construir();
+        return envioCorreo.enviar(notificacion);
+    }
+
+    /**
+     * Manda la clave temporal de un cliente nuevo. ...
+     */
+    public boolean enviarClaveTemporal(String correo, String nombre, String usuario, String claveTemporal) {
+        Notificacion notificacion = Notificacion.nueva()
+                .para(correo)
+                .asunto(ASUNTO_ACCESO)
+                .plantilla(CUERPO_ACCESO)
+                .valor("nombre", nombre)
+                .valor("usuario", usuario)
+                .valor("clave", claveTemporal)
                 .construir();
         return envioCorreo.enviar(notificacion);
     }

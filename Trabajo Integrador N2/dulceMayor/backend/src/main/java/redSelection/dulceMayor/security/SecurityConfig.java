@@ -82,6 +82,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/products/**", "/api/exchange-rate/**",
                                 "/api/locations/**", "/api/companies/branches").permitAll()
                         .requestMatchers("/api/admin/**").hasRole("ADMINISTRATIVO")
+                        // Plantillas de correo: las edita administración (el Jefe lo hereda)
+                        .requestMatchers("/api/configuracion-correo/**").hasRole("ADMINISTRATIVO")
                         .requestMatchers(HttpMethod.PATCH, "/api/orders/*/status").hasRole("ADMINISTRATIVO")
                         // Cada empleado ve solo su ruta
                         .requestMatchers(HttpMethod.GET, "/api/rutas/preventista/{id}/hoy").access(propia(Rol.PREVENTISTA))
@@ -90,6 +92,11 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/rutas/paradas/*/entrega").hasRole("TRANSPORTISTA")
                         .requestMatchers("/api/rutas/*/orden", "/api/rutas/*/optimizar")
                         .hasAnyRole("PREVENTISTA", "TRANSPORTISTA")
+                        // Entregas: el historial es del propio transportista (la administración ve cualquiera); el detalle y el cobro
+                        // los valida EntregaService contra el transportista asignado a ESA entrega.
+                        .requestMatchers(HttpMethod.GET, "/api/entregas/transportista/{id}").access(propia(Rol.TRANSPORTISTA))
+                        .requestMatchers(HttpMethod.GET, "/api/entregas/pedido/*").hasAnyRole("TRANSPORTISTA", "ADMINISTRATIVO")
+                        .requestMatchers(HttpMethod.POST, "/api/entregas/pedido/*/cobro").hasRole("TRANSPORTISTA")
                         .requestMatchers("/api/ruteo/**").hasAnyRole("PREVENTISTA", "TRANSPORTISTA", "ADMINISTRATIVO")
                         // Puntos de venta: el preventista da de alta y ve SOLO los suyos (lo exige PuntoVentaService);
                         // dar de baja es del administrativo
@@ -105,7 +112,8 @@ public class SecurityConfig {
                         // (esa pertenencia la exige PagoService). El cliente no elige el medio: lo acuerda facturación.
                         .requestMatchers(HttpMethod.GET, "/api/facturas/*/pagos", "/api/pagos/*")
                         .hasAnyRole("CLIENTE", "ADMINISTRATIVO")
-                        .requestMatchers("/api/facturas/*/pagos", "/api/pagos/**").hasRole("ADMINISTRATIVO")
+                        .requestMatchers("/api/facturas/*/pagos", "/api/facturas/*/pagos/confirmar", "/api/pagos/**")
+                        .hasRole("ADMINISTRATIVO")
                         // Solo el Jefe Administrativo: usuarios, estadísticas y reportes globales
                         .requestMatchers("/api/usuarios/**", "/api/estadisticas/**", "/api/reportes/globales/**")
                         .hasRole("JEFE_ADMINISTRATIVO")

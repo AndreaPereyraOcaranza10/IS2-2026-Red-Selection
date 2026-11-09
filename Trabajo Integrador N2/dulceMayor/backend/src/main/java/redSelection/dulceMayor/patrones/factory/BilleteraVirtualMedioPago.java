@@ -31,4 +31,8 @@ public class BilleteraVirtualMedioPago implements MedioPago {
     public String instrucciones(Pago pago) {
         return "Escaneá el código QR con tu billetera virtual para pagar $" + pago.getMonto() + ".";
     }
+
+    /** Apagada hasta integrar Mercado Pago (se reemplaza el QR por el checkout real vía un Adapter). */
+    @Override
+    public boolean disponible() { return false; }
 }

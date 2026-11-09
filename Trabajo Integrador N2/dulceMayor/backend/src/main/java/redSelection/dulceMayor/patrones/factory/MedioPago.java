@@ -16,6 +16,11 @@ public interface MedioPago {
 
     TipoPago tipo();
 
+    /** ¿Se puede ofrecer hoy este medio? Permite dejar uno implementado pero apagado (ej.: billetera virtual). */
+    default boolean disponible() {
+        return true;
+    }
+
     /** Qué tiene que hacer el cliente para pagar (se le muestra en su panel). */
     String instrucciones(Pago pago);
 

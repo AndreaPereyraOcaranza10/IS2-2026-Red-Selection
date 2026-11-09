@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
+import org.springframework.dao.DataIntegrityViolationException;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -53,6 +54,14 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(AccessDeniedException.class)
     ProblemDetail prohibido(AccessDeniedException ex) {
         return ProblemDetail.forStatusAndDetail(HttpStatus.FORBIDDEN, "No tenés permisos para esta operación");
+    }
+
+    /** Red de seguridad: si dos pedidos pisan el mismo valor único a la vez (ej. código de producto), 409 y no 500. */
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    ProblemDetail integridad(DataIntegrityViolationException ex) {
+        log.warn("Violación de integridad de datos", ex);
+        return ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT,
+                "Ya existe un registro con esos datos (revisá los campos que deben ser únicos).");
     }
 
     @ExceptionHandler(Exception.class)

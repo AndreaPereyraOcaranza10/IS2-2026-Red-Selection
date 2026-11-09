@@ -33,6 +33,12 @@ public class PagoController {
         return ResponseEntity.created(ubicacion).body(creado);
     }
 
+    /** Contrato de BK-07 (idempotente): registra y confirma el cobro de la factura con ese medio. */
+    @PostMapping("/facturas/{facturaId}/pagos/confirmar")
+    public PagoRespuestaDTO confirmarFactura(@PathVariable String facturaId, @Valid @RequestBody PagoCrearDTO dto) {
+        return pagoService.confirmarFactura(facturaId, dto.tipoPago());
+    }
+
     @GetMapping("/facturas/{facturaId}/pagos")
     public List<PagoRespuestaDTO> listar(@PathVariable String facturaId) {
         return pagoService.listarPorFactura(facturaId);

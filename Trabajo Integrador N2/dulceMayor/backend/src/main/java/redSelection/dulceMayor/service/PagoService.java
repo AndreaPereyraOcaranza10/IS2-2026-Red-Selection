@@ -8,6 +8,7 @@ import redSelection.dulceMayor.dto.PagoRespuestaDTO;
 import redSelection.dulceMayor.enums.EstadoFactura;
 import redSelection.dulceMayor.enums.EstadoPago;
 import redSelection.dulceMayor.enums.Rol;
+import redSelection.dulceMayor.enums.TipoPago;
 import redSelection.dulceMayor.exception.RecursoNoEncontradoException;
 import redSelection.dulceMayor.exception.ReglaNegocioException;
 import redSelection.dulceMayor.model.FacturaCliente;
@@ -20,6 +21,7 @@ import redSelection.dulceMayor.security.UsuarioAutenticado;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Ciclo del pago de una factura: iniciar (la administración acuerda el medio con el cliente) → confirmar o anular.
@@ -46,19 +48,23 @@ public class PagoService {
 
     @Transactional
     public PagoRespuestaDTO iniciar(String facturaId, PagoCrearDTO dto) {
+        MedioPago medio = medioPagoFactory.obtener(dto.tipoPago());
+        if (!medio.disponible()) {
+            throw new ReglaNegocioException("El medio de pago " + dto.tipoPago() + " todavía no está habilitado.");
+        }
         FacturaCliente factura = facturaService.obtenerEntidad(facturaId);
-        if (factura.getEstado() != EstadoFactura.EMITIDA) {
-            throw new ReglaNegocioException("Solo se puede pagar una factura emitida.");
+        if (factura.getEstado() == EstadoFactura.ANULADA) {
+            throw new ReglaNegocioException("La factura está anulada: no se puede pagar.");
         }
         List<Pago> existentes = pagoRepository.findByFacturaIdAndEliminadoFalse(facturaId);
-        if (existentes.stream().anyMatch(p -> p.getEstado() == EstadoPago.CONFIRMADO)) {
+        if (factura.getEstado() == EstadoFactura.PAGADA
+                || existentes.stream().anyMatch(p -> p.getEstado() == EstadoPago.CONFIRMADO)) {
             throw new ReglaNegocioException("La factura ya está paga.");
         }
         // Si el cliente cambia de medio, el pago pendiente anterior se anula: queda uno solo vigente.
         existentes.stream().filter(p -> p.getEstado() == EstadoPago.PENDIENTE)
                 .forEach(p -> p.setEstado(EstadoPago.ANULADO));
 
-        MedioPago medio = medioPagoFactory.obtener(dto.tipoPago());
         Pago pago = pagoRepository.save(medio.crearPago(factura));
         medio.alGuardar(pago);
         return aRespuesta(pago);
@@ -78,7 +84,45 @@ public class PagoService {
         return aRespuesta(pago);
     }
 
-    /** Bloqueo pesimista: dos confirmaciones simultáneas no pueden registrar el mismo cobro dos veces. */
+    /**
+     * El pago que hoy vale para una factura: el confirmado si lo hay, si no el pendiente. SIN control de acceso:
+     * lo usan otros services que ya validaron quién pregunta (ej. EntregaService para el transportista).
+     */
+    @Transactional(readOnly = true)
+    public Optional<PagoRespuestaDTO> pagoVigente(String facturaId) {
+        List<Pago> pagosFactura = pagoRepository.findByFacturaIdAndEliminadoFalse(facturaId);
+        return pagosFactura.stream().filter(p -> p.getEstado() == EstadoPago.CONFIRMADO).findFirst()
+                .or(() -> pagosFactura.stream().filter(p -> p.getEstado() == EstadoPago.PENDIENTE).findFirst())
+                .map(this::aRespuesta);
+    }
+
+    /**
+     * Contrato de BK-07: registra el cobro de una factura con un medio. Es IDEMPOTENTE: repetir la misma
+     * llamada no crea otro pago ni cambia nada, devuelve el pago ya confirmado. Si había un pago pendiente
+     * de ese medio lo confirma; si no, lo crea y lo confirma (efectivo o transferencia recibidos).
+     */
+    @Transactional
+    public PagoRespuestaDTO confirmarFactura(String facturaId, TipoPago tipoPago) {
+        facturaService.obtenerEntidad(facturaId);   // 404 si no existe
+        List<Pago> existentes = pagoRepository.findByFacturaIdAndEliminadoFalse(facturaId);
+        Pago confirmado = existentes.stream().filter(p -> p.getEstado() == EstadoPago.CONFIRMADO).findFirst().orElse(null);
+        if (confirmado != null) {
+            if (confirmado.getTipoPago() == tipoPago) {
+                return aRespuesta(confirmado);
+            }
+            throw new ReglaNegocioException("La factura ya fue pagada con " + confirmado.getTipoPago() + ".");
+        }
+        String pagoId = existentes.stream()
+                .filter(p -> p.getEstado() == EstadoPago.PENDIENTE && p.getTipoPago() == tipoPago)
+                .map(Pago::getId).findFirst()
+                .orElseGet(() -> iniciar(facturaId, new PagoCrearDTO(tipoPago)).id());
+        return confirmar(pagoId);
+    }
+
+    /**
+     * Idempotente: confirmar un pago que ya está confirmado devuelve lo mismo y no cambia nada (ni la fecha).
+     * Bloqueo pesimista: dos confirmaciones simultáneas no pueden registrar el mismo cobro dos veces.
+     */
     @Transactional
     public PagoRespuestaDTO confirmar(String pagoId) {
         Pago pago = pagoRepository.buscarConBloqueo(pagoId)
@@ -88,12 +132,16 @@ public class PagoService {
         if (!medioPagoFactory.obtener(pago.getTipoPago()).puedeConfirmar(rol)) {
             throw new AccessDeniedException("Tu rol no puede confirmar pagos de este medio");
         }
+        if (pago.getEstado() == EstadoPago.CONFIRMADO) {
+            return aRespuesta(pago);
+        }
         exigirPendiente(pago, "confirmar");
-        if (pago.getFactura().getEstado() != EstadoFactura.EMITIDA) {
+        if (pago.getFactura().getEstado() == EstadoFactura.ANULADA) {
             throw new ReglaNegocioException("La factura está anulada: no se puede registrar el pago.");
         }
         pago.setEstado(EstadoPago.CONFIRMADO);
         pago.setFechaPago(LocalDateTime.now());
+        pago.getFactura().setEstado(EstadoFactura.PAGADA);   // criterio de BK-07: la factura pasa a pagada
         return aRespuesta(pago);
     }
 

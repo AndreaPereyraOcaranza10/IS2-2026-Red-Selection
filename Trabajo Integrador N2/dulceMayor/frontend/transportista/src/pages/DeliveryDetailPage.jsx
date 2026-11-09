@@ -4,11 +4,11 @@ import { deliveryApi } from '../api.js';
 
 /** Detalle de una entrega: productos, medio de pago y trazabilidad (incluye al transportista). */
 export default function DeliveryDetailPage() {
-  const { id } = useParams();
-  const detail = useAsync(() => deliveryApi.stop(id), [id]);
-
+  const { id, orderId } = useParams();   // /reparto/:id (parada de hoy) o /pedido/:orderId (historial)
+  const detail = useAsync(() => (orderId ? deliveryApi.orderDetail(orderId) : deliveryApi.stop(id)), [id, orderId]);
+  
   return (
-    <Layout title="Detalle de la entrega" back backTo="/reparto">
+    <Layout title="Detalle de la entrega" back backTo={orderId ? '/entregas' : '/reparto'}>
       <Async state={detail}>
         {(d) => {
           const s = d.stop;

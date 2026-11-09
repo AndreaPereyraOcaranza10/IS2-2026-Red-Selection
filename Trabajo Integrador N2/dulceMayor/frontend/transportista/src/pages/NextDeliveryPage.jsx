@@ -17,6 +17,9 @@ export default function NextDeliveryPage() {
   const deliver = async () => {
     setBusy(true);
     try {
+      // En efectivo, primero se registra el cobro (idempotente: si falla la entrega y se reintenta, no se cobra dos veces).
+      const s = detail.data.stop;
+      if (s.paymentMethod === 'EFECTIVO') await deliveryApi.collectCash(s.orderId);
       const res = await deliveryApi.deliver(id);
       navigate('/entrega-registrada', { replace: true, state: res }); // { delivered, nextStop, emailSent }
     } catch (e) {

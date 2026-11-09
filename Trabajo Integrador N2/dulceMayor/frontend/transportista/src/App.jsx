@@ -24,6 +24,7 @@ export default function App() {
                   <Routes>
                     <Route path="/reparto" element={<DeliveryRoutePage />} />
                     <Route path="/reparto/:id" element={<DeliveryDetailPage />} />
+                    <Route path="/pedido/:orderId" element={<DeliveryDetailPage />} />
                     <Route path="/mapa" element={<DeliveryMapPage />} />
                     <Route path="/entregas" element={<DeliveriesDonePage />} />
                     <Route path="/entrega/:id" element={<NextDeliveryPage />} />

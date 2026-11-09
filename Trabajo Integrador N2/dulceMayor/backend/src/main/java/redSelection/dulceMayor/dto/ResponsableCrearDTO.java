@@ -24,7 +24,7 @@ public record ResponsableCrearDTO(
         String email,
 
         @NotBlank
-        @Pattern(regexp = PatronesValidacion.TELEFONO, message = "El teléfono solo lleva números (entre 8 y 15)")
+        @Pattern(regexp = PatronesValidacion.TELEFONO, message = "El teléfono debe tener 10 u 11 dígitos numéricos")
         String telefono,
 
         TipoTelefono tipoTelefono   // opcional, por defecto CELULAR
