@@ -8,4 +8,13 @@ export const ADMIN_ROUTES = {
   dispatch: '/admin/despacho',
   account: '/admin/cuenta',
   branches: '/admin/sucursales',
+  users: '/admin/usuarios',
+  promotions: '/admin/promociones',
 };
+
+export function institutionalSiteUrl() {
+  const configuredUrl = import.meta.env.VITE_CLIENT_URL;
+  if (configuredUrl) return configuredUrl;
+  if (window.location.port === '5176') return `${window.location.protocol}//${window.location.hostname}:5175`;
+  return '/';
+}

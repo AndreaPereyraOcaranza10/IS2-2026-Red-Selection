@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Headphones, ShoppingBag } from "lucide-react";
 import { Navigate, Route, Routes, useLocation, useNavigate, useParams } from "react-router-dom";
 import { api } from "./api";
-import { ADMIN_ROLES, ACCOUNT_STORAGE_KEY, ROUTES } from "./config";
+import { ADMIN_ROLES, ACCOUNT_STORAGE_KEY, ROUTES, adminAppUrl } from "./config";
 import { Header } from "./components/Header";
 import { CartPanel } from "./components/CartPanel";
 import { HomePage } from "./pages/HomePage";
@@ -11,8 +11,15 @@ import { ProductDetailPage } from "./pages/ProductDetailPage";
 import { OrdersPage } from "./pages/OrdersPage";
 import { ProfilePage } from "./pages/ProfilePage";
 import { LoginPage } from "./pages/LoginPage";
-import { OperationsDashboardPage } from "./pages/OperationsDashboardPage";
 import { ForcedPasswordPage } from "./pages/ForcedPasswordPage";
+
+function AdminAppRedirect() {
+  useEffect(() => {
+    const destination = `${window.location.pathname}${window.location.search}${window.location.hash}`;
+    window.location.replace(adminAppUrl(destination));
+  }, []);
+  return /* @__PURE__ */ jsx("main", { className: "admin-redirect", children: "Abriendo el panel administrativo…" });
+}
 function readAccount() {
   try {
     const value = sessionStorage.getItem(ACCOUNT_STORAGE_KEY);
@@ -34,6 +41,10 @@ function App() {
   const [apiNotice, setApiNotice] = useState("");
   const [checkoutError, setCheckoutError] = useState("");
   const [checkingOut, setCheckingOut] = useState(false);
+  const [promoCode, setPromoCode] = useState("");
+  const [promotion, setPromotion] = useState(null);
+  const [promoLoading, setPromoLoading] = useState(false);
+  const [promoError, setPromoError] = useState("");
   useEffect(() => {
     api.products().then((products) => {
       setCatalog(products);
@@ -52,6 +63,10 @@ function App() {
     requestAnimationFrame(() => document.getElementById(id)?.scrollIntoView());
   }, [location.pathname, location.hash]);
   const count = Object.values(quantities).reduce((total, quantity) => total + quantity, 0);
+  const cartSubtotal = catalog.reduce((sum, product) => sum + product.price * (quantities[String(product.id)] || 0), 0);
+  const estimatedDiscount = promotion ? Math.round((promotion.type === "PRODUCTO_DESTACADO"
+    ? catalog.filter((product) => String(product.id) === String(promotion.productId)).reduce((sum, product) => sum + product.price * (quantities[String(product.id)] || 0), 0)
+    : cartSubtotal) * Number(promotion.discountPercent || 0) / 100) : 0;
   const categories = useMemo(() => [...new Set(catalog.map((product) => product.category).filter(Boolean))].sort((a, b) => a.localeCompare(b, "es")), [catalog]);
   const filtered = useMemo(() => catalog.filter((product) => (category === "Ver todo" || product.category === category) && `${product.name} ${product.brand} ${product.category}`.toLowerCase().includes(search.toLowerCase())), [catalog, category, search]);
   const goTo = (path) => {
@@ -72,21 +87,55 @@ function App() {
       navigate("/cambiar-clave", { replace: true });
     }
   }, [account, location.pathname, navigate]);
-  const addProduct = (id, amount = 1) => setQuantities((previous) => {
-    const key = String(id);
-    const product = catalog.find((item) => String(item.id) === key);
-    const stock = Number(product?.stock);
-    if (!product || !Number.isFinite(stock) || stock <= 0) return previous;
-    const increment = Math.max(1, Math.trunc(Number(amount) || 1));
-    return { ...previous, [key]: Math.min(stock, (previous[key] || 0) + increment) };
-  });
+  const addProduct = (id, amount = 1) => {
+    setPromotion(null);
+    setPromoError("");
+    setQuantities((previous) => {
+      const key = String(id);
+      const product = catalog.find((item) => String(item.id) === key);
+      const stock = Number(product?.stock);
+      if (!product || !Number.isFinite(stock) || stock <= 0) return previous;
+      const increment = Math.max(1, Math.trunc(Number(amount) || 1));
+      return { ...previous, [key]: Math.min(stock, (previous[key] || 0) + increment) };
+    });
+  };
   const removeProduct = (id) => {
+    setPromotion(null);
+    setPromoError("");
     setQuantities((previous) => {
       const next = { ...previous };
       delete next[String(id)];
       return next;
     });
     setCheckoutError("");
+  };
+  const applyPromotion = async () => {
+    if (!account) {
+      setPromoError("Iniciá sesión como cliente para validar un código de descuento.");
+      return;
+    }
+    if (ADMIN_ROLES.includes(account.role)) {
+      setPromoError("Los códigos de descuento se aplican desde una cuenta de cliente.");
+      return;
+    }
+    setPromoLoading(true);
+    setPromoError("");
+    setPromotion(null);
+    try {
+      const result = await api.validatePromotion(promoCode.trim());
+      if (!result?.valid) throw new Error(result?.message || "El código no es válido.");
+      if (result.type === "VOLUMEN" && count < Number(result.minQuantity || 0)) {
+        throw new Error(`Este código requiere al menos ${result.minQuantity} unidades en el pedido.`);
+      }
+      if (result.type === "PRODUCTO_DESTACADO" && !Object.entries(quantities).some(([id, quantity]) => quantity > 0 && id === String(result.productId))) {
+        throw new Error(`Agregá ${result.productName || "el producto destacado"} al pedido para usar este código.`);
+      }
+      setPromotion(result);
+    } catch (error) {
+      setPromoError(error instanceof Error ? error.message : "No se pudo validar el código.");
+    } finally {
+      setPromoLoading(false);
+    }
   };
   const handleOrder = async () => {
     if (!account) {
@@ -102,8 +151,10 @@ function App() {
     setCheckingOut(true);
     setCheckoutError("");
     try {
-      await api.createOrder(Object.entries(quantities).map(([productId, quantity]) => ({ productId, quantity })));
+      await api.createOrder(Object.entries(quantities).map(([productId, quantity]) => ({ productId, quantity })), promotion ? promoCode.trim() : undefined);
       setQuantities({});
+      setPromotion(null);
+      setPromoCode("");
       setCartOpen(false);
       goTo(ROUTES.orders);
     } catch (error) {
@@ -121,7 +172,7 @@ function App() {
       onOrdersClick: () => goTo(ROUTES.orders),
       onLoginClick: () => goTo(ROUTES.login),
       onProfileClick: () => goTo(ROUTES.profile),
-      onAdminClick: () => goTo(ROUTES.admin),
+      onAdminClick: () => window.location.assign(adminAppUrl(ROUTES.admin)),
       onLogoutClick: logout
     }
   );
@@ -136,7 +187,7 @@ function App() {
       count,
       ")"
     ] }),
-    /* @__PURE__ */ jsx(CartPanel, { open: cartOpen, onClose: () => setCartOpen(false), products: catalog, quantities, onRemoveProduct: removeProduct, onCheckout: handleOrder, error: checkoutError, submitting: checkingOut })
+    /* @__PURE__ */ jsx(CartPanel, { open: cartOpen, onClose: () => setCartOpen(false), products: catalog, quantities, onRemoveProduct: removeProduct, onCheckout: handleOrder, error: checkoutError, submitting: checkingOut, promoCode, onPromoCodeChange: (value) => { setPromoCode(value); setPromotion(null); setPromoError(""); }, onApplyPromo: applyPromotion, onRemovePromo: () => { setPromotion(null); setPromoError(""); }, promotion, promoLoading, promoError, estimatedDiscount })
   ] });
   return /* @__PURE__ */ jsxs(Fragment, { children: [
     /* @__PURE__ */ jsxs(Routes, { children: [
@@ -153,22 +204,26 @@ function App() {
       ] }) }),
       /* @__PURE__ */ jsx(Route, { path: ROUTES.orders, element: /* @__PURE__ */ jsxs(Fragment, { children: [
         header,
-        /* @__PURE__ */ jsx(OrdersPage, { onBack: () => goTo(ROUTES.catalog), onProfile: () => goTo(ROUTES.profile) })
+        /* @__PURE__ */ jsx(OrdersPage, { onBack: () => goTo(ROUTES.catalog), onProfile: () => goTo(ROUTES.profile), account })
       ] }) }),
       /* @__PURE__ */ jsx(Route, { path: ROUTES.profile, element: /* @__PURE__ */ jsxs(Fragment, { children: [
         header,
         /* @__PURE__ */ jsx(ProfilePage, { onBack: () => goTo(ROUTES.home), onPasswordChanged: persistAccount })
       ] }) }),
-      /* @__PURE__ */ jsx(Route, { path: "/cambiar-clave", element: /* @__PURE__ */ jsx(ForcedPasswordPage, { account, onComplete: (session) => { persistAccount(session); goTo(ADMIN_ROLES.includes(session.role) ? ROUTES.admin : ROUTES.home); } }) }),
+      /* @__PURE__ */ jsx(Route, { path: "/cambiar-clave", element: /* @__PURE__ */ jsx(ForcedPasswordPage, { account, onComplete: (session) => { if (ADMIN_ROLES.includes(session.role)) window.location.assign(adminAppUrl(ROUTES.admin)); else { persistAccount(session); goTo(ROUTES.home); } } }) }),
       /* @__PURE__ */ jsx(Route, { path: ROUTES.login, element: /* @__PURE__ */ jsxs(Fragment, { children: [
         header,
         /* @__PURE__ */ jsx(LoginPage, { onSuccess: async (email, password) => {
           const session = await api.login(email, password);
+          if (ADMIN_ROLES.includes(session.role)) {
+            window.location.assign(adminAppUrl(ROUTES.admin));
+            return;
+          }
           persistAccount(session);
-          goTo(session.mustChangePassword ? "/cambiar-clave" : ADMIN_ROLES.includes(session.role) ? ROUTES.admin : ROUTES.home);
-        }, onStaff: () => goTo(ROUTES.admin) })
+          goTo(session.mustChangePassword ? "/cambiar-clave" : ROUTES.home);
+        }, onStaff: () => window.location.assign(adminAppUrl("/login")) })
       ] }) }),
-      /* @__PURE__ */ jsx(Route, { path: "/admin/*", element: /* @__PURE__ */ jsx(OperationsDashboardPage, { onBack: () => goTo(ROUTES.home) }) }),
+      /* @__PURE__ */ jsx(Route, { path: "/admin/*", element: /* @__PURE__ */ jsx(AdminAppRedirect, {}) }),
       /* @__PURE__ */ jsx(Route, { path: "*", element: /* @__PURE__ */ jsx(Navigate, { to: ROUTES.home, replace: true }) })
     ] }),
     footerActions

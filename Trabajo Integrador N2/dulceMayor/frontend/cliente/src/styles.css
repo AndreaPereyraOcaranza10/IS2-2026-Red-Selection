@@ -132,6 +132,12 @@
 @media(max-width:720px){.main-nav{min-width:0;max-width:100vw}}
 /* State polish: make feedback distinct, readable and consistent. */
 :focus-visible{outline:3px solid rgba(194,24,91,.28);outline-offset:3px}
+/* Reparte el header sobre una caja centrada y evita que sus extremos se desplacen fuera del viewport. */
+@media(min-width:1101px){
+  .header-inner{max-width:1440px;padding-inline:clamp(20px,2.4vw,36px);gap:clamp(10px,1.2vw,18px)}
+  .main-nav{gap:clamp(10px,1.1vw,16px);margin-inline:auto}
+  .header-actions{gap:clamp(5px,.65vw,9px)}
+}
 .public-branch-map{display:block;width:100%;height:170px;margin-top:12px;border:0;border-radius:7px;background:var(--color-surface-dim)}.branch-directions{display:inline-block;margin-top:8px;color:var(--color-brand-primary);font-size:11px;font-weight:700}.branch-photo-slot{min-height:58px!important;padding:10px!important;display:flex;align-items:center;justify-content:center;color:var(--color-outline);font-size:11px;text-align:center}.branch-photos{display:flex;gap:8px;overflow-x:auto;padding:12px 12px 0;scroll-snap-type:x proximity}.branch-photos img{width:100%;min-width:100%;height:170px;object-fit:cover;border-radius:7px;scroll-snap-align:start}.branch-photo-upload{display:flex;flex-direction:column;gap:7px;padding:10px 12px;border:1px dashed var(--color-outline-variant);border-radius:6px;color:var(--color-brand-primary);font-size:11px}.branch-photo-upload>span{display:flex;align-items:center;gap:7px;font-weight:700}.branch-photo-upload input{font-size:11px}.branch-photo-upload small{color:var(--color-outline);font-size:10px}.detail-price{display:flex;flex-direction:column;gap:5px;padding:8px 0}.detail-price>span,.detail-price>small,.detail-stock{color:var(--color-outline);font-size:11px}.detail-price>strong{color:var(--color-brand-deep);font:700 27px 'Plus Jakarta Sans'}.detail-description{color:var(--color-outline);font-size:12px;line-height:1.6}.detail-stock.available{color:var(--color-secondary)}.detail-stock.unavailable{color:var(--color-error)}.quantity-stepper button:disabled{opacity:.5;cursor:not-allowed}.detail-add:disabled{opacity:.6;cursor:not-allowed}
 .add-button{min-height:40px;border-radius:8px;transition:background-color .18s ease,border-color .18s ease,color .18s ease,transform .18s ease,box-shadow .18s ease}
 .add-button:hover{transform:translateY(-1px);box-shadow:0 5px 12px var(--color-shadow-brand-soft)}
@@ -338,7 +344,36 @@ html,body,#root{width:100%;max-width:100%}body{min-width:0}#root{min-width:0;ove
 
 .password-change-section{display:flex;flex-direction:column;gap:14px}.password-change-section .profile-form-footer{padding-bottom:0}.password-required-page .profile-heading{margin:22px 0}
 .cart-item{grid-template-columns:58px minmax(0,1fr) auto auto;gap:9px}.cart-item>div{min-width:0}.cart-item>div>b{overflow-wrap:anywhere}.cart-remove{width:32px;height:32px;display:grid;place-items:center;border:1px solid var(--color-surface-dim);border-radius:7px;background:var(--color-surface);color:var(--color-error);cursor:pointer}.cart-remove:hover{background:var(--color-surface-dim);border-color:var(--color-error)}.add-button:disabled{opacity:.62;cursor:not-allowed;transform:none;box-shadow:none}.quantity-stepper button:disabled{opacity:.45;cursor:not-allowed}
+.cart-promotion{padding:12px 0 4px;border-top:1px solid var(--color-surface-dim)}.cart-promotion>label{display:flex;align-items:center;gap:6px;margin-bottom:8px;color:var(--color-brand-deep);font-size:10px;font-weight:700}.cart-promo-form{display:flex;gap:7px}.cart-promo-form input{min-width:0;flex:1;height:37px;padding:0 10px;border:1px solid var(--color-surface-dim);border-radius:6px;color:var(--color-brand-deep);font:inherit;font-size:10px;text-transform:uppercase}.cart-promo-form input:focus{outline:2px solid var(--color-brand-soft);border-color:var(--color-brand-primary)}.cart-promo-form button{min-width:75px;padding:0 12px;border:1px solid var(--color-brand-primary);border-radius:6px;background:var(--color-surface);color:var(--color-brand-primary);font-size:10px;font-weight:700;cursor:pointer}.cart-promo-form button:disabled{opacity:.55;cursor:wait}.cart-promo-error,.cart-promo-success{display:flex;align-items:flex-start;gap:6px;margin:7px 0 0;font-size:9px;line-height:1.45}.cart-promo-error{color:var(--color-error)}.cart-promo-success{color:var(--color-secondary)}.cart-discount{display:flex;justify-content:space-between;padding:8px 0 0;color:var(--color-secondary);font-size:10px}.cart-discount b{color:var(--color-secondary)}.cart-final-total{padding-top:8px;border-top:0}.cart-final-total b{font-size:15px}
 .ops-site-link{height:34px;padding:0 11px;display:inline-flex;align-items:center;justify-content:center;gap:7px;border:1px solid var(--color-surface-dim);border-radius:8px;background:var(--color-surface);color:var(--color-brand-primary);font-size:10px;font-weight:700;text-decoration:none;white-space:nowrap}
 .ops-site-link svg{width:15px;height:15px;flex:none}
 .ops-site-link:hover{background:var(--color-surface-dim);border-color:var(--color-primary-soft)}
 @media(max-width:650px){.ops-site-link{width:34px;height:34px;padding:0;border-radius:9px}.ops-site-link span{display:none}}
+
+.orders-refresh-button,.invoice-download-button{min-height:36px;padding:0 11px;display:inline-flex;align-items:center;justify-content:center;gap:7px;border:1px solid var(--color-surface-dim);border-radius:6px;background:var(--color-surface);color:var(--color-brand-primary);font:600 10px 'DM Sans';cursor:pointer}
+.orders-refresh-button svg,.invoice-download-button svg{width:15px;height:15px;flex:none}
+.orders-refresh-button:disabled,.invoice-download-button:disabled{opacity:.6;cursor:wait}
+.order-stock-notice,.invoice-download-error{margin:0 18px 14px;padding:10px 12px;border-radius:6px;background:var(--color-warning-soft);color:#765000;font-size:10px;line-height:1.5}
+.invoice-download-error{margin:0 0 13px;background:var(--color-error-soft);color:var(--color-error)}
+.order-event-details{margin:0 18px 14px;padding:12px 0;border-top:1px solid var(--color-surface-dim);color:var(--color-brand-primary);font-size:10px}
+.order-event-details>summary{display:flex;align-items:center;gap:7px;cursor:pointer;font-weight:700;list-style:none}
+.order-event-details>summary::-webkit-details-marker{display:none}
+.order-event-details ol{position:relative;display:flex;flex-direction:column;gap:0;margin:12px 0 0;padding:0;list-style:none}
+.order-event-details ol:before{content:'';position:absolute;top:8px;bottom:10px;left:6px;width:1px;background:var(--color-surface-dim)}
+.order-event-details li{position:relative;display:flex;gap:10px;padding:0 0 12px}
+.order-event-details li:last-child{padding-bottom:0}
+.order-event-dot{position:relative;z-index:1;width:13px;height:13px;flex:none;border:3px solid var(--color-surface);border-radius:50%;background:var(--color-secondary);box-shadow:0 0 0 1px var(--color-secondary)}
+.order-event-details li>div{display:flex;flex-wrap:wrap;gap:3px 10px;align-items:baseline}
+.order-event-details li b{font-size:10px}
+.order-event-details li small{color:var(--color-outline);font-size:9px}
+.order-event-details li p{flex-basis:100%;color:var(--color-outline);font-size:9px;line-height:1.45}
+.order-carrier,.order-point-of-sale{display:flex;align-items:center;gap:6px;margin:0 18px 12px;color:var(--color-brand-primary);font-size:9px}
+.order-carrier svg,.order-point-of-sale svg{flex:none}
+.invoice-record-state.cancelled{background:var(--color-error-soft);color:var(--color-error)}
+.invoice-download-button{grid-column:2/-1;justify-self:start;min-height:34px}
+.invoice-download-error+.account-loading{margin-top:8px}
+@media(max-width:650px){.orders-refresh-button{min-height:32px;padding:0 8px;font-size:9px}.order-stock-notice{margin-right:12px;margin-left:12px}.order-event-details{margin-right:12px;margin-left:12px}.order-carrier,.order-point-of-sale{margin-right:12px;margin-left:12px}.invoice-download-button{grid-column:1/-1;width:100%}}
+.order-status.delivered{background:var(--color-secondary-soft);color:var(--color-secondary)}
+.order-status.delivered i{background:var(--color-secondary)}
+.tracking-step.active.delivered .step-icon{background:var(--color-secondary);color:var(--color-surface);box-shadow:0 0 0 2px var(--color-secondary-soft)}
+.tracking-step.active.delivered b{color:var(--color-secondary)}

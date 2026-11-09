@@ -1,7 +1,7 @@
 import { Fragment, jsx, jsxs } from "react/jsx-runtime";
-import { ArrowRight, Check, LoaderCircle, ShoppingBag, Trash2, X } from "lucide-react";
+import { ArrowRight, Check, LoaderCircle, ShoppingBag, Trash2, X, Tag } from "lucide-react";
 const currency = new Intl.NumberFormat("es-AR", { style: "currency", currency: "ARS", maximumFractionDigits: 0 });
-export function CartPanel({ open, onClose, products, quantities, onRemoveProduct, onCheckout, error = "", submitting = false }) {
+export function CartPanel({ open, onClose, products, quantities, onRemoveProduct, onCheckout, error = "", submitting = false, promoCode = "", onPromoCodeChange, onApplyPromo, onRemovePromo, promotion, promoLoading = false, promoError = "", estimatedDiscount = 0 }) {
   const items = products.filter((product) => quantities[String(product.id)]);
   const total = items.reduce((sum, product) => sum + product.price * quantities[String(product.id)], 0);
   return /* @__PURE__ */ jsxs(Fragment, { children: [
@@ -38,6 +38,19 @@ export function CartPanel({ open, onClose, products, quantities, onRemoveProduct
         /* @__PURE__ */ jsxs("div", { className: "cart-total", children: [
           /* @__PURE__ */ jsx("span", { children: "Subtotal estimado" }),
           /* @__PURE__ */ jsx("b", { children: currency.format(total) })
+        ] }),
+        /* @__PURE__ */ jsxs("section", { className: "cart-promotion", "aria-label": "Código de descuento", children: [
+          /* @__PURE__ */ jsxs("label", { htmlFor: "cart-promo-code", children: [/* @__PURE__ */ jsx(Tag, { size: 15 }), " Código de descuento"] }),
+          /* @__PURE__ */ jsxs("div", { className: "cart-promo-form", children: [
+            /* @__PURE__ */ jsx("input", { id: "cart-promo-code", value: promoCode, onChange: (event) => onPromoCodeChange?.(event.target.value), placeholder: "Ingresá tu código", autoComplete: "off", disabled: promoLoading || Boolean(promotion) }),
+            promotion ? /* @__PURE__ */ jsx("button", { type: "button", onClick: onRemovePromo, disabled: promoLoading, children: "Quitar" }) : /* @__PURE__ */ jsx("button", { type: "button", onClick: onApplyPromo, disabled: promoLoading || !promoCode.trim(), children: promoLoading ? "Validando…" : "Aplicar" })
+          ] }),
+          promoError && /* @__PURE__ */ jsx("p", { className: "cart-promo-error", role: "alert", children: promoError }),
+          promotion && /* @__PURE__ */ jsxs("p", { className: "cart-promo-success", children: [/* @__PURE__ */ jsx(Check, { size: 14 }), " ", promotion.message || `Cupón aplicado: ${promotion.discountPercent}% de descuento`] })
+        ] }),
+        promotion && estimatedDiscount > 0 && /* @__PURE__ */ jsxs(Fragment, { children: [
+          /* @__PURE__ */ jsxs("div", { className: "cart-discount", children: [/* @__PURE__ */ jsx("span", { children: "Descuento estimado" }), /* @__PURE__ */ jsx("b", { children: `−${currency.format(estimatedDiscount)}` })] }),
+          /* @__PURE__ */ jsxs("div", { className: "cart-total cart-final-total", children: [/* @__PURE__ */ jsx("span", { children: "Total estimado con descuento" }), /* @__PURE__ */ jsx("b", { children: currency.format(Math.max(0, total - estimatedDiscount)) })] })
         ] }),
         /* @__PURE__ */ jsxs("p", { className: "cart-note", children: [
           /* @__PURE__ */ jsx(Check, { size: 15 }),

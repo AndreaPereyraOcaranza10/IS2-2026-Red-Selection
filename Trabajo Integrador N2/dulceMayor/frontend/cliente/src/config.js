@@ -19,4 +19,10 @@ export const ADMIN_ROUTES = {
   branches: "/admin/sucursales"
 };
 export const ACCOUNT_STORAGE_KEY = "dulcemayor.account";
-export const ADMIN_ROLES = ["ADMIN", "ALMACENERO", "JEFE_ADMINISTRATIVO"];
+export const ADMIN_ROLES = ["ADMIN", "JEFE_ADMINISTRATIVO"];
+
+export function adminAppUrl(path = "/login") {
+  const base = import.meta.env.VITE_ADMIN_URL
+    || `${window.location.protocol}//${window.location.hostname}:5176`;
+  return new URL(path, base).toString();
+}

@@ -2,10 +2,12 @@ import { Fragment, jsx, jsxs } from "react/jsx-runtime";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { ProductsAdminPage, useAuth } from '@dulcemayor/shared';
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { ADMIN_ROUTES } from "../config";
-import { AlertTriangle, ArrowLeft, ArrowRight, Bell, Barcode, Building2, CheckCircle2, ChevronDown, CircleHelp, ClipboardList, Clock3, FileText, LayoutDashboard, LoaderCircle, MapPin, MoreVertical, Package, PackageCheck, Plus, RefreshCw, Search, Settings, ShoppingCart, Truck, Warehouse, X } from "lucide-react";
+import { ADMIN_ROUTES, institutionalSiteUrl } from "../config";
+import { AlertTriangle, ArrowLeft, ArrowRight, Bell, Barcode, Building2, CheckCircle2, ChevronDown, ClipboardList, Clock3, ExternalLink, FileText, LayoutDashboard, LoaderCircle, MapPin, Package, PackageCheck, Plus, RefreshCw, Search, Settings, ShoppingCart, Tag, Truck, Users, Warehouse, X } from "lucide-react";
 import { apiAdmin as api } from "../api";
 import { BranchesAdmin } from "./BranchesAdmin";
+import { UsersAdminPage } from "./UsersAdminPage.jsx";
+import { PromotionsAdminPage } from "./PromotionsAdminPage.jsx";
 const navItems = [
   { label: "Inicio", icon: LayoutDashboard },
   { label: "Productos", icon: Package },
@@ -13,11 +15,12 @@ const navItems = [
   { label: "Pedidos", icon: ShoppingCart },
   { label: "Facturaci\xF3n y pagos", icon: FileText },
   { label: "Despacho", icon: Truck },
-  { label: "Mi cuenta", icon: Settings },
-  { label: "Sucursales", icon: Building2 }
+  { label: "Sucursales", icon: Building2 },
+  { label: "Usuarios internos", icon: Users },
+  { label: "Promociones", icon: Tag }
 ];
 const menuByRole = {
-  ADMINISTRATIVO: navItems.map(({ label }) => label),
+  ADMINISTRATIVO: navItems.filter(({ label }) => !["Usuarios internos", "Promociones"].includes(label)).map(({ label }) => label),
   JEFE_ADMINISTRATIVO: navItems.map(({ label }) => label),
 };
 const sectionPaths = {
@@ -28,7 +31,9 @@ const sectionPaths = {
   [navItems[4].label]: ADMIN_ROUTES.billing,
   "Despacho": ADMIN_ROUTES.dispatch,
   "Mi cuenta": ADMIN_ROUTES.account,
-  "Sucursales": ADMIN_ROUTES.branches
+  "Sucursales": ADMIN_ROUTES.branches,
+  "Usuarios internos": ADMIN_ROUTES.users,
+  "Promociones": ADMIN_ROUTES.promotions
 };
 const stateLabels = { CARGADO: "Cargado", PENDIENTE_STOCK: "Pendiente de stock", FACTURADO: "Facturado", EN_REPARTO: "En reparto", ENTREGADO: "Entregado", ANULADO: "Anulado" };
 const nextState = { CARGADO: "FACTURADO", FACTURADO: "EN_REPARTO", EN_REPARTO: "ENTREGADO" };
@@ -235,6 +240,12 @@ export function OperationsDashboardPage({ onBack }) {
   useEffect(() => {
     if (!Object.values(sectionPaths).includes(currentPath)) navigate("/acceso-denegado", { replace: true });
   }, [currentPath, navigate]);
+  useEffect(() => {
+    const rutasSoloJefe = [ADMIN_ROUTES.users, ADMIN_ROUTES.promotions];
+    if (rutasSoloJefe.includes(currentPath) && user?.role !== "JEFE_ADMINISTRATIVO") {
+      navigate("/acceso-denegado", { replace: true });
+    }
+  }, [currentPath, navigate, user?.role]);
   const [orders, setOrders] = useState([]);
   const [inventory, setInventory] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -313,22 +324,21 @@ export function OperationsDashboardPage({ onBack }) {
         label === "Despacho" && inTransit.length > 0 && /* @__PURE__ */ jsx("b", { children: inTransit.length })
       ] }, label)) }),
       /* @__PURE__ */ jsxs("div", { className: "ops-side-bottom", children: [
-        /* @__PURE__ */ jsxs("button", { onClick: () => setNotice("Atajos: Ctrl + K buscar, P nuevo pedido, S consultar stock."), children: [
-          /* @__PURE__ */ jsx(CircleHelp, {}),
-          " Atajos de teclado ",
-          /* @__PURE__ */ jsx("kbd", { children: "?" })
-        ] }),
         /* @__PURE__ */ jsxs("button", { onClick: () => { logout(); onBack?.(); }, children: [
           /* @__PURE__ */ jsx(ArrowLeft, {}),
-          " Cerrar sesi?n"
+          " Cerrar sesi\u00f3n"
         ] }),
-        /* @__PURE__ */ jsxs("div", { className: "ops-user", children: [
+        /* @__PURE__ */ jsxs("a", { className: "ops-institutional-link", href: institutionalSiteUrl(), "aria-label": "Volver al sitio institucional", title: "Volver al sitio institucional", children: [
+          /* @__PURE__ */ jsx(ExternalLink, {}),
+          /* @__PURE__ */ jsx("span", { children: "Sitio institucional" })
+        ] }),
+        /* @__PURE__ */ jsxs("button", { type: "button", className: section === "Mi cuenta" ? "ops-user active" : "ops-user", onClick: () => setSection("Mi cuenta"), "aria-label": "Abrir Mi perfil", title: "Mi perfil", children: [
           /* @__PURE__ */ jsx("span", { children: "DM" }),
           /* @__PURE__ */ jsxs("div", { children: [
             /* @__PURE__ */ jsx("b", { children: user?.fullName || user?.username || "Cuenta operativa" }),
             /* @__PURE__ */ jsx("small", { children: user?.role || "Personal autorizado" })
           ] }),
-          /* @__PURE__ */ jsx(MoreVertical, {})
+          /* @__PURE__ */ jsx(Settings, {})
         ] })
       ] })
     ] }),
@@ -553,6 +563,8 @@ export function OperationsDashboardPage({ onBack }) {
             ] })
           ] }),
           section === "Sucursales" && /* @__PURE__ */ jsx(BranchesAdmin, {})
+          ,section === "Usuarios internos" && user?.role === "JEFE_ADMINISTRATIVO" && /* @__PURE__ */ jsx(UsersAdminPage, {})
+          ,section === "Promociones" && user?.role === "JEFE_ADMINISTRATIVO" && /* @__PURE__ */ jsx(PromotionsAdminPage, {})
         ] }),
         /* @__PURE__ */ jsxs("div", { className: "ops-footer-note", children: [
           /* @__PURE__ */ jsx(PackageCheck, {}),

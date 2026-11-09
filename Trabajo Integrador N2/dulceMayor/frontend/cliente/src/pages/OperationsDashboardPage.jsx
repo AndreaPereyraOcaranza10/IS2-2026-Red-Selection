@@ -2,7 +2,7 @@ import { Fragment, jsx, jsxs } from "react/jsx-runtime";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { ADMIN_ROUTES } from "../config";
-import { AlertTriangle, ArrowLeft, ArrowRight, Bell, Barcode, Building2, CheckCircle2, ChevronDown, CircleHelp, ClipboardList, Clock3, FileText, LayoutDashboard, LoaderCircle, MapPin, MoreVertical, Package, PackageCheck, Plus, RefreshCw, Search, Settings, ShoppingCart, Truck, Warehouse, X } from "lucide-react";
+import { AlertTriangle, ArrowLeft, ArrowRight, Bell, Barcode, Building2, CheckCircle2, ChevronDown, CircleHelp, ClipboardList, Clock3, ExternalLink, FileText, LayoutDashboard, LoaderCircle, MapPin, MoreVertical, Package, PackageCheck, Plus, RefreshCw, Search, Settings, ShoppingCart, Truck, Warehouse, X } from "lucide-react";
 import { api } from "../api";
 import { BranchesAdmin } from "./BranchesAdmin";
 import { ProductsAdminPage } from "../../../shared/src/components/ProductsAdminPage.jsx";
@@ -272,13 +272,9 @@ export function OperationsDashboardPage({ onBack }) {
     }
   };
   const changeStock = async (product, stock) => {
-    try {
-      const updated = await api.updateStock(product.id, stock);
-      setInventory((previous) => previous.map((item) => item.id === product.id ? updated : item));
-      setNotice(`Stock actualizado: ${product.name} \xB7 ${stock} unidades.`);
-    } catch (cause) {
-      setNotice(cause instanceof Error ? cause.message : "No se pudo actualizar el stock.");
-    }
+    const updated = await api.updateStock(product.id, stock);
+    setInventory((previous) => previous.map((item) => item.id === product.id ? updated : item));
+    setNotice(`Stock actualizado: ${product.name} \xB7 ${stock} unidades.`);
   };
   const createManualOrderDone = () => {
     setManualOrderOpen(false);
@@ -341,6 +337,10 @@ export function OperationsDashboardPage({ onBack }) {
           /* @__PURE__ */ jsx(ChevronDown, {})
         ] }),
         /* @__PURE__ */ jsxs("div", { className: "ops-top-actions", children: [
+          /* @__PURE__ */ jsxs(Link, { className: "ops-site-link", to: "/", "aria-label": "Ir al sitio institucional", title: "Sitio institucional", children: [
+            /* @__PURE__ */ jsx(ExternalLink, {}),
+            /* @__PURE__ */ jsx("span", { children: "Sitio institucional" })
+          ] }),
           /* @__PURE__ */ jsxs("button", { onClick: () => setNotice(pendingOrders.length ? `Ten\xE9s ${pendingOrders.length} pedidos pendientes.` : "No hay notificaciones nuevas."), "aria-label": "Notificaciones", children: [
             /* @__PURE__ */ jsx(Bell, {}),
             pendingOrders.length > 0 && /* @__PURE__ */ jsx("i", {})

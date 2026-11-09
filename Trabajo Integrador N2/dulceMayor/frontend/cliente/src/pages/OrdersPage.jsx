@@ -1,216 +1,391 @@
-import { Fragment, jsx, jsxs } from "react/jsx-runtime";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { ArrowLeft, BadgeCheck, FileText, LoaderCircle, Package, RefreshCw, Search, Truck } from "lucide-react";
+import {
+  ArrowLeft,
+  BadgeCheck,
+  Clock3,
+  Download,
+  FileText,
+  LoaderCircle,
+  MapPin,
+  Package,
+  RefreshCw,
+  Search,
+  Truck,
+} from "lucide-react";
 import { api } from "../api";
-const money = new Intl.NumberFormat("es-AR", { style: "currency", currency: "ARS", minimumFractionDigits: 2 });
-const dateTime = (value) => new Intl.DateTimeFormat("es-AR", { dateStyle: "medium", timeStyle: "short" }).format(new Date(value));
+
+const money = new Intl.NumberFormat("es-AR", {
+  style: "currency",
+  currency: "ARS",
+  minimumFractionDigits: 2,
+});
+
 const statusText = {
-  CARGADO: "Cargado",
+  CARGADO: "Recibido",
   PENDIENTE_STOCK: "Pendiente de stock",
   FACTURADO: "Facturado",
   EN_REPARTO: "En reparto",
   ENTREGADO: "Entregado",
-  ANULADO: "Anulado"
+  ANULADO: "Anulado",
 };
-const steps = ["CARGADO", "FACTURADO", "EN_REPARTO", "ENTREGADO"];
-const isInvoiced = (order) => Boolean(order.invoicedAt) || ["FACTURADO", "EN_REPARTO", "ENTREGADO"].includes(order.status);
+
+const trackingSteps = ["CARGADO", "FACTURADO", "EN_REPARTO", "ENTREGADO"];
+
+function dateTime(value) {
+  if (!value) return "Sin fecha";
+  const date = new Date(value);
+  return Number.isNaN(date.getTime())
+    ? String(value)
+    : new Intl.DateTimeFormat("es-AR", { dateStyle: "medium", timeStyle: "short" }).format(date);
+}
+
+function orderNumber(id = "") {
+  return "DM-" + String(id).slice(0, 8).toUpperCase();
+}
+
+function stateLabel(state) {
+  return statusText[state] || String(state || "Actualización").replaceAll("_", " ");
+}
+
 function OrderCard({ order }) {
-  const currentStep = steps.indexOf(order.status);
   const canceled = order.status === "ANULADO";
-  const orderNumber = `DM-${order.id.slice(0, 8).toUpperCase()}`;
-  return /* @__PURE__ */ jsxs("article", { className: "order-card", children: [
-    /* @__PURE__ */ jsxs("header", { children: [
-      /* @__PURE__ */ jsxs("div", { children: [
-        /* @__PURE__ */ jsx("span", { children: "Pedido" }),
-        /* @__PURE__ */ jsxs("b", { children: [
-          "#",
-          orderNumber
-        ] }),
-        /* @__PURE__ */ jsx("small", { children: dateTime(order.createdAt) })
-      ] }),
-      /* @__PURE__ */ jsxs("span", { className: `order-status ${canceled ? "cancelled" : ""}`, children: [
-        /* @__PURE__ */ jsx("i", {}),
-        " ",
-        statusText[order.status] || order.status
-      ] })
-    ] }),
-    /* @__PURE__ */ jsx("div", { className: "tracking-title", children: /* @__PURE__ */ jsxs("div", { children: [
-      /* @__PURE__ */ jsx("span", { children: /* @__PURE__ */ jsx(Truck, {}) }),
-      /* @__PURE__ */ jsxs("div", { children: [
-        /* @__PURE__ */ jsx("b", { children: "Seguimiento del pedido" }),
-        /* @__PURE__ */ jsx("small", { children: canceled ? "Este pedido fue cancelado." : `Estado actual: ${statusText[order.status] || order.status}` })
-      ] })
-    ] }) }),
-    !canceled && /* @__PURE__ */ jsx("div", { className: "tracking-steps", children: steps.map((step, index) => /* @__PURE__ */ jsxs("div", { className: index < currentStep ? "tracking-step done" : index === currentStep ? "tracking-step active" : "tracking-step", children: [
-      /* @__PURE__ */ jsx("span", { className: "step-icon", children: index < currentStep ? /* @__PURE__ */ jsx(BadgeCheck, {}) : index === currentStep ? /* @__PURE__ */ jsx(RefreshCw, {}) : index === 3 ? /* @__PURE__ */ jsx(Truck, {}) : /* @__PURE__ */ jsx(Package, {}) }),
-      /* @__PURE__ */ jsx("b", { children: statusText[step] }),
-      /* @__PURE__ */ jsx("small", { children: step === "FACTURADO" && order.invoicedAt ? dateTime(order.invoicedAt) : index === 0 ? dateTime(order.createdAt) : index === currentStep ? "Actual" : "Pendiente" })
-    ] }, step)) }),
-    /* @__PURE__ */ jsxs("div", { className: "order-lower", children: [
-      /* @__PURE__ */ jsxs("section", { className: "items-section", children: [
-        /* @__PURE__ */ jsxs("div", { className: "subsection-heading", children: [
-          /* @__PURE__ */ jsx("b", { children: "Art\xEDculos del pedido" }),
-          /* @__PURE__ */ jsxs("small", { children: [
-            order.items.length,
-            " ",
-            order.items.length === 1 ? "\xEDtem" : "\xEDtems"
-          ] })
-        ] }),
-        order.items.map((item) => /* @__PURE__ */ jsxs("div", { className: "order-product", children: [
-          /* @__PURE__ */ jsx("span", { className: "order-product-icon", children: /* @__PURE__ */ jsx(Package, { size: 18 }) }),
-          /* @__PURE__ */ jsxs("div", { children: [
-            /* @__PURE__ */ jsx("b", { children: item.productName }),
-            /* @__PURE__ */ jsxs("small", { children: [
-              money.format(item.unitPrice),
-              " por unidad"
-            ] })
-          ] }),
-          /* @__PURE__ */ jsxs("strong", { children: [
-            item.quantity,
-            " u."
-          ] })
-        ] }, item.productId))
-      ] }),
-      /* @__PURE__ */ jsxs("section", { className: "totals-section", children: [
-        /* @__PURE__ */ jsx("div", { className: "subsection-heading", children: /* @__PURE__ */ jsx("b", { children: "Resumen" }) }),
-        /* @__PURE__ */ jsxs("div", { children: [
-          /* @__PURE__ */ jsx("span", { children: "Medio de pago" }),
-          /* @__PURE__ */ jsx("b", { children: order.paymentMethod.replaceAll("_", " ") })
-        ] }),
-        /* @__PURE__ */ jsxs("div", { className: "grand-total", children: [
-          /* @__PURE__ */ jsx("span", { children: "Total del pedido" }),
-          /* @__PURE__ */ jsx("b", { children: money.format(order.total) })
-        ] }),
-        order.status === "FACTURADO" && /* @__PURE__ */ jsxs("p", { className: "invoice-issued", children: [
-          /* @__PURE__ */ jsx(BadgeCheck, { size: 15 }),
-          " Facturado",
-          order.invoicedAt ? ` \xB7 ${dateTime(order.invoicedAt)}` : ""
-        ] })
-      ] })
-    ] })
-  ] });
+  const delivered = order.status === "ENTREGADO";
+  const events = [...(order.trace?.events || [])].sort(
+    (left, right) => new Date(left.at || 0) - new Date(right.at || 0),
+  );
+  const activeIndex = order.status === "PENDIENTE_STOCK"
+    ? -1
+    : trackingSteps.indexOf(order.status);
+
+  return (
+    <article className="order-card">
+      <header>
+        <div>
+          <span>Pedido</span>
+          <b>#{orderNumber(order.id)}</b>
+          <small>{dateTime(order.createdAt)}</small>
+        </div>
+        <span className={"order-status " + (canceled ? "cancelled" : delivered ? "delivered" : "")}>
+          <i /> {stateLabel(order.status)}
+        </span>
+      </header>
+
+      <div className="tracking-title">
+        <div>
+          <span><Truck /></span>
+          <div>
+            <b>Seguimiento del pedido</b>
+            <small>
+              {canceled
+                ? "Este pedido fue cancelado."
+                : order.status === "PENDIENTE_STOCK"
+                  ? "Estamos esperando disponibilidad de stock para facturarlo."
+                  : "Estado actual: " + stateLabel(order.status)}
+            </small>
+          </div>
+        </div>
+      </div>
+
+      {!canceled && (
+        <div className="tracking-steps">
+          {trackingSteps.map((step, index) => {
+            const done = activeIndex >= 0 && index < activeIndex;
+            const active = index === activeIndex;
+            const event = events.find((item) => item.state === step);
+            return (
+              <div className={"tracking-step " + (done ? "done " : "") + (active ? "active " : "") + (active && step === "ENTREGADO" ? "delivered" : "")} key={step}>
+                <span className="step-icon">
+                  {done || (active && step === "ENTREGADO") ? <BadgeCheck /> : active ? <RefreshCw /> : index === 3 ? <Truck /> : <Package />}
+                </span>
+                <b>{stateLabel(step)}</b>
+                <small>{event ? dateTime(event.at) : active ? "Actual" : "Pendiente"}</small>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {order.status === "PENDIENTE_STOCK" && (
+        <p className="order-stock-notice" role="status">
+          El pedido fue recibido y se facturará cuando haya stock suficiente.
+        </p>
+      )}
+
+      {events.length > 0 && (
+        <details className="order-event-details">
+          <summary><Clock3 size={15} /> Ver historial de estados</summary>
+          <ol>
+            {events.map((event, index) => (
+              <li key={String(event.state) + "-" + String(event.at) + "-" + index}>
+                <span className="order-event-dot" />
+                <div>
+                  <b>{stateLabel(event.state)}</b>
+                  <small>{dateTime(event.at)}</small>
+                  {event.note && <p>{event.note}</p>}
+                </div>
+              </li>
+            ))}
+          </ol>
+        </details>
+      )}
+
+      {order.trace?.carrier && (
+        <p className="order-carrier">
+          <Truck size={15} /> Transportista: {order.trace.carrier.name}
+          {order.trace.carrier.vehicle ? " · " + order.trace.carrier.vehicle : ""}
+        </p>
+      )}
+
+      {order.pointOfSale?.address && (
+        <p className="order-point-of-sale"><MapPin size={15} /> Entrega en {order.pointOfSale.address}</p>
+      )}
+
+      <div className="order-lower">
+        <section className="items-section">
+          <div className="subsection-heading">
+            <b>Artículos del pedido</b>
+            <small>{order.items?.length || 0} {(order.items?.length || 0) === 1 ? "ítem" : "ítems"}</small>
+          </div>
+          {(order.items || []).map((item, index) => (
+            <div className="order-product" key={String(item.productId) + "-" + index}>
+              <span className="order-product-icon"><Package size={18} /></span>
+              <div>
+                <b>{item.productName}</b>
+                <small>{money.format(item.unitPrice)} por unidad</small>
+              </div>
+              <strong>{item.quantity} u.</strong>
+            </div>
+          ))}
+        </section>
+
+        <section className="totals-section">
+          <div className="subsection-heading"><b>Resumen</b></div>
+          <div>
+            <span>Medio de pago</span>
+            <b>{String(order.paymentMethod || "A_COORDINAR").replaceAll("_", " ")}</b>
+          </div>
+          <div className="grand-total">
+            <span>Total del pedido</span>
+            <b>{money.format(order.total || 0)}</b>
+          </div>
+          {order.invoiceId && !canceled && (
+            <p className="invoice-issued">
+              <BadgeCheck size={15} /> Facturado
+              {order.invoicedAt ? " · " + dateTime(order.invoicedAt) : ""}
+            </p>
+          )}
+        </section>
+      </div>
+    </article>
+  );
 }
-function InvoiceCard({ order }) {
-  return /* @__PURE__ */ jsxs("article", { className: "invoice-record", children: [
-    /* @__PURE__ */ jsx("div", { className: "invoice-record-icon", children: /* @__PURE__ */ jsx(FileText, {}) }),
-    /* @__PURE__ */ jsxs("div", { className: "invoice-record-main", children: [
-      /* @__PURE__ */ jsxs("span", { children: [
-        "Pedido #",
-        order.id.slice(0, 8).toUpperCase()
-      ] }),
-      /* @__PURE__ */ jsx("b", { children: "Comprobante de facturaci\xF3n" }),
-      /* @__PURE__ */ jsx("small", { children: order.invoicedAt ? dateTime(order.invoicedAt) : dateTime(order.createdAt) })
-    ] }),
-    /* @__PURE__ */ jsxs("div", { className: "invoice-record-total", children: [
-      /* @__PURE__ */ jsx("small", { children: "Total" }),
-      /* @__PURE__ */ jsx("b", { children: money.format(order.total) })
-    ] }),
-    /* @__PURE__ */ jsxs("span", { className: "invoice-record-state", children: [
-      /* @__PURE__ */ jsx(BadgeCheck, { size: 14 }),
-      " Facturado"
-    ] }),
-    /* @__PURE__ */ jsxs("details", { className: "invoice-record-details", children: [
-      /* @__PURE__ */ jsx("summary", { children: "Ver detalle" }),
-      /* @__PURE__ */ jsx("div", { children: order.items.map((item) => /* @__PURE__ */ jsxs("p", { children: [
-        /* @__PURE__ */ jsxs("span", { children: [
-          item.quantity,
-          " \xD7 ",
-          item.productName
-        ] }),
-        /* @__PURE__ */ jsx("b", { children: money.format(item.total) })
-      ] }, item.productId)) })
-    ] })
-  ] });
+
+function InvoiceCard({ order, onDownload, downloading }) {
+  const canceled = order.status === "ANULADO";
+  return (
+    <article className="invoice-record">
+      <div className="invoice-record-icon"><FileText /></div>
+      <div className="invoice-record-main">
+        <span>Pedido #{orderNumber(order.id)}</span>
+        <b>{canceled ? "Factura anulada" : "Factura del pedido"}</b>
+        <small>{dateTime(order.invoicedAt || order.createdAt)}</small>
+      </div>
+      <div className="invoice-record-total">
+        <small>Total</small>
+        <b>{money.format(order.total || 0)}</b>
+      </div>
+      <span className={"invoice-record-state " + (canceled ? "cancelled" : "")}>
+        <BadgeCheck size={14} /> {canceled ? "Anulada" : "Facturada"}
+      </span>
+      {order.invoiceId && !canceled && (
+        <button
+          className="invoice-download-button"
+          type="button"
+          onClick={() => onDownload(order)}
+          disabled={downloading}
+        >
+          {downloading ? <LoaderCircle className="spin" /> : <Download />}
+          {downloading ? "Preparando PDF…" : "Descargar factura PDF"}
+        </button>
+      )}
+      <details className="invoice-record-details">
+        <summary>Ver detalle</summary>
+        <div>
+          {(order.items || []).map((item, index) => (
+            <p key={String(item.productId) + "-" + index}>
+              <span>{item.quantity} × {item.productName}</span>
+              <b>{money.format(item.total)}</b>
+            </p>
+          ))}
+        </div>
+      </details>
+    </article>
+  );
 }
-export function OrdersPage({ onBack, onProfile }) {
+
+export function OrdersPage({ onBack, onProfile, account }) {
   const [tab, setTab] = useState("pedidos");
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [invoiceError, setInvoiceError] = useState("");
   const [query, setQuery] = useState("");
+  const [downloadingInvoiceId, setDownloadingInvoiceId] = useState("");
+
   const loadOrders = useCallback(() => {
     setLoading(true);
     setError("");
-    api.orders().then(setOrders).catch((cause) => setError(cause instanceof Error ? cause.message : "No pudimos cargar tus pedidos.")).finally(() => setLoading(false));
+    api.orders()
+      .then((result) => setOrders(Array.isArray(result) ? result : []))
+      .catch((cause) => setError(cause instanceof Error ? cause.message : "No pudimos cargar tus pedidos."))
+      .finally(() => setLoading(false));
   }, []);
+
   useEffect(loadOrders, [loadOrders]);
-  const filteredOrders = useMemo(() => orders.filter((order) => `${order.id} ${order.status} ${order.createdAt}`.toLowerCase().includes(query.toLowerCase())), [orders, query]);
-  const invoices = orders.filter(isInvoiced);
-  return /* @__PURE__ */ jsxs("main", { className: "orders-page", children: [
-    /* @__PURE__ */ jsxs("aside", { className: "account-sidebar", children: [
-      /* @__PURE__ */ jsxs("div", { className: "merchant-card", children: [
-        /* @__PURE__ */ jsx("div", { className: "merchant-avatar", children: "DM" }),
-        /* @__PURE__ */ jsxs("div", { children: [
-          /* @__PURE__ */ jsx("b", { children: "Cuenta mayorista" }),
-          /* @__PURE__ */ jsx("small", { children: "Portal de clientes" })
-        ] })
-      ] }),
-      /* @__PURE__ */ jsxs("button", { className: tab === "pedidos" ? "account-tab current" : "account-tab", onClick: () => setTab("pedidos"), children: [
-        /* @__PURE__ */ jsx(Package, {}),
-        " Pedidos ",
-        /* @__PURE__ */ jsx("span", { children: orders.length })
-      ] }),
-      /* @__PURE__ */ jsxs("button", { className: tab === "facturas" ? "account-tab current" : "account-tab", onClick: () => setTab("facturas"), children: [
-        /* @__PURE__ */ jsx(FileText, {}),
-        " Facturas ",
-        /* @__PURE__ */ jsx("span", { children: invoices.length })
-      ] }),
-      /* @__PURE__ */ jsxs("button", { className: "account-tab", onClick: onProfile, children: [
-        /* @__PURE__ */ jsx(BadgeCheck, {}),
-        " Mis datos"
-      ] })
-    ] }),
-    /* @__PURE__ */ jsxs("section", { className: "orders-content", children: [
-      /* @__PURE__ */ jsxs("button", { className: "back-link", onClick: onBack, children: [
-        /* @__PURE__ */ jsx(ArrowLeft, { size: 16 }),
-        " Volver al cat\xE1logo"
-      ] }),
-      /* @__PURE__ */ jsx("div", { className: "orders-title", children: /* @__PURE__ */ jsxs("div", { children: [
-        /* @__PURE__ */ jsx("span", { className: "section-kicker", children: "TU CUENTA MAYORISTA" }),
-        /* @__PURE__ */ jsx("h1", { children: tab === "pedidos" ? "Mis pedidos" : "Mis facturas" })
-      ] }) }),
-      tab === "pedidos" && /* @__PURE__ */ jsx("div", { className: "orders-toolbar", children: /* @__PURE__ */ jsxs("label", { children: [
-        /* @__PURE__ */ jsx(Search, {}),
-        /* @__PURE__ */ jsx("input", { value: query, onChange: (event) => setQuery(event.target.value), placeholder: "Buscar por pedido o estado..." })
-      ] }) }),
-      loading ? /* @__PURE__ */ jsxs("div", { className: "account-loading", children: [
-        /* @__PURE__ */ jsx(LoaderCircle, { className: "spin" }),
-        " Cargando ",
-        tab === "pedidos" ? "pedidos" : "facturas",
-        "..."
-      ] }) : error ? /* @__PURE__ */ jsxs("div", { className: "account-state error", children: [
-        /* @__PURE__ */ jsx("h2", { children: "No pudimos cargar esta secci\xF3n" }),
-        /* @__PURE__ */ jsx("p", { children: error }),
-        /* @__PURE__ */ jsx("button", { onClick: loadOrders, children: "Volver a intentar" })
-      ] }) : tab === "pedidos" ? filteredOrders.length ? /* @__PURE__ */ jsx("div", { className: "account-record-list", children: filteredOrders.map((order) => /* @__PURE__ */ jsx(OrderCard, { order }, order.id)) }) : /* @__PURE__ */ jsxs("div", { className: "account-state", children: [
-        /* @__PURE__ */ jsx("span", { children: /* @__PURE__ */ jsx(Package, {}) }),
-        /* @__PURE__ */ jsx("h2", { children: query ? "No encontramos pedidos" : "Todav\xEDa no ten\xE9s pedidos" }),
-        /* @__PURE__ */ jsx("p", { children: query ? "Prob\xE1 con otro n\xFAmero o estado." : "Cuando confirmes un pedido desde el cat\xE1logo, aparecer\xE1 ac\xE1 con su seguimiento." }),
-        /* @__PURE__ */ jsx("button", { onClick: onBack, children: "Explorar cat\xE1logo" })
-      ] }) : invoices.length ? /* @__PURE__ */ jsxs(Fragment, { children: [
-        /* @__PURE__ */ jsx("p", { className: "invoice-intro", children: "Facturaci\xF3n asociada a tus pedidos confirmados." }),
-        /* @__PURE__ */ jsx("div", { className: "invoice-record-list", children: invoices.map((order) => /* @__PURE__ */ jsx(InvoiceCard, { order }, order.id)) })
-      ] }) : /* @__PURE__ */ jsxs("div", { className: "account-state", children: [
-        /* @__PURE__ */ jsx("span", { children: /* @__PURE__ */ jsx(FileText, {}) }),
-        /* @__PURE__ */ jsx("h2", { children: "Todav\xEDa no hay facturas" }),
-        /* @__PURE__ */ jsx("p", { children: "Las facturas aparecer\xE1n aqu\xED cuando un pedido cambie al estado \u201CFacturado\u201D." }),
-        /* @__PURE__ */ jsx("button", { onClick: () => setTab("pedidos"), children: "Ver mis pedidos" })
-      ] }),
-      tab === "pedidos" && !loading && !error && /* @__PURE__ */ jsxs("section", { className: "payment-card", children: [
-        /* @__PURE__ */ jsxs("div", { className: "payment-heading", children: [
-          /* @__PURE__ */ jsx("span", { children: /* @__PURE__ */ jsx(BadgeCheck, {}) }),
-          /* @__PURE__ */ jsxs("div", { children: [
-            /* @__PURE__ */ jsx("b", { children: "Medios de pago mayoristas" }),
-            /* @__PURE__ */ jsx("small", { children: "La informaci\xF3n de pago se habilitar\xE1 cuando est\xE9 integrada a un pedido." })
-          ] })
-        ] }),
-        /* @__PURE__ */ jsxs("div", { className: "payment-content", children: [
-          /* @__PURE__ */ jsxs("p", { className: "payment-unavailable", children: [
-            /* @__PURE__ */ jsx(BadgeCheck, {}),
-            " Todav\xEDa no hay medios de pago configurados para mostrar."
-          ] })
-        ] })
-      ] })
-    ] })
-  ] });
+
+  const filteredOrders = useMemo(
+    () => orders.filter((order) =>
+      (String(order.id) + " " + String(order.status) + " " + String(order.createdAt))
+        .toLowerCase().includes(query.toLowerCase()),
+    ),
+    [orders, query],
+  );
+  const invoices = orders.filter((order) => Boolean(order.invoiceId));
+
+  const downloadInvoice = async (order) => {
+    if (!order.invoiceId || downloadingInvoiceId) return;
+    setInvoiceError("");
+    setDownloadingInvoiceId(order.invoiceId);
+    try {
+      const { blob, filename } = await api.invoicePdf(order.invoiceId);
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename || ("factura-" + order.invoiceId + ".pdf");
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+    } catch (cause) {
+      setInvoiceError(cause instanceof Error ? cause.message : "No pudimos descargar la factura.");
+    } finally {
+      setDownloadingInvoiceId("");
+    }
+  };
+
+  return (
+    <main className="orders-page">
+      <aside className="account-sidebar">
+        <div className="merchant-card">
+          <div className="merchant-avatar">DM</div>
+          <div>
+            <b>{account?.displayName || account?.email || "Cuenta mayorista"}</b>
+            <small>Portal de clientes</small>
+          </div>
+        </div>
+        <button className={tab === "pedidos" ? "account-tab current" : "account-tab"} onClick={() => setTab("pedidos")}>
+          <Package /> Pedidos <span>{orders.length}</span>
+        </button>
+        <button className={tab === "facturas" ? "account-tab current" : "account-tab"} onClick={() => setTab("facturas")}>
+          <FileText /> Facturas <span>{invoices.length}</span>
+        </button>
+        <button className="account-tab" onClick={onProfile}>
+          <BadgeCheck /> Mis datos
+        </button>
+      </aside>
+
+      <section className="orders-content">
+        <button className="back-link" onClick={onBack}>
+          <ArrowLeft size={16} /> Volver al catálogo
+        </button>
+        <div className="orders-title">
+          <div>
+            <span className="section-kicker">TU CUENTA MAYORISTA</span>
+            <h1>{tab === "pedidos" ? "Mis pedidos" : "Mis facturas"}</h1>
+          </div>
+          <button className="orders-refresh-button" type="button" onClick={loadOrders} disabled={loading}>
+            <RefreshCw size={15} /> Actualizar
+          </button>
+        </div>
+
+        {tab === "pedidos" && (
+          <div className="orders-toolbar">
+            <label>
+              <Search />
+              <input
+                value={query}
+                onChange={(event) => setQuery(event.target.value)}
+                placeholder="Buscar por pedido o estado..."
+              />
+            </label>
+          </div>
+        )}
+
+        {invoiceError && <p className="invoice-download-error" role="alert">{invoiceError}</p>}
+
+        {loading ? (
+          <div className="account-loading"><LoaderCircle className="spin" /> Cargando {tab}…</div>
+        ) : error ? (
+          <div className="account-state error" role="alert">
+            <h2>No pudimos cargar esta sección</h2>
+            <p>{error}</p>
+            <button onClick={loadOrders}>Volver a intentar</button>
+          </div>
+        ) : tab === "pedidos" ? (
+          filteredOrders.length ? (
+            <div className="account-record-list">
+              {filteredOrders.map((order) => <OrderCard order={order} key={order.id} />)}
+            </div>
+          ) : (
+            <div className="account-state">
+              <span><Package /></span>
+              <h2>{query ? "No encontramos pedidos" : "Todavía no tenés pedidos"}</h2>
+              <p>
+                {query
+                  ? "Probá con otro número o estado."
+                  : "Cuando confirmes un pedido desde el catálogo, aparecerá acá con su seguimiento."}
+              </p>
+              <button onClick={onBack}>Explorar catálogo</button>
+            </div>
+          )
+        ) : invoices.length ? (
+          <>
+            <p className="invoice-intro">Facturas asociadas a tus pedidos confirmados.</p>
+            <div className="invoice-record-list">
+              {invoices.map((order) => (
+                <InvoiceCard
+                  order={order}
+                  key={order.id}
+                  onDownload={downloadInvoice}
+                  downloading={downloadingInvoiceId === order.invoiceId}
+                />
+              ))}
+            </div>
+          </>
+        ) : (
+          <div className="account-state">
+            <span><FileText /></span>
+            <h2>Todavía no hay facturas</h2>
+            <p>Las facturas aparecerán acá cuando se emita una para uno de tus pedidos.</p>
+            <button onClick={() => setTab("pedidos")}>Ver mis pedidos</button>
+          </div>
+        )}
+
+        {tab === "pedidos" && !loading && !error && (
+          <section className="payment-card">
+            <div className="payment-heading">
+              <span><BadgeCheck /></span>
+              <div>
+                <b>Medios de pago mayoristas</b>
+                <small>La información de pago se habilitará cuando esté integrada a un pedido.</small>
+              </div>
+            </div>
+            <div className="payment-content">
+              <p className="payment-unavailable"><BadgeCheck /> Todavía no hay medios de pago configurados para mostrar.</p>
+            </div>
+          </section>
+        )}
+      </section>
+    </main>
+  );
 }

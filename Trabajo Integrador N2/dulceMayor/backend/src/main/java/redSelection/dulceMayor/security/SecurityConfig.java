@@ -73,6 +73,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/auth/login", "/api/auth/register").permitAll()
                         .requestMatchers("/actuator/health", "/error").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/imagenes/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/imagenes").hasRole("ADMINISTRATIVO")
                         .requestMatchers(HttpMethod.GET, "/api/catalogo/**", "/api/ubicacion/**").permitAll()
                         // Las imágenes del catálogo se muestran en el sitio público (<img> no manda token); los ids son UUID
                         .requestMatchers(HttpMethod.GET, "/api/imagenes/*").permitAll()
@@ -112,8 +114,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.DELETE, "/api/orders/*").denyAll()
                         .requestMatchers("/api/orders", "/api/orders/*")
                         .hasAnyRole("CLIENTE", "PREVENTISTA", "ADMINISTRATIVO")
-                        // Promociones: el preventista solo valida un código al armar el pedido; el ABM es de administración
-                        .requestMatchers(HttpMethod.POST, "/api/promociones/validar").hasAnyRole("PREVENTISTA", "ADMINISTRATIVO")
+                        // Clientes y preventistas validan códigos al armar pedidos; el ABM es de administración
+                        .requestMatchers(HttpMethod.POST, "/api/promociones/validar").hasAnyRole("CLIENTE", "PREVENTISTA", "ADMINISTRATIVO")
                         .requestMatchers("/api/promociones/**").hasRole("ADMINISTRATIVO")
                         // Factura en PDF: administración, el preventista de ese pedido o el cliente de ese comercio
                         // (la pertenencia la exige FacturaClienteService)

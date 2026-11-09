@@ -1,6 +1,8 @@
 package redSelection.dulceMayor.model;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 import lombok.*;
 import redSelection.dulceMayor.enums.ProveedorAuth;
 import redSelection.dulceMayor.enums.Rol;
@@ -27,7 +29,8 @@ public class Usuario extends Base {
     private String clave;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @JdbcTypeCode(SqlTypes.VARCHAR)
+    @Column(nullable = false, length = 32)
     private Rol rol;
 
     @Enumerated(EnumType.STRING)

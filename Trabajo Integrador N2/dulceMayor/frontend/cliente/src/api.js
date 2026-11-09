@@ -34,6 +34,40 @@ async function request(path, init = {}) {
   return response.json();
 }
 
+async function requestPdf(path) {
+  const headers = new Headers();
+  try {
+    const account = JSON.parse(sessionStorage.getItem("dulcemayor.account") || "null");
+    if (account?.token) headers.set("Authorization", "Bearer " + account.token);
+  } catch {
+    // Let the API reject an invalid or missing session.
+  }
+  const response = await fetch(API_BASE + path, { headers });
+  if (!response.ok) {
+    const body = await response.json().catch(() => null);
+    if (response.status === 401) {
+      sessionStorage.removeItem("dulcemayor.account");
+      if (window.location.pathname !== "/ingresar" && window.location.pathname !== "/login") {
+        window.location.replace("/ingresar");
+      }
+    }
+    throw new Error(body?.detail || body?.message || "No se pudo descargar la factura.");
+  }
+
+  const disposition = response.headers.get("Content-Disposition") || "";
+  const match = disposition.match(/filename\*?=(?:UTF-8''|")?([^;"\r\n"]+)/i);
+  let filename = match?.[1]?.trim();
+  if (filename) {
+    try {
+      filename = decodeURIComponent(filename);
+    } catch {
+      // Keep the server-provided filename if it is not URL encoded.
+    }
+    filename = filename.replace(/[\\/:*?"<>|]/g, "-");
+  }
+  return { blob: await response.blob(), filename };
+}
+
 export const api = {
   products: () => request("/products"),
   exchangeRate: () => request("/exchange-rate/usd"),
@@ -66,7 +100,9 @@ export const api = {
     await request("/auth/change-password", { method: "POST", body: JSON.stringify({ currentPassword, newPassword }) }),
   ),
   orders: () => request("/orders"),
-  createOrder: (items) => request("/orders", { method: "POST", body: JSON.stringify({ clientName: "Cuenta mayorista", paymentMethod: "A_COORDINAR", items }) }),
+  invoicePdf: (id) => requestPdf("/facturas/" + encodeURIComponent(id) + "/pdf"),
+  validatePromotion: (code) => request("/promociones/validar", { method: "POST", body: JSON.stringify({ code }) }),
+  createOrder: (items, promoCode) => request("/orders", { method: "POST", body: JSON.stringify({ clientName: "Cuenta mayorista", paymentMethod: "A_COORDINAR", items, ...(promoCode ? { promoCode } : {}) }) }),
   createManualOrder: (clientName, items) => request("/orders", { method: "POST", body: JSON.stringify({ clientName, paymentMethod: "A_COORDINAR", items }) }),
   updateOrderStatus: (id, status) => request(`/orders/${id}/status`, { method: "PATCH", body: JSON.stringify({ status }) }),
   inventory: () => request("/admin/products"),

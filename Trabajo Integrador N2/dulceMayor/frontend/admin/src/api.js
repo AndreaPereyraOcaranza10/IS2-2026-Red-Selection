@@ -26,6 +26,15 @@ export const apiAdmin = {
     return api.upload('/api/imagenes', form);
   },
   imageUrl: (id) => `${API_BASE}/api/imagenes/${id}`,
+  users: () => api.get('/api/usuarios'),
+  createUser: (user) => api.post('/api/usuarios', user),
+  resetUserPassword: (id) => api.post(`/api/usuarios/${id}/reiniciar-clave`),
+  deleteUser: (id) => api.delete(`/api/usuarios/${id}`),
+  promotions: () => api.get('/api/promociones'),
+  createPromotion: (promotion) => api.post('/api/promociones', promotion),
+  updatePromotion: (id, promotion) => api.put(`/api/promociones/${id}`, promotion),
+  deletePromotion: (id) => api.delete(`/api/promociones/${id}`),
+  promotionProducts: () => api.get('/api/productos'),
   createManualOrder: (clientName, items) => api.post('/api/orders', {
     clientName,
     paymentMethod: 'A_COORDINAR',
