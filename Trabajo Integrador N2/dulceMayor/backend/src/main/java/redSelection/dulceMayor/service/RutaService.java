@@ -13,6 +13,7 @@ import redSelection.dulceMayor.patrones.strategy.OptimizadorRuta;
 import redSelection.dulceMayor.patrones.strategy.PlanOptimizado;
 import redSelection.dulceMayor.patrones.strategy.PuntoRuta;
 import redSelection.dulceMayor.repository.*;
+import redSelection.dulceMayor.security.UsuarioActual;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -40,6 +41,7 @@ public class RutaService {
     private final OptimizadorRuta optimizador;          // por calles (OSRM) con respaldo
     private final OptimizadorRuta ordenadorLocal;       // línea recta, sin red: orden inicial de una ruta nueva
     private final NotificacionFacade notificaciones;
+    private final UsuarioActual usuarioActual;
 
     public RutaService(RutaDiariaRepository rutaRepository,
                        ParadaRutaRepository paradaRepository,
@@ -51,7 +53,8 @@ public class RutaService {
                        DulceMayorRepository dulceMayorRepository,
                        OptimizadorRuta optimizador,
                        @Qualifier("vecinoMasCercanoOptimizador") OptimizadorRuta ordenadorLocal,
-                       NotificacionFacade notificaciones) {
+                       NotificacionFacade notificaciones,
+                       UsuarioActual usuarioActual) {
         this.rutaRepository = rutaRepository;
         this.paradaRepository = paradaRepository;
         this.preventistaRepository = preventistaRepository;
@@ -63,6 +66,7 @@ public class RutaService {
         this.optimizador = optimizador;
         this.ordenadorLocal = ordenadorLocal;
         this.notificaciones = notificaciones;
+        this.usuarioActual = usuarioActual;
     }
 
     // =====================================================
@@ -160,10 +164,11 @@ public class RutaService {
         }
         // Un comercio con más de un pedido facturado se atiende en una sola parada: el resto queda para la próxima consulta.
         List<ClienteMinorista> clientes = porCliente.values().stream().map(Pedido::getCliente).toList();
+        String usuario = usuarioActual.nombreOSistema();
         for (ClienteMinorista cliente : ordenInicial(clientes)) {
             Pedido pedido = porCliente.get(cliente.getId());
             agregarParada(ruta, cliente, pedido);
-            pedido.setEstado(EstadoPedido.EN_REPARTO);
+            pedido.despachar(usuario, "Asignado a la ruta de reparto del " + ruta.getFecha());
             Entrega entrega = entregaRepository.findByPedidoId(pedido.getId())
                     .orElseGet(() -> Entrega.builder().pedido(pedido).build());
             entrega.setTransportista(transportista);
@@ -188,11 +193,11 @@ public class RutaService {
             throw new ReglaNegocioException("Esta parada es de preventa: se registra como visita.");
         }
         Pedido pedido = parada.getPedido();
-        if (pedido == null || pedido.getEstado() != EstadoPedido.EN_REPARTO) {
-            throw new ReglaNegocioException("El pedido de esta parada no está en reparto.");
+        if (pedido == null) {
+            throw new ReglaNegocioException("Esta parada no tiene un pedido para entregar.");
         }
+        pedido.entregar(usuarioActual.nombreOSistema(), "Entregado al comercio");   // el State rechaza si no está EN_REPARTO
         LocalDateTime ahora = cerrarParada(parada);
-        pedido.setEstado(EstadoPedido.ENTREGADO);
         entregaRepository.findByPedidoId(pedido.getId()).ifPresent(e -> e.setFechaEntrega(ahora));
 
         Optional<ParadaRuta> siguiente = primeraPendiente(ruta);

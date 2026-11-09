@@ -16,4 +16,13 @@ public class UsuarioActual {
         }
         return usuario;
     }
+
+    /** Nombre de usuario para auditoría (historial). Si no hay sesión, el cambio lo hizo el sistema. */
+    public String nombreOSistema() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth != null && auth.getPrincipal() instanceof UsuarioAutenticado usuario) {
+            return usuario.getNombreUsuario();
+        }
+        return "sistema";
+    }
 }

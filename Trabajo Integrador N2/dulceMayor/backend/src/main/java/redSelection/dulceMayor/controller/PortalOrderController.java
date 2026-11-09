@@ -12,6 +12,7 @@ import org.springframework.web.server.ResponseStatusException;
 import redSelection.dulceMayor.enums.*;
 import redSelection.dulceMayor.model.*;
 import redSelection.dulceMayor.repository.*;
+import redSelection.dulceMayor.security.UsuarioActual;
 import redSelection.dulceMayor.service.*;
 
 import java.math.BigDecimal;
@@ -31,11 +32,12 @@ public class PortalOrderController {
     private final PrecioService precios;
     private final StockService stock;
     private final FacturaClienteRepository facturas;
+    private final UsuarioActual usuarioActual;
 
     public PortalOrderController(PedidoRepository pedidos, ClienteMinoristaRepository clientes,
                                  ResponsableComercioRepository responsables, PreventistaRepository preventistas,
                                  ProductoService productos, PrecioService precios, StockService stock,
-                                 FacturaClienteRepository facturas) {
+                                 FacturaClienteRepository facturas, UsuarioActual usuarioActual) {
         this.pedidos = pedidos;
         this.clientes = clientes;
         this.responsables = responsables;
@@ -44,6 +46,7 @@ public class PortalOrderController {
         this.precios = precios;
         this.stock = stock;
         this.facturas = facturas;
+        this.usuarioActual = usuarioActual;
     }
 
     @GetMapping
@@ -115,6 +118,7 @@ public class PortalOrderController {
         }
         pedido.setSubtotal(subtotal);
         pedido.setTotal(subtotal);
+        pedido.registrarAlta(usuarioActual.nombreOSistema());
         return toResponse(pedidos.save(pedido));
     }
 
@@ -129,16 +133,10 @@ public class PortalOrderController {
         } catch (Exception exception) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El estado solicitado no es válido.");
         }
-        boolean valid = next == EstadoPedido.ANULADO
-                || pedido.getEstado() == EstadoPedido.CARGADO && next == EstadoPedido.FACTURADO
-                || pedido.getEstado() == EstadoPedido.FACTURADO && next == EstadoPedido.EN_REPARTO
-                || pedido.getEstado() == EstadoPedido.EN_REPARTO && next == EstadoPedido.ENTREGADO;
-        if (!valid) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT,
-                    "No se puede cambiar el pedido de " + pedido.getEstado() + " a " + next + ".");
-        }
+        // El estado actual (patrón State) valida la transición y la registra en el historial.
+        // Si después falla la factura, la transacción se revierte y el pedido queda como estaba.
+        pedido.avanzarA(next, usuarioActual.nombreOSistema(), update.note());
         if (next == EstadoPedido.FACTURADO) emitirFactura(pedido);
-        pedido.setEstado(next);
         return toResponse(pedidos.save(pedido));
     }
 
@@ -187,16 +185,32 @@ public class PortalOrderController {
         String invoiceId = factura == null ? null : factura.getId();
         return new OrderResponse(pedido.getId(), pedido.getCliente().getNombreComercio(),
                 pedido.getEstado().name(), "A_COORDINAR", pedido.getFechaHoraCarga().toString(),
-                invoicedAt, invoiceId, pedido.getTotal(), lines);
+                invoicedAt, invoiceId, pedido.getTotal(), lines, new OrderTrace(eventos(pedido)));
+    }
+
+    /** Historial con la misma forma que usa el frontend ({ state, at }). */
+    private List<OrderEvent> eventos(Pedido pedido) {
+        if (pedido.getHistorial().isEmpty()) {
+            // Pedidos creados antes de BK-04: solo se conoce la fecha de carga.
+            return List.of(new OrderEvent(EstadoPedido.CARGADO.name(), pedido.getFechaHoraCarga().toString(),
+                    null, null));
+        }
+        return pedido.getHistorial().stream()
+                .map(h -> new OrderEvent(h.getEstadoNuevo().name(), h.getFechaHora().toString(),
+                        h.getUsuario(), h.getObservacion()))
+                .toList();
     }
 
     public record OrderRequest(String clientName, String paymentMethod,
                                @NotEmpty List<@Valid OrderLineRequest> items) {}
     public record OrderLineRequest(@NotBlank String productId, @Min(1) int quantity) {}
-    public record StatusUpdate(@NotBlank String status) {}
+    /** note es opcional: queda como observación en el historial. */
+    public record StatusUpdate(@NotBlank String status, String note) {}
     public record OrderLineResponse(String productId, String productName, int quantity,
                                     BigDecimal unitPrice, BigDecimal total) {}
     public record OrderResponse(String id, String clientName, String status, String paymentMethod,
                                 String createdAt, String invoicedAt, String invoiceId, BigDecimal total,
-                                List<OrderLineResponse> items) {}
+                                List<OrderLineResponse> items, OrderTrace trace) {}
+    public record OrderTrace(List<OrderEvent> events) {}
+    public record OrderEvent(String state, String at, String user, String note) {}
 }
