@@ -5,16 +5,15 @@ import jakarta.validation.Validator;
 import jakarta.validation.ValidatorFactory;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
-import org.springframework.security.core.Authentication;
-import org.springframework.web.server.ResponseStatusException;
-import redSelection.dulceMayor.controller.PortalProfileController;
+import redSelection.dulceMayor.dto.PerfilClienteDTO;
 import redSelection.dulceMayor.dto.ResponsableCrearDTO;
 import redSelection.dulceMayor.enums.TipoDocumento;
 import redSelection.dulceMayor.exception.ReglaNegocioException;
 import redSelection.dulceMayor.model.ResponsableComercio;
 import redSelection.dulceMayor.model.Usuario;
 import redSelection.dulceMayor.repository.ResponsableComercioRepository;
-import redSelection.dulceMayor.repository.UsuarioRepository;
+import redSelection.dulceMayor.service.CuentaClienteService;
+import redSelection.dulceMayor.service.PerfilClienteService;
 import redSelection.dulceMayor.service.ResponsableComercioService;
 import redSelection.dulceMayor.service.UbicacionService;
 
@@ -56,30 +55,31 @@ class ValidacionesDatosPersonalesTest {
         }
     }
 
+    // Las reglas del perfil se movieron del controller a PerfilClienteService (ValidadorPersona),
+    // así que estos casos se prueban contra el service y esperan ReglaNegocioException.
     @Test
     void perfilRechazaNombresConNumerosYTelefonosFueraDeLongitud() {
-        PortalProfileController.ProfileRequest request = new PortalProfileController.ProfileRequest(
-                "Ana1", "Perez1", null, "1990-01-01", TipoDocumento.DNI,
-                "12345678", "123456789", null, "1", "1", "1",
-                "Calle", "1", null, null, null, null);
+        PerfilClienteService servicio = perfilServiceDe(mock(ResponsableComercioService.class));
 
-        var errores = validator.validate(request).stream()
-                .map(error -> error.getPropertyPath().toString()).toList();
-
-        assertTrue(errores.contains("nombre"));
-        assertTrue(errores.contains("apellido"));
-        assertTrue(errores.contains("telefono"));
+        assertThrows(ReglaNegocioException.class, () -> servicio.actualizar(CORREO,
+                perfil("Ana1", "Perez", "12345678", "1123456789")));
+        assertThrows(ReglaNegocioException.class, () -> servicio.actualizar(CORREO,
+                perfil("Ana", "Perez1", "12345678", "1123456789")));
+        assertThrows(ReglaNegocioException.class, () -> servicio.actualizar(CORREO,
+                perfil("Ana", "Perez", "12345678", "123456789")));
     }
 
     @Test
     void dniInvalidoSeRechazaAlCrearYModificarResponsable() {
         ResponsableComercioRepository repositorio = mock(ResponsableComercioRepository.class);
-        ResponsableComercioService servicio = new ResponsableComercioService(repositorio);
+        ResponsableComercioService servicio = new ResponsableComercioService(repositorio,
+                mock(CuentaClienteService.class));
         ResponsableComercio existente = ResponsableComercio.builder()
                 .tipoDocumento(TipoDocumento.DNI).numeroDocumento("87654321").build();
         when(repositorio.findByIdAndEliminadoFalse("responsable-1")).thenReturn(Optional.of(existente));
+        // El DNI acepta 7 u 8 números (los DNI viejos tienen 7): 6 es inválido.
         ResponsableCrearDTO dto = new ResponsableCrearDTO(
-                "Ana", "Perez", TipoDocumento.DNI, "1234567",
+                "Ana", "Perez", TipoDocumento.DNI, "123456",
                 "ana@example.com", "1123456789", null);
 
         assertThrows(ReglaNegocioException.class, () -> servicio.crear(dto));
@@ -89,24 +89,29 @@ class ValidacionesDatosPersonalesTest {
 
     @Test
     void dniInvalidoSeRechazaEnPerfilDelUsuario() {
-        UsuarioRepository usuarios = mock(UsuarioRepository.class);
-        ResponsableComercioRepository responsables = mock(ResponsableComercioRepository.class);
-        PortalProfileController controller = new PortalProfileController(
-                usuarios, responsables, mock(UbicacionService.class));
-        Usuario usuario = Usuario.builder().nombreUsuario("ana@example.com")
-                .activo(true).eliminado(false).build();
-        Authentication authentication = mock(Authentication.class);
-        when(authentication.getName()).thenReturn("ana@example.com");
-        when(usuarios.findByNombreUsuarioIgnoreCase("ana@example.com")).thenReturn(Optional.of(usuario));
-        PortalProfileController.ProfileRequest request = new PortalProfileController.ProfileRequest(
-                "Ana", "Perez", null, "1990-01-01", TipoDocumento.DNI,
-                "1234567", "1123456789", null, "1", "1", "1",
-                "Calle", "1", null, null, null, null);
+        ResponsableComercioService responsables = mock(ResponsableComercioService.class);
+        PerfilClienteService servicio = perfilServiceDe(responsables);
 
-        ResponseStatusException error = assertThrows(ResponseStatusException.class,
-                () -> controller.update(authentication, request));
+        ReglaNegocioException error = assertThrows(ReglaNegocioException.class,
+                () -> servicio.actualizar(CORREO, perfil("Ana", "Perez", "123456", "1123456789")));
 
-        assertEquals(400, error.getStatusCode().value());
-        verifyNoInteractions(responsables);
+        assertTrue(error.getMessage().contains("DNI"));
+        verify(responsables, never()).guardar(any());
+    }
+
+    private static final String CORREO = "ana@example.com";
+
+    /** Service del perfil con un usuario activo y sin perfil cargado todavía (primera vez que lo completa). */
+    private static PerfilClienteService perfilServiceDe(ResponsableComercioService responsables) {
+        CuentaClienteService cuentas = mock(CuentaClienteService.class);
+        Usuario usuario = Usuario.builder().nombreUsuario(CORREO).activo(true).eliminado(false).build();
+        when(cuentas.obtenerUsuarioActivo(CORREO)).thenReturn(usuario);
+        when(responsables.buscarPorNombreUsuario(CORREO)).thenReturn(Optional.empty());
+        return new PerfilClienteService(cuentas, responsables, mock(UbicacionService.class));
+    }
+
+    private static PerfilClienteDTO perfil(String nombre, String apellido, String dni, String telefono) {
+        return new PerfilClienteDTO(nombre, apellido, null, "1990-01-01", TipoDocumento.DNI,
+                dni, telefono, null, "1", "1", "1", "Calle", "1", null, null, null, null);
     }
 }

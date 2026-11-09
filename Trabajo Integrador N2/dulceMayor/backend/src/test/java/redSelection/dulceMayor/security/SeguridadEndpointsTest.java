@@ -24,7 +24,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * JWT reales. Un controller "sonda" responde 200 a cualquier /api/**, así que si llega un 200 es porque la
  * regla de seguridad dejó pasar el pedido (no hace falta base de datos ni mocks de servicios).
  */
-@WebMvcTest
+// controllers = Sonda: sin esto @WebMvcTest carga TODOS los controllers reales, que necesitan services
+// que este test no levanta (y además le quitarían rutas a la sonda).
+@WebMvcTest(controllers = SeguridadEndpointsTest.Sonda.class)
 @Import({SecurityConfig.class, JwtService.class, SeguridadEndpointsTest.Sonda.class, SeguridadEndpointsTest.SesionesDePrueba.class})
 @TestPropertySource(properties = "app.jwt.secret=clave-de-prueba-de-al-menos-32-caracteres!!")
 class SeguridadEndpointsTest {
