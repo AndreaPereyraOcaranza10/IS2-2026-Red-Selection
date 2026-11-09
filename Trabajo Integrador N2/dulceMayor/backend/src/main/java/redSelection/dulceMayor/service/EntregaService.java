@@ -135,6 +135,12 @@ public class EntregaService {
         return pagoService.confirmarFactura(factura.getId(), TipoPago.EFECTIVO);
     }
 
+    /** Para otros services (la trazabilidad del pedido): la entrega de un pedido, sin control de acceso. */
+    @Transactional(readOnly = true)
+    public Optional<Entrega> buscarPorPedido(String pedidoId) {
+        return entregaRepository.findByPedidoId(pedidoId).filter(e -> !e.isEliminado());
+    }
+
     // ---------- Auxiliares ----------
 
     private Entrega buscar(String pedidoId) {

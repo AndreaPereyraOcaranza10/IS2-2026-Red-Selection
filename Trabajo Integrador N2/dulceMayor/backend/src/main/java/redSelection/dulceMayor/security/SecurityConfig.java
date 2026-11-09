@@ -107,11 +107,17 @@ public class SecurityConfig {
                         .requestMatchers("/api/responsables/**").hasRole("ADMINISTRATIVO")
                         // Pedidos: el cliente ve los suyos, el preventista carga y ve los de SUS comercios
                         // (lo exige PortalOrderController) y el administrativo ve y carga los de cualquiera
+                        // Un pedido no se modifica ni se borra: se anula (PATCH /status). Se cierran los PUT/DELETE heredados.
+                        .requestMatchers(HttpMethod.PUT, "/api/orders/*").denyAll()
+                        .requestMatchers(HttpMethod.DELETE, "/api/orders/*").denyAll()
                         .requestMatchers("/api/orders", "/api/orders/*")
                         .hasAnyRole("CLIENTE", "PREVENTISTA", "ADMINISTRATIVO")
                         // Promociones: el preventista solo valida un código al armar el pedido; el ABM es de administración
                         .requestMatchers(HttpMethod.POST, "/api/promociones/validar").hasAnyRole("PREVENTISTA", "ADMINISTRATIVO")
                         .requestMatchers("/api/promociones/**").hasRole("ADMINISTRATIVO")
+                        // Factura en PDF: administración, el preventista de ese pedido o el cliente de ese comercio
+                        // (la pertenencia la exige FacturaClienteService)
+                        .requestMatchers(HttpMethod.GET, "/api/facturas/*/pdf").hasAnyRole("CLIENTE", "PREVENTISTA", "ADMINISTRATIVO")
                         .requestMatchers("/api/profile").hasAnyRole("CLIENTE", "ADMINISTRATIVO")
                         // Pagos: administración inicia, confirma y anula; el cliente solo consulta los de SUS facturas
                         // (esa pertenencia la exige PagoService). El cliente no elige el medio: lo acuerda facturación.

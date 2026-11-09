@@ -139,6 +139,11 @@ class SeguridadEndpointsTest {
         esperar(403, HttpMethod.PATCH, "/api/orders/x/status", prev);
         esperar(200, HttpMethod.PATCH, "/api/orders/x/status", token(Rol.ADMINISTRATIVO, false, "a1"));
         esperar(403, HttpMethod.GET, "/api/orders", token(Rol.TRANSPORTISTA, false, "t1"));
+        // Un pedido no se modifica ni se borra (se anula): ni siquiera administración
+        String admin = token(Rol.ADMINISTRATIVO, false, "a1");
+        esperar(403, HttpMethod.PUT, "/api/orders/x", admin);
+        esperar(403, HttpMethod.DELETE, "/api/orders/x", admin);
+        esperar(403, HttpMethod.DELETE, "/api/orders/x", prev);
     }
 
     @Test @DisplayName("Promociones: el preventista solo valida códigos; el ABM es de administración")
@@ -152,6 +157,15 @@ class SeguridadEndpointsTest {
         esperar(200, HttpMethod.DELETE, "/api/promociones/x", admin);
         esperar(200, HttpMethod.POST, "/api/promociones/validar", admin);
         esperar(403, HttpMethod.POST, "/api/promociones/validar", token(Rol.TRANSPORTISTA, false, "t1"));
+    }
+
+    @Test @DisplayName("Factura en PDF: cliente, preventista y admin (la pertenencia la valida el service); transportista no")
+    void facturaPdf() throws Exception {
+        esperar(200, HttpMethod.GET, "/api/facturas/x/pdf", token(Rol.PREVENTISTA, false, "p1"));
+        esperar(200, HttpMethod.GET, "/api/facturas/x/pdf", token(Rol.CLIENTE, false, null));
+        esperar(200, HttpMethod.GET, "/api/facturas/x/pdf", token(Rol.ADMINISTRATIVO, false, "a1"));
+        esperar(403, HttpMethod.GET, "/api/facturas/x/pdf", token(Rol.TRANSPORTISTA, false, "t1"));
+        esperar(401, HttpMethod.GET, "/api/facturas/x/pdf", null);
     }
 
     @Test @DisplayName("Responsables: buscar para preventista; ABM solo admin")
