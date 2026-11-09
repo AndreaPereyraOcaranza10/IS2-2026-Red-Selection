@@ -12,7 +12,8 @@ function accountFromSession(session, fallbackEmail = "") {
 }
 
 async function request(path, init = {}) {
-  const headers = new Headers({ "Content-Type": "application/json", ...init.headers });
+  const headers = new Headers(init.headers || {});
+  if (!(init.body instanceof FormData) && !headers.has("Content-Type")) headers.set("Content-Type", "application/json");
   try {
     const account = JSON.parse(sessionStorage.getItem("dulcemayor.account") || "null");
     if (account?.token) headers.set("Authorization", `Bearer ${account.token}`);
@@ -40,6 +41,13 @@ export const api = {
   publicBranches: () => request("/companies/branches"),
   createBranch: (branch) => request("/admin/companies/branches", { method: "POST", body: JSON.stringify(branch) }),
   updateBranch: (id, branch) => request(`/admin/companies/branches/${id}`, { method: "PUT", body: JSON.stringify(branch) }),
+  uploadBranchPhoto: async (id, file) => {
+    const form = new FormData();
+    form.append("archivo", file);
+    form.append("tipo", "FOTO_SUCURSAL");
+    const image = await request("/imagenes", { method: "POST", body: form });
+    return request(`/admin/companies/branches/${id}/images`, { method: "POST", body: JSON.stringify({ imagenId: image.id }) });
+  },
   deleteBranch: (id) => request(`/admin/companies/branches/${id}`, { method: "DELETE" }),
   product: (id) => request(`/products/${id}`),
   login: async (email, password) => accountFromSession(
@@ -63,4 +71,24 @@ export const api = {
   updateOrderStatus: (id, status) => request(`/orders/${id}/status`, { method: "PATCH", body: JSON.stringify({ status }) }),
   inventory: () => request("/admin/products"),
   updateStock: (id, stock) => request(`/admin/products/${id}/stock`, { method: "PATCH", body: JSON.stringify({ stock }) }),
+  productRecords: () => request("/productos"),
+  createProduct: (product) => request("/productos", { method: "POST", body: JSON.stringify(product) }),
+  updateProduct: (id, product) => request(`/productos/${id}`, { method: "PUT", body: JSON.stringify(product) }),
+  deleteProduct: (id) => request(`/productos/${id}`, { method: "DELETE" }),
+  updateStock: (id, stock) => request(`/admin/products/${id}/stock`, { method: "PATCH", body: JSON.stringify({ stock }) }),
+  updatePrice: (id, precio) => request(`/productos/${id}/precio`, { method: "PUT", body: JSON.stringify({ precio }) }),
+  categories: () => request("/categorias"),
+  createCategory: (category) => request("/categorias", { method: "POST", body: JSON.stringify(category) }),
+  updateCategory: (id, category) => request(`/categorias/${id}`, { method: "PUT", body: JSON.stringify(category) }),
+  deleteCategory: (id) => request(`/categorias/${id}`, { method: "DELETE" }),
+  subcategories: () => request("/subcategorias"),
+  createSubcategory: (subcategory) => request("/subcategorias", { method: "POST", body: JSON.stringify(subcategory) }),
+  updateSubcategory: (id, subcategory) => request(`/subcategorias/${id}`, { method: "PUT", body: JSON.stringify(subcategory) }),
+  deleteSubcategory: (id) => request(`/subcategorias/${id}`, { method: "DELETE" }),
+  uploadImage: (file) => {
+    const form = new FormData();
+    form.append("archivo", file);
+    return request("/imagenes", { method: "POST", body: form });
+  },
+  imageUrl: (id) => `${API_BASE}/imagenes/${id}`
 };

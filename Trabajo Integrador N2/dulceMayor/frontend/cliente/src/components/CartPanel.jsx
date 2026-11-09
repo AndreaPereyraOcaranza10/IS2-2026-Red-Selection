@@ -1,7 +1,7 @@
 import { Fragment, jsx, jsxs } from "react/jsx-runtime";
-import { ArrowRight, Check, LoaderCircle, ShoppingBag, X } from "lucide-react";
+import { ArrowRight, Check, LoaderCircle, ShoppingBag, Trash2, X } from "lucide-react";
 const currency = new Intl.NumberFormat("es-AR", { style: "currency", currency: "ARS", maximumFractionDigits: 0 });
-export function CartPanel({ open, onClose, products, quantities, onCheckout, error = "", submitting = false }) {
+export function CartPanel({ open, onClose, products, quantities, onRemoveProduct, onCheckout, error = "", submitting = false }) {
   const items = products.filter((product) => quantities[String(product.id)]);
   const total = items.reduce((sum, product) => sum + product.price * quantities[String(product.id)], 0);
   return /* @__PURE__ */ jsxs(Fragment, { children: [
@@ -32,6 +32,7 @@ export function CartPanel({ open, onClose, products, quantities, onCheckout, err
               currency.format(item.price)
             ] })
           ] }),
+          /* @__PURE__ */ jsx("button", { className: "cart-remove", type: "button", onClick: () => onRemoveProduct?.(item.id), "aria-label": `Eliminar ${item.name} del pedido`, title: "Eliminar del pedido", children: /* @__PURE__ */ jsx(Trash2, { size: 16 }) }),
           /* @__PURE__ */ jsx("strong", { children: currency.format(item.price * quantities[String(item.id)]) })
         ] }, item.id)) }),
         /* @__PURE__ */ jsxs("div", { className: "cart-total", children: [

@@ -172,7 +172,7 @@ export function LoginPage({ onSuccess, onStaff }) {
           /* @__PURE__ */ jsx("small", { children: "MAYORISTA B2B \xB7 MENDOZA" })
         ] })
       ] }),
-      /* @__PURE__ */ jsx("span", { children: "\xA9 2025 Dulce Mayorista Mendoza S.A. \xB7 CUIT 30-71234567-8" }),
+      /* @__PURE__ */ jsxs("span", { children: ["\xA9 ", new Date().getFullYear(), " Dulce Mayor. Todos los derechos reservados."] }),
       /* @__PURE__ */ jsxs("a", { href: "tel:+542614250800", children: [
         /* @__PURE__ */ jsx(Headphones, {}),
         " Soporte comercial"

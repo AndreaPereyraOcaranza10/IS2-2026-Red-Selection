@@ -2,7 +2,6 @@ import { Fragment, jsx, jsxs } from "react/jsx-runtime";
 import { useEffect, useMemo, useState } from "react";
 import { Headphones, ShoppingBag } from "lucide-react";
 import { Navigate, Route, Routes, useLocation, useNavigate, useParams } from "react-router-dom";
-import { products as demoProducts } from "./data/products";
 import { api } from "./api";
 import { ADMIN_ROLES, ACCOUNT_STORAGE_KEY, ROUTES } from "./config";
 import { Header } from "./components/Header";
@@ -29,13 +28,20 @@ function App() {
   const [category, setCategory] = useState("Ver todo");
   const [quantities, setQuantities] = useState({});
   const [cartOpen, setCartOpen] = useState(false);
-  const [catalog, setCatalog] = useState(demoProducts);
+  const [catalog, setCatalog] = useState([]);
+  const [catalogLoading, setCatalogLoading] = useState(true);
   const [account, setAccount] = useState(readAccount);
   const [apiNotice, setApiNotice] = useState("");
   const [checkoutError, setCheckoutError] = useState("");
   const [checkingOut, setCheckingOut] = useState(false);
   useEffect(() => {
-    api.products().then(setCatalog).catch(() => setApiNotice("Mostrando cat\xE1logo de demostraci\xF3n."));
+    api.products().then((products) => {
+      setCatalog(products);
+      setApiNotice("");
+    }).catch(() => {
+      setCatalog([]);
+      setApiNotice("No se pudo cargar el cat\xE1logo real. Revis\xE1 la conexi\xF3n con la API e intent\xE1 nuevamente.");
+    }).finally(() => setCatalogLoading(false));
   }, []);
   useEffect(() => {
     if (!location.hash) {
@@ -46,6 +52,7 @@ function App() {
     requestAnimationFrame(() => document.getElementById(id)?.scrollIntoView());
   }, [location.pathname, location.hash]);
   const count = Object.values(quantities).reduce((total, quantity) => total + quantity, 0);
+  const categories = useMemo(() => [...new Set(catalog.map((product) => product.category).filter(Boolean))].sort((a, b) => a.localeCompare(b, "es")), [catalog]);
   const filtered = useMemo(() => catalog.filter((product) => (category === "Ver todo" || product.category === category) && `${product.name} ${product.brand} ${product.category}`.toLowerCase().includes(search.toLowerCase())), [catalog, category, search]);
   const goTo = (path) => {
     navigate(path);
@@ -65,11 +72,31 @@ function App() {
       navigate("/cambiar-clave", { replace: true });
     }
   }, [account, location.pathname, navigate]);
-  const addProduct = (id) => setQuantities((previous) => ({ ...previous, [String(id)]: (previous[String(id)] || 0) + 1 }));
+  const addProduct = (id, amount = 1) => setQuantities((previous) => {
+    const key = String(id);
+    const product = catalog.find((item) => String(item.id) === key);
+    const stock = Number(product?.stock);
+    if (!product || !Number.isFinite(stock) || stock <= 0) return previous;
+    const increment = Math.max(1, Math.trunc(Number(amount) || 1));
+    return { ...previous, [key]: Math.min(stock, (previous[key] || 0) + increment) };
+  });
+  const removeProduct = (id) => {
+    setQuantities((previous) => {
+      const next = { ...previous };
+      delete next[String(id)];
+      return next;
+    });
+    setCheckoutError("");
+  };
   const handleOrder = async () => {
     if (!account) {
       setCartOpen(false);
       goTo(ROUTES.login);
+      return;
+    }
+    if (ADMIN_ROLES.includes(account.role)) {
+      setCheckoutError("Esta sesión es del personal. Para cargar el pedido, usá «Nuevo pedido manual» desde el panel administrativo.");
+      setCartOpen(true);
       return;
     }
     setCheckingOut(true);
@@ -109,18 +136,18 @@ function App() {
       count,
       ")"
     ] }),
-    /* @__PURE__ */ jsx(CartPanel, { open: cartOpen, onClose: () => setCartOpen(false), products: catalog, quantities, onCheckout: handleOrder, error: checkoutError, submitting: checkingOut })
+    /* @__PURE__ */ jsx(CartPanel, { open: cartOpen, onClose: () => setCartOpen(false), products: catalog, quantities, onRemoveProduct: removeProduct, onCheckout: handleOrder, error: checkoutError, submitting: checkingOut })
   ] });
   return /* @__PURE__ */ jsxs(Fragment, { children: [
     /* @__PURE__ */ jsxs(Routes, { children: [
       /* @__PURE__ */ jsx(Route, { path: ROUTES.home, element: /* @__PURE__ */ jsxs(Fragment, { children: [
         header,
-        /* @__PURE__ */ jsx(HomePage, { filtered, catalogCount: filtered.length, apiNotice, category, search, onCategory: setCategory, onSearch: setSearch, quantities, onAdd: addProduct, onDetails: (id) => goTo(ROUTES.product(id)) })
+        /* @__PURE__ */ jsx(HomePage, { filtered, categories, catalogCount: filtered.length, catalogLoading, apiNotice, category, search, onCategory: setCategory, onSearch: setSearch, quantities, onAdd: addProduct, onDetails: (id) => goTo(ROUTES.product(id)) })
       ] }) }),
       /* @__PURE__ */ jsx(Route, { path: ROUTES.productDetail, element: /* @__PURE__ */ jsxs(Fragment, { children: [
         header,
-        /* @__PURE__ */ jsx(ProductRoute, { catalog, onBack: () => goTo(ROUTES.catalog), onAdd: (id, amount) => {
-          setQuantities((previous) => ({ ...previous, [id]: (previous[id] || 0) + amount }));
+        /* @__PURE__ */ jsx(ProductRoute, { catalog, quantities, onBack: () => goTo(ROUTES.catalog), onAdd: (id, amount) => {
+          addProduct(id, amount);
           setCartOpen(true);
         } })
       ] }) }),
@@ -147,9 +174,34 @@ function App() {
     footerActions
   ] });
 }
-function ProductRoute({ catalog, onBack, onAdd }) {
+function ProductRoute({ catalog, quantities, onBack, onAdd }) {
   const { id } = useParams();
-  const product = catalog.find((item) => String(item.id) === id) || demoProducts.find((item) => String(item.id) === id) || demoProducts[0];
-  return /* @__PURE__ */ jsx(ProductDetailPage, { product, onBack, onAdd: (quantity) => onAdd(String(product.id), quantity) }, id);
+  const catalogProduct = catalog.find((item) => String(item.id) === id);
+  const [product, setProduct] = useState(catalogProduct || null);
+  const [loading, setLoading] = useState(!catalogProduct);
+  useEffect(() => {
+    let active = true;
+    if (catalogProduct) {
+      setProduct(catalogProduct);
+      setLoading(false);
+      return () => { active = false; };
+    }
+    setLoading(true);
+    api.product(id).then((value) => {
+      if (active) setProduct(value);
+    }).catch(() => {
+      if (active) setProduct(null);
+    }).finally(() => {
+      if (active) setLoading(false);
+    });
+    return () => { active = false; };
+  }, [catalogProduct, id]);
+  if (loading) return /* @__PURE__ */ jsx("main", { className: "detail-page", children: "Cargando producto..." });
+  if (!product) return /* @__PURE__ */ jsxs("main", { className: "detail-page", children: [
+    /* @__PURE__ */ jsx("h1", { children: "Producto no disponible" }),
+    /* @__PURE__ */ jsx("p", { children: "No encontramos este producto en el cat\xE1logo." }),
+    /* @__PURE__ */ jsx("button", { className: "back-link", onClick: onBack, children: "Volver al cat\xE1logo" })
+  ] });
+  return /* @__PURE__ */ jsx(ProductDetailPage, { product, quantityInCart: quantities[String(product.id)] || 0, onBack, onAdd: (quantity) => onAdd(String(product.id), quantity) }, id);
 }
 export default App;

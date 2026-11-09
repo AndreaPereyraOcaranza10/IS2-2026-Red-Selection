@@ -23,15 +23,15 @@ export function Hero() {
         /* @__PURE__ */ jsxs("div", { children: [
           /* @__PURE__ */ jsx(PackageCheck, {}),
           /* @__PURE__ */ jsxs("span", { children: [
-            /* @__PURE__ */ jsx("b", { children: "+2.000" }),
-            /* @__PURE__ */ jsx("small", { children: "productos" })
+            /* @__PURE__ */ jsx("b", { children: "Cat\xE1logo" }),
+            /* @__PURE__ */ jsx("small", { children: "de productos" })
           ] })
         ] }),
         /* @__PURE__ */ jsxs("div", { children: [
           /* @__PURE__ */ jsx(Truck, {}),
           /* @__PURE__ */ jsxs("span", { children: [
-            /* @__PURE__ */ jsx("b", { children: "Env\xEDo gratis" }),
-            /* @__PURE__ */ jsx("small", { children: "desde $150.000" })
+            /* @__PURE__ */ jsx("b", { children: "Entregas" }),
+            /* @__PURE__ */ jsx("small", { children: "coordinadas por zona" })
           ] })
         ] }),
         /* @__PURE__ */ jsxs("div", { children: [

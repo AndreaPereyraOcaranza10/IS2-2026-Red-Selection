@@ -5,6 +5,7 @@ import { ADMIN_ROUTES } from "../config";
 import { AlertTriangle, ArrowLeft, ArrowRight, Bell, Barcode, Building2, CheckCircle2, ChevronDown, CircleHelp, ClipboardList, Clock3, FileText, LayoutDashboard, LoaderCircle, MapPin, MoreVertical, Package, PackageCheck, Plus, RefreshCw, Search, Settings, ShoppingCart, Truck, Warehouse, X } from "lucide-react";
 import { api } from "../api";
 import { BranchesAdmin } from "./BranchesAdmin";
+import { ProductsAdminPage } from "../../../shared/src/components/ProductsAdminPage.jsx";
 const navItems = [
   { label: "Inicio", icon: LayoutDashboard },
   { label: "Productos", icon: Package },
@@ -508,8 +509,8 @@ export function OperationsDashboardPage({ onBack }) {
             ] })
           ] }),
           section === "Pedidos" && /* @__PURE__ */ jsx(OrdersTable, { orders, onAdvance: advanceOrder }),
-          section === "Productos" && /* @__PURE__ */ jsx(InventoryTable, { products: inventory, onStockChange: changeStock }),
-          section === "Stock" && /* @__PURE__ */ jsx(InventoryTable, { products: inventory, onStockChange: changeStock, stockOnly: true }),
+          section === "Productos" && /* @__PURE__ */ jsx(ProductsAdminPage, { apiAdmin: api, onStockChange: changeStock }),
+          section === "Stock" && /* @__PURE__ */ jsx(ProductsAdminPage, { apiAdmin: api, onStockChange: changeStock, stockOnly: true }),
           section === "Facturaci\xF3n y pagos" && /* @__PURE__ */ jsxs("section", { className: "orders-table-card ops-billing-table", children: [
             /* @__PURE__ */ jsxs("header", { className: "table-title", children: [
               /* @__PURE__ */ jsxs("div", { children: [
