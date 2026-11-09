@@ -25,6 +25,7 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 /** PV-01: el preventista carga pedidos solo para SUS puntos de venta y ve solo sus pedidos. */
@@ -34,6 +35,7 @@ class PedidosPreventistaTest {
     private ClienteMinoristaRepository clientes;
     private PreventistaRepository preventistas;
     private RutaService rutas;
+    private PromocionService promociones;
     private PortalOrderController controller;
 
     private Preventista yo;
@@ -53,8 +55,9 @@ class PedidosPreventistaTest {
         StockService stock = mock(StockService.class);
         FacturaClienteRepository facturas = mock(FacturaClienteRepository.class);
         UsuarioActual usuarioActual = mock(UsuarioActual.class);
+        promociones = mock(PromocionService.class);
         controller = new PortalOrderController(pedidos, clientes, mock(ResponsableComercioRepository.class),
-                preventistas, productos, precios, stock, facturas, usuarioActual, rutas);
+                preventistas, productos, precios, stock, facturas, usuarioActual, rutas, promociones);
 
         yo = Preventista.builder().build();
         yo.setId("prev-1");
@@ -83,7 +86,37 @@ class PedidosPreventistaTest {
     }
 
     private OrderRequest pedidoPara(String puntoId) {
-        return new OrderRequest(null, null, puntoId, null, List.of(new OrderLineRequest("prod-1", 3)));
+        return pedidoPara(puntoId, null);
+    }
+
+    private OrderRequest pedidoPara(String puntoId, String promoCode) {
+        return new OrderRequest(null, null, puntoId, promoCode, List.of(new OrderLineRequest("prod-1", 3)));
+    }
+
+    @Test
+    @DisplayName("BK-06: un código válido reduce el total y queda guardado en el pedido")
+    void codigoValidoReduceElTotal() {
+        Promocion dulce10 = Promocion.builder().codigo("DULCE10").build();
+        when(promociones.vigentePorCodigo("dulce10")).thenReturn(dulce10);
+        when(promociones.calcularDescuento(eq(dulce10), any())).thenReturn(new BigDecimal("300.00"));
+
+        OrderResponse r = controller.create(pedidoPara("cli-1", "dulce10"), auth);
+
+        assertEquals(new BigDecimal("300.00"), r.discount());
+        assertEquals(new BigDecimal("2700.00"), r.total());
+        verify(pedidos).save(argThat(p -> p.getPromocion() == dulce10 && p.getSubtotal().compareTo(new BigDecimal("3000")) == 0));
+    }
+
+    @Test
+    @DisplayName("BK-06: un código vencido o inexistente rechaza el pedido y no se guarda nada")
+    void codigoInvalidoRechazaElPedido() {
+        when(promociones.vigentePorCodigo("VIEJO"))
+                .thenThrow(new redSelection.dulceMayor.exception.ReglaNegocioException("El código VIEJO venció."));
+
+        assertThrows(redSelection.dulceMayor.exception.ReglaNegocioException.class,
+                () -> controller.create(pedidoPara("cli-1", "VIEJO"), auth));
+        verify(pedidos, never()).save(any());
+        verifyNoInteractions(rutas);
     }
 
     @Test

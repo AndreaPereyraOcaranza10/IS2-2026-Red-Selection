@@ -37,6 +37,9 @@ import redSelection.dulceMayor.repository.UsuarioRepository;
 import redSelection.dulceMayor.service.AuthService;
 import redSelection.dulceMayor.enums.Presentacion;
 import redSelection.dulceMayor.enums.TipoMovimientoStock;
+import redSelection.dulceMayor.enums.TipoPromocion;
+import redSelection.dulceMayor.model.Promocion;
+import redSelection.dulceMayor.repository.PromocionRepository;
 import redSelection.dulceMayor.model.Categoria;
 import redSelection.dulceMayor.model.Producto;
 import redSelection.dulceMayor.model.SubCategoria;
@@ -82,6 +85,7 @@ public class DatosDemoInicializador implements ApplicationRunner {
     private final ProductoRepository productoRepository;
     private final PrecioService precioService;
     private final StockService stockService;
+    private final PromocionRepository promocionRepository;
 
     public DatosDemoInicializador(UsuarioRepository usuarioRepository,
                                   PreventistaRepository preventistaRepository,
@@ -98,7 +102,9 @@ public class DatosDemoInicializador implements ApplicationRunner {
                                   SubCategoriaRepository subCategoriaRepository,
                                   ProductoRepository productoRepository,
                                   PrecioService precioService,
-                                  StockService stockService) {
+                                  StockService stockService,
+                                  PromocionRepository promocionRepository) {
+        this.promocionRepository = promocionRepository;
         this.categoriaRepository = categoriaRepository;
         this.subCategoriaRepository = subCategoriaRepository;
         this.productoRepository = productoRepository;
@@ -142,6 +148,22 @@ public class DatosDemoInicializador implements ApplicationRunner {
         if (productoRepository.findByEliminadoFalse().isEmpty()) {
             cargarCatalogo();
         }
+        if (promocionRepository.findByEliminadoFalse().isEmpty()) {
+            cargarPromociones();
+        }
+    }
+
+    /** DULCE10: 10% sobre todo el pedido (volumen, desde 1 unidad). ALFAJOR15: 15% solo sobre el alfajor. */
+    private void cargarPromociones() {
+        LocalDate desde = LocalDate.now().minusDays(30);
+        promocionRepository.save(Promocion.builder().codigo("DULCE10").tipoPromocion(TipoPromocion.VOLUMEN)
+                .porcentajeDescuento(new BigDecimal("10")).cantidadMinima(1).fechaDesde(desde).build());
+        productoRepository.findByEliminadoFalse().stream()
+                .filter(p -> p.getCodigo().equals("DM-001")).findFirst()
+                .ifPresent(alfajor -> promocionRepository.save(Promocion.builder().codigo("ALFAJOR15")
+                        .tipoPromocion(TipoPromocion.PRODUCTO_DESTACADO).porcentajeDescuento(new BigDecimal("15"))
+                        .producto(alfajor).fechaDesde(desde).build()));
+        log.info("Promociones de demostración listas: DULCE10 y ALFAJOR15.");
     }
 
     /**

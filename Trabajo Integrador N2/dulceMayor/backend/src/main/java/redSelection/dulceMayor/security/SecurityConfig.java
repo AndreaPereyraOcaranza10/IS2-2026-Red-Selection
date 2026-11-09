@@ -109,6 +109,9 @@ public class SecurityConfig {
                         // (lo exige PortalOrderController) y el administrativo ve y carga los de cualquiera
                         .requestMatchers("/api/orders", "/api/orders/*")
                         .hasAnyRole("CLIENTE", "PREVENTISTA", "ADMINISTRATIVO")
+                        // Promociones: el preventista solo valida un código al armar el pedido; el ABM es de administración
+                        .requestMatchers(HttpMethod.POST, "/api/promociones/validar").hasAnyRole("PREVENTISTA", "ADMINISTRATIVO")
+                        .requestMatchers("/api/promociones/**").hasRole("ADMINISTRATIVO")
                         .requestMatchers("/api/profile").hasAnyRole("CLIENTE", "ADMINISTRATIVO")
                         // Pagos: administración inicia, confirma y anula; el cliente solo consulta los de SUS facturas
                         // (esa pertenencia la exige PagoService). El cliente no elige el medio: lo acuerda facturación.

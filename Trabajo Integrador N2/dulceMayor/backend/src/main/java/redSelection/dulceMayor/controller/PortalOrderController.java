@@ -15,6 +15,7 @@ import redSelection.dulceMayor.repository.*;
 import redSelection.dulceMayor.security.UsuarioActual;
 import redSelection.dulceMayor.security.UsuarioAutenticado;
 import redSelection.dulceMayor.service.*;
+import redSelection.dulceMayor.patrones.strategy.promocion.ReglaPromocion.LineaPromocion;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -35,12 +36,13 @@ public class PortalOrderController {
     private final FacturaClienteRepository facturas;
     private final UsuarioActual usuarioActual;
     private final RutaService rutas;
+    private final PromocionService promociones;
 
     public PortalOrderController(PedidoRepository pedidos, ClienteMinoristaRepository clientes,
                                  ResponsableComercioRepository responsables, PreventistaRepository preventistas,
                                  ProductoService productos, PrecioService precios, StockService stock,
                                  FacturaClienteRepository facturas, UsuarioActual usuarioActual,
-                                 RutaService rutas) {
+                                 RutaService rutas, PromocionService promociones) {
         this.pedidos = pedidos;
         this.clientes = clientes;
         this.responsables = responsables;
@@ -51,6 +53,7 @@ public class PortalOrderController {
         this.facturas = facturas;
         this.usuarioActual = usuarioActual;
         this.rutas = rutas;
+        this.promociones = promociones;
     }
 
     @GetMapping
@@ -148,8 +151,17 @@ public class PortalOrderController {
             subtotal = subtotal.add(row);
         }
         pedido.setSubtotal(subtotal);
-        pedido.setTotal(subtotal);
-        // TODO BK-06: aplicar request.promoCode() al subtotal. Hasta entonces el código se ignora.
+        BigDecimal descuento = BigDecimal.ZERO;
+        if (request.promoCode() != null && !request.promoCode().isBlank()) {
+            // BK-06: un código inexistente, vencido o que no aplica a este pedido se rechaza (422) con el motivo
+            Promocion promocion = promociones.vigentePorCodigo(request.promoCode());
+            descuento = promociones.calcularDescuento(promocion, pedido.getItems().stream()
+                    .map(i -> new LineaPromocion(i.getProducto().getId(), i.getCantidad(), i.getSubtotal()))
+                    .toList());
+            pedido.setPromocion(promocion);
+        }
+        pedido.setDescuento(descuento);
+        pedido.setTotal(subtotal.subtract(descuento));
         pedido.registrarAlta(usuarioActual.nombreOSistema());
         Pedido guardado = pedidos.save(pedido);
         if (preventistaLogueado != null) {

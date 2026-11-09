@@ -23,8 +23,8 @@ export default function OrderPage() {
   const applyPromo = async () => {
     try {
       const st = await cart.applyPromo(code);
-      if (st === 'ok') toast('Código aplicado: 10% de descuento');
-      else if (st === 'bad') toast('Código inválido', { error: true });
+      if (st === 'ok') toast('Código aplicado');
+      else if (st === 'bad') toast('El código no se puede usar', { error: true });
     } catch (e) {
       toast(e.message, { error: true });
     }
@@ -35,7 +35,8 @@ export default function OrderPage() {
     try {
       const res = await preventistaApi.createOrder({
         pointOfSaleId: pos.id,
-        promoCode: promo.status === 'ok' ? promo.code : null,
+        // Solo si aplica: un código válido que todavía no da descuento (falta cantidad o producto) el backend lo rechazaría
+        promoCode: promo.status === 'ok' && cart.discount > 0 ? promo.code : null,
         items: cart.lines.map((l) => ({ productId: l.product.id, quantity: l.quantity })),
       });
       cart.clear();
@@ -124,7 +125,11 @@ export default function OrderPage() {
               <button className="linkbtn small" style={{ marginRight: -8 }} onClick={applyPromo}>Aplicar</button>
             </div>
             <span className="help">
-              {promo.status === 'ok' ? `Código aplicado: ${promo.percent}% de descuento` : promo.status === 'bad' ? 'El código no es válido o venció. Revisalo e intentá de nuevo.' : 'Probá con DULCE10'}
+              {promo.status === 'ok'
+                ? cart.promoHint ?? `Código aplicado: ${promo.percent}% de descuento${promo.type === 'PRODUCTO_DESTACADO' ? ` en ${promo.productName}` : ''}`
+                : promo.status === 'bad'
+                  ? promo.message ?? 'El código no es válido o venció. Revisalo e intentá de nuevo.'
+                  : 'Probá con DULCE10'}
             </span>
           </div>
         </div>

@@ -148,8 +148,10 @@ export async function mockRequest(method, path, body, token, opciones = {}) {
     case 'GET /api/products':
       return PRODUCTS.filter((x) => x.stock > 0).map(product); // el backend oculta los ítems sin stock
 
-    case 'POST /api/promotions/validate':
-      return body.code === 'DULCE10' ? { valid: true, discountPercent: 10 } : { valid: false, discountPercent: 0 };
+    case 'POST /api/promociones/validar': // mismo DTO que PromocionValidadaDTO del backend
+      return body.code === 'DULCE10'
+        ? { valid: true, discountPercent: 10, type: 'VOLUMEN', minQuantity: 1, productId: null, productName: null, message: null }
+        : { valid: false, discountPercent: 0, type: null, minQuantity: null, productId: null, productName: null, message: 'El código no existe.' };
 
     case 'GET /api/orders':
       return db.orders.map(order);

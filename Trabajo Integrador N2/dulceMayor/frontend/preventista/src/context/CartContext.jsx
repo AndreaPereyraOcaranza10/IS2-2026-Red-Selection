@@ -3,7 +3,27 @@ import { useAsync } from '@dulcemayor/shared';
 import { preventistaApi } from '../api.js';
 
 const Ctx = createContext(null);
-const NO_PROMO = { code: '', status: 'none', percent: 0 };
+const NO_PROMO = { code: '', status: 'none', percent: 0, type: null, minQuantity: null, productId: null, productName: null, message: null };
+const round2 = (n) => Math.round(n * 100) / 100;
+
+/**
+ * Descuento estimado con las mismas reglas que el backend (Strategy de promociones):
+ * VOLUMEN sobre todo el pedido si llega a la cantidad mínima; PRODUCTO_DESTACADO solo sobre ese producto.
+ * El definitivo lo calcula el backend al cargar el pedido. Devuelve { discount, hint }.
+ */
+function promoDiscount(promo, lines, count, subtotal) {
+  if (promo.status !== 'ok') return { discount: 0, hint: null };
+  if (promo.type === 'PRODUCTO_DESTACADO') {
+    const base = lines.filter((l) => l.product.id === promo.productId).reduce((a, l) => a + l.product.price * l.quantity, 0);
+    return base > 0
+      ? { discount: round2((base * promo.percent) / 100), hint: null }
+      : { discount: 0, hint: `Agregá ${promo.productName} al pedido para usar este código.` };
+  }
+  const min = promo.minQuantity ?? 1;
+  return count >= min
+    ? { discount: round2((subtotal * promo.percent) / 100), hint: null }
+    : { discount: 0, hint: `Este código aplica desde ${min} unidades (llevás ${count}).` };
+}
 const INITIAL = { items: {}, pointOfSale: null, promo: NO_PROMO };
 
 function reducer(s, a) {
@@ -38,14 +58,15 @@ export function CartProvider({ children }) {
       .filter((l) => l.product);
     const count = lines.reduce((a, l) => a + l.quantity, 0);
     const subtotal = lines.reduce((a, l) => a + l.product.price * l.quantity, 0);
-    const discount = state.promo.status === 'ok' ? Math.round((subtotal * state.promo.percent) / 100) : 0;
+    const { discount, hint: promoHint } = promoDiscount(state.promo, lines, count, subtotal);
     return {
       catalog,
       lines,
       count,
       subtotal,
       discount,
-      total: subtotal - discount,
+      promoHint,
+      total: round2(subtotal - discount),
       quantityOf: (id) => state.items[id] || 0,
       pointOfSale: state.pointOfSale,
       promo: state.promo,
@@ -54,7 +75,7 @@ export function CartProvider({ children }) {
       remove: (id) => dispatch({ type: 'del', id }),
       setPointOfSale: (pointOfSale) => dispatch({ type: 'pos', pointOfSale }),
       clear: () => dispatch({ type: 'clear' }),
-      /** Valida el código contra el backend (Strategy de promociones). Devuelve 'ok' | 'bad' | 'none'. */
+      /** Valida el código contra el backend. Devuelve 'ok' | 'bad' | 'none'. */
       applyPromo: async (raw) => {
         const code = raw.trim().toUpperCase();
         if (!code) {
@@ -62,7 +83,9 @@ export function CartProvider({ children }) {
           return 'none';
         }
         const r = await preventistaApi.validatePromo(code);
-        const promo = r.valid ? { code, status: 'ok', percent: r.discountPercent } : { code, status: 'bad', percent: 0 };
+        const promo = r.valid
+          ? { ...NO_PROMO, code, status: 'ok', percent: Number(r.discountPercent), type: r.type, minQuantity: r.minQuantity, productId: r.productId, productName: r.productName }
+          : { ...NO_PROMO, code, status: 'bad', message: r.message };
         dispatch({ type: 'promo', promo });
         return promo.status;
       },

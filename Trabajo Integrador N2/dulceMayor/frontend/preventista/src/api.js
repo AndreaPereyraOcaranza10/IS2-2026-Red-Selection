@@ -85,6 +85,6 @@ export const preventistaApi = {
   createOrder,
   orders: async () => (await api.get('/api/orders')).map(orderFromDTO),
   order: async (id) => orderFromDTO(await api.get(`/api/orders/${id}`)),
-  // Promociones: siguen simuladas hasta BK-06 (el backend todavía no aplica el código).
-  validatePromo: (code) => api.post('/api/promotions/validate', { code }),
+  // Promociones (BK-06): el backend valida el código; el descuento definitivo lo calcula al cargar el pedido.
+  validatePromo: (code) => api.post('/api/promociones/validar', { code }),
 };

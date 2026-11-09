@@ -8,8 +8,6 @@ export const USE_MOCK = import.meta.env.VITE_USE_MOCK === 'true';
  * con VITE_USE_MOCK=false siguen simulados. Cuando el backend los sume, se quitan de esta lista y listo.
  */
 const PENDIENTES_DE_BACKEND = [
-  '/api/preventor/',
-  '/api/promotions',
   '/api/delivery/',
 ];
 
