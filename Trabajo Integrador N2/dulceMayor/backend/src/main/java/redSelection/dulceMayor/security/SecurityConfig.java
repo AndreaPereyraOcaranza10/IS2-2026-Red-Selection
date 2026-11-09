@@ -76,6 +76,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/imagenes/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/imagenes").hasRole("ADMINISTRATIVO")
                         .requestMatchers(HttpMethod.GET, "/api/catalogo/**", "/api/ubicacion/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/chatbot/presupuestos").permitAll()
                         // Las imágenes del catálogo se muestran en el sitio público (<img> no manda token); los ids son UUID
                         .requestMatchers(HttpMethod.GET, "/api/imagenes/*").permitAll()
                         // Cada empleado ve solo su ruta (el administrativo y el jefe ven cualquiera).

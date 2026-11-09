@@ -102,6 +102,18 @@ export const api = {
   orders: () => request("/orders"),
   invoicePdf: (id) => requestPdf("/facturas/" + encodeURIComponent(id) + "/pdf"),
   validatePromotion: (code) => request("/promociones/validar", { method: "POST", body: JSON.stringify({ code }) }),
+  chatbotBudget: async (mensaje) => {
+    const response = await fetch(API_BASE + "/chatbot/presupuestos", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ mensaje }),
+    });
+    if (!response.ok) {
+      const body = await response.json().catch(() => null);
+      throw new Error(body?.detail || body?.message || `Error ${response.status}`);
+    }
+    return response.json();
+  },
   createOrder: (items, promoCode) => request("/orders", { method: "POST", body: JSON.stringify({ clientName: "Cuenta mayorista", paymentMethod: "A_COORDINAR", items, ...(promoCode ? { promoCode } : {}) }) }),
   createManualOrder: (clientName, items) => request("/orders", { method: "POST", body: JSON.stringify({ clientName, paymentMethod: "A_COORDINAR", items }) }),
   updateOrderStatus: (id, status) => request(`/orders/${id}/status`, { method: "PATCH", body: JSON.stringify({ status }) }),

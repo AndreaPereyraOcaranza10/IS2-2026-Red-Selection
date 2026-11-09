@@ -6,6 +6,7 @@ import { api } from "./api";
 import { ADMIN_ROLES, ACCOUNT_STORAGE_KEY, ROUTES, adminAppUrl } from "./config";
 import { Header } from "./components/Header";
 import { CartPanel } from "./components/CartPanel";
+import { BudgetAssistant } from "./components/BudgetAssistant";
 import { HomePage } from "./pages/HomePage";
 import { ProductDetailPage } from "./pages/ProductDetailPage";
 import { OrdersPage } from "./pages/OrdersPage";
@@ -35,6 +36,7 @@ function App() {
   const [category, setCategory] = useState("Ver todo");
   const [quantities, setQuantities] = useState({});
   const [cartOpen, setCartOpen] = useState(false);
+  const [assistantOpen, setAssistantOpen] = useState(false);
   const [catalog, setCatalog] = useState([]);
   const [catalogLoading, setCatalogLoading] = useState(true);
   const [account, setAccount] = useState(readAccount);
@@ -109,6 +111,11 @@ function App() {
     });
     setCheckoutError("");
   };
+  const addAssistantItems = (items) => {
+    items.forEach((item) => addProduct(item.productoId, item.cantidad));
+    setAssistantOpen(false);
+    setCartOpen(true);
+  };
   const applyPromotion = async () => {
     if (!account) {
       setPromoError("Iniciá sesión como cliente para validar un código de descuento.");
@@ -177,10 +184,11 @@ function App() {
     }
   );
   const footerActions = /* @__PURE__ */ jsxs(Fragment, { children: [
-    location.pathname !== "/ingresar" && /* @__PURE__ */ jsxs("button", { className: "help-button", "aria-label": "Contactar con atenci\xF3n al cliente", children: [
+    location.pathname !== "/ingresar" && /* @__PURE__ */ jsxs("button", { className: "help-button", onClick: () => setAssistantOpen(true), "aria-label": "Abrir asistente de presupuestos", children: [
       /* @__PURE__ */ jsx(Headphones, { size: 19 }),
       /* @__PURE__ */ jsx("span", { children: "\xBFNecesit\xE1s ayuda?" })
     ] }),
+    /* @__PURE__ */ jsx(BudgetAssistant, { open: assistantOpen, onClose: () => setAssistantOpen(false), onAddItems: addAssistantItems }),
     count > 0 && /* @__PURE__ */ jsxs("button", { className: "mobile-cart", onClick: () => setCartOpen(true), children: [
       /* @__PURE__ */ jsx(ShoppingBag, { size: 18 }),
       " Presupuesto (",

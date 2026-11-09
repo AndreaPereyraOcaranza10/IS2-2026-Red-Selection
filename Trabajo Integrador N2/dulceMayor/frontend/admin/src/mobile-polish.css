@@ -1,0 +1,30 @@
+@media(max-width:650px){
+  .ops-sidebar>.ops-side-bottom>.ops-user{padding:5px 8px}
+
+  .admin-resource-table{width:100%;min-width:0!important;table-layout:fixed}
+  .admin-resource-table tbody tr{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    grid-template-areas:
+      "usuario rol"
+      "nombre estado"
+      "documento acciones";
+    gap:9px 12px;
+    padding:12px 10px;
+  }
+  .admin-resource-table td{min-width:0;overflow-wrap:anywhere}
+  .admin-resource-table td:nth-child(1){grid-area:usuario}
+  .admin-resource-table td:nth-child(2){grid-area:nombre}
+  .admin-resource-table td:nth-child(3){grid-area:documento}
+  .admin-resource-table td:nth-child(4){grid-area:rol}
+  .admin-resource-table td:nth-child(5){grid-area:estado}
+  .admin-resource-table td:nth-child(6){grid-area:acciones;justify-content:flex-start}
+  .admin-resource-table td:nth-child(1):before{content:'Usuario'}
+  .admin-resource-table td:nth-child(2):before{content:'Nombre'}
+  .admin-resource-table td:nth-child(3):before{content:'Documento'}
+  .admin-resource-table td:nth-child(4):before{content:'Rol'}
+  .admin-resource-table td:nth-child(5):before{content:'Estado'}
+  .admin-resource-table td:nth-child(6):before{content:'Acciones'}
+  .admin-resource-table .admin-role-pill,
+  .admin-resource-table .admin-active-pill{max-width:100%;padding:4px 6px;font-size:8px;line-height:1.2;white-space:normal;overflow-wrap:anywhere}
+  .admin-resource-table .admin-row-actions{flex-wrap:wrap}
+}
