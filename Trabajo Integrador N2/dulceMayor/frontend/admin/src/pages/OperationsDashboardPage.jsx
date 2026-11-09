@@ -1,13 +1,14 @@
 import { Fragment, jsx, jsxs } from "react/jsx-runtime";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { lazy, Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import { ProductsAdminPage, useAuth } from '@dulcemayor/shared';
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { ADMIN_ROUTES, institutionalSiteUrl } from "../config";
-import { AlertTriangle, ArrowLeft, ArrowRight, Bell, Barcode, Building2, CheckCircle2, ChevronDown, ClipboardList, Clock3, ExternalLink, FileText, LayoutDashboard, LoaderCircle, MapPin, Package, PackageCheck, Plus, RefreshCw, Search, Settings, ShoppingCart, Tag, Truck, Users, Warehouse, X } from "lucide-react";
+import { AlertTriangle, ArrowLeft, ArrowRight, BarChart3, Bell, Barcode, Building2, CheckCircle2, ChevronDown, ClipboardList, Clock3, ExternalLink, FileText, LayoutDashboard, LoaderCircle, MapPin, Package, PackageCheck, Plus, RefreshCw, Search, Settings, ShoppingCart, Tag, Truck, Users, Warehouse, X } from "lucide-react";
 import { apiAdmin as api } from "../api";
 import { BranchesAdmin } from "./BranchesAdmin";
 import { UsersAdminPage } from "./UsersAdminPage.jsx";
 import { PromotionsAdminPage } from "./PromotionsAdminPage.jsx";
+const StatisticsAdminPage = lazy(() => import("./StatisticsAdminPage.jsx").then((module) => ({ default: module.StatisticsAdminPage })));
 const navItems = [
   { label: "Inicio", icon: LayoutDashboard },
   { label: "Productos", icon: Package },
@@ -17,10 +18,11 @@ const navItems = [
   { label: "Despacho", icon: Truck },
   { label: "Sucursales", icon: Building2 },
   { label: "Usuarios internos", icon: Users },
-  { label: "Promociones", icon: Tag }
+  { label: "Promociones", icon: Tag },
+  { label: "Estadísticas", icon: BarChart3 }
 ];
 const menuByRole = {
-  ADMINISTRATIVO: navItems.filter(({ label }) => !["Usuarios internos", "Promociones"].includes(label)).map(({ label }) => label),
+  ADMINISTRATIVO: navItems.filter(({ label }) => !["Usuarios internos", "Promociones", "Estadísticas"].includes(label)).map(({ label }) => label),
   JEFE_ADMINISTRATIVO: navItems.map(({ label }) => label),
 };
 const sectionPaths = {
@@ -33,7 +35,8 @@ const sectionPaths = {
   "Mi cuenta": ADMIN_ROUTES.account,
   "Sucursales": ADMIN_ROUTES.branches,
   "Usuarios internos": ADMIN_ROUTES.users,
-  "Promociones": ADMIN_ROUTES.promotions
+  "Promociones": ADMIN_ROUTES.promotions,
+  "Estadísticas": ADMIN_ROUTES.statistics
 };
 const stateLabels = { CARGADO: "Cargado", PENDIENTE_STOCK: "Pendiente de stock", FACTURADO: "Facturado", EN_REPARTO: "En reparto", ENTREGADO: "Entregado", ANULADO: "Anulado" };
 const nextState = { CARGADO: "FACTURADO", FACTURADO: "EN_REPARTO", EN_REPARTO: "ENTREGADO" };
@@ -241,7 +244,7 @@ export function OperationsDashboardPage({ onBack }) {
     if (!Object.values(sectionPaths).includes(currentPath)) navigate("/acceso-denegado", { replace: true });
   }, [currentPath, navigate]);
   useEffect(() => {
-    const rutasSoloJefe = [ADMIN_ROUTES.users, ADMIN_ROUTES.promotions];
+    const rutasSoloJefe = [ADMIN_ROUTES.users, ADMIN_ROUTES.promotions, ADMIN_ROUTES.statistics];
     if (rutasSoloJefe.includes(currentPath) && user?.role !== "JEFE_ADMINISTRATIVO") {
       navigate("/acceso-denegado", { replace: true });
     }
@@ -565,6 +568,7 @@ export function OperationsDashboardPage({ onBack }) {
           section === "Sucursales" && /* @__PURE__ */ jsx(BranchesAdmin, {})
           ,section === "Usuarios internos" && user?.role === "JEFE_ADMINISTRATIVO" && /* @__PURE__ */ jsx(UsersAdminPage, {})
           ,section === "Promociones" && user?.role === "JEFE_ADMINISTRATIVO" && /* @__PURE__ */ jsx(PromotionsAdminPage, {})
+          ,section === "Estadísticas" && user?.role === "JEFE_ADMINISTRATIVO" && /* @__PURE__ */ jsx(Suspense, { fallback: /* @__PURE__ */ jsx("div", { className: "stats-empty", children: "Cargando gráficos…" }), children: /* @__PURE__ */ jsx(StatisticsAdminPage, { apiAdmin: api }) })
         ] }),
         /* @__PURE__ */ jsxs("div", { className: "ops-footer-note", children: [
           /* @__PURE__ */ jsx(PackageCheck, {}),

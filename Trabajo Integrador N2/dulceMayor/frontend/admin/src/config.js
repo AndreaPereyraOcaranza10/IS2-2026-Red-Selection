@@ -10,6 +10,7 @@ export const ADMIN_ROUTES = {
   branches: '/admin/sucursales',
   users: '/admin/usuarios',
   promotions: '/admin/promociones',
+  statistics: '/admin/estadisticas',
 };
 
 export function institutionalSiteUrl() {

@@ -35,6 +35,11 @@ export const apiAdmin = {
   updatePromotion: (id, promotion) => api.put(`/api/promociones/${id}`, promotion),
   deletePromotion: (id) => api.delete(`/api/promociones/${id}`),
   promotionProducts: () => api.get('/api/productos'),
+  dailyStatistics: () => api.get('/api/estadisticas/pedidos/preventistas/dia'),
+  monthlyStatistics: () => api.get('/api/estadisticas/pedidos/preventistas/mes'),
+  stockStatistics: () => api.get('/api/estadisticas/stock/productos'),
+  salespersonPerformance: () => api.get('/api/estadisticas/rendimiento/preventistas'),
+  bestSellingProducts: () => api.get('/api/estadisticas/productos-mas-vendidos'),
   createManualOrder: (clientName, items) => api.post('/api/orders', {
     clientName,
     paymentMethod: 'A_COORDINAR',
