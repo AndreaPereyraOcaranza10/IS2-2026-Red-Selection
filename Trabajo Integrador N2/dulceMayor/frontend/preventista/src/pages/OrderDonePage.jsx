@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { ActionBar, Icon, Layout, MapView, OrderStateChip, RoutePlanBanner, fmt, formatDistance, optimizeAndSave, stopDestination, useDirections } from '@dulcemayor/shared';
-import { preventistaApi } from '../api.js';
+import { pedidoCorto, preventistaApi } from '../api.js';
 import PreventistaNav from '../components/PreventistaNav.jsx';
 
 const isPending = (s) => s.status === 'PENDIENTE';
@@ -74,7 +74,7 @@ export default function OrderDonePage() {
           <div className="big" style={{ background: 'var(--ok-bg)', color: 'var(--ok)', width: 112, height: 112 }}>
             <Icon name="check" size={64} />
           </div>
-          <h1 style={{ fontSize: 28, lineHeight: '34px', fontWeight: 800 }}>¡Pedido #{order.id} cargado!</h1>
+          <h1 style={{ fontSize: 28, lineHeight: '34px', fontWeight: 800 }}>¡Pedido #{pedidoCorto(order.id)} cargado!</h1>
           <p className="sec">{cur.name} · {fmt(order.total)}</p>
           <OrderStateChip state={order.state} />
         </div>

@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { Async, EmptyState, Fab, Layout, OrderStateChip, fmt, formatShortDate, useAsync, useRefresh } from '@dulcemayor/shared';
-import { preventistaApi } from '../api.js';
+import { pedidoCorto, preventistaApi } from '../api.js';
 import PreventistaNav from '../components/PreventistaNav.jsx';
 
 /** Mis pedidos: listado con estado; al tocar uno se ve la trazabilidad. */
@@ -32,7 +32,7 @@ export default function OrdersPage() {
                   onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && navigate(`/pedidos/${o.id}`)}
                 >
                   <div className="row">
-                    <b className="grow">Pedido #{o.id}</b>
+                    <b className="grow">Pedido #{pedidoCorto(o.id)}</b>
                     <OrderStateChip state={o.state} />
                   </div>
                   <div className="row"><span className="grow sec">{o.pointOfSale.name}</span></div>

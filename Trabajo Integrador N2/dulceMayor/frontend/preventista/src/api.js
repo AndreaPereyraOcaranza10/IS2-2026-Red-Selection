@@ -2,6 +2,9 @@ import { api, createRouteApi, locationApi, pointOfSaleApi } from '@dulcemayor/sh
 
 const routes = createRouteApi('preventista');
 
+/** Número de pedido para mostrar: los ids del backend son UUID largos, alcanza con los primeros 8 caracteres. */
+export const pedidoCorto = (id) => String(id).slice(0, 8);
+
 // ---------- Adapters: DTO del backend -> modelo de las pantallas ----------
 
 /** PortalProduct -> { id, name, presentation, price, category, stockLevel } */

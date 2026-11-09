@@ -1,6 +1,6 @@
 import { useParams } from 'react-router-dom';
 import { Async, Layout, OrderStateChip, Timeline, fmt, formatDateTime, useAsync } from '@dulcemayor/shared';
-import { preventistaApi } from '../api.js';
+import { pedidoCorto, preventistaApi } from '../api.js';
 
 /** Detalle del pedido con trazabilidad: carga, stock, facturación, transportista y entrega. */
 export default function OrderDetailPage() {
@@ -8,7 +8,7 @@ export default function OrderDetailPage() {
   const order = useAsync(() => preventistaApi.order(id), [id]);
 
   return (
-    <Layout title={`Pedido #${id}`} back backTo="/pedidos">
+    <Layout title={`Pedido #${pedidoCorto(id)}`} back backTo="/pedidos">
       <Async state={order}>
         {(o) => (
           <div className="cols rev">
