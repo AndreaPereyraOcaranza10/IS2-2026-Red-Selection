@@ -61,9 +61,15 @@ public class FacturaPdf {
         return String.format("%08d", factura.getNumeroFactura());
     }
 
+    /** Para descargar: controla que quien la pide pueda verla. */
     @Transactional(readOnly = true)
     public byte[] generar(String facturaId, UsuarioAutenticado usuario) {
-        FacturaCliente factura = facturas.obtenerParaDescarga(facturaId, usuario);
+        return generar(facturas.obtenerParaDescarga(facturaId, usuario));
+    }
+
+    /** Para uso interno del sistema (ej. el correo de BK-08): sin control de acceso. Llamar dentro de una transacción. */
+    @Transactional(readOnly = true)
+    public byte[] generar(FacturaCliente factura) {
         Pedido pedido = factura.getPedido();
         ClienteMinorista cliente = pedido.getCliente();
         DulceMayor sede = empresas.findByEliminadoFalse().stream()
@@ -355,7 +361,7 @@ public class FacturaPdf {
         return p;
     }
 
-    private static String pesos(BigDecimal monto) {
+    public static String pesos(BigDecimal monto) {
         return NumberFormat.getCurrencyInstance(Locale.forLanguageTag("es-AR")).format(monto);
     }
 

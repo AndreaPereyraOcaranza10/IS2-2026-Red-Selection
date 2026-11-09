@@ -4,6 +4,7 @@ import jakarta.mail.internet.MimeMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Component;
@@ -35,10 +36,15 @@ public class JavaMailEnvioCorreo implements EnvioCorreo {
         }
         try {
             MimeMessage mensaje = sender.createMimeMessage();
-            MimeMessageHelper ayudante = new MimeMessageHelper(mensaje, "UTF-8");
+            Notificacion.Adjunto adjunto = notificacion.adjunto();
+            // Con adjunto el mensaje tiene que ser multipart
+            MimeMessageHelper ayudante = new MimeMessageHelper(mensaje, adjunto != null, "UTF-8");
             ayudante.setTo(notificacion.destinatario());
             ayudante.setSubject(notificacion.asunto());
             ayudante.setText(notificacion.cuerpoHtml(), true);
+            if (adjunto != null) {
+                ayudante.addAttachment(adjunto.nombre(), new ByteArrayResource(adjunto.contenido()), adjunto.tipo());
+            }
             sender.send(mensaje);
             return true;
         } catch (Exception ex) {

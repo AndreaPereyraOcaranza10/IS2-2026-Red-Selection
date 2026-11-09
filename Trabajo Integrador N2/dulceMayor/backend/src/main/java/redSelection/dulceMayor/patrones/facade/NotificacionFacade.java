@@ -28,6 +28,17 @@ public class NotificacionFacade {
                     + "Es tu turno: por favor, tené a mano el pago ({{pedido}}).</p>"
                     + "<p>¡Gracias por elegirnos!</p>";
 
+    /** BK-08: confirmación del pedido al facturarse, con la factura en PDF adjunta. */
+    public static final String ASUNTO_FACTURA = "Dulce Mayor · Tu pedido está confirmado (Factura N° {{numero}})";
+    public static final String CUERPO_FACTURA =
+            "<p>Hola {{responsable}},</p>"
+                    + "<p>¡Tu pedido para <b>{{comercio}}</b> está confirmado! Ya lo facturamos y lo estamos preparando "
+                    + "para el reparto.</p>"
+                    + "<p><b>Factura N° {{numero}}</b> · Total: <b>{{total}}</b><br>"
+                    + "Productos: {{productos}}</p>"
+                    + "<p>Te adjuntamos la factura en PDF. El área de facturación se va a comunicar con vos para "
+                    + "coordinar el pago.</p>"
+                    + "<p>¡Gracias por elegirnos!<br>Dulce Mayor</p>";
     private static final String ASUNTO_ACCESO = "Tu acceso a Dulce Mayor";
     private static final String CUERPO_ACCESO =
             "<p>Hola {{nombre}},</p>"
@@ -68,6 +79,39 @@ public class NotificacionFacade {
                 .valor("comercio", cliente.getNombreComercio())
                 .valor("direccion", direccion.getCalle() + " " + direccion.getNumeracion() + ", " + direccion.getLocalidadNombre())
                 .valor("pedido", parada.getPedido() != null ? "pedido " + parada.getPedido().getId() : "tu pedido")
+                .construir();
+        return envioCorreo.enviar(notificacion);
+    }
+
+    /**
+     * BK-08: confirma al responsable del comercio que su pedido se facturó, con la factura en PDF adjunta.
+     * Usa la plantilla CONFIRMACION_PEDIDO si administración la configuró. @return true si el correo salió;
+     * false si el responsable no tiene correo cargado o el envío falló (nunca lanza: la factura ya está emitida).
+     */
+    public boolean enviarFactura(FacturaCliente factura, byte[] pdf, String numero, String total) {
+        ClienteMinorista cliente = factura.getPedido().getCliente();
+        ResponsableComercio responsable = cliente.getResponsable();
+        Optional<String> correo = responsable == null ? Optional.empty() : correoPrincipal(responsable);
+        if (correo.isEmpty()) {
+            return false;
+        }
+        Optional<ConfiguracionCorreoEmpresa> plantilla = sedeCentral()
+                .flatMap(sede -> configuracionRepository
+                        .findByDulceMayorIdAndTipoCorreo(sede.getId(), TipoCorreo.CONFIRMACION_PEDIDO))
+                .filter(c -> !c.isEliminado());
+        String productos = factura.getDetalles().stream()
+                .map(d -> d.getCantidad() + " × " + d.getProducto().getNombre())
+                .collect(java.util.stream.Collectors.joining(", "));
+        Notificacion notificacion = Notificacion.nueva()
+                .para(correo.get())
+                .asunto(plantilla.map(ConfiguracionCorreoEmpresa::getAsunto).orElse(ASUNTO_FACTURA))
+                .plantilla(plantilla.map(ConfiguracionCorreoEmpresa::getCuerpoHtml).orElse(CUERPO_FACTURA))
+                .valor("responsable", responsable.getNombre() + " " + responsable.getApellido())
+                .valor("comercio", cliente.getNombreComercio())
+                .valor("numero", numero)
+                .valor("total", total)
+                .valor("productos", productos)
+                .adjunto("Factura-" + numero + ".pdf", "application/pdf", pdf)
                 .construir();
         return envioCorreo.enviar(notificacion);
     }

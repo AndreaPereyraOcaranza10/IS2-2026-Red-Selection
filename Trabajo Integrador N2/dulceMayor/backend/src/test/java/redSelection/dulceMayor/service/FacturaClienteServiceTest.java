@@ -3,6 +3,7 @@ package redSelection.dulceMayor.service;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.context.ApplicationEventPublisher;
 import redSelection.dulceMayor.enums.*;
 import redSelection.dulceMayor.exception.RecursoNoEncontradoException;
 import redSelection.dulceMayor.exception.ReglaNegocioException;
@@ -26,6 +27,7 @@ class FacturaClienteServiceTest {
     private FacturaClienteRepository facturas;
     private ProductoService productos;
     private StockService stock;
+    private ApplicationEventPublisher eventos;
     private FacturaClienteService servicio;
 
     private Producto alfajor;
@@ -37,7 +39,8 @@ class FacturaClienteServiceTest {
         facturas = mock(FacturaClienteRepository.class);
         productos = mock(ProductoService.class);
         stock = mock(StockService.class);
-        servicio = new FacturaClienteService(facturas, productos, stock);
+        eventos = mock(ApplicationEventPublisher.class);
+        servicio = new FacturaClienteService(facturas, productos, stock, eventos);
 
         alfajor = producto("alfajor", "Alfajor");
         chicles = producto("chicles", "Chicles");
@@ -93,6 +96,7 @@ class FacturaClienteServiceTest {
         assertEquals("Factura N° 42", ultimaObservacion());
         verify(stock).registrar(eq(alfajor), eq(TipoMovimientoStock.VENTA), eq(-2), any(DetalleFactura.class));
         verify(stock).registrar(eq(chicles), eq(TipoMovimientoStock.VENTA), eq(-1), any(DetalleFactura.class));
+        verify(eventos).publishEvent(any(FacturaEmitidaEvento.class));   // BK-08: dispara el correo
     }
 
     @Test
@@ -107,6 +111,7 @@ class FacturaClienteServiceTest {
         assertEquals("Falta stock de Chicles (faltan 1)", ultimaObservacion());
         verify(facturas, never()).save(any());
         verify(stock, never()).registrar(any(), any(), anyInt(), any());
+        verifyNoInteractions(eventos);   // sin factura no hay correo
     }
 
     @Test

@@ -105,7 +105,8 @@ public class ConfiguracionCorreoService {
     static List<String> marcadores(TipoCorreo tipo) {
         return switch (tipo) {
             case PROXIMA_ENTREGA -> List.of("responsable", "comercio", "direccion", "pedido");
-            case CONFIRMACION_PEDIDO, NEWSLETTER -> List.of();
+            case CONFIRMACION_PEDIDO -> List.of("responsable", "comercio", "numero", "total", "productos");
+            case NEWSLETTER -> List.of();
         };
     }
 
@@ -118,11 +119,17 @@ public class ConfiguracionCorreoService {
             return new ConfiguracionCorreoRespuestaDTO(tipo, guardada.get().getAsunto(), guardada.get().getCuerpoHtml(),
                     true, marcadores(tipo));
         }
-        boolean tieneTextoPorDefecto = tipo == TipoCorreo.PROXIMA_ENTREGA;
-        return new ConfiguracionCorreoRespuestaDTO(tipo,
-                tieneTextoPorDefecto ? NotificacionFacade.ASUNTO_POR_DEFECTO : "",
-                tieneTextoPorDefecto ? NotificacionFacade.CUERPO_POR_DEFECTO : "",
-                false, marcadores(tipo));
+        String asunto = switch (tipo) {
+            case PROXIMA_ENTREGA -> NotificacionFacade.ASUNTO_POR_DEFECTO;
+            case CONFIRMACION_PEDIDO -> NotificacionFacade.ASUNTO_FACTURA;
+            case NEWSLETTER -> "";
+        };
+        String cuerpo = switch (tipo) {
+            case PROXIMA_ENTREGA -> NotificacionFacade.CUERPO_POR_DEFECTO;
+            case CONFIRMACION_PEDIDO -> NotificacionFacade.CUERPO_FACTURA;
+            case NEWSLETTER -> "";
+        };
+        return new ConfiguracionCorreoRespuestaDTO(tipo, asunto, cuerpo, false, marcadores(tipo));
     }
 
     private DulceMayor sedeCentral() {

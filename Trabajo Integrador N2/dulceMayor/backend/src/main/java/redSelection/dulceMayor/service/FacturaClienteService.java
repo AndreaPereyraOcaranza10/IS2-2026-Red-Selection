@@ -1,5 +1,6 @@
 package redSelection.dulceMayor.service;
 
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import redSelection.dulceMayor.enums.EstadoFactura;
@@ -28,12 +29,14 @@ public class FacturaClienteService {
     private final FacturaClienteRepository facturaRepository;
     private final ProductoService productoService;
     private final StockService stockService;
+    private final ApplicationEventPublisher eventos;
 
     public FacturaClienteService(FacturaClienteRepository facturaRepository, ProductoService productoService,
-                                 StockService stockService) {
+                                 StockService stockService, ApplicationEventPublisher eventos) {
         this.facturaRepository = facturaRepository;
         this.productoService = productoService;
         this.stockService = stockService;
+        this.eventos = eventos;
     }
 
     // =====================================================
@@ -183,6 +186,8 @@ public class FacturaClienteService {
         }
         pedido.setEstadoStock(EstadoStockPedido.CONFIRMADO);
         pedido.facturar(usuario, "Factura N° " + numero);
+        // BK-08: el correo con la factura sale recién cuando esta transacción se confirma (CorreoFacturaService)
+        eventos.publishEvent(new FacturaEmitidaEvento(guardada.getId()));
         return guardada;
     }
 }
