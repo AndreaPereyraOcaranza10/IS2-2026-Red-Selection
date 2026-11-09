@@ -130,6 +130,17 @@ class SeguridadEndpointsTest {
         esperar(403, HttpMethod.POST, "/api/puntos-venta", token(Rol.CLIENTE, false, null));
     }
 
+    @Test @DisplayName("Pedidos: preventista carga y consulta; cambiar estado solo admin; transportista fuera")
+    void pedidos() throws Exception {
+        String prev = token(Rol.PREVENTISTA, false, "p1");
+        esperar(200, HttpMethod.GET, "/api/orders", prev);
+        esperar(200, HttpMethod.POST, "/api/orders", prev);
+        esperar(200, HttpMethod.GET, "/api/orders/x", prev);
+        esperar(403, HttpMethod.PATCH, "/api/orders/x/status", prev);
+        esperar(200, HttpMethod.PATCH, "/api/orders/x/status", token(Rol.ADMINISTRATIVO, false, "a1"));
+        esperar(403, HttpMethod.GET, "/api/orders", token(Rol.TRANSPORTISTA, false, "t1"));
+    }
+
     @Test @DisplayName("Responsables: buscar para preventista; ABM solo admin")
     void responsables() throws Exception {
         String prev = token(Rol.PREVENTISTA, false, "p1");

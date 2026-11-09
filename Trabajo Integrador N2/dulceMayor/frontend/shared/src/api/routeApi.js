@@ -14,6 +14,7 @@ const STOP_STATUS = {
 
 const stopFromDTO = (type) => (p) => ({
   id: p.id,
+  clientId: p.clienteId, // id del comercio (distinto del id de la parada): es el que se usa para cargar pedidos
   sequence: p.orden,
   name: p.comercio,
   address: p.direccion,

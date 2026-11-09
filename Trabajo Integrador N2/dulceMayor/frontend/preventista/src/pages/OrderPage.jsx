@@ -138,8 +138,9 @@ export default function OrderPage() {
               key={s.id}
               className="opt"
               role="radio"
-              aria-checked={pos?.id === s.id}
-              onClick={() => { cart.setPointOfSale({ id: s.id, name: s.name, address: s.address }); setPickOpen(false); }}
+              aria-checked={pos?.id === (s.clientId ?? s.id)}
+              // El pedido va al comercio (clientId), no a la parada de la ruta (id)
+              onClick={() => { cart.setPointOfSale({ id: s.clientId ?? s.id, name: s.name, address: s.address }); setPickOpen(false); }}
             >
               <span className="radio" />
               <span className="grow">

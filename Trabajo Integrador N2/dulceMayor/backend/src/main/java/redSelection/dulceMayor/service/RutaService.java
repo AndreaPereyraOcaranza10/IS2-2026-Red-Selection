@@ -99,6 +99,22 @@ public class RutaService {
         return rutaRepository.save(ruta);
     }
 
+    /**
+     * Tomar un pedido cuenta como visita: si el comercio es una parada pendiente de la ruta de hoy del
+     * preventista, se cierra. Si no está en la ruta (pedido fuera de recorrido), no hace nada.
+     */
+    @Transactional
+    public void registrarVisitaPorPedido(String preventistaId, String clienteId) {
+        rutaRepository.findByResponsableIdAndFechaAndTipoRuta(preventistaId, LocalDate.now(), TipoRuta.PREVENTA)
+                .ifPresent(ruta -> pendientes(ruta).stream()
+                        .filter(p -> p.getCliente().getId().equals(clienteId))
+                        .findFirst()
+                        .ifPresent(parada -> {
+                            cerrarParada(parada);
+                            ruta.setEstado(primeraPendiente(ruta).isPresent() ? EstadoRuta.EN_CURSO : EstadoRuta.FINALIZADA);
+                        }));
+    }
+
     /** Registra que el preventista visitó el comercio. Cierra la ruta cuando no quedan paradas pendientes. */
     @Transactional
     public ParadaRutaDTO registrarVisita(String paradaId) {

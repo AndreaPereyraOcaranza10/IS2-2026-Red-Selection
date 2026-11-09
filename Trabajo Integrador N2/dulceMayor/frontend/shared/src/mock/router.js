@@ -81,19 +81,23 @@ export function resetMock() {
 }
 
 /* ---------- mappers (Entidad -> DTO) ---------- */
-const product = (p) => ({ id: p.id, name: p.name, presentation: p.presentation, price: p.price, category: p.category, stockLevel: p.stock === 0 ? 'NONE' : p.stock <= 20 ? 'LOW' : 'OK' });
-const pointOfSale = (p) => ({ id: p.id, name: p.name, address: p.address, lat: p.lat, lng: p.lng });
+// Productos y pedidos con los mismos DTOs que el backend (PortalProduct / OrderResponse): las pantallas los
+// adaptan en su api.js, así el modo demo y el backend real pasan por el mismo código.
+const product = (p) => ({ id: p.id, name: p.name, pack: p.presentation, price: p.price, category: p.category, stock: p.stock, stockMinimum: 20, inStock: p.stock > 0 });
+const pointOfSale = (p) => ({ id: String(p.id), name: p.name, address: p.address, lat: p.lat, lng: p.lng });
 const lineItems = (items) => items.map(([pid, q]) => { const p = PRODUCTS.find((x) => x.id === pid); return { productId: pid, name: p.name, presentation: p.presentation, unitPrice: p.price, quantity: q }; });
 const orderTotal = (items) => lineItems(items).reduce((a, l) => a + l.unitPrice * l.quantity, 0);
-const order = (o) => ({
-  id: o.id, state: o.state, total: o.total, discount: o.discount || 0, createdAt: o.createdAt,
-  pointOfSale: pointOfSale(POINTS.find((p) => p.id === o.pos)),
-  items: lineItems(o.items || POINTS.find((p) => p.id === o.pos).items),
-  trace: { events: o.events.map(([state, at]) => ({ state, at })), carrier: o.carrier },
-});
-const visitStop = (id, i) => { const p = POINTS.find((x) => x.id === id); return { id, sequence: i + 1, name: p.name, address: p.address, distanceKm: p.distanceKm, lat: p.lat, lng: p.lng, contactName: p.contactName, phone: p.phone, status: db.visited.has(id) ? 'VISITADO' : 'PENDIENTE' }; };
+const order = (o) => {
+  const pt = POINTS.find((p) => p.id === o.pos);
+  return {
+    id: o.id, clientName: pt.name, status: o.state, paymentMethod: 'A_COORDINAR', createdAt: o.createdAt,
+    invoicedAt: null, invoiceId: null, total: o.total, discount: o.discount || 0,
+    items: lineItems(o.items || pt.items).map((l) => ({ productId: l.productId, productName: l.name, quantity: l.quantity, unitPrice: l.unitPrice, total: l.unitPrice * l.quantity })),
+    trace: { events: o.events.map(([state, at]) => ({ state, at })), carrier: o.carrier },
+    pointOfSale: pointOfSale(pt),
+  };
+};
 const deliveryStop = (id, i) => { const p = POINTS.find((x) => x.id === id); return { id, sequence: i + 1, name: p.name, address: p.address, distanceKm: p.distanceKm, lat: p.lat, lng: p.lng, contactName: p.contactName, status: db.delivered.has(id) ? 'ENTREGADO' : 'PENDIENTE', deliveredAt: db.delivered.get(id) || null, paymentMethod: p.paymentMethod, total: orderTotal(p.items) }; };
-const nextVisit = () => { const i = db.visitOrder.findIndex((id) => !db.visited.has(id)); return i < 0 ? null : visitStop(db.visitOrder[i], i); };
 const instruction = (m) => (m === 'EFECTIVO' ? 'Cobrar en efectivo al entregar' : m === 'TRANSFERENCIA' ? `Alias: ${ALIAS}` : 'Pago con billetera virtual (QR del comercio)');
 
 const sessionUser = (token) => (token?.startsWith('mock.') ? USERS[token.slice(5)] : null);
@@ -144,9 +148,6 @@ export async function mockRequest(method, path, body, token, opciones = {}) {
     case 'GET /api/products':
       return PRODUCTS.filter((x) => x.stock > 0).map(product); // el backend oculta los ítems sin stock
 
-    case 'GET /api/preventor/zone':
-      return POINTS.map((x) => ({ ...visitStop(x.id, 0), inRoute: db.visitOrder.includes(x.id), sequence: undefined }));
-
     case 'POST /api/promotions/validate':
       return body.code === 'DULCE10' ? { valid: true, discountPercent: 10 } : { valid: false, discountPercent: 0 };
 
@@ -154,7 +155,7 @@ export async function mockRequest(method, path, body, token, opciones = {}) {
       return db.orders.map(order);
 
     case 'POST /api/orders': {
-      const pt = POINTS.find((x) => x.id === body.pointOfSaleId);
+      const pt = POINTS.find((x) => x.id === Number(body.pointOfSaleId));
       if (!pt || !body.items?.length) throw new ApiError(400, 'Datos inválidos', { errors: [{ field: 'items', message: 'El pedido necesita al menos un producto' }] });
       const items = body.items.map((i) => [i.productId, i.quantity]);
       const subtotal = orderTotal(items);
@@ -162,8 +163,8 @@ export async function mockRequest(method, path, body, token, opciones = {}) {
       const now = new Date().toISOString();
       const o = { id: db.seq++, pos: pt.id, state: 'CARGADO', items, total: subtotal - discount, discount, createdAt: now, carrier: null, events: [['CARGADO', now]] };
       db.orders.unshift(o);
-      db.visited.add(pt.id); // tomar el pedido cuenta como visita
-      return { order: order(o), nextStop: nextVisit() };
+      db.visited.add(pt.id); // tomar el pedido cuenta como visita (igual que el backend)
+      return order(o);
     }
 
     default:

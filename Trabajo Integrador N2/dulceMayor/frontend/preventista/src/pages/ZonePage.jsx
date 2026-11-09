@@ -15,7 +15,7 @@ export default function ZonePage() {
       <Async state={zone}>
         {(points) => {
           const sel = points.find((p) => p.id === selId) || points.find((p) => p.inRoute && p.status === 'PENDIENTE') || points[0];
-          const pins = points.map((p) => ({ id: p.id, text: p.id, lat: p.lat, lng: p.lng, label: p.name, status: p.status === 'VISITADO' ? 'vis' : 'pend' }));
+          const pins = points.map((p) => ({ id: p.id, text: p.sequence ?? '•', lat: p.lat, lng: p.lng, label: p.name, status: p.status === 'VISITADO' ? 'vis' : 'pend' }));
           return (
             <div style={{ position: 'relative', flex: 1, display: 'flex' }}>
               <MapView tall route={false} pins={pins} selectedId={sel.id} onPinClick={setSelId} />

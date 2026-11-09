@@ -13,6 +13,7 @@ import redSelection.dulceMayor.enums.*;
 import redSelection.dulceMayor.model.*;
 import redSelection.dulceMayor.repository.*;
 import redSelection.dulceMayor.security.UsuarioActual;
+import redSelection.dulceMayor.security.UsuarioAutenticado;
 import redSelection.dulceMayor.service.*;
 
 import java.math.BigDecimal;
@@ -33,11 +34,13 @@ public class PortalOrderController {
     private final StockService stock;
     private final FacturaClienteRepository facturas;
     private final UsuarioActual usuarioActual;
+    private final RutaService rutas;
 
     public PortalOrderController(PedidoRepository pedidos, ClienteMinoristaRepository clientes,
                                  ResponsableComercioRepository responsables, PreventistaRepository preventistas,
                                  ProductoService productos, PrecioService precios, StockService stock,
-                                 FacturaClienteRepository facturas, UsuarioActual usuarioActual) {
+                                 FacturaClienteRepository facturas, UsuarioActual usuarioActual,
+                                 RutaService rutas) {
         this.pedidos = pedidos;
         this.clientes = clientes;
         this.responsables = responsables;
@@ -47,6 +50,7 @@ public class PortalOrderController {
         this.stock = stock;
         this.facturas = facturas;
         this.usuarioActual = usuarioActual;
+        this.rutas = rutas;
     }
 
     @GetMapping
@@ -55,10 +59,28 @@ public class PortalOrderController {
         if (isStaff(authentication)) {
             return pedidos.findByEliminadoFalse().stream().map(this::toResponse).toList();
         }
+        Preventista preventista = preventistaLogueado(authentication);
+        if (preventista != null) {
+            return pedidos.findByPreventistaIdOrderByFechaHoraCargaDesc(preventista.getId()).stream()
+                    .filter(p -> !p.isEliminado()).map(this::toResponse).toList();
+        }
         ResponsableComercio responsable = responsableFor(authentication.getName());
         if (responsable == null) return List.of();
         return pedidos.findByClienteResponsableIdOrderByFechaHoraCargaDesc(responsable.getId()).stream()
                 .filter(p -> !p.isEliminado()).map(this::toResponse).toList();
+    }
+
+    /** Detalle de un pedido: el administrativo ve cualquiera; el preventista y el cliente, solo los suyos. */
+    @GetMapping("/{id}")
+    @Transactional
+    public OrderResponse get(@PathVariable String id, Authentication authentication) {
+        Pedido pedido = pedidos.findByIdAndEliminadoFalse(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "No se encontró el pedido."));
+        if (!isStaff(authentication) && !esDueno(pedido, authentication)) {
+            // 404 y no 403: no se confirma que exista un pedido ajeno
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "No se encontró el pedido.");
+        }
+        return toResponse(pedido);
     }
 
     @PostMapping
@@ -66,7 +88,16 @@ public class PortalOrderController {
     @Transactional
     public OrderResponse create(@Valid @RequestBody OrderRequest request, Authentication authentication) {
         ClienteMinorista cliente;
-        if (isStaff(authentication)) {
+        Preventista preventistaLogueado = preventistaLogueado(authentication);
+        if (preventistaLogueado != null) {
+            // El preventista carga el pedido para uno de SUS puntos de venta
+            String puntoId = request.pointOfSaleId() == null ? "" : request.pointOfSaleId().trim();
+            cliente = clientes.findByIdAndEliminadoFalse(puntoId)
+                    .filter(c -> c.getPreventistaAsignado() != null
+                            && c.getPreventistaAsignado().getId().equals(preventistaLogueado.getId()))
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+                            "No encontramos ese punto de venta entre los tuyos."));
+        } else if (isStaff(authentication)) {
             String name = request.clientName() == null ? "" : request.clientName().trim();
             cliente = clientes.findByEliminadoFalse().stream()
                     .filter(c -> c.getNombreComercio().equalsIgnoreCase(name)
@@ -84,7 +115,7 @@ public class PortalOrderController {
                             "Tu cuenta todavía no está vinculada a un comercio. Contactá a un administrador para asociarla."));
         }
 
-        Preventista asignado = cliente.getPreventistaAsignado();
+        Preventista asignado = preventistaLogueado != null ? preventistaLogueado : cliente.getPreventistaAsignado();
         if (asignado == null) {
             asignado = preventistas.findByEliminadoFalse().stream().findFirst()
                     .orElseThrow(() -> new ResponseStatusException(HttpStatus.CONFLICT,
@@ -118,8 +149,13 @@ public class PortalOrderController {
         }
         pedido.setSubtotal(subtotal);
         pedido.setTotal(subtotal);
+        // TODO BK-06: aplicar request.promoCode() al subtotal. Hasta entonces el código se ignora.
         pedido.registrarAlta(usuarioActual.nombreOSistema());
-        return toResponse(pedidos.save(pedido));
+        Pedido guardado = pedidos.save(pedido);
+        if (preventistaLogueado != null) {
+            rutas.registrarVisitaPorPedido(preventistaLogueado.getId(), cliente.getId());   // tomar el pedido cuenta como visita
+        }
+        return toResponse(guardado);
     }
 
     @PatchMapping("/{id}/status")
@@ -170,6 +206,30 @@ public class PortalOrderController {
                 .findFirst().orElse(null);
     }
 
+    /** El preventista del token, o null si quien llama no es un preventista. */
+    private Preventista preventistaLogueado(Authentication authentication) {
+        if (authentication == null || !(authentication.getPrincipal() instanceof UsuarioAutenticado usuario)
+                || usuario.getRol() != Rol.PREVENTISTA) {
+            return null;
+        }
+        if (usuario.getEmpleadoId() == null) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Tu usuario no está asociado a un preventista.");
+        }
+        return preventistas.findByIdAndEliminadoFalse(usuario.getEmpleadoId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.FORBIDDEN,
+                        "Tu usuario no está asociado a un preventista."));
+    }
+
+    private boolean esDueno(Pedido pedido, Authentication authentication) {
+        Preventista preventista = preventistaLogueado(authentication);
+        if (preventista != null) {
+            return pedido.getPreventista().getId().equals(preventista.getId());
+        }
+        ResponsableComercio responsable = responsableFor(authentication.getName());
+        return responsable != null && pedido.getCliente().getResponsable() != null
+                && pedido.getCliente().getResponsable().getId().equals(responsable.getId());
+    }
+
     private boolean isStaff(Authentication authentication) {
         return authentication != null && authentication.getAuthorities().stream()
                 .anyMatch(a -> a.getAuthority().equals("ROLE_ADMINISTRATIVO")
@@ -185,7 +245,15 @@ public class PortalOrderController {
         String invoiceId = factura == null ? null : factura.getId();
         return new OrderResponse(pedido.getId(), pedido.getCliente().getNombreComercio(),
                 pedido.getEstado().name(), "A_COORDINAR", pedido.getFechaHoraCarga().toString(),
-                invoicedAt, invoiceId, pedido.getTotal(), lines, new OrderTrace(eventos(pedido)));
+                invoicedAt, invoiceId, pedido.getTotal(), lines, new OrderTrace(eventos(pedido)),
+                pedido.getDescuento(), puntoDeVenta(pedido.getCliente()));
+    }
+
+    private PointOfSale puntoDeVenta(ClienteMinorista cliente) {
+        Direccion d = cliente.getDireccion();
+        String direccion = d == null ? "" : d.getCalle() + " " + d.getNumeracion() + ", " + d.getLocalidadNombre();
+        return new PointOfSale(cliente.getId(), cliente.getNombreComercio(), direccion,
+                d == null ? null : d.getLatitud(), d == null ? null : d.getLongitud());
     }
 
     /** Historial con la misma forma que usa el frontend ({ state, at }). */
@@ -201,7 +269,8 @@ public class PortalOrderController {
                 .toList();
     }
 
-    public record OrderRequest(String clientName, String paymentMethod,
+    /** El administrativo indica clientName; el preventista, pointOfSaleId (id del comercio) y opcionalmente promoCode. */
+    public record OrderRequest(String clientName, String paymentMethod, String pointOfSaleId, String promoCode,
                                @NotEmpty List<@Valid OrderLineRequest> items) {}
     public record OrderLineRequest(@NotBlank String productId, @Min(1) int quantity) {}
     /** note es opcional: queda como observación en el historial. */
@@ -210,7 +279,9 @@ public class PortalOrderController {
                                     BigDecimal unitPrice, BigDecimal total) {}
     public record OrderResponse(String id, String clientName, String status, String paymentMethod,
                                 String createdAt, String invoicedAt, String invoiceId, BigDecimal total,
-                                List<OrderLineResponse> items, OrderTrace trace) {}
+                                List<OrderLineResponse> items, OrderTrace trace,
+                                BigDecimal discount, PointOfSale pointOfSale) {}
+    public record PointOfSale(String id, String name, String address, Double lat, Double lng) {}
     public record OrderTrace(List<OrderEvent> events) {}
     public record OrderEvent(String state, String at, String user, String note) {}
 }

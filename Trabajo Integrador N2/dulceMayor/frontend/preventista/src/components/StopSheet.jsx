@@ -14,9 +14,12 @@ export default function StopSheet({ stop, onClose, onChanged }) {
   if (!stop) return null;
 
   const visited = stop.status === 'VISITADO';
+  // Un punto de la zona que no está en la ruta de hoy no tiene parada para marcar como visitada.
+  const canMarkVisited = !visited && stop.inRoute !== false;
 
   const takeOrder = () => {
-    cart.setPointOfSale({ id: stop.id, name: stop.name, address: stop.address });
+    // El pedido va al comercio (clientId), no a la parada de la ruta (id)
+    cart.setPointOfSale({ id: stop.clientId ?? stop.id, name: stop.name, address: stop.address });
     onClose();
     navigate('/pedido', { replace: true });
   };
@@ -38,7 +41,7 @@ export default function StopSheet({ stop, onClose, onChanged }) {
   return (
     <Sheet open onClose={onClose}>
       <div className="row">
-        <div className={`num ${visited ? 'v' : ''}`}>{stop.sequence ?? stop.id}</div>
+        <div className={`num ${visited ? 'v' : ''}`}>{stop.sequence ?? '•'}</div>
         <div className="grow">
           <h2>{stop.name}</h2>
           <p className="sec small">{stop.address}</p>
@@ -57,7 +60,7 @@ export default function StopSheet({ stop, onClose, onChanged }) {
         <Icon name="nav" size={20} />
         Cómo llegar
       </button>
-      {!visited && (
+      {canMarkVisited && (
         <button className="btn btn-g" onClick={markVisited} disabled={busy}>
           Marcar como visitado
         </button>

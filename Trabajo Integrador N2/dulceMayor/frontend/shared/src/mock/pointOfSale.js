@@ -163,6 +163,21 @@ function create(body, s, { POINTS, db }) {
   };
 }
 
+/** PuntoVentaRespuestaDTO resumido de un punto de la demo (lo que usa el mapa de la zona). */
+function list(pt, s) {
+  const responsible = s.responsibles.find((r) => r.id === `resp-${pt.id}`);
+  const [street, locality] = pt.address.split(', ');
+  return {
+    id: String(pt.id),
+    nombreComercio: pt.name,
+    razonSocial: pt.name,
+    cuit: null,
+    direccion: { calle: street, numeracion: '', localidadNombre: locality ?? '', latitud: pt.lat, longitud: pt.lng, textoCompleto: pt.address },
+    responsable: responsible ? responsibleDto(responsible) : null,
+    preventistaId: '1',
+  };
+}
+
 export function pointOfSaleRoutes(key, p, body, q, ctx) {
   const s = (store ??= seed(ctx.POINTS));
   switch (key) {
@@ -178,6 +193,8 @@ export function pointOfSaleRoutes(key, p, body, q, ctx) {
       return search(q.get('q'), s);
     case 'POST /api/puntos-venta':
       return create(body, s, ctx);
+    case 'GET /api/puntos-venta':
+      return ctx.POINTS.map((pt) => list(pt, s));
     default:
       return NOT_HANDLED;
   }

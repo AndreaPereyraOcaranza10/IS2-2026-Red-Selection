@@ -35,8 +35,19 @@ import redSelection.dulceMayor.repository.ResponsableComercioRepository;
 import redSelection.dulceMayor.repository.TransportistaRepository;
 import redSelection.dulceMayor.repository.UsuarioRepository;
 import redSelection.dulceMayor.service.AuthService;
+import redSelection.dulceMayor.enums.Presentacion;
+import redSelection.dulceMayor.enums.TipoMovimientoStock;
+import redSelection.dulceMayor.model.Categoria;
+import redSelection.dulceMayor.model.Producto;
+import redSelection.dulceMayor.model.SubCategoria;
+import redSelection.dulceMayor.repository.CategoriaRepository;
+import redSelection.dulceMayor.repository.ProductoRepository;
+import redSelection.dulceMayor.repository.SubCategoriaRepository;
+import redSelection.dulceMayor.service.PrecioService;
+import redSelection.dulceMayor.service.StockService;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -66,6 +77,11 @@ public class DatosDemoInicializador implements ApplicationRunner {
     private final PedidoRepository pedidoRepository;
     private final PasswordEncoder passwordEncoder;
     private final String correoResponsables;
+    private final CategoriaRepository categoriaRepository;
+    private final SubCategoriaRepository subCategoriaRepository;
+    private final ProductoRepository productoRepository;
+    private final PrecioService precioService;
+    private final StockService stockService;
 
     public DatosDemoInicializador(UsuarioRepository usuarioRepository,
                                   PreventistaRepository preventistaRepository,
@@ -77,7 +93,17 @@ public class DatosDemoInicializador implements ApplicationRunner {
                                   ClienteMinoristaRepository clienteRepository,
                                   PedidoRepository pedidoRepository,
                                   PasswordEncoder passwordEncoder,
-                                  @Value("${app.demo.correo-responsables:}") String correoResponsables) {
+                                  @Value("${app.demo.correo-responsables:}") String correoResponsables,
+                                  CategoriaRepository categoriaRepository,
+                                  SubCategoriaRepository subCategoriaRepository,
+                                  ProductoRepository productoRepository,
+                                  PrecioService precioService,
+                                  StockService stockService) {
+        this.categoriaRepository = categoriaRepository;
+        this.subCategoriaRepository = subCategoriaRepository;
+        this.productoRepository = productoRepository;
+        this.precioService = precioService;
+        this.stockService = stockService;
         this.usuarioRepository = usuarioRepository;
         this.preventistaRepository = preventistaRepository;
         this.transportistaRepository = transportistaRepository;
@@ -112,6 +138,42 @@ public class DatosDemoInicializador implements ApplicationRunner {
         if (usuarioRepository.findByNombreUsuarioIgnoreCase("admin.mza").isEmpty()) {
             usuarioRepository.save(usuarioEmpleado("admin.mza", Rol.ADMINISTRATIVO));
             log.info("Administrativo de demostracion listo: usuario admin.mza (clave inicial '{}').", AuthService.CLAVE_INICIAL);
+        }
+        if (productoRepository.findByEliminadoFalse().isEmpty()) {
+            cargarCatalogo();
+        }
+    }
+
+    /**
+     * Catálogo mínimo para poder armar pedidos: categorías, productos con precio vigente y stock inicial.
+     * Hay uno sin stock (no aparece en el catálogo) y dos con stock bajo. BK-17 lo amplía con imágenes y más datos.
+     */
+    private void cargarCatalogo() {
+        producto("DM-001", "Alfajor triple chocolate", "Alfajores", "Triples", Presentacion.BULTO, 24, "18400", 120);
+        producto("DM-002", "Chicles menta (display)", "Chicles", "Menta", Presentacion.BULTO, 20, "32900", 80);
+        producto("DM-003", "Caramelos masticables frutales", "Caramelos", "Masticables", Presentacion.PACK, 50, "6800", 12);
+        producto("DM-004", "Chocolate con maní", "Chocolates", "Barras", Presentacion.PACK, 12, "14250", 60);
+        producto("DM-005", "Gomitas ositos", "Gomitas", "Ositos", Presentacion.BULTO, 12, "21600", 9);
+        producto("DM-006", "Turrón de maní", "Turrones", "Maní", Presentacion.BULTO, 50, "11900", 40);
+        producto("DM-007", "Obleas rellenas", "Snacks", "Obleas", Presentacion.PACK, 36, "9700", 75);
+        producto("DM-008", "Bombones surtidos", "Chocolates", "Bombones", Presentacion.BULTO, 24, "25800", 0);
+        log.info("Catálogo de demostración listo: 8 productos con precio y stock.");
+    }
+
+    private void producto(String codigo, String nombre, String categoria, String subcategoria,
+                          Presentacion presentacion, int unidades, String precio, int stock) {
+        Categoria cat = categoriaRepository.findByEliminadoFalse().stream()
+                .filter(c -> c.getNombre().equals(categoria)).findFirst()
+                .orElseGet(() -> categoriaRepository.save(Categoria.builder().nombre(categoria).build()));
+        SubCategoria sub = subCategoriaRepository.save(SubCategoria.builder().nombre(subcategoria).categoria(cat).build());
+        Producto producto = productoRepository.save(Producto.builder()
+                .codigo(codigo).nombre(nombre).marca("Dulce Mayor")
+                .presentacion(presentacion).unidadesPorPresentacion(unidades)
+                .stockMinimo(20).subCategoria(sub)
+                .build());
+        precioService.fijarPrecio(producto, new BigDecimal(precio), LocalDate.now().minusDays(30));
+        if (stock > 0) {
+            stockService.registrar(producto, TipoMovimientoStock.INGRESO, stock, null);
         }
     }
 

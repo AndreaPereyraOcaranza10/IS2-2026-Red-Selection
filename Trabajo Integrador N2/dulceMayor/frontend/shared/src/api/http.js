@@ -9,9 +9,7 @@ export const USE_MOCK = import.meta.env.VITE_USE_MOCK === 'true';
  */
 const PENDIENTES_DE_BACKEND = [
   '/api/preventor/',
-  '/api/products',
   '/api/promotions',
-  '/api/orders',
   '/api/delivery/',
 ];
 
