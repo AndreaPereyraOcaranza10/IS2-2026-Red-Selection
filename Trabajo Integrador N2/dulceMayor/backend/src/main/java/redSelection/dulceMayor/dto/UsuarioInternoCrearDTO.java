@@ -7,11 +7,12 @@ import jakarta.validation.constraints.Size;
 import redSelection.dulceMayor.enums.Rol;
 import redSelection.dulceMayor.enums.TipoDocumento;
 
-/** Datos para dar de alta un empleado con acceso al sistema. */
+/** Datos para dar de alta un empleado con acceso al sistema (su usuario es su correo electrónico). */
 public record UsuarioInternoCrearDTO(
-        @NotBlank @Size(max = 80)
-        @Pattern(regexp = "^[A-Za-z0-9._@-]+$", message = "El usuario solo puede contener letras, números, punto, guion, guion bajo o @")
-        String nombreUsuario,
+        /** El correo del empleado es también su nombre de usuario para ingresar al sistema. */
+        @NotBlank(message = "Ingresá el correo electrónico") @Size(max = 80)
+        @Pattern(regexp = "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$", message = "Ingresá un correo electrónico válido")
+        String correoElectronico,
 
         @NotBlank @Size(max = 60)
         @Pattern(regexp = PatronesValidacion.NOMBRE_PERSONA, message = "El nombre solo puede tener letras")

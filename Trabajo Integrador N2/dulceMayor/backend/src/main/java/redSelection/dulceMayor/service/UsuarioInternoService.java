@@ -9,12 +9,16 @@ import redSelection.dulceMayor.dto.UsuarioInternoRespuestaDTO;
 import redSelection.dulceMayor.enums.ProveedorAuth;
 import redSelection.dulceMayor.enums.Rol;
 import redSelection.dulceMayor.exception.ReglaNegocioException;
+import redSelection.dulceMayor.enums.TipoContacto;
+import redSelection.dulceMayor.model.Contacto;
+import redSelection.dulceMayor.model.ContactoCorreoElectronico;
 import redSelection.dulceMayor.model.Empleado;
 import redSelection.dulceMayor.model.Preventista;
 import redSelection.dulceMayor.model.Transportista;
 import redSelection.dulceMayor.model.Usuario;
 import redSelection.dulceMayor.repository.EmpleadoRepository;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /** Alta y mantenimiento de las cuentas del personal. Solo el Jefe accede a este servicio. */
@@ -42,7 +46,7 @@ public class UsuarioInternoService extends BaseService<Empleado, UsuarioInternoC
     @Override
     protected Empleado aEntidad(UsuarioInternoCrearDTO dto) {
         Usuario usuario = Usuario.builder()
-                .nombreUsuario(dto.nombreUsuario().trim())
+                .nombreUsuario(correoNormalizado(dto))
                 .clave(passwordEncoder.encode(AuthService.CLAVE_INICIAL))
                 .rol(dto.rol())
                 .proveedorAuth(ProveedorAuth.LOCAL)
@@ -57,6 +61,7 @@ public class UsuarioInternoService extends BaseService<Empleado, UsuarioInternoC
                     .tipoDocumento(dto.tipoDocumento())
                     .numeroDocumento(dto.numeroDocumento().trim().toUpperCase())
                     .zonaAsignada(dto.zonaAsignada().trim())
+                    .contactos(contactosDe(dto))
                     .usuario(usuario)
                     .build();
             case TRANSPORTISTA -> Transportista.builder()
@@ -65,6 +70,7 @@ public class UsuarioInternoService extends BaseService<Empleado, UsuarioInternoC
                     .tipoDocumento(dto.tipoDocumento())
                     .numeroDocumento(dto.numeroDocumento().trim().toUpperCase())
                     .patenteVehiculo(dto.patenteVehiculo().trim().toUpperCase())
+                    .contactos(contactosDe(dto))
                     .usuario(usuario)
                     .build();
             case ADMINISTRATIVO -> Empleado.builder()
@@ -72,6 +78,7 @@ public class UsuarioInternoService extends BaseService<Empleado, UsuarioInternoC
                     .apellido(dto.apellido().trim())
                     .tipoDocumento(dto.tipoDocumento())
                     .numeroDocumento(dto.numeroDocumento().trim().toUpperCase())
+                    .contactos(contactosDe(dto))
                     .usuario(usuario)
                     .build();
             default -> throw new ReglaNegocioException(
@@ -85,8 +92,8 @@ public class UsuarioInternoService extends BaseService<Empleado, UsuarioInternoC
             throw new ReglaNegocioException(
                     "Solo se pueden crear usuarios preventistas, transportistas o administrativos.");
         }
-        if (usuarioService.buscarPorNombreUsuario(dto.nombreUsuario().trim()).isPresent()) {
-            throw new ReglaNegocioException("Ya existe una cuenta con ese nombre de usuario.");
+        if (usuarioService.buscarPorNombreUsuario(correoNormalizado(dto)).isPresent()) {
+            throw new ReglaNegocioException("Ya existe una cuenta con ese correo electrónico.");
         }
         if (usuarioService.existePersonaConDocumento(
                 dto.tipoDocumento(), dto.numeroDocumento().trim().toUpperCase())) {
@@ -98,6 +105,19 @@ public class UsuarioInternoService extends BaseService<Empleado, UsuarioInternoC
         if (dto.rol() == Rol.TRANSPORTISTA && (dto.patenteVehiculo() == null || dto.patenteVehiculo().isBlank())) {
             throw new ReglaNegocioException("Indicá la patente del vehículo del transportista.");
         }
+    }
+
+    /** El correo, en minúsculas y sin espacios, es el nombre de usuario (el login no distingue mayúsculas). */
+    private static String correoNormalizado(UsuarioInternoCrearDTO dto) {
+        return dto.correoElectronico().trim().toLowerCase();
+    }
+
+    /** El correo queda también como contacto principal del empleado (sirve para avisos y para la ficha). */
+    private static List<Contacto> contactosDe(UsuarioInternoCrearDTO dto) {
+        List<Contacto> contactos = new ArrayList<>();
+        contactos.add(ContactoCorreoElectronico.builder()
+                .tipoContacto(TipoContacto.LABORAL).principal(true).email(correoNormalizado(dto)).build());
+        return contactos;
     }
 
     @Override
