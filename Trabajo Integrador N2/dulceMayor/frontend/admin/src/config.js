@@ -11,6 +11,7 @@ export const ADMIN_ROUTES = {
   users: '/admin/usuarios',
   promotions: '/admin/promociones',
   statistics: '/admin/estadisticas',
+  reports: '/admin/reportes'
 };
 
 export function institutionalSiteUrl() {

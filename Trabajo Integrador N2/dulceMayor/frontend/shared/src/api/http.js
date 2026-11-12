@@ -75,7 +75,28 @@ async function request(method, path, body) {
   }
 }
 
+function nombreDeArchivo(disposition) {
+  const match = (disposition || '').match(/filename\*?=(?:UTF-8'')?"?([^";\r\n]+)"?/i);
+  if (!match) return null;
+  try { return decodeURIComponent(match[1].trim()).replace(/[\\/:*?"<>|]/g, '-'); }
+  catch { return match[1].trim().replace(/[\\/:*?"<>|]/g, '-'); }
+}
+
+async function download(path, nombreAlternativo = 'archivo') {
+  if (simulado(path)) throw new ApiError(0, 'Las descargas necesitan el backend real (VITE_USE_MOCK=false).', { code: 'MOCK' });
+  let res;
+  try { res = await fetch(BASE_URL + path, { headers: token ? { Authorization: `Bearer ${token}` } : {} }); }
+  catch { throw new ApiError(0, 'No pudimos conectarnos. Revisá tu conexión a internet y volvé a intentar.', { code: 'NETWORK' }); }
+  if (!res.ok) {
+    const data = await res.json().catch(() => null);
+    if (res.status === 401 && token) onUnauthorized();
+    throw new ApiError(res.status, data?.detail || data?.message || 'No se pudo descargar el archivo.', { code: data?.code });
+  }
+  return { blob: await res.blob(), filename: nombreDeArchivo(res.headers.get('Content-Disposition')) || nombreAlternativo };
+}
+
 export const api = {
+  download,
   get: (path) => request('GET', path),
   post: (path, body) => request('POST', path, body ?? {}),
   upload: (path, formData) => request('POST', path, formData),

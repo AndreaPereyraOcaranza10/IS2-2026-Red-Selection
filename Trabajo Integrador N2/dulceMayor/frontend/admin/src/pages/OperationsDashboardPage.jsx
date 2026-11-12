@@ -3,11 +3,12 @@ import { lazy, Suspense, useCallback, useEffect, useMemo, useState } from "react
 import { ProductsAdminPage, useAuth } from '@dulcemayor/shared';
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { ADMIN_ROUTES, institutionalSiteUrl } from "../config";
-import { AlertTriangle, ArrowLeft, ArrowRight, BarChart3, Bell, Barcode, Building2, CheckCircle2, ChevronDown, ClipboardList, Clock3, ExternalLink, FileText, LayoutDashboard, LoaderCircle, MapPin, Package, PackageCheck, Plus, RefreshCw, Search, Settings, ShoppingCart, Tag, Truck, Users, Warehouse, X } from "lucide-react";
+import { AlertTriangle, ArrowLeft, ArrowRight, BarChart3, Bell, Barcode, Building2, CheckCircle2, ChevronDown, ClipboardList, Clock3, ExternalLink, FileText, LayoutDashboard, LoaderCircle, MapPin, Package, PackageCheck, Plus, RefreshCw, Search, Settings, ShoppingCart, Tag, Truck, Users, Warehouse, X, FileBarChart } from "lucide-react";
 import { apiAdmin as api } from "../api";
 import { BranchesAdmin } from "./BranchesAdmin";
 import { UsersAdminPage } from "./UsersAdminPage.jsx";
 import { PromotionsAdminPage } from "./PromotionsAdminPage.jsx";
+import { ReportsAdminPage } from "./ReportsAdminPage.jsx";
 import { OrdersAdminPage } from "./OrdersAdminPage.jsx";
 import { BillingPaymentsAdminPage } from "./BillingPaymentsAdminPage.jsx";
 const StatisticsAdminPage = lazy(() => import("./StatisticsAdminPage.jsx").then((module) => ({ default: module.StatisticsAdminPage })));
@@ -18,6 +19,7 @@ const navItems = [
   { label: "Pedidos", icon: ShoppingCart },
   { label: "Facturaci\xF3n y pagos", icon: FileText },
   { label: "Despacho", icon: Truck },
+  { label: "Reportes", icon: FileBarChart },
   { label: "Sucursales", icon: Building2 },
   { label: "Usuarios internos", icon: Users },
   { label: "Promociones", icon: Tag },
@@ -34,6 +36,7 @@ const sectionPaths = {
   "Pedidos": ADMIN_ROUTES.orders,
   [navItems[4].label]: ADMIN_ROUTES.billing,
   "Despacho": ADMIN_ROUTES.dispatch,
+  "Reportes": ADMIN_ROUTES.reports,
   "Mi cuenta": ADMIN_ROUTES.account,
   "Sucursales": ADMIN_ROUTES.branches,
   "Usuarios internos": ADMIN_ROUTES.users,
@@ -542,6 +545,7 @@ export function OperationsDashboardPage({ onBack }) {
             ] }),
             /* @__PURE__ */ jsx(DataRows, { orders: dispatchOrders, onAdvance: advanceOrder, empty: "No hay pedidos en tr\xE1nsito." })
           ] }),
+          section === "Reportes" && /* @__PURE__ */ jsx(ReportsAdminPage, { apiAdmin: api, role: user?.role }),
           section === "Mi cuenta" && /* @__PURE__ */ jsxs("section", { className: "admin-account-card", children: [
             /* @__PURE__ */ jsx("span", { className: "ops-user-avatar", children: "DM" }),
             /* @__PURE__ */ jsx("h2", { children: user?.fullName || user?.username || "Cuenta operativa" }),

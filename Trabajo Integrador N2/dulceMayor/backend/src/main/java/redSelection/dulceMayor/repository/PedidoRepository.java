@@ -18,6 +18,8 @@ public interface PedidoRepository extends BaseRepository<Pedido> {
     List<Pedido> findByClienteResponsableIdOrderByFechaHoraCargaDesc(String responsableId);
     List<Pedido> findByPreventistaIdOrderByFechaHoraCargaDesc(String preventistaId);
     List<Pedido> findByEstadoOrderByFechaHoraCargaAsc(EstadoPedido estado);
+    /** Pedidos cargados en un período, del más viejo al más nuevo (base de los reportes). */
+    List<Pedido> findByEliminadoFalseAndFechaHoraCargaBetweenOrderByFechaHoraCargaAsc(LocalDateTime desde, LocalDateTime hasta);
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("select p from Pedido p where p.id = :id")

@@ -15,4 +15,9 @@ public interface EntregaRepository extends BaseRepository<Entrega> {
     /** Historial de un transportista: entregas realizadas entre dos instantes, la más reciente primero. */
     List<Entrega> findByTransportistaIdAndFechaEntregaBetweenAndEliminadoFalseOrderByFechaEntregaDesc(
             String transportistaId, LocalDateTime desde, LocalDateTime hasta);
+
+    /** Envíos de los pedidos cargados en un período (reporte de envíos). */
+    List<Entrega> findByEliminadoFalseAndPedidoFechaHoraCargaBetweenOrderByPedidoFechaHoraCargaAsc(
+            LocalDateTime desde, LocalDateTime hasta);
+
 }

@@ -261,6 +261,83 @@ class SeguridadEndpointsTest {
         }
     }
 
+    // ---------- BK-15: matriz de roles para pagos, entregas, correo, reportes y pedidos ----------
+
+    /**
+     * Prueba una URL con los cinco roles: los de `permitidos` reciben 200 y el resto 403; sin token, 401.
+     * El Jefe pasa donde pasa el Administrativo o el Preventista (RoleHierarchy), pero NO donde se exige Transportista.
+     */
+    private void soloRoles(HttpMethod metodo, String url, Rol... permitidos) throws Exception {
+        java.util.Set<Rol> ok = java.util.Set.of(permitidos);
+        for (Rol rol : Rol.values()) {
+            boolean heredado = rol == Rol.JEFE_ADMINISTRATIVO
+                    && (ok.contains(Rol.ADMINISTRATIVO) || ok.contains(Rol.PREVENTISTA));
+            esperar(ok.contains(rol) || heredado ? 200 : 403, metodo, url,
+                    token(rol, false, rol == Rol.CLIENTE ? null : "e1"));
+        }
+        esperar(401, metodo, url, null);
+    }
+
+    @Test @DisplayName("Pagos: el cliente solo consulta; iniciar, confirmar y anular es de administración")
+    void pagos() throws Exception {
+        soloRoles(HttpMethod.GET, "/api/facturas/f1/pagos", Rol.CLIENTE, Rol.ADMINISTRATIVO);
+        soloRoles(HttpMethod.GET, "/api/pagos/p1", Rol.CLIENTE, Rol.ADMINISTRATIVO);
+        soloRoles(HttpMethod.POST, "/api/facturas/f1/pagos", Rol.ADMINISTRATIVO);
+        soloRoles(HttpMethod.POST, "/api/facturas/f1/pagos/confirmar", Rol.ADMINISTRATIVO);
+        soloRoles(HttpMethod.POST, "/api/pagos/p1/confirmar", Rol.ADMINISTRATIVO);
+        soloRoles(HttpMethod.POST, "/api/pagos/p1/anular", Rol.ADMINISTRATIVO);
+    }
+
+    @Test @DisplayName("Entregas: el transportista ve SU historial; detalle y cobro, solo el transportista (el cobro, ni el admin)")
+    void entregas() throws Exception {
+        String t1 = token(Rol.TRANSPORTISTA, false, "t1");
+        esperar(200, HttpMethod.GET, "/api/entregas/transportista/t1", t1);
+        esperar(403, HttpMethod.GET, "/api/entregas/transportista/t2", t1);                      // el de otro
+        esperar(200, HttpMethod.GET, "/api/entregas/transportista/t2", token(Rol.ADMINISTRATIVO, false, "a1"));
+        esperar(403, HttpMethod.GET, "/api/entregas/transportista/t1", token(Rol.PREVENTISTA, false, "t1"));
+        esperar(403, HttpMethod.GET, "/api/entregas/transportista/t1", token(Rol.CLIENTE, false, null));
+        soloRoles(HttpMethod.GET, "/api/entregas/pedido/p1", Rol.TRANSPORTISTA, Rol.ADMINISTRATIVO);
+        soloRoles(HttpMethod.POST, "/api/entregas/pedido/p1/cobro", Rol.TRANSPORTISTA);
+    }
+
+    @Test @DisplayName("Plantillas de correo y reenvío de acceso: solo administración")
+    void correoYAccesos() throws Exception {
+        soloRoles(HttpMethod.GET, "/api/configuracion-correo", Rol.ADMINISTRATIVO);
+        soloRoles(HttpMethod.GET, "/api/configuracion-correo/PROXIMA_ENTREGA", Rol.ADMINISTRATIVO);
+        soloRoles(HttpMethod.PUT, "/api/configuracion-correo/PROXIMA_ENTREGA", Rol.ADMINISTRATIVO);
+        soloRoles(HttpMethod.DELETE, "/api/configuracion-correo/PROXIMA_ENTREGA", Rol.ADMINISTRATIVO);
+        soloRoles(HttpMethod.POST, "/api/responsables/r1/reenviar-acceso", Rol.ADMINISTRATIVO);
+    }
+
+    @Test @DisplayName("Reportes: operativos para administración; el de ventas, solo el Jefe; no se pide con otros verbos")
+    void reportes() throws Exception {
+        for (String url : new String[]{"/api/reportes/clientes", "/api/reportes/pedidos", "/api/reportes/envios",
+                "/api/reportes/montos", "/api/reportes/pedidos/pdf", "/api/reportes/montos/excel"}) {
+            soloRoles(HttpMethod.GET, url, Rol.ADMINISTRATIVO);
+        }
+        for (String url : new String[]{"/api/reportes/globales/ventas", "/api/reportes/globales/ventas/excel",
+                "/api/reportes/globales/ventas/pdf"}) {
+            soloRoles(HttpMethod.GET, url, Rol.JEFE_ADMINISTRATIVO);
+        }
+        esperar(403, HttpMethod.POST, "/api/reportes/pedidos", token(Rol.ADMINISTRATIVO, false, "a1"));   // solo GET
+    }
+
+    @Test @DisplayName("Pedidos y perfil del portal: cliente, preventista y admin cargan; el pedido no se edita ni se borra")
+    void pedidosYPerfil() throws Exception {
+        soloRoles(HttpMethod.GET, "/api/orders", Rol.CLIENTE, Rol.PREVENTISTA, Rol.ADMINISTRATIVO);
+        soloRoles(HttpMethod.POST, "/api/orders", Rol.CLIENTE, Rol.PREVENTISTA, Rol.ADMINISTRATIVO);
+        String admin = token(Rol.ADMINISTRATIVO, false, "a1");
+        esperar(403, HttpMethod.PUT, "/api/orders/o1", admin);
+        esperar(403, HttpMethod.DELETE, "/api/orders/o1", admin);
+        esperar(200, HttpMethod.GET, "/api/profile", token(Rol.CLIENTE, false, null));
+        esperar(403, HttpMethod.GET, "/api/profile", token(Rol.PREVENTISTA, false, "p1"));
+    }
+
+    @Test @DisplayName("El presupuesto del chatbot es público (sitio institucional sin sesión)")
+    void chatbotPublico() throws Exception {
+        esperar(200, HttpMethod.POST, "/api/chatbot/presupuestos", null);
+    }
+
     @Test @DisplayName("El Jefe tampoco entra con la clave inicial pendiente")
     void jefePrimerIngreso() throws Exception {
         esperar(403, HttpMethod.GET, "/api/productos", token(Rol.JEFE_ADMINISTRATIVO, true, "j1"));

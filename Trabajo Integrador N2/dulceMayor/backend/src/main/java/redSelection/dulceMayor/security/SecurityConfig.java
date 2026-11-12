@@ -132,6 +132,9 @@ public class SecurityConfig {
                         // Solo el Jefe Administrativo: usuarios, estadísticas y reportes globales
                         .requestMatchers("/api/usuarios/**", "/api/estadisticas/**", "/api/reportes/globales/**")
                         .hasRole("JEFE_ADMINISTRATIVO")
+                        // Reportes operativos (pantalla, PDF y Excel): administración. Va DESPUÉS de la regla de arriba,
+                        // así /api/reportes/globales/** sigue siendo solo del Jefe (la primera regla que coincide gana).
+                        .requestMatchers(HttpMethod.GET, "/api/reportes/**").hasRole("ADMINISTRATIVO")
                         // Gestión de productos, categorías e imágenes: solo administración
                         // (las categorías se pueden LEER por empleados de campo; escribir es del administrativo)
                         .requestMatchers(HttpMethod.GET, "/api/categorias/**", "/api/subcategorias/**")
@@ -171,6 +174,7 @@ public class SecurityConfig {
         config.setAllowedOrigins(Arrays.stream(origenes.split(",")).map(String::trim).filter(s -> !s.isEmpty()).toList());
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("Authorization", "Content-Type"));
+        config.setExposedHeaders(List.of("Content-Disposition"));
         config.setMaxAge(3600L);
         UrlBasedCorsConfigurationSource fuente = new UrlBasedCorsConfigurationSource();
         fuente.registerCorsConfiguration("/api/**", config);
