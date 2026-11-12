@@ -115,10 +115,25 @@ export function PaymentPanel({ order, onPaid }) {
               <b>{money.format(pendingWallet.monto || order.total || 0)}</b>
               <p>{pendingWallet.instrucciones}</p>
               <small>Cuando pagues, el pedido se factura solo. Estamos verificando el pago…</small>
+              {!pendingWallet.pasarelaSimulada && (
+                <small>El QR vence a los 15 minutos. Si ya venció, podés generar uno nuevo.</small>
+              )}
               <div className="order-payment-actions">
                 <button type="button" onClick={() => verify(false)} disabled={busy}>
                   <RefreshCw size={14} /> Ya pagué, verificar
                 </button>
+                {!pendingWallet.pasarelaSimulada && (
+                  <button
+                    type="button"
+                    className="order-payment-renew"
+                    onClick={start}
+                    disabled={busy}
+                    title="El QR anterior dejará de funcionar"
+                  >
+                    {busy ? <LoaderCircle className="spin" size={14} /> : <RefreshCw size={14} />}
+                    {busy ? "Generando QR…" : "Renovar QR"}
+                  </button>
+                )}
                 {pendingWallet.pasarelaSimulada && (
                   <button type="button" className="order-payment-demo" onClick={simulate} disabled={busy}>
                     Simular pago (modo demo)

@@ -19,7 +19,6 @@ import java.util.Map;
  * Responde 200 siempre que la notificación sea auténtica, para que Mercado Pago no reintente en loop.
  */
 @RestController
-@RequestMapping("/api/pagos/webhook")
 @ConditionalOnProperty(name = "app.pagos.pasarela", havingValue = "mercadopago")
 public class MercadoPagoWebhookController {
 
@@ -33,7 +32,7 @@ public class MercadoPagoWebhookController {
         this.secreto = secreto;
     }
 
-    @PostMapping("/mercadopago")
+    @PostMapping({"/api/pagos/webhook/mercadopago", "/api/webhooks/mercadopago/orders"})
     public ResponseEntity<Void> recibir(@RequestParam(name = "data.id", required = false) String dataIdQuery,
                                         @RequestHeader(name = "x-signature", required = false) String firma,
                                         @RequestHeader(name = "x-request-id", required = false) String requestId,
