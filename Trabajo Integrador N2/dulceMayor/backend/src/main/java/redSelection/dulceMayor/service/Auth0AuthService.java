@@ -100,13 +100,19 @@ public class Auth0AuthService {
     private Usuario registrarOVincularCuenta(String email, String subject) {
         Usuario existente = usuarioRepository.findByNombreUsuarioIgnoreCase(email).orElse(null);
         if (existente != null) {
-            // Mantiene las cuentas creadas por el anterior acceso directo de Google al pasar a Auth0.
-            if (existente.getProveedorAuth() == ProveedorAuth.GOOGLE && existente.getRol() == Rol.CLIENTE) {
+            if (!existente.isActivo() || existente.isEliminado() || existente.getRol() != Rol.CLIENTE) {
+                throw new BadCredentialsException("La cuenta no esta habilitada para el portal de clientes.");
+            }
+            // El correo ya fue verificado por Auth0. Vincula cuentas locales o del login Google anterior,
+            // preserva la clave local y evita reclamar una cuenta que ya pertenece a otra identidad Auth0.
+            if (existente.getProveedorAuth() == ProveedorAuth.LOCAL
+                    || existente.getProveedorAuth() == ProveedorAuth.GOOGLE) {
                 existente.setProveedorAuth(ProveedorAuth.AUTH0);
                 existente.setIdExterno(subject);
                 return usuarioRepository.save(existente);
             }
-            throw new ReglaNegocioException("Ya existe una cuenta con ese correo. Inicia sesion con correo y clave.");
+            throw new ReglaNegocioException(
+                    "Esta cuenta ya esta vinculada a otra identidad de Google. Inicia sesion con el acceso vinculado.");
         }
         return usuarioRepository.save(Usuario.builder()
                 .nombreUsuario(email)

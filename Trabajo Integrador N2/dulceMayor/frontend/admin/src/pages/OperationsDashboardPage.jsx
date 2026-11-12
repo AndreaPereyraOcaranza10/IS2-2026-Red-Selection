@@ -334,9 +334,9 @@ export function OperationsDashboardPage({ onBack }) {
           /* @__PURE__ */ jsx("small", { children: "DEP\xD3SITO \xB7 ONLINE" })
         ] })
       ] }),
-      /* @__PURE__ */ jsxs("button", { className: "ops-new-order", onClick: () => setManualOrderOpen(true), children: [
-        /* @__PURE__ */ jsx(Plus, {}),
-        " Nuevo pedido"
+      /* @__PURE__ */ jsxs("a", { className: "ops-new-order ops-site-link", href: institutionalSiteUrl(), "aria-label": "Ir al sitio institucional", title: "Ir al sitio institucional", children: [
+        /* @__PURE__ */ jsx(ExternalLink, {}),
+        " Sitio institucional"
       ] }),
       /* @__PURE__ */ jsx("div", { className: "ops-nav-label", children: "OPERACIONES" }),
       /* @__PURE__ */ jsx("nav", { children: visibleNavItems.map(({ label, icon: Icon }) => /* @__PURE__ */ jsxs("button", { className: section === label ? "ops-nav-item active" : "ops-nav-item", onClick: () => setSection(label), children: [
@@ -350,10 +350,6 @@ export function OperationsDashboardPage({ onBack }) {
         /* @__PURE__ */ jsxs("button", { onClick: () => { logout(); onBack?.(); }, children: [
           /* @__PURE__ */ jsx(ArrowLeft, {}),
           " Cerrar sesi\u00f3n"
-        ] }),
-        /* @__PURE__ */ jsxs("a", { className: "ops-institutional-link", href: institutionalSiteUrl(), "aria-label": "Volver al sitio institucional", title: "Volver al sitio institucional", children: [
-          /* @__PURE__ */ jsx(ExternalLink, {}),
-          /* @__PURE__ */ jsx("span", { children: "Sitio institucional" })
         ] }),
         /* @__PURE__ */ jsxs("button", { type: "button", className: section === "Mi cuenta" ? "ops-user active" : "ops-user", onClick: () => setSection("Mi cuenta"), "aria-label": "Abrir Mi perfil", title: "Mi perfil", children: [
           /* @__PURE__ */ jsx("span", { children: "DM" }),

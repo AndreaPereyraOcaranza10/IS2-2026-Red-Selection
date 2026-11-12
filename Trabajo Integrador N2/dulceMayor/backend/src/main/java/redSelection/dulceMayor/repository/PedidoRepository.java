@@ -15,6 +15,7 @@ import java.util.Optional;
 
 @Repository
 public interface PedidoRepository extends BaseRepository<Pedido> {
+    List<Pedido> findByClienteIdAndEliminadoFalse(String clienteId);
     List<Pedido> findByClienteResponsableIdOrderByFechaHoraCargaDesc(String responsableId);
     List<Pedido> findByPreventistaIdOrderByFechaHoraCargaDesc(String preventistaId);
     List<Pedido> findByEstadoOrderByFechaHoraCargaAsc(EstadoPedido estado);

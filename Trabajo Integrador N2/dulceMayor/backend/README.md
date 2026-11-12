@@ -1,5 +1,11 @@
 # Backend
 
+## BK-17: datos de demostraciÃ³n
+
+En perfiles distintos de `prod`, el inicializador crea de forma idempotente el catÃ¡logo demo (o completa los cÃ³digos faltantes), imÃ¡genes PNG ilustrativas, las sucursales Casa Central, Godoy Cruz y MaipÃº, y el comercio `Kiosco Demo BK17`. TambiÃ©n agrega pedidos con historial en todos los estados y ventas/facturas de los Ãºltimos seis meses para poblar el panel y los reportes. No duplica el conjunto de pedidos si ya existe.
+
+Cuentas demo: `jefe.mza`, `admin.mza`, `preventista.mza`, `preventista2.mza`, `transportista.mza` y `cliente.demo`. La clave inicial es `dulcemayor`; al iniciar sesiÃ³n, las cuentas requieren cambiarla. El inicializador se puede desactivar con `APP_DEMO_DATA=false` y no se ejecuta con el perfil `prod`.
+
 ## BK-12: newsletter mensual de ofertas
 
 El backend envía el correo automáticamente el día 5 de cada mes a las 09:00 (zona `America/Argentina/Mendoza`). Incluye productos activos marcados en oferta que tengan precio vigente y stock positivo. Cada responsable de comercios activos recibe un solo mensaje por correo principal; los errores individuales se cuentan y no detienen los demás envíos.

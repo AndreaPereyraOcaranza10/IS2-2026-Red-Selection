@@ -29,7 +29,7 @@ function readAccount() {
     return null;
   }
 }
-function App({ auth0Configured = false }) {
+function App({ auth0Configured = false, auth0Logout }) {
   const navigate = useNavigate();
   const location = useLocation();
   const [search, setSearch] = useState("");
@@ -78,6 +78,7 @@ function App({ auth0Configured = false }) {
     sessionStorage.removeItem(ACCOUNT_STORAGE_KEY);
     setAccount(null);
     setCartOpen(false);
+    auth0Logout?.();
     navigate(ROUTES.login);
   };
   const persistAccount = (session) => {
