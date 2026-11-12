@@ -1,22 +1,24 @@
 package redSelection.dulceMayor.patrones.factory;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import redSelection.dulceMayor.enums.EstadoPago;
+import redSelection.dulceMayor.enums.Rol;
 import redSelection.dulceMayor.enums.TipoPago;
 import redSelection.dulceMayor.model.Pago;
+import redSelection.dulceMayor.patrones.adapter.PasarelaPago;
 
 /**
- * Billetera virtual: se genera un QR que lleva a la pantalla de pago del cliente. El QR guarda solo la
- * referencia (id del pago); el monto sale siempre de la BD. Hasta tener un webhook de la billetera real
- * (candidato a Adapter), administración confirma el cobro.
+ * Billetera virtual (Mercado Pago). Al crear el pago le pide una orden a la pasarela (Adapter {@link PasarelaPago})
+ * y guarda su referencia y el contenido del QR. El monto sale siempre del pedido. A diferencia de los otros medios,
+ * NADIE confirma a mano: el cobro lo acredita únicamente la pasarela (PagoService consulta su estado).
  */
 @Component
 public class BilleteraVirtualMedioPago implements MedioPago {
 
-    private final String urlBase;
+    private final PasarelaPago pasarela;
 
-    public BilleteraVirtualMedioPago(@Value("${app.pagos.qr-url:http://localhost:5173/cliente/pagos}") String urlBase) {
-        this.urlBase = urlBase.endsWith("/") ? urlBase.substring(0, urlBase.length() - 1) : urlBase;
+    public BilleteraVirtualMedioPago(PasarelaPago pasarela) {
+        this.pasarela = pasarela;
     }
 
     @Override
@@ -24,15 +26,20 @@ public class BilleteraVirtualMedioPago implements MedioPago {
 
     @Override
     public void alGuardar(Pago pago) {
-        pago.setCodigoQr(urlBase + "/" + pago.getId());
+        PasarelaPago.OrdenPasarela orden = pasarela.crearOrden(pago.getId(), pago.getMonto(), "Pedido Dulce Mayor");
+        pago.setReferenciaExterna(orden.referencia());
+        pago.setCodigoQr(orden.contenidoQr());
     }
 
     @Override
     public String instrucciones(Pago pago) {
-        return "Escaneá el código QR con tu billetera virtual para pagar $" + pago.getMonto() + ".";
+        if (pago.getEstado() == EstadoPago.CONFIRMADO) {
+            return "El cliente ya pagó " + "$" + pago.getMonto() + " con Mercado Pago";
+        }
+        return "Escaneá el código QR con Mercado Pago (o tu billetera) para pagar $" + pago.getMonto() + ".";
     }
 
-    /** Apagada hasta integrar Mercado Pago (se reemplaza el QR por el checkout real vía un Adapter). */
+    /** Ningún rol confirma a mano un pago de billetera: lo acredita la pasarela. */
     @Override
-    public boolean disponible() { return false; }
+    public boolean puedeConfirmar(Rol rol) { return false; }
 }

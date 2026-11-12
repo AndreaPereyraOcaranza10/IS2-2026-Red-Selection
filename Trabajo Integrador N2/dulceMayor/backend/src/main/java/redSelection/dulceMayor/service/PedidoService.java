@@ -305,6 +305,18 @@ public class PedidoService extends BaseService<Pedido, PedidoCrearDTO, PedidoRes
         return pagoService.confirmarPedido(pedido, dto.tipoPago());
     }
 
+    /** Consulta a la pasarela si el cliente ya pagó con billetera virtual; si sí, el pago se confirma y se factura. */
+    @Transactional
+    public Optional<PagoRespuestaDTO> verificarPago(String pedidoId) {
+        return pagoService.verificarPorPedido(buscarEntidad(pedidoId).getId());   // un pedido ajeno responde 404
+    }
+
+    /** Modo demo (pasarela simulada): equivale a pagar el QR desde la billetera. Con la pasarela real responde error. */
+    @Transactional
+    public Optional<PagoRespuestaDTO> simularAcreditacion(String pedidoId) {
+        return pagoService.simularAcreditacion(buscarEntidad(pedidoId).getId());
+    }
+
     /** El pago vigente del pedido, si lo hay (con las instrucciones y el QR para que el cliente pague). */
     @Transactional(readOnly = true)
     public Optional<PagoRespuestaDTO> pagoVigente(String pedidoId) {

@@ -36,6 +36,11 @@ public class Pago extends Base {
 
     //private String alias; TRANSFERENCIA
 
+    /** BILLETERA_VIRTUAL: el texto que la pasarela entrega para dibujar el QR (ZXing lo convierte en imagen). */
     @Column(length = 1000)
-    private String codigoQr; //BILLETERA_VIRTUAL
+    private String codigoQr;
+
+    /** BILLETERA_VIRTUAL: id de la orden en la pasarela (Mercado Pago o simulada); con él se consulta y se cancela. */
+    @Column(length = 100)
+    private String referenciaExterna;
 }

@@ -52,6 +52,18 @@ public class PortalOrderController extends BaseController<PedidoCrearDTO, Pedido
         return pedidos.registrarPago(id, dto);
     }
 
+    /** Consulta a la pasarela si el pago de billetera ya se acreditó (el cliente lo usa al volver de pagar). */
+    @PostMapping("/{id}/pagos/verificar")
+    public ResponseEntity<PagoRespuestaDTO> verificarPago(@PathVariable String id) {
+        return pedidos.verificarPago(id).map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.noContent().build());
+    }
+
+    /** Solo modo demo: simula que el cliente pagó el QR. Con la pasarela real devuelve 422. */
+    @PostMapping("/{id}/pagos/simular-acreditacion")
+    public ResponseEntity<PagoRespuestaDTO> simularAcreditacion(@PathVariable String id) {
+        return pedidos.simularAcreditacion(id).map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.noContent().build());
+    }
+
     /** El pago vigente del pedido (instrucciones y QR); 204 si todavía no se eligió un medio. */
     @GetMapping("/{id}/pagos/vigente")
     public ResponseEntity<PagoRespuestaDTO> pagoVigente(@PathVariable String id) {

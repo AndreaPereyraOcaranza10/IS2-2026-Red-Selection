@@ -30,4 +30,5 @@ export const PAYMENT_LABEL = {
   EFECTIVO: 'Efectivo',
   TRANSFERENCIA: 'Transferencia',
   BILLETERA_QR: 'Billetera virtual',
+  BILLETERA_VIRTUAL: 'Billetera virtual',
 };

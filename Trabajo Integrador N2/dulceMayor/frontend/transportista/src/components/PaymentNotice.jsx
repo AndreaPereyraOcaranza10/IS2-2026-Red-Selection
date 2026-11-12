@@ -17,11 +17,12 @@ export default function PaymentNotice({ method, total, instruction }) {
       </div>
     );
   }
+  const label = (PAYMENT_LABEL[method] || String(method).replaceAll('_', ' ')).toLowerCase();
   return (
     <div className="alert" style={{ background: 'var(--info-bg)', color: 'var(--info)' }}>
       <Icon name="check" />
       <p>
-        <b>Pago por {PAYMENT_LABEL[method].toLowerCase()}.</b> {instruction}. No cobres en mano.
+        <b>Pago por {label}.</b> {instruction ? instruction.replace(/\.+$/, '') + '. ' : ''}No cobres en mano.
       </p>
     </div>
   );

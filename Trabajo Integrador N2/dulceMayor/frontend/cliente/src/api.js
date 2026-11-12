@@ -101,6 +101,10 @@ export const api = {
   ),
   orders: () => request("/orders"),
   cancelOrder: (id) => request(`/orders/${encodeURIComponent(id)}/cancel`, { method: "POST", body: JSON.stringify({}) }),
+  orderPayment: (id) => request(`/orders/${encodeURIComponent(id)}/pagos/vigente`),
+  startOrderPayment: (id) => request(`/orders/${encodeURIComponent(id)}/pagos`, { method: "POST", body: JSON.stringify({ tipoPago: "BILLETERA_VIRTUAL" }) }),
+  verifyOrderPayment: (id) => request(`/orders/${encodeURIComponent(id)}/pagos/verificar`, { method: "POST", body: JSON.stringify({}) }),
+  simulateOrderPayment: (id) => request(`/orders/${encodeURIComponent(id)}/pagos/simular-acreditacion`, { method: "POST", body: JSON.stringify({}) }),
   invoicePdf: (id) => requestPdf("/facturas/" + encodeURIComponent(id) + "/pdf"),
   validatePromotion: (code) => request("/promociones/validar", { method: "POST", body: JSON.stringify({ code }) }),
   chatbotBudget: async (mensaje) => {

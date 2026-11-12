@@ -9,6 +9,7 @@ import {
   LoaderCircle,
   MapPin,
   Package,
+  QrCode,
   RefreshCw,
   Search,
   Truck,
@@ -49,7 +50,98 @@ function stateLabel(state) {
   return statusText[state] || String(state || "Actualización").replaceAll("_", " ");
 }
 
-function OrderCard({ order, onCancel, cancelling }) {
+/** Pago con billetera virtual: genera el QR (lo dibuja el backend con ZXing), lo muestra y verifica el cobro contra la pasarela. */
+export function PaymentPanel({ order, onPaid }) {
+  const [payment, setPayment] = useState(null);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
+  const pendingWallet = payment?.tipoPago === "BILLETERA_VIRTUAL" && payment?.estado === "PENDIENTE" ? payment : null;
+  const agreedPayment = payment && !pendingWallet && payment.estado === "PENDIENTE" ? payment : null;
+
+  useEffect(() => {
+    let active = true;
+    api.orderPayment(order.id)
+      .then((current) => { if (active) setPayment(current || null); })
+      .catch(() => {});
+    return () => { active = false; };
+  }, [order.id]);
+
+  const verify = useCallback(async (silent) => {
+    try {
+      const current = await api.verifyOrderPayment(order.id);
+      if (current) setPayment(current);
+      if (current?.estado === "CONFIRMADO") onPaid();
+      else if (!silent) setError("Todavía no vemos el pago. Si ya pagaste, esperá unos segundos y probá de nuevo.");
+    } catch (cause) {
+      if (!silent) setError(cause instanceof Error ? cause.message : "No pudimos verificar el pago.");
+    }
+  }, [order.id, onPaid]);
+
+  useEffect(() => {
+    if (!pendingWallet) return undefined;
+    const timer = window.setInterval(() => verify(true), 5000);
+    return () => window.clearInterval(timer);
+  }, [pendingWallet?.id, verify]);
+
+  const run = async (action) => {
+    if (busy) return;
+    setBusy(true);
+    setError("");
+    try {
+      await action();
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : "No pudimos completar la operación.");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const start = () => run(async () => setPayment(await api.startOrderPayment(order.id)));
+  const simulate = () => run(async () => {
+    const current = await api.simulateOrderPayment(order.id);
+    if (current) setPayment(current);
+    if (current?.estado === "CONFIRMADO") onPaid();
+  });
+
+  return (
+    <div className="order-payment">
+      {pendingWallet ? (
+        <>
+          <div className="order-payment-qr">
+            {pendingWallet.imagenQr && (
+              <img src={pendingWallet.imagenQr} alt="Código QR para pagar con Mercado Pago" width="220" height="220" />
+            )}
+            <div>
+              <b>{money.format(pendingWallet.monto || order.total || 0)}</b>
+              <p>{pendingWallet.instrucciones}</p>
+              <small>Cuando pagues, el pedido se factura solo. Estamos verificando el pago…</small>
+              <div className="order-payment-actions">
+                <button type="button" onClick={() => verify(false)} disabled={busy}>
+                  <RefreshCw size={14} /> Ya pagué, verificar
+                </button>
+                {pendingWallet.pasarelaSimulada && (
+                  <button type="button" className="order-payment-demo" onClick={simulate} disabled={busy}>
+                    Simular pago (modo demo)
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+        </>
+      ) : agreedPayment ? (
+        <p className="order-payment-agreed" role="status">{agreedPayment.instrucciones}</p>
+      ) : (
+        <button type="button" className="order-payment-start" onClick={start} disabled={busy}>
+          {busy ? <LoaderCircle className="spin" size={14} /> : <QrCode size={14} />}
+          {busy ? "Generando QR…" : "Pagar con Mercado Pago"}
+        </button>
+      )}
+      {error && <p className="order-payment-error" role="alert">{error}</p>}
+    </div>
+  );
+}
+
+function OrderCard({ order, onCancel, cancelling, onPaid }) {
   const canceled = order.status === "ANULADO";
   const delivered = order.status === "ENTREGADO";
   const events = [...(order.trace?.events || [])].sort(
@@ -117,10 +209,12 @@ function OrderCard({ order, onCancel, cancelling }) {
 
       {order.status === "PENDIENTE_PAGO" && (
         <p className="order-stock-notice" role="status">
-          Reservamos tu mercadería. Administración se va a comunicar para acordar el pago (efectivo, transferencia o
-          billetera virtual). Si no se paga en 48 horas, el pedido se anula solo.
+          Reservamos tu mercadería. Podés pagar ahora con billetera virtual (Mercado Pago) o esperar que administración
+          te contacte para acordar efectivo o transferencia. Si no se paga en 48 horas, el pedido se anula solo.
         </p>
       )}
+
+      {order.status === "PENDIENTE_PAGO" && <PaymentPanel order={order} onPaid={onPaid} />}
 
       {onCancel && ["PENDIENTE_STOCK", "PENDIENTE_PAGO"].includes(order.status) && (
         <div className="order-cancel">
@@ -370,7 +464,7 @@ export function OrdersPage({ onBack, onProfile, account }) {
         ) : tab === "pedidos" ? (
           filteredOrders.length ? (
             <div className="account-record-list">
-              {filteredOrders.map((order) => <OrderCard order={order} key={order.id} onCancel={cancelOrder} cancelling={cancellingId === order.id} />)}
+              {filteredOrders.map((order) => <OrderCard order={order} key={order.id} onCancel={cancelOrder} cancelling={cancellingId === order.id} onPaid={loadOrders} />)}
             </div>
           ) : (
             <div className="account-state">

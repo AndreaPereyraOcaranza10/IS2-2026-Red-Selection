@@ -81,3 +81,14 @@ describe('Despacho de pedidos', () => {
     expect(screen.getByText(/No hay pedidos pendientes de despacho/)).toBeTruthy();
   });
 });
+
+describe('Aviso de pago del transportista', () => {
+  it('no se rompe con el medio que informa el backend (BILLETERA_VIRTUAL) ni con uno desconocido', async () => {
+    const { default: PaymentNotice } = await import('../transportista/src/components/PaymentNotice.jsx');
+    const { unmount } = render(<PaymentNotice method="BILLETERA_VIRTUAL" total={5000} instruction="Ya pagó con QR" />);
+    expect(screen.getByText(/Pago por billetera virtual/)).toBeTruthy();
+    unmount();
+    render(<PaymentNotice method="OTRO_MEDIO" total={5000} instruction="" />);
+    expect(screen.getByText(/Pago por otro medio/)).toBeTruthy();
+  });
+});

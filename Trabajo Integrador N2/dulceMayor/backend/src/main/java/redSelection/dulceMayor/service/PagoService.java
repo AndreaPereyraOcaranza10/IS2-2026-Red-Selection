@@ -15,11 +15,15 @@ import redSelection.dulceMayor.exception.ReglaNegocioException;
 import redSelection.dulceMayor.model.FacturaCliente;
 import redSelection.dulceMayor.model.Pago;
 import redSelection.dulceMayor.model.Pedido;
+import redSelection.dulceMayor.patrones.adapter.PasarelaPago;
 import redSelection.dulceMayor.patrones.factory.MedioPago;
 import redSelection.dulceMayor.patrones.factory.MedioPagoFactory;
 import redSelection.dulceMayor.repository.PagoRepository;
 import redSelection.dulceMayor.security.UsuarioActual;
 import redSelection.dulceMayor.security.UsuarioAutenticado;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -36,19 +40,27 @@ import java.util.Optional;
 @Service
 public class PagoService {
 
+    private static final Logger log = LoggerFactory.getLogger(PagoService.class);
+
     private final PagoRepository pagoRepository;
     private final FacturaClienteService facturaService;
     private final MedioPagoFactory medioPagoFactory;
     private final UsuarioActual usuarioActual;
+    private final PasarelaPago pasarela;
+    private final QrService qrService;
 
     public PagoService(PagoRepository pagoRepository,
                        FacturaClienteService facturaService,
                        MedioPagoFactory medioPagoFactory,
-                       UsuarioActual usuarioActual) {
+                       UsuarioActual usuarioActual,
+                       PasarelaPago pasarela,
+                       QrService qrService) {
         this.pagoRepository = pagoRepository;
         this.facturaService = facturaService;
         this.medioPagoFactory = medioPagoFactory;
         this.usuarioActual = usuarioActual;
+        this.pasarela = pasarela;
+        this.qrService = qrService;
     }
 
     // =====================================================
@@ -73,8 +85,7 @@ public class PagoService {
         if (existentes.stream().anyMatch(p -> p.getEstado() == EstadoPago.CONFIRMADO)) {
             throw new ReglaNegocioException("El pedido ya está pago.");
         }
-        existentes.stream().filter(p -> p.getEstado() == EstadoPago.PENDIENTE)
-                .forEach(p -> p.setEstado(EstadoPago.ANULADO));
+        existentes.stream().filter(p -> p.getEstado() == EstadoPago.PENDIENTE).forEach(this::anularPago);
 
         Pago pago = pagoRepository.save(medio.crearPago(pedido));
         medio.alGuardar(pago);
@@ -117,7 +128,73 @@ public class PagoService {
     public void anularPendientesDe(String pedidoId) {
         pagoRepository.findByPedidoIdAndEliminadoFalse(pedidoId).stream()
                 .filter(p -> p.getEstado() == EstadoPago.PENDIENTE)
-                .forEach(p -> p.setEstado(EstadoPago.ANULADO));
+                .forEach(this::anularPago);
+    }
+
+    // =====================================================
+    // PASARELA DE PAGO (billetera virtual): verificar contra la pasarela, nunca confiar en el cliente
+    // =====================================================
+
+    /**
+     * Verifica el pago de billetera virtual de un pedido: le pregunta a la pasarela y, si lo acreditó, confirma el pago
+     * y emite la factura (misma transacción). Idempotente. Sin control de acceso: lo valida quien llama.
+     */
+    @Transactional
+    public Optional<PagoRespuestaDTO> verificarPorPedido(String pedidoId) {
+        pagoRepository.findByPedidoIdAndEliminadoFalse(pedidoId).stream()
+                .filter(p -> p.getEstado() == EstadoPago.PENDIENTE && p.getReferenciaExterna() != null)
+                .map(Pago::getId).findFirst()
+                .ifPresent(this::verificarContraPasarela);
+        return pagoVigentePorPedido(pedidoId);
+    }
+
+    /**
+     * Para el webhook de la pasarela: se identifica el pago por la referencia y se VUELVE A CONSULTAR a la pasarela.
+     * Lo que diga el cuerpo del webhook no se usa para acreditar. Referencia desconocida o pago ya resuelto: se ignora.
+     */
+    @Transactional
+    public void verificarPorReferencia(String referencia) {
+        Optional<Pago> pago = pagoRepository.findByReferenciaExternaAndEliminadoFalse(referencia);
+        if (pago.isEmpty()) {
+            log.warn("Notificación de la pasarela con una referencia desconocida: {}", referencia);
+            return;
+        }
+        verificarContraPasarela(pago.get().getId());
+    }
+
+    /** Modo demo: deja la orden acreditada en la pasarela simulada y verifica por el mismo camino que el real. */
+    @Transactional
+    public Optional<PagoRespuestaDTO> simularAcreditacion(String pedidoId) {
+        Pago pago = pagoRepository.findByPedidoIdAndEliminadoFalse(pedidoId).stream()
+                .filter(p -> p.getEstado() == EstadoPago.PENDIENTE && p.getReferenciaExterna() != null)
+                .findFirst()
+                .orElseThrow(() -> new ReglaNegocioException("El pedido no tiene un pago de billetera virtual pendiente."));
+        pasarela.simularAcreditacion(pago.getReferenciaExterna());   // falla si la pasarela no es la simulada
+        return verificarPorPedido(pedidoId);
+    }
+
+    private void verificarContraPasarela(String pagoId) {
+        Pago pago = pagoRepository.buscarConBloqueo(pagoId).filter(p -> !p.isEliminado()).orElse(null);
+        if (pago == null || pago.getEstado() != EstadoPago.PENDIENTE || pago.getReferenciaExterna() == null) {
+            return;   // ya resuelto (idempotente) o sin orden en la pasarela
+        }
+        switch (pasarela.consultar(pago.getReferenciaExterna())) {
+            case ACREDITADA -> acreditar(pago);
+            case CANCELADA -> pago.setEstado(EstadoPago.ANULADO);
+            case PENDIENTE -> { }
+        }
+    }
+
+    /** Anula el pago y, si tenía una orden abierta en la pasarela, la cancela (si la pasarela falla, se registra y se sigue). */
+    private void anularPago(Pago pago) {
+        pago.setEstado(EstadoPago.ANULADO);
+        if (pago.getReferenciaExterna() != null) {
+            try {
+                pasarela.cancelar(pago.getReferenciaExterna());
+            } catch (RuntimeException e) {
+                log.warn("No se pudo cancelar la orden {} en la pasarela: {}", pago.getReferenciaExterna(), e.getMessage());
+            }
+        }
     }
 
     /** Al emitir la factura de un pedido sin pagar (efectivo): el pago vigente pasa a apuntar a esa factura. */
@@ -147,8 +224,7 @@ public class PagoService {
                 || existentes.stream().anyMatch(p -> p.getEstado() == EstadoPago.CONFIRMADO)) {
             throw new ReglaNegocioException("La factura ya está paga.");
         }
-        existentes.stream().filter(p -> p.getEstado() == EstadoPago.PENDIENTE)
-                .forEach(p -> p.setEstado(EstadoPago.ANULADO));
+        existentes.stream().filter(p -> p.getEstado() == EstadoPago.PENDIENTE).forEach(this::anularPago);
 
         Pago pago = medio.crearPago(factura.getPedido());
         pago.setFactura(factura);
@@ -254,7 +330,7 @@ public class PagoService {
                 .filter(p -> !p.isEliminado())
                 .orElseThrow(() -> new RecursoNoEncontradoException("Pago", pagoId));
         exigirPendiente(pago, "anular");
-        pago.setEstado(EstadoPago.ANULADO);
+        anularPago(pago);
         return aRespuesta(pago);
     }
 
@@ -298,6 +374,13 @@ public class PagoService {
         }
     }
 
+    /** El QR solo se dibuja mientras el pago de billetera espera ser pagado. */
+    private String imagenQr(Pago pago) {
+        boolean pendiente = pago.getTipoPago() == TipoPago.BILLETERA_VIRTUAL
+                && pago.getEstado() == EstadoPago.PENDIENTE && pago.getCodigoQr() != null;
+        return pendiente ? qrService.generarPngBase64(pago.getCodigoQr()) : null;
+    }
+
     private PagoRespuestaDTO aRespuesta(Pago pago) {
         FacturaCliente factura = pago.getFactura();
         return new PagoRespuestaDTO(
@@ -310,6 +393,8 @@ public class PagoService {
                 pago.getMonto(),
                 pago.getFechaPago(),
                 medioPagoFactory.obtener(pago.getTipoPago()).instrucciones(pago),
-                pago.getCodigoQr());
+                pago.getCodigoQr(),
+                imagenQr(pago),
+                pago.getTipoPago() == TipoPago.BILLETERA_VIRTUAL && pasarela.esSimulada());
     }
 }

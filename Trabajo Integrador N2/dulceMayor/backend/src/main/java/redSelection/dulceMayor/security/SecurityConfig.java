@@ -117,7 +117,8 @@ public class SecurityConfig {
                         // Pago y cancelación del pedido: el cliente elige billetera virtual y cancela lo suyo; administración
                         // registra el cobro (la pertenencia del pedido la exige PedidoService). Va ANTES de la regla general.
                         .requestMatchers(HttpMethod.POST, "/api/orders/*/pagos/confirmar").hasRole("ADMINISTRATIVO")
-                        .requestMatchers(HttpMethod.POST, "/api/orders/*/cancel", "/api/orders/*/pagos")
+                        .requestMatchers(HttpMethod.POST, "/api/orders/*/cancel", "/api/orders/*/pagos",
+                                "/api/orders/*/pagos/verificar", "/api/orders/*/pagos/simular-acreditacion")
                         .hasAnyRole("CLIENTE", "ADMINISTRATIVO")
                         .requestMatchers(HttpMethod.GET, "/api/orders/*/pagos/vigente").hasAnyRole("CLIENTE", "ADMINISTRATIVO")
                         .requestMatchers(HttpMethod.PUT, "/api/orders/*").denyAll()

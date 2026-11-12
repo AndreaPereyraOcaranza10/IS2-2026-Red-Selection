@@ -16,5 +16,7 @@ public record PagoRespuestaDTO(
         BigDecimal monto,
         LocalDateTime fechaPago,
         String instrucciones,
-        String codigoQr
+        String codigoQr,
+        String imagenQr,           // data URI PNG del QR (solo billetera virtual pendiente), generado con ZXing
+        boolean pasarelaSimulada   // true en modo demo: el front ofrece "Simular pago"
 ) { }
