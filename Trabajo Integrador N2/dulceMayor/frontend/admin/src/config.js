@@ -8,6 +8,7 @@ export const ADMIN_ROUTES = {
   dispatch: '/admin/despacho',
   account: '/admin/cuenta',
   branches: '/admin/sucursales',
+  clients: '/admin/clientes',
   users: '/admin/usuarios',
   promotions: '/admin/promociones',
   statistics: '/admin/estadisticas',

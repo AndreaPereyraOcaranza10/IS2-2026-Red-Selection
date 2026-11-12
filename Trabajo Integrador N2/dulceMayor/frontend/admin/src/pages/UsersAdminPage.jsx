@@ -4,7 +4,7 @@ import { INITIAL_PASSWORD, useAuth } from '@dulcemayor/shared';
 import { apiAdmin as api } from '../api';
 
 const emptyForm = () => ({
-  nombreUsuario: '', nombre: '', apellido: '', tipoDocumento: 'DNI', numeroDocumento: '',
+  correoElectronico: '', nombre: '', apellido: '', tipoDocumento: 'DNI', numeroDocumento: '',
   rol: 'PREVENTISTA', zonaAsignada: '', patenteVehiculo: '',
 });
 
@@ -46,7 +46,7 @@ export function UsersAdminPage() {
     try {
       const payload = {
         ...form,
-        nombreUsuario: form.nombreUsuario.trim(),
+        correoElectronico: form.correoElectronico.trim().toLowerCase(),
         nombre: form.nombre.trim(),
         apellido: form.apellido.trim(),
         numeroDocumento: form.numeroDocumento.trim(),
@@ -93,9 +93,9 @@ export function UsersAdminPage() {
     </header>
     {notice && <div className="ops-notice" role="status">{notice}<button type="button" onClick={() => setNotice('')}><X /></button></div>}
     {error && <div className="ops-notice ops-notice-error" role="alert">{error}<button type="button" onClick={() => void load()}>Reintentar</button></div>}
-    <div className="admin-resource-toolbar"><label><Search /><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Buscar por usuario, nombre o rol..." /></label><span>{users.length} usuarios</span></div>
+    <div className="admin-resource-toolbar"><label><Search /><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Buscar por correo, nombre o rol..." /></label><span>{users.length} usuarios</span></div>
     {loading ? <div className="ops-loading"><LoaderCircle className="spin" /> Cargando usuarios…</div> : <div className="ops-table-wrap">
-      <table className="ops-table admin-resource-table"><thead><tr><th>Usuario</th><th>Nombre</th><th>Documento</th><th>Rol</th><th>Estado</th><th>Acciones</th></tr></thead>
+      <table className="ops-table admin-resource-table"><thead><tr><th>Usuario (correo)</th><th>Nombre</th><th>Documento</th><th>Rol</th><th>Estado</th><th>Acciones</th></tr></thead>
         <tbody>{visibleUsers.map((entry) => <tr key={entry.id}>
           <td><b>{entry.nombreUsuario}</b></td><td>{entry.nombre} {entry.apellido}</td><td>{entry.tipoDocumento} · {entry.documentoParcial}</td>
           <td><span className="admin-role-pill">{roles[entry.rol] || entry.rol}</span></td>
@@ -115,7 +115,7 @@ export function UsersAdminPage() {
         <header><div><span className="section-kicker">PERSONAL</span><h2 id="new-user-title">Alta de usuario</h2></div><button type="button" className="resource-close" onClick={() => setOpen(false)} aria-label="Cerrar"><X /></button></header>
         <form onSubmit={submit}>
           <div className="resource-form-grid">
-            <label>Nombre de usuario<input required maxLength="80" autoComplete="off" value={form.nombreUsuario} onChange={(event) => setForm({ ...form, nombreUsuario: event.target.value })} /></label>
+            <label>Correo electrónico (será su usuario)<input required type="email" maxLength="80" autoComplete="off" placeholder="nombre@dulcemayor.com" value={form.correoElectronico} onChange={(event) => setForm({ ...form, correoElectronico: event.target.value })} /></label>
             <label>Rol<select value={form.rol} onChange={(event) => setForm({ ...form, rol: event.target.value })}><option value="PREVENTISTA">Preventista</option><option value="TRANSPORTISTA">Transportista</option><option value="ADMINISTRATIVO">Administrativo</option></select></label>
             <label>Nombre<input required maxLength="60" value={form.nombre} onChange={(event) => setForm({ ...form, nombre: event.target.value })} /></label>
             <label>Apellido<input required maxLength="60" value={form.apellido} onChange={(event) => setForm({ ...form, apellido: event.target.value })} /></label>

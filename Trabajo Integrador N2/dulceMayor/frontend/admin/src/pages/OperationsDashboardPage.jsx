@@ -3,9 +3,10 @@ import { lazy, Suspense, useCallback, useEffect, useMemo, useState } from "react
 import { ProductsAdminPage, useAuth } from '@dulcemayor/shared';
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { ADMIN_ROUTES, institutionalSiteUrl } from "../config";
-import { AlertTriangle, ArrowLeft, ArrowRight, BarChart3, Bell, Barcode, Building2, CheckCircle2, ChevronDown, ClipboardList, Clock3, ExternalLink, FileText, LayoutDashboard, LoaderCircle, MapPin, Package, PackageCheck, Plus, RefreshCw, Search, Settings, ShoppingCart, Tag, Truck, Users, Warehouse, X, FileBarChart } from "lucide-react";
+import { AlertTriangle, ArrowLeft, ArrowRight, BarChart3, Bell, Barcode, Building2, CheckCircle2, ChevronDown, ClipboardList, Clock3, ExternalLink, FileText, LayoutDashboard, LoaderCircle, MapPin, Package, PackageCheck, Plus, RefreshCw, Search, Settings, ShoppingCart, Store, Tag, Truck, Users, Warehouse, X, FileBarChart } from "lucide-react";
 import { apiAdmin as api } from "../api";
 import { BranchesAdmin } from "./BranchesAdmin";
+import { ClientsAdminPage } from "./ClientsAdminPage.jsx";
 import { UsersAdminPage } from "./UsersAdminPage.jsx";
 import { PromotionsAdminPage } from "./PromotionsAdminPage.jsx";
 import { ReportsAdminPage } from "./ReportsAdminPage.jsx";
@@ -23,6 +24,7 @@ const navItems = [
   { label: "Despacho", icon: Truck },
   { label: "Reportes", icon: FileBarChart },
   { label: "Sucursales", icon: Building2 },
+  { label: "Clientes", icon: Store },
   { label: "Usuarios internos", icon: Users },
   { label: "Promociones", icon: Tag },
   { label: "Estadísticas", icon: BarChart3 }
@@ -41,6 +43,7 @@ const sectionPaths = {
   "Reportes": ADMIN_ROUTES.reports,
   "Mi cuenta": ADMIN_ROUTES.account,
   "Sucursales": ADMIN_ROUTES.branches,
+  "Clientes": ADMIN_ROUTES.clients,
   "Usuarios internos": ADMIN_ROUTES.users,
   "Promociones": ADMIN_ROUTES.promotions,
   "Estadísticas": ADMIN_ROUTES.statistics
@@ -578,6 +581,7 @@ export function OperationsDashboardPage({ onBack }) {
             ] })
           ] }),
           section === "Sucursales" && /* @__PURE__ */ jsx(BranchesAdmin, {})
+          ,section === "Clientes" && /* @__PURE__ */ jsx(ClientsAdminPage, {})
           ,section === "Usuarios internos" && user?.role === "JEFE_ADMINISTRATIVO" && /* @__PURE__ */ jsx(UsersAdminPage, {})
           ,section === "Promociones" && user?.role === "JEFE_ADMINISTRATIVO" && /* @__PURE__ */ jsx(PromotionsAdminPage, {})
           ,section === "Estadísticas" && user?.role === "JEFE_ADMINISTRATIVO" && /* @__PURE__ */ jsx(Suspense, { fallback: /* @__PURE__ */ jsx("div", { className: "stats-empty", children: "Cargando gráficos…" }), children: /* @__PURE__ */ jsx(StatisticsAdminPage, { apiAdmin: api }) })

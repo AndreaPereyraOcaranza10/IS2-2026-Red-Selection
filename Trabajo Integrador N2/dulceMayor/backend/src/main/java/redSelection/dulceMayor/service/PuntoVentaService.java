@@ -80,7 +80,9 @@ public class PuntoVentaService extends BaseService<ClienteMinorista, PuntoVentaC
                 c.getId(), c.getNombreComercio(), c.getRazonSocial(), c.getCuit(),
                 direccionService.aRespuesta(c.getDireccion()),
                 responsableService.aRespuesta(c.getResponsable()),
-                c.getPreventistaAsignado() != null ? c.getPreventistaAsignado().getId() : null);
+                c.getPreventistaAsignado() != null ? c.getPreventistaAsignado().getId() : null,
+                c.getPreventistaAsignado() != null
+                        ? c.getPreventistaAsignado().getNombre() + " " + c.getPreventistaAsignado().getApellido() : null);
     }
 
     // ---------- Hooks ----------

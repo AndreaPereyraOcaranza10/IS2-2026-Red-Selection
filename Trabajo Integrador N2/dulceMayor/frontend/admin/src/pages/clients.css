@@ -1,0 +1,14 @@
+/* Detalle de cliente (ClientsAdminPage) */
+.client-detail{padding:18px 20px 20px}
+.client-detail-lead{display:flex;align-items:center;gap:12px;margin-bottom:16px;padding:12px 14px;border:1px solid var(--color-surface-dim);border-radius:10px;background:var(--color-surface-low, rgba(0,0,0,.02))}
+.client-detail-lead>svg{flex:none;width:22px;height:22px;color:var(--color-brand-primary)}
+.client-detail-lead b{display:block;color:var(--color-brand-deep);font:700 13px 'Plus Jakarta Sans'}
+.client-detail-lead span{color:var(--color-outline);font-size:11px}
+.client-detail-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 16px;margin:0}
+.client-detail-item{min-width:0;display:flex;align-items:flex-start;gap:10px}
+.client-detail-item>svg{flex:none;width:16px;height:16px;margin-top:2px;color:var(--color-brand-primary)}
+.client-detail-item dt{margin:0 0 3px;color:var(--color-outline);font-size:9px;font-weight:700;letter-spacing:.06em;text-transform:uppercase}
+.client-detail-item dd{margin:0;color:var(--color-brand-deep);font-size:12px;line-height:1.4;overflow-wrap:anywhere}
+.client-detail-full{grid-column:1/-1}
+.client-detail-footer{display:flex;justify-content:flex-end;margin-top:18px;padding-top:14px;border-top:1px solid var(--color-surface-dim)}
+@media(max-width:560px){.client-detail-grid{grid-template-columns:1fr}}

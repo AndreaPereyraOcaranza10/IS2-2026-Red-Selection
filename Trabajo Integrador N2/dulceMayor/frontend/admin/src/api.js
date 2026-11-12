@@ -46,6 +46,7 @@ export const apiAdmin = {
     return api.upload('/api/imagenes', form);
   },
   imageUrl: (id) => `${API_BASE}/api/imagenes/${id}`,
+  clients: () => api.get('/api/puntos-venta'),
   users: () => api.get('/api/usuarios'),
   createUser: (user) => api.post('/api/usuarios', user),
   resetUserPassword: (id) => api.post(`/api/usuarios/${id}/reiniciar-clave`),
