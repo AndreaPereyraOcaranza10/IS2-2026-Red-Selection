@@ -22,4 +22,16 @@ public interface VigenciaPrecioRepository extends BaseRepository<VigenciaPrecio>
             order by v.fechaDesde desc
             """)
     List<VigenciaPrecio> vigentesEn(@Param("productoId") String productoId, @Param("fecha") LocalDate fecha);
+
+    /** Precios vigentes de todos los productos en una fecha, ordenados para elegir el más reciente por producto. */
+    @Query("""
+            select v from VigenciaPrecio v
+            join fetch v.producto p
+            where v.eliminado = false
+              and p.eliminado = false
+              and v.fechaDesde <= :fecha
+              and (v.fechaHasta is null or v.fechaHasta >= :fecha)
+            order by p.id, v.fechaDesde desc
+            """)
+    List<VigenciaPrecio> vigentesEn(@Param("fecha") LocalDate fecha);
 }

@@ -106,7 +106,7 @@ public class ConfiguracionCorreoService {
         return switch (tipo) {
             case PROXIMA_ENTREGA -> List.of("responsable", "comercio", "direccion", "pedido");
             case CONFIRMACION_PEDIDO -> List.of("responsable", "comercio", "numero", "total", "productos");
-            case NEWSLETTER -> List.of();
+            case NEWSLETTER -> List.of("responsable", "fecha", "productos");
         };
     }
 
@@ -122,12 +122,12 @@ public class ConfiguracionCorreoService {
         String asunto = switch (tipo) {
             case PROXIMA_ENTREGA -> NotificacionFacade.ASUNTO_POR_DEFECTO;
             case CONFIRMACION_PEDIDO -> NotificacionFacade.ASUNTO_FACTURA;
-            case NEWSLETTER -> "";
+            case NEWSLETTER -> NotificacionFacade.ASUNTO_NEWSLETTER;
         };
         String cuerpo = switch (tipo) {
             case PROXIMA_ENTREGA -> NotificacionFacade.CUERPO_POR_DEFECTO;
             case CONFIRMACION_PEDIDO -> NotificacionFacade.CUERPO_FACTURA;
-            case NEWSLETTER -> "";
+            case NEWSLETTER -> NotificacionFacade.CUERPO_NEWSLETTER;
         };
         return new ConfiguracionCorreoRespuestaDTO(tipo, asunto, cuerpo, false, marcadores(tipo));
     }

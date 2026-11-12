@@ -8,6 +8,8 @@ import { apiAdmin as api } from "../api";
 import { BranchesAdmin } from "./BranchesAdmin";
 import { UsersAdminPage } from "./UsersAdminPage.jsx";
 import { PromotionsAdminPage } from "./PromotionsAdminPage.jsx";
+import { OrdersAdminPage } from "./OrdersAdminPage.jsx";
+import { BillingPaymentsAdminPage } from "./BillingPaymentsAdminPage.jsx";
 const StatisticsAdminPage = lazy(() => import("./StatisticsAdminPage.jsx").then((module) => ({ default: module.StatisticsAdminPage })));
 const navItems = [
   { label: "Inicio", icon: LayoutDashboard },
@@ -280,8 +282,8 @@ export function OperationsDashboardPage({ onBack }) {
   const lowStockProducts = inventory.filter((product) => Number(product.stock) <= (product.stockMinimum || 0));
   const inTransit = orders.filter((order) => order.status === "EN_REPARTO");
   const deliveredToday = orders.filter((order) => order.status === "ENTREGADO" && new Date(order.createdAt).toDateString() === (/* @__PURE__ */ new Date()).toDateString()).length;
-  const advanceOrder = async (order) => {
-    const status = nextState[order.status];
+  const advanceOrder = async (order, requestedStatus) => {
+    const status = requestedStatus || nextState[order.status];
     if (!status) return;
     try {
       const updated = await api.updateOrderStatus(order.id, status);
@@ -523,22 +525,10 @@ export function OperationsDashboardPage({ onBack }) {
               ] })
             ] })
           ] }),
-          section === "Pedidos" && /* @__PURE__ */ jsx(OrdersTable, { orders, onAdvance: advanceOrder }),
+          section === "Pedidos" && /* @__PURE__ */ jsx(OrdersAdminPage, { orders, inventory, loading, onRefresh: () => loadData(true), onStatusChange: advanceOrder }),
           section === "Productos" && /* @__PURE__ */ jsx(ProductsAdminPage, { apiAdmin: api, onStockChange: changeStock }),
           section === "Stock" && /* @__PURE__ */ jsx(ProductsAdminPage, { apiAdmin: api, onStockChange: changeStock, stockOnly: true }),
-          section === "Facturaci\xF3n y pagos" && /* @__PURE__ */ jsxs("section", { className: "orders-table-card ops-billing-table", children: [
-            /* @__PURE__ */ jsxs("header", { className: "table-title", children: [
-              /* @__PURE__ */ jsxs("div", { children: [
-                /* @__PURE__ */ jsx("h2", { children: "Pedidos facturados" }),
-                /* @__PURE__ */ jsx("p", { children: "Pedidos con estado de facturaci\xF3n confirmado" })
-              ] }),
-              /* @__PURE__ */ jsxs("b", { children: [
-                invoiceOrders.length,
-                " comprobantes"
-              ] })
-            ] }),
-            /* @__PURE__ */ jsx(DataRows, { orders: invoiceOrders, empty: "Todav\xEDa no hay pedidos facturados." })
-          ] }),
+          section === "Facturaci\xF3n y pagos" && /* @__PURE__ */ jsx(BillingPaymentsAdminPage, { orders: invoiceOrders, loading, onRefresh: () => loadData(true) }),
           section === "Despacho" && /* @__PURE__ */ jsxs("section", { className: "orders-table-card ops-dispatch-table", children: [
             /* @__PURE__ */ jsxs("header", { className: "table-title", children: [
               /* @__PURE__ */ jsxs("div", { children: [

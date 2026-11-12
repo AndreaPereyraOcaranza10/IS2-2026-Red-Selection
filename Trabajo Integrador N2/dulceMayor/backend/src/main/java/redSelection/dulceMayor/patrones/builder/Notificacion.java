@@ -56,6 +56,12 @@ public final class Notificacion {
             return this;
         }
 
+        /** Inserta HTML generado por el servidor y previamente escapado, para listas y otros fragmentos confiables. */
+        public Builder valorHtmlSeguro(String marcador, String htmlEscapado) {
+            this.valores.put(marcador, htmlEscapado == null ? "" : htmlEscapado);
+            return this;
+        }
+
         public Notificacion construir() {
             if (destinatario == null || destinatario.isBlank()) {
                 throw new IllegalStateException("La notificación necesita un destinatario.");

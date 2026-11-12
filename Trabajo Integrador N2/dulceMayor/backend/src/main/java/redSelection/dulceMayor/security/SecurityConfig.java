@@ -87,6 +87,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/admin/**").hasRole("ADMINISTRATIVO")
                         // Plantillas de correo: las edita administración (el Jefe lo hereda)
                         .requestMatchers("/api/configuracion-correo/**").hasRole("ADMINISTRATIVO")
+                        .requestMatchers("/api/newsletter/**").hasRole("JEFE_ADMINISTRATIVO")
                         .requestMatchers(HttpMethod.PATCH, "/api/orders/*/status").hasRole("ADMINISTRATIVO")
                         // Cada empleado ve solo su ruta
                         .requestMatchers(HttpMethod.GET, "/api/rutas/preventista/{id}/hoy").access(propia(Rol.PREVENTISTA))

@@ -14,6 +14,7 @@ import java.util.Optional;
 public interface ProductoRepository extends BaseRepository<Producto> {
     Optional<Producto> findByCodigoIgnoreCase(String codigo);
     List<Producto> findBySubCategoriaIdAndEliminadoFalse(String subCategoriaId);
+    List<Producto> findByEnOfertaTrueAndEliminadoFalse();
     /*
      Bloqueo pesimista: dos facturaciones simultáneas del mismo producto se ejecutan en fila,
      así no se vende dos veces el mismo stock.

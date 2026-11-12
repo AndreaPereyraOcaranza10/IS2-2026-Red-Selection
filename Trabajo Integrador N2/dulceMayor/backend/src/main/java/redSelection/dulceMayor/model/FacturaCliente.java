@@ -3,6 +3,8 @@ package redSelection.dulceMayor.model;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 import redSelection.dulceMayor.enums.*;
 import java.math.BigDecimal;
 import java.time.*;
@@ -23,7 +25,7 @@ public class FacturaCliente extends Base {
     @Column(nullable = false)
     private LocalDateTime fechaFactura;
 
-    @Enumerated(EnumType.STRING) @Column(nullable = false) @Builder.Default
+    @Enumerated(EnumType.STRING) @JdbcTypeCode(SqlTypes.VARCHAR) @Column(nullable = false, length = 20) @Builder.Default
     private EstadoFactura estado = EstadoFactura.EMITIDA;
 
     @Column(nullable = false, precision = 12, scale = 2)

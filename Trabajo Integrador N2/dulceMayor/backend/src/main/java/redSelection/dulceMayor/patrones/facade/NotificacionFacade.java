@@ -39,6 +39,13 @@ public class NotificacionFacade {
                     + "<p>Te adjuntamos la factura en PDF. El área de facturación se va a comunicar con vos para "
                     + "coordinar el pago.</p>"
                     + "<p>¡Gracias por elegirnos!<br>Dulce Mayor</p>";
+    public static final String ASUNTO_NEWSLETTER = "Ofertas de Dulce Mayor · {{fecha}}";
+    public static final String CUERPO_NEWSLETTER =
+            "<html><body style='font-family:Arial,sans-serif;color:#261923'>"
+                    + "<h2>Ofertas de Dulce Mayor</h2><p>Hola {{responsable}},</p>"
+                    + "<p>Estas son las ofertas disponibles con stock al {{fecha}}:</p>"
+                    + "<ul>{{productos}}</ul><p>Consultá el catálogo para realizar tu pedido.</p>"
+                    + "<p>Dulce Mayor</p></body></html>";
     private static final String ASUNTO_ACCESO = "Tu acceso a Dulce Mayor";
     private static final String CUERPO_ACCESO =
             "<p>Hola {{nombre}},</p>"
@@ -112,6 +119,23 @@ public class NotificacionFacade {
                 .valor("total", total)
                 .valor("productos", productos)
                 .adjunto("Factura-" + numero + ".pdf", "application/pdf", pdf)
+                .construir();
+        return envioCorreo.enviar(notificacion);
+    }
+
+    /** BK-12: envía la plantilla newsletter (personalizada o predeterminada) al responsable de un comercio. */
+    public boolean enviarNewsletter(String correo, String responsable, String fecha, String productosHtml) {
+        Optional<ConfiguracionCorreoEmpresa> plantilla = sedeCentral()
+                .flatMap(sede -> configuracionRepository
+                        .findByDulceMayorIdAndTipoCorreo(sede.getId(), TipoCorreo.NEWSLETTER))
+                .filter(c -> !c.isEliminado());
+        Notificacion notificacion = Notificacion.nueva()
+                .para(correo)
+                .asunto(plantilla.map(ConfiguracionCorreoEmpresa::getAsunto).orElse(ASUNTO_NEWSLETTER))
+                .plantilla(plantilla.map(ConfiguracionCorreoEmpresa::getCuerpoHtml).orElse(CUERPO_NEWSLETTER))
+                .valor("responsable", responsable)
+                .valor("fecha", fecha)
+                .valorHtmlSeguro("productos", productosHtml)
                 .construir();
         return envioCorreo.enviar(notificacion);
     }
