@@ -2,5 +2,6 @@ package redSelection.dulceMayor.enums;
 
 public enum ProveedorAuth {
     LOCAL,
-    GOOGLE
+    GOOGLE,
+    AUTH0
 }

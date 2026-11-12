@@ -9,6 +9,7 @@
     "preview": "vite preview --host 127.0.0.1 --port 4175"
   },
   "dependencies": {
+    "@auth0/auth0-react": "^2.30.0",
     "lucide-react": "^0.468.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"

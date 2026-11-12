@@ -29,7 +29,7 @@ function readAccount() {
     return null;
   }
 }
-function App() {
+function App({ auth0Configured = false }) {
   const navigate = useNavigate();
   const location = useLocation();
   const [search, setSearch] = useState("");
@@ -221,7 +221,7 @@ function App() {
       /* @__PURE__ */ jsx(Route, { path: "/cambiar-clave", element: /* @__PURE__ */ jsx(ForcedPasswordPage, { account, onComplete: (session) => { if (ADMIN_ROLES.includes(session.role)) window.location.assign(adminAppUrl(ROUTES.admin)); else { persistAccount(session); goTo(ROUTES.home); } } }) }),
       /* @__PURE__ */ jsx(Route, { path: ROUTES.login, element: /* @__PURE__ */ jsxs(Fragment, { children: [
         header,
-        /* @__PURE__ */ jsx(LoginPage, { onSuccess: async (email, password) => {
+        /* @__PURE__ */ jsx(LoginPage, { auth0Configured, onSuccess: async (email, password) => {
           const session = await api.login(email, password);
           if (ADMIN_ROLES.includes(session.role)) {
             window.location.assign(adminAppUrl(ROUTES.admin));
@@ -229,6 +229,9 @@ function App() {
           }
           persistAccount(session);
           goTo(session.mustChangePassword ? "/cambiar-clave" : ROUTES.home);
+        }, onAuth0Success: (session) => {
+          persistAccount(session);
+          goTo(ROUTES.home);
         }, onStaff: () => window.location.assign(adminAppUrl("/login")) })
       ] }) }),
       /* @__PURE__ */ jsx(Route, { path: "/admin/*", element: /* @__PURE__ */ jsx(AdminAppRedirect, {}) }),

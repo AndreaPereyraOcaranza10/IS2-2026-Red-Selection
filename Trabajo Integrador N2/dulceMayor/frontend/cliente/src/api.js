@@ -23,7 +23,7 @@ async function request(path, init = {}) {
   const response = await fetch(API_BASE + path, { ...init, headers });
   if (!response.ok) {
     const body = await response.json().catch(() => null);
-    const isAuthenticationRequest = path.endsWith("/auth/login") || path.endsWith("/auth/register");
+    const isAuthenticationRequest = path.endsWith("/auth/login") || path.endsWith("/auth/register") || path.endsWith("/auth/auth0");
     if (response.status === 401 && !isAuthenticationRequest) {
       sessionStorage.removeItem("dulcemayor.account");
       if (window.location.pathname !== "/ingresar" && window.location.pathname !== "/login") window.location.replace("/ingresar");
@@ -86,6 +86,9 @@ export const api = {
   product: (id) => request(`/products/${id}`),
   login: async (email, password) => accountFromSession(
     await request("/auth/login", { method: "POST", body: JSON.stringify({ username: email, password }) }), email,
+  ),
+  loginWithAuth0: async (idToken) => accountFromSession(
+    await request("/auth/auth0", { method: "POST", body: JSON.stringify({ idToken }) }),
   ),
   profile: () => request("/profile"),
   updateProfile: (profile) => request("/profile", { method: "PUT", body: JSON.stringify(profile) }),

@@ -1,9 +1,10 @@
 import { Fragment, jsx, jsxs } from "react/jsx-runtime";
 import { useState } from "react";
-import { ArrowRight, Check, Eye, EyeOff, Headphones, MessageCircle, ShieldCheck } from "lucide-react";
+import { ArrowRight, Check, Eye, EyeOff, Headphones, ShieldCheck } from "lucide-react";
 import { Link } from "react-router-dom";
 import { api } from "../api";
-export function LoginPage({ onSuccess, onStaff }) {
+import { Auth0GoogleButton } from "../components/Auth0GoogleButton.jsx";
+export function LoginPage({ auth0Configured, onSuccess, onStaff, onAuth0Success }) {
   const [mode, setMode] = useState("login");
   const [visible, setVisible] = useState(false);
   const [notice, setNotice] = useState("");
@@ -22,6 +23,15 @@ export function LoginPage({ onSuccess, onStaff }) {
       setNotice(result.message);
     } catch (error) {
       setNotice(error instanceof Error ? error.message : "No se pudo completar la solicitud.");
+    }
+  };
+  const signInWithAuth0 = async (idToken) => {
+    setNotice("");
+    try {
+      const session = await api.loginWithAuth0(idToken);
+      await onAuth0Success?.(session);
+    } catch (error) {
+      setNotice(error instanceof Error ? error.message : "No se pudo ingresar con Google via Auth0.");
     }
   };
   return /* @__PURE__ */ jsxs("main", { className: "login-page", children: [
@@ -80,11 +90,11 @@ export function LoginPage({ onSuccess, onStaff }) {
         mode === "login" ? /* @__PURE__ */ jsxs(Fragment, { children: [
           /* @__PURE__ */ jsxs("div", { className: "login-card-heading", children: [
             /* @__PURE__ */ jsx("h2", { children: "Ingreso de clientes" }),
-            /* @__PURE__ */ jsx("p", { children: "Ingres\xE1 tu CUIT o correo comercial registrado." })
+            /* @__PURE__ */ jsx("p", { children: "Ingres\xE1 con el correo comercial registrado." })
           ] }),
           /* @__PURE__ */ jsxs("form", { onSubmit: submit, children: [
             /* @__PURE__ */ jsxs("label", { children: [
-              "CUIT o correo",
+              "Correo comercial",
               /* @__PURE__ */ jsx("input", { name: "email", type: "email", required: true, placeholder: "comercio@correo.com" })
             ] }),
             /* @__PURE__ */ jsxs("label", { children: [
@@ -106,10 +116,7 @@ export function LoginPage({ onSuccess, onStaff }) {
               /* @__PURE__ */ jsx(ArrowRight, {})
             ] })
           ] }),
-          /* @__PURE__ */ jsxs("button", { className: "whatsapp-access", onClick: () => setNotice("Contacta a Atencion Mayorista para solicitar un acceso rapido."), children: [
-            /* @__PURE__ */ jsx(MessageCircle, {}),
-            " Acceso rapido via WhatsApp"
-          ] }),
+          /* @__PURE__ */ jsx(Auth0GoogleButton, { configured: auth0Configured, mode: "login", onCredential: signInWithAuth0, onError: setNotice }),
           /* @__PURE__ */ jsx("p", { className: "login-assurance", children: "Habilitacion automatica tras validacion fiscal." }),
           /* @__PURE__ */ jsxs("button", { className: "staff-access", onClick: onStaff, children: [
             "\xBFTrabajas en deposito? ",
@@ -117,32 +124,10 @@ export function LoginPage({ onSuccess, onStaff }) {
           ] })
         ] }) : /* @__PURE__ */ jsxs(Fragment, { children: [
           /* @__PURE__ */ jsxs("div", { className: "login-card-heading", children: [
-            /* @__PURE__ */ jsx("h2", { children: "Alta comercial mayorista" }),
-            /* @__PURE__ */ jsx("p", { children: "Completa los datos para habilitar precios por bulto." })
+            /* @__PURE__ */ jsx("h2", { children: "Crear cuenta mayorista" }),
+            /* @__PURE__ */ jsx("p", { children: "Registrate con tu correo y una clave. Luego podrás completar tus datos y domicilio en Mi perfil." })
           ] }),
           /* @__PURE__ */ jsxs("form", { onSubmit: submit, children: [
-            /* @__PURE__ */ jsxs("label", { children: [
-              "Razon social / fantasia",
-              /* @__PURE__ */ jsx("input", { required: true, placeholder: "Ej: Distribuidora Central" })
-            ] }),
-            /* @__PURE__ */ jsxs("div", { className: "form-columns", children: [
-              /* @__PURE__ */ jsxs("label", { children: [
-                "CUIT",
-                /* @__PURE__ */ jsx("input", { required: true, inputMode: "numeric", placeholder: "30712345678" })
-              ] }),
-              /* @__PURE__ */ jsxs("label", { children: [
-                "Rubro",
-                /* @__PURE__ */ jsxs("select", { defaultValue: "kiosco", children: [
-                  /* @__PURE__ */ jsx("option", { value: "kiosco", children: "Kiosco / Drugstore" }),
-                  /* @__PURE__ */ jsx("option", { value: "autoservicio", children: "Autoservicio / Almacen" }),
-                  /* @__PURE__ */ jsx("option", { value: "distribuidor", children: "Distribuidor" })
-                ] })
-              ] })
-            ] }),
-            /* @__PURE__ */ jsxs("label", { children: [
-              "WhatsApp de contacto",
-              /* @__PURE__ */ jsx("input", { required: true, type: "tel", placeholder: "+54 9 261 4123456" })
-            ] }),
             /* @__PURE__ */ jsxs("label", { children: [
               "Correo comercial",
               /* @__PURE__ */ jsx("input", { name: "email", required: true, type: "email", placeholder: "nombre@comercio.com" })
@@ -156,6 +141,7 @@ export function LoginPage({ onSuccess, onStaff }) {
               /* @__PURE__ */ jsx(Check, {})
             ] })
           ] }),
+          /* @__PURE__ */ jsx(Auth0GoogleButton, { configured: auth0Configured, mode: "register", onCredential: signInWithAuth0, onError: setNotice }),
           /* @__PURE__ */ jsxs("button", { className: "staff-access", onClick: onStaff, children: [
             "\xBFTrabajas en deposito? ",
             /* @__PURE__ */ jsx("b", { children: "Abrir centro de mando \u2192" })

@@ -1,13 +1,14 @@
 package redSelection.dulceMayor.service;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import org.springframework.http.client.JdkClientHttpRequestFactory;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 
 import java.net.http.HttpClient;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Map;
 
 @Service
 public class CotizacionDolarService {
@@ -28,13 +29,15 @@ public class CotizacionDolarService {
             return current.quote();
         }
         try {
-            JsonNode source = client.get().uri("/usd/bna").retrieve().body(JsonNode.class);
-            if (source == null || !source.hasNonNull("sell") || source.path("sell").asDouble() <= 0) {
+            Map<String, Object> source = client.get().uri("/usd/bna").retrieve()
+                    .body(new ParameterizedTypeReference<>() {});
+            double sell = number(source, "sell");
+            if (source == null || !Double.isFinite(sell) || sell <= 0) {
                 throw new IllegalStateException("La fuente no devolvió una cotización válida.");
             }
             DollarQuote quote = new DollarQuote("USD", "Banco Nación",
-                    source.path("buy").asDouble(0), source.path("sell").asDouble(),
-                    source.path("updatedAt").asText(""), source.path("lastScrapedAt").asText(""),
+                    number(source, "buy"), sell,
+                    text(source, "updatedAt"), text(source, "lastScrapedAt"),
                     false, "https://www.bna.com.ar/Personas");
             cached = new CachedQuote(quote, Instant.now());
             return quote;
@@ -46,6 +49,18 @@ public class CotizacionDolarService {
             }
             throw new IllegalStateException("La cotización del Banco Nación no está disponible.", exception);
         }
+    }
+
+    private static double number(Map<String, Object> source, String field) {
+        if (source == null) return 0;
+        Object value = source.get(field);
+        return value instanceof Number number ? number.doubleValue() : 0;
+    }
+
+    private static String text(Map<String, Object> source, String field) {
+        if (source == null) return "";
+        Object value = source.get(field);
+        return value == null ? "" : value.toString();
     }
 
     private record CachedQuote(DollarQuote quote, Instant fetchedAt) {}

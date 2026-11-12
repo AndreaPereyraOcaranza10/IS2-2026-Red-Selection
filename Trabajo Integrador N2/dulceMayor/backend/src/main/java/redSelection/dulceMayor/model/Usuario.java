@@ -34,7 +34,8 @@ public class Usuario extends Base {
     private Rol rol;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @JdbcTypeCode(SqlTypes.VARCHAR)
+    @Column(nullable = false, length = 32)
     @Builder.Default
     private ProveedorAuth proveedorAuth = ProveedorAuth.LOCAL;
 
