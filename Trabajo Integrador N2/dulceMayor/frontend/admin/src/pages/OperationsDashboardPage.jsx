@@ -11,6 +11,8 @@ import { PromotionsAdminPage } from "./PromotionsAdminPage.jsx";
 import { ReportsAdminPage } from "./ReportsAdminPage.jsx";
 import { OrdersAdminPage } from "./OrdersAdminPage.jsx";
 import { BillingPaymentsAdminPage } from "./BillingPaymentsAdminPage.jsx";
+import { DispatchDialog, PendingDispatchCard } from "./DispatchPanel.jsx";
+
 const StatisticsAdminPage = lazy(() => import("./StatisticsAdminPage.jsx").then((module) => ({ default: module.StatisticsAdminPage })));
 const navItems = [
   { label: "Inicio", icon: LayoutDashboard },
@@ -262,6 +264,7 @@ export function OperationsDashboardPage({ onBack }) {
   const [error, setError] = useState("");
   const [showAlerts, setShowAlerts] = useState(true);
   const [manualOrderOpen, setManualOrderOpen] = useState(false);
+  const [dispatchTarget, setDispatchTarget] = useState(null);
   const loadData = useCallback(async (quiet = false) => {
     if (quiet) setRefreshing(true);
     else setLoading(true);
@@ -286,6 +289,10 @@ export function OperationsDashboardPage({ onBack }) {
   const inTransit = orders.filter((order) => order.status === "EN_REPARTO");
   const deliveredToday = orders.filter((order) => order.status === "ENTREGADO" && new Date(order.createdAt).toDateString() === (/* @__PURE__ */ new Date()).toDateString()).length;
   const advanceOrder = async (order, requestedStatus) => {
+    if (order.status === "FACTURADO" && (!requestedStatus || requestedStatus === "EN_REPARTO")) {
+      setDispatchTarget([order]);
+      return;
+    }
     const status = requestedStatus || nextState[order.status];
     if (!status) return;
     try {
@@ -301,6 +308,11 @@ export function OperationsDashboardPage({ onBack }) {
     setInventory((previous) => previous.map((item) => item.id === product.id ? updated : item));
     setNotice(`Stock actualizado: ${product.name} \xB7 ${stock} unidades.`);
   };
+  const dispatchDone = (result) => {
+    setDispatchTarget(null);
+    void loadData(true);
+    setNotice(`${result.pedidoIds.length === 1 ? "1 pedido asignado" : `${result.pedidoIds.length} pedidos asignados`} a ${result.transportista}.`);
+  };
   const createManualOrderDone = () => {
     setManualOrderOpen(false);
     setSection("Pedidos");
@@ -309,6 +321,7 @@ export function OperationsDashboardPage({ onBack }) {
   };
   const todayLabel = new Intl.DateTimeFormat("es-AR", { weekday: "long", day: "numeric", month: "short" }).format(/* @__PURE__ */ new Date());
   const invoiceOrders = orders.filter(isInvoiced);
+  const pendingDispatch = orders.filter((order) => order.status === "FACTURADO");
   const dispatchOrders = orders.filter((order) => ["EN_REPARTO", "ENTREGADO"].includes(order.status));
   return /* @__PURE__ */ jsxs("main", { className: "ops-app", children: [
     /* @__PURE__ */ jsxs("aside", { className: "ops-sidebar", children: [
@@ -329,7 +342,7 @@ export function OperationsDashboardPage({ onBack }) {
         /* @__PURE__ */ jsx("span", { children: label }),
         label === "Stock" && lowStockProducts.length > 0 && /* @__PURE__ */ jsx("b", { children: lowStockProducts.length }),
         label === "Pedidos" && pendingOrders.length > 0 && /* @__PURE__ */ jsx("b", { children: pendingOrders.length }),
-        label === "Despacho" && inTransit.length > 0 && /* @__PURE__ */ jsx("b", { children: inTransit.length })
+        label === "Despacho" && pendingDispatch.length > 0 && /* @__PURE__ */ jsx("b", { children: pendingDispatch.length })
       ] }, label)) }),
       /* @__PURE__ */ jsxs("div", { className: "ops-side-bottom", children: [
         /* @__PURE__ */ jsxs("button", { onClick: () => { logout(); onBack?.(); }, children: [
@@ -532,18 +545,21 @@ export function OperationsDashboardPage({ onBack }) {
           section === "Productos" && /* @__PURE__ */ jsx(ProductsAdminPage, { apiAdmin: api, onStockChange: changeStock }),
           section === "Stock" && /* @__PURE__ */ jsx(ProductsAdminPage, { apiAdmin: api, onStockChange: changeStock, stockOnly: true }),
           section === "Facturaci\xF3n y pagos" && /* @__PURE__ */ jsx(BillingPaymentsAdminPage, { orders: invoiceOrders, loading, onRefresh: () => loadData(true) }),
-          section === "Despacho" && /* @__PURE__ */ jsxs("section", { className: "orders-table-card ops-dispatch-table", children: [
-            /* @__PURE__ */ jsxs("header", { className: "table-title", children: [
-              /* @__PURE__ */ jsxs("div", { children: [
-                /* @__PURE__ */ jsx("h2", { children: "Seguimiento de despachos" }),
-                /* @__PURE__ */ jsx("p", { children: "Pedidos en camino y entregados" })
+          section === "Despacho" && /* @__PURE__ */ jsxs(Fragment, { children: [
+            /* @__PURE__ */ jsx(PendingDispatchCard, { orders: pendingDispatch, onAssign: setDispatchTarget }),
+            /* @__PURE__ */ jsxs("section", { className: "orders-table-card ops-dispatch-table", children: [
+              /* @__PURE__ */ jsxs("header", { className: "table-title", children: [
+                /* @__PURE__ */ jsxs("div", { children: [
+                  /* @__PURE__ */ jsx("h2", { children: "Seguimiento de despachos" }),
+                  /* @__PURE__ */ jsx("p", { children: "Pedidos en camino y entregados" })
+                ] }),
+                /* @__PURE__ */ jsxs("b", { children: [
+                  dispatchOrders.length,
+                  " pedidos"
+                ] })
               ] }),
-              /* @__PURE__ */ jsxs("b", { children: [
-                dispatchOrders.length,
-                " pedidos"
-              ] })
-            ] }),
-            /* @__PURE__ */ jsx(DataRows, { orders: dispatchOrders, onAdvance: advanceOrder, empty: "No hay pedidos en tr\xE1nsito." })
+              /* @__PURE__ */ jsx(DataRows, { orders: dispatchOrders, onAdvance: advanceOrder, showCarrier: true, empty: "No hay pedidos en tr\xE1nsito." })
+            ] })
           ] }),
           section === "Reportes" && /* @__PURE__ */ jsx(ReportsAdminPage, { apiAdmin: api, role: user?.role }),
           section === "Mi cuenta" && /* @__PURE__ */ jsxs("section", { className: "admin-account-card", children: [
@@ -572,7 +588,8 @@ export function OperationsDashboardPage({ onBack }) {
         ] })
       ] })
     ] }),
-    manualOrderOpen && /* @__PURE__ */ jsx(ManualOrderModal, { products: inventory, onClose: () => setManualOrderOpen(false), onCreated: createManualOrderDone })
+    manualOrderOpen && /* @__PURE__ */ jsx(ManualOrderModal, { products: inventory, onClose: () => setManualOrderOpen(false), onCreated: createManualOrderDone }),
+    dispatchTarget && /* @__PURE__ */ jsx(DispatchDialog, { orders: dispatchTarget, onClose: () => setDispatchTarget(null), onDone: dispatchDone })
   ] });
 }
 function Kpi({ icon, color, label, value, suffix, detail, onClick }) {
@@ -591,7 +608,7 @@ function Kpi({ icon, color, label, value, suffix, detail, onClick }) {
     ] })
   ] });
 }
-function DataRows({ orders, onAdvance, empty }) {
+function DataRows({ orders, onAdvance, showCarrier = false, empty }) {
   return /* @__PURE__ */ jsxs("div", { className: "ops-table-wrap", children: [
     /* @__PURE__ */ jsxs("table", { className: "ops-table", children: [
       /* @__PURE__ */ jsx("thead", { children: /* @__PURE__ */ jsxs("tr", { children: [
@@ -600,6 +617,7 @@ function DataRows({ orders, onAdvance, empty }) {
         /* @__PURE__ */ jsx("th", { children: "Fecha" }),
         /* @__PURE__ */ jsx("th", { children: "Total" }),
         /* @__PURE__ */ jsx("th", { children: "Estado" }),
+        showCarrier && /* @__PURE__ */ jsx("th", { children: "Transportista" }),
         /* @__PURE__ */ jsx("th", { children: "Acci\xF3n" })
       ] }) }),
       /* @__PURE__ */ jsx("tbody", { children: orders.map((order) => /* @__PURE__ */ jsxs("tr", { children: [
@@ -614,6 +632,7 @@ function DataRows({ orders, onAdvance, empty }) {
         /* @__PURE__ */ jsx("td", { children: orderDate(order.invoicedAt || order.createdAt) }),
         /* @__PURE__ */ jsx("td", { children: /* @__PURE__ */ jsx("b", { children: currency.format(order.total) }) }),
         /* @__PURE__ */ jsx("td", { children: stateLabels[order.status] || order.status }),
+        showCarrier && /* @__PURE__ */ jsx("td", { children: order.trace?.carrier?.name || "\u2014" }),
         /* @__PURE__ */ jsx("td", { children: onAdvance && nextState[order.status] && /* @__PURE__ */ jsxs("button", { className: "row-action", onClick: () => onAdvance(order), children: [
           "Avanzar ",
           /* @__PURE__ */ jsx(ArrowRight, {})

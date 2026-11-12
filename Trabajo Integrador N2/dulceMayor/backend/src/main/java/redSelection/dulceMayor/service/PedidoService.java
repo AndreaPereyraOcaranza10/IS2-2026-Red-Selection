@@ -22,8 +22,7 @@ import redSelection.dulceMayor.security.UsuarioAutenticado;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 /**
  * Pedidos. PATRÓN: Template Method (capa Service) sobre BaseService:
@@ -215,6 +214,10 @@ public class PedidoService extends BaseService<Pedido, PedidoCrearDTO, PedidoRes
         } catch (IllegalArgumentException e) {
             throw new ReglaNegocioException("El estado solicitado no es válido: " + dto.status() + ".");
         }
+        if (destino == EstadoPedido.EN_REPARTO) {
+            // Despachar es asignar a un transportista (crea la Entrega y la parada): solo por DespachoService.
+            throw new ReglaNegocioException("Para despachar un pedido hay que asignarlo a un transportista (Despacho).");
+        }
         String usuario = usuarioActual.nombreOSistema();
         if (destino == EstadoPedido.FACTURADO) {
             facturaService.facturarPedido(pedido, usuario);
@@ -225,6 +228,47 @@ public class PedidoService extends BaseService<Pedido, PedidoCrearDTO, PedidoRes
             }
         }
         return aRespuesta(pedidoRepository.save(pedido));
+    }
+
+    // =====================================================
+    // DESPACHO (lo usa DespachoService)
+    // =====================================================
+
+    /**
+     * Pasa pedidos FACTURADOS a EN_REPARTO (el State valida la transición y la deja en el historial). Se toma cada pedido
+     * con bloqueo, en orden de id, para que dos administradores no despachen el mismo pedido a la vez. Todos o ninguno:
+     * si uno no se puede despachar, la transacción se revierte. Un comercio no puede repetirse: una parada lleva un
+     * solo pedido.
+     */
+    @Transactional
+    public List<Pedido> despacharFacturados(Collection<String> ids, String observacion) {
+        List<Pedido> pedidos = new ArrayList<>();
+        for (String id : new TreeSet<>(ids)) {
+            pedidos.add(pedidoRepository.buscarConBloqueo(id).filter(p -> !p.isEliminado())
+                    .orElseThrow(() -> new RecursoNoEncontradoException(nombreRecurso(), id)));
+        }
+        validarDespacho(pedidos);
+        String usuario = usuarioActual.nombreOSistema();
+        pedidos.forEach(pedido -> pedido.despachar(usuario, observacion));
+        return pedidoRepository.saveAll(pedidos);
+    }
+
+    private void validarDespacho(List<Pedido> pedidos) {
+        Map<String, Integer> porComercio = new LinkedHashMap<>();
+        for (Pedido pedido : pedidos) {
+            String comercio = pedido.getCliente().getNombreComercio();
+            if (pedido.getEstado() != EstadoPedido.FACTURADO) {
+                throw new ReglaNegocioException("El pedido de " + comercio + " no se puede despachar: está "
+                        + pedido.getEstado() + " y solo se despachan pedidos FACTURADOS.");
+            }
+            porComercio.merge(pedido.getCliente().getId() + "|" + comercio, 1, Integer::sum);
+        }
+        porComercio.forEach((clave, cantidad) -> {
+            if (cantidad > 1) {
+                throw new ReglaNegocioException(clave.substring(clave.indexOf('|') + 1) + " tiene " + cantidad
+                        + " pedidos en este despacho: asignalos en despachos separados.");
+            }
+        });
     }
 
     // =====================================================

@@ -232,3 +232,15 @@ html,body,#root{height:auto;min-height:100%;overflow-x:hidden;overflow-y:auto}
 
 /* Prueba para agrandar el tamaño de la letra*/
 .ops-app{zoom:1.15}
+
+.ops-dispatch-pending{margin-bottom:16px}
+.ops-dispatch-pending .table-title{align-items:center;gap:12px;flex-wrap:wrap}
+.ops-dispatch-pending .ops-primary{display:inline-flex;align-items:center;gap:7px;height:40px;padding:0 14px;font-size:14px;white-space:nowrap}
+.ops-dispatch-pending .ops-primary:disabled{opacity:.55;cursor:not-allowed}
+.ops-dispatch-pending .ops-primary svg{width:16px;height:16px}
+.dispatch-check{width:44px;text-align:center}
+.dispatch-check input{width:17px;height:17px;accent-color:var(--color-brand-primary);cursor:pointer}
+.dispatch-orders{margin:0 0 4px;padding:0;list-style:none;max-height:240px;overflow:auto;border:1px solid var(--color-surface-dim);border-radius:8px}
+.dispatch-orders li{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 12px;border-bottom:1px solid var(--color-surface-dim);color:var(--color-brand-deep);font-size:15px}
+.dispatch-orders li:last-child{border-bottom:0}
+.dispatch-orders small{color:var(--color-text-secondary);font-size:14px;font-weight:700;white-space:nowrap}

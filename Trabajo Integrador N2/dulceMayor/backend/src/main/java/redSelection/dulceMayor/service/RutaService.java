@@ -1,6 +1,7 @@
 package redSelection.dulceMayor.service;
 
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import redSelection.dulceMayor.dto.*;
@@ -12,7 +13,8 @@ import redSelection.dulceMayor.patrones.facade.NotificacionFacade;
 import redSelection.dulceMayor.patrones.strategy.OptimizadorRuta;
 import redSelection.dulceMayor.patrones.strategy.PlanOptimizado;
 import redSelection.dulceMayor.patrones.strategy.PuntoRuta;
-import redSelection.dulceMayor.repository.*;
+import redSelection.dulceMayor.repository.ParadaRutaRepository;
+import redSelection.dulceMayor.repository.RutaDiariaRepository;
 import redSelection.dulceMayor.security.UsuarioActual;
 
 import java.time.LocalDate;
@@ -26,18 +28,19 @@ import java.util.stream.Collectors;
  * (armar la ruta del día, registrar visitas/entregas, reordenar). Sí reutiliza las excepciones y el
  * manejador global de errores.
  * Usa Strategy (OptimizadorRuta) para ordenar y la Facade de notificaciones para avisar al próximo comercio.
+ * Solo accede a SUS repositories (rutas y paradas). Preventistas, transportistas, comercios, entregas y la empresa
+ * se piden a los services que los administran, nunca a sus repositories.
  */
 @Service
 public class RutaService {
 
     private final RutaDiariaRepository rutaRepository;
     private final ParadaRutaRepository paradaRepository;
-    private final PreventistaRepository preventistaRepository;
-    private final TransportistaRepository transportistaRepository;
-    private final ClienteMinoristaRepository clienteRepository;
-    private final PedidoRepository pedidoRepository;
-    private final EntregaRepository entregaRepository;
-    private final DulceMayorRepository dulceMayorRepository;
+    private final PreventistaService preventistaService;
+    private final TransportistaService transportistaService;
+    private final PuntoVentaService puntoVentaService;
+    private final EntregaService entregaService;
+    private final DulceMayorService dulceMayorService;
     private final OptimizadorRuta optimizador;          // por calles (OSRM) con respaldo
     private final OptimizadorRuta ordenadorLocal;       // línea recta, sin red: orden inicial de una ruta nueva
     private final NotificacionFacade notificaciones;
@@ -45,24 +48,22 @@ public class RutaService {
 
     public RutaService(RutaDiariaRepository rutaRepository,
                        ParadaRutaRepository paradaRepository,
-                       PreventistaRepository preventistaRepository,
-                       TransportistaRepository transportistaRepository,
-                       ClienteMinoristaRepository clienteRepository,
-                       PedidoRepository pedidoRepository,
-                       EntregaRepository entregaRepository,
-                       DulceMayorRepository dulceMayorRepository,
+                       PreventistaService preventistaService,
+                       TransportistaService transportistaService,
+                       PuntoVentaService puntoVentaService,
+                       EntregaService entregaService,
+                       DulceMayorService dulceMayorService,
                        OptimizadorRuta optimizador,
                        @Qualifier("vecinoMasCercanoOptimizador") OptimizadorRuta ordenadorLocal,
                        NotificacionFacade notificaciones,
                        UsuarioActual usuarioActual) {
         this.rutaRepository = rutaRepository;
         this.paradaRepository = paradaRepository;
-        this.preventistaRepository = preventistaRepository;
-        this.transportistaRepository = transportistaRepository;
-        this.clienteRepository = clienteRepository;
-        this.pedidoRepository = pedidoRepository;
-        this.entregaRepository = entregaRepository;
-        this.dulceMayorRepository = dulceMayorRepository;
+        this.preventistaService = preventistaService;
+        this.transportistaService = transportistaService;
+        this.puntoVentaService = puntoVentaService;
+        this.entregaService = entregaService;
+        this.dulceMayorService = dulceMayorService;
         this.optimizador = optimizador;
         this.ordenadorLocal = ordenadorLocal;
         this.notificaciones = notificaciones;
@@ -76,8 +77,7 @@ public class RutaService {
     /** Ruta de hoy del preventista: si no existe, se arma con los comercios que tiene asignados. */
     @Transactional
     public RutaDTO rutaDePreventista(String preventistaId) {
-        Preventista preventista = preventistaRepository.findByIdAndEliminadoFalse(preventistaId)
-                .orElseThrow(() -> new RecursoNoEncontradoException("Preventista", preventistaId));
+        Preventista preventista = preventistaService.obtenerEntidad(preventistaId);
         LocalDate hoy = LocalDate.now();
         RutaDiaria ruta = rutaRepository
                 .findByResponsableIdAndFechaAndTipoRuta(preventistaId, hoy, TipoRuta.PREVENTA)
@@ -91,8 +91,7 @@ public class RutaService {
                 .tipoRuta(TipoRuta.PREVENTA)
                 .responsable(preventista)
                 .build();
-        List<ClienteMinorista> clientes =
-                clienteRepository.findByPreventistaAsignadoIdAndEliminadoFalse(preventista.getId());
+        List<ClienteMinorista> clientes = puntoVentaService.clientesAsignados(preventista.getId());
         for (ClienteMinorista cliente : ordenInicial(clientes)) {
             agregarParada(ruta, cliente, null);
         }
@@ -133,31 +132,63 @@ public class RutaService {
     // =====================================================
 
     /**
-     * Ruta de hoy del transportista. Cada consulta toma los pedidos FACTURADOS que nadie despachó,
-     * los pasa a EN_REPARTO, crea su Entrega y los suma como paradas al final de la ruta.
+     * Ruta de hoy del transportista: solo los pedidos que administración le asignó (ver DespachoService).
+     * Consultarla no cambia ningún pedido; si hoy todavía no tiene ruta, se devuelve una vacía.
      */
     @Transactional
     public RutaDTO rutaDeTransportista(String transportistaId) {
-        Transportista transportista = transportistaRepository.findByIdAndEliminadoFalse(transportistaId)
-                .orElseThrow(() -> new RecursoNoEncontradoException("Transportista", transportistaId));
+        Transportista transportista = transportistaService.obtenerEntidad(transportistaId);
+        return aDTO(rutaDeRepartoDeHoy(transportista));
+    }
+
+    /**
+     * Suma a la ruta de hoy del transportista los pedidos que administración le acaba de asignar: una parada por
+     * comercio y la Entrega con quién la lleva. Los pedidos ya pasaron a EN_REPARTO (lo hace DespachoService
+     * con el patrón State). Un comercio no puede repetirse en el mismo despacho: una parada lleva un solo pedido.
+     */
+    @Transactional
+    public void incorporarPedidosARuta(Transportista transportista, List<Pedido> pedidos, LocalDateTime fechaDespacho) {
+        Map<String, Pedido> porCliente = new LinkedHashMap<>();
+        for (Pedido pedido : pedidos) {
+            if (porCliente.putIfAbsent(pedido.getCliente().getId(), pedido) != null) {
+                throw new ReglaNegocioException("Un comercio no puede tener dos pedidos en el mismo despacho.");
+            }
+        }
+        RutaDiaria ruta = rutaDeRepartoDeHoy(transportista);
+        List<ClienteMinorista> clientes = porCliente.values().stream().map(Pedido::getCliente).toList();
+        for (ClienteMinorista cliente : ordenInicial(clientes)) {
+            Pedido pedido = porCliente.get(cliente.getId());
+            agregarParada(ruta, cliente, pedido);
+            entregaService.registrarDespacho(pedido, transportista, fechaDespacho);
+        }
+        if (ruta.getEstado() == EstadoRuta.FINALIZADA) {
+            ruta.setEstado(EstadoRuta.PLANIFICADA);   // llegaron pedidos nuevos: la ruta se reabre
+        }
+        rutaRepository.save(ruta);
+    }
+
+    private RutaDiaria rutaDeRepartoDeHoy(Transportista transportista) {
         LocalDate hoy = LocalDate.now();
-        RutaDiaria ruta = rutaRepository
-                .findByResponsableIdAndFechaAndTipoRuta(transportistaId, hoy, TipoRuta.REPARTO)
+        return rutaRepository
+                .findByResponsableIdAndFechaAndTipoRuta(transportista.getId(), hoy, TipoRuta.REPARTO)
                 .orElseGet(() -> rutaRepository.save(RutaDiaria.builder()
                         .fecha(hoy)
                         .tipoRuta(TipoRuta.REPARTO)
                         .responsable(transportista)
                         .build()));
-        despacharFacturados(ruta, transportista);
-        return aDTO(ruta);
     }
 
     /**
-     * Un comercio recién dado de alta se suma como parada pendiente a la ruta de hoy del preventista.
-     * Si hoy todavía no consultó su ruta no hace falta nada: se arma sola con los comercios asignados.
+     * Observer: un comercio recién dado de alta (PuntoVentaAltaEvento) se suma como parada pendiente a la ruta de
+     * hoy del preventista. Si hoy todavía no consultó su ruta no hace falta nada: se arma sola con los comercios asignados.
      */
+    @EventListener
     @Transactional
-    public void incorporarARutaDeHoy(String preventistaId, ClienteMinorista cliente) {
+    public void alDarDeAltaPuntoDeVenta(PuntoVentaAltaEvento evento) {
+        incorporarARutaDeHoy(evento.preventistaId(), evento.cliente());
+    }
+
+    private void incorporarARutaDeHoy(String preventistaId, ClienteMinorista cliente) {
         rutaRepository.findByResponsableIdAndFechaAndTipoRuta(preventistaId, LocalDate.now(), TipoRuta.PREVENTA)
                 .ifPresent(ruta -> {
                     agregarParada(ruta, cliente, null);
@@ -166,35 +197,6 @@ public class RutaService {
                     }
                     rutaRepository.save(ruta);
                 });
-    }
-
-    private void despacharFacturados(RutaDiaria ruta, Transportista transportista) {
-        List<Pedido> facturados = pedidoRepository.findByEstadoOrderByFechaHoraCargaAsc(EstadoPedido.FACTURADO);
-        if (facturados.isEmpty()) {
-            return;
-        }
-        LocalDateTime ahora = LocalDateTime.now();
-        Map<String, Pedido> porCliente = new LinkedHashMap<>();
-        for (Pedido pedido : facturados) {
-            porCliente.putIfAbsent(pedido.getCliente().getId(), pedido);
-        }
-        // Un comercio con más de un pedido facturado se atiende en una sola parada: el resto queda para la próxima consulta.
-        List<ClienteMinorista> clientes = porCliente.values().stream().map(Pedido::getCliente).toList();
-        String usuario = usuarioActual.nombreOSistema();
-        for (ClienteMinorista cliente : ordenInicial(clientes)) {
-            Pedido pedido = porCliente.get(cliente.getId());
-            agregarParada(ruta, cliente, pedido);
-            pedido.despachar(usuario, "Asignado a la ruta de reparto del " + ruta.getFecha());
-            Entrega entrega = entregaRepository.findByPedidoId(pedido.getId())
-                    .orElseGet(() -> Entrega.builder().pedido(pedido).build());
-            entrega.setTransportista(transportista);
-            entrega.setFechaDespacho(ahora);
-            entregaRepository.save(entrega);
-        }
-        if (ruta.getEstado() == EstadoRuta.FINALIZADA) {
-            ruta.setEstado(EstadoRuta.PLANIFICADA);   // llegaron pedidos nuevos: la ruta se reabre
-        }
-        rutaRepository.save(ruta);
     }
 
     /**
@@ -214,7 +216,7 @@ public class RutaService {
         }
         pedido.entregar(usuarioActual.nombreOSistema(), "Entregado al comercio");   // el State rechaza si no está EN_REPARTO
         LocalDateTime ahora = cerrarParada(parada);
-        entregaRepository.findByPedidoId(pedido.getId()).ifPresent(e -> e.setFechaEntrega(ahora));
+        entregaService.registrarEntrega(pedido.getId(), ahora);
 
         Optional<ParadaRuta> siguiente = primeraPendiente(ruta);
         boolean correoEnviado = false;
@@ -363,10 +365,7 @@ public class RutaService {
     }
 
     private Optional<PuntoRuta> depositoCentral() {
-        return dulceMayorRepository.findByEliminadoFalse().stream()
-                .filter(d -> d.getTipoEmpresa() == TipoEmpresa.SEDE_CENTRAL)
-                .findFirst()
-                .flatMap(d -> puntoDe("deposito", d.getDireccion()));
+        return dulceMayorService.sedeCentral().flatMap(d -> puntoDe("deposito", d.getDireccion()));
     }
 
     private Optional<PuntoRuta> puntoDeParada(ParadaRuta parada) {

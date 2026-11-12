@@ -25,7 +25,7 @@ public class PortalOrderController extends BaseController<PedidoCrearDTO, Pedido
 
     @Override protected String idDe(PedidoRespuestaDTO respuesta) { return respuesta.id(); }
 
-    /** Administración: facturar, despachar, entregar o anular (lo valida el patrón State del pedido). */
+    /** Administración: facturar, entregar o anular (lo valida el patrón State del pedido). */
     @PatchMapping("/{id}/status")
     public PedidoRespuestaDTO cambiarEstado(@PathVariable String id, @Valid @RequestBody CambioEstadoPedidoDTO cambio) {
         return pedidos.cambiarEstado(id, cambio);

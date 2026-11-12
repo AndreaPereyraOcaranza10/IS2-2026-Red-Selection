@@ -1,5 +1,6 @@
 package redSelection.dulceMayor.service;
 
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,24 +29,23 @@ public class PuntoVentaService extends BaseService<ClienteMinorista, PuntoVentaC
     private final DireccionService direccionService;
     private final ResponsableComercioService responsableService;
     private final PreventistaService preventistaService;
-    private final RutaService rutaService;
+    private final ApplicationEventPublisher eventos;
     private final UsuarioActual usuarioActual;
 
     public PuntoVentaService(ClienteMinoristaRepository clienteRepository,
                              DireccionService direccionService,
                              ResponsableComercioService responsableService,
                              PreventistaService preventistaService,
-                             RutaService rutaService,
+                             ApplicationEventPublisher eventos,        // antes: RutaService rutaService,
                              UsuarioActual usuarioActual) {
         super(clienteRepository);
         this.clienteRepository = clienteRepository;
         this.direccionService = direccionService;
         this.responsableService = responsableService;
         this.preventistaService = preventistaService;
-        this.rutaService = rutaService;
+        this.eventos = eventos;                                        // antes: this.rutaService = rutaService;
         this.usuarioActual = usuarioActual;
     }
-
     // ---------- Pasos del Template Method ----------
 
     @Override protected String nombreRecurso() { return "Punto de venta"; }
@@ -106,12 +106,21 @@ public class PuntoVentaService extends BaseService<ClienteMinorista, PuntoVentaC
         exigirPropiedad(cliente);
     }
 
-    /** El punto de venta ya está guardado: si el preventista tiene ruta armada hoy, aparece como parada pendiente. */
+    /**
+     * El punto de venta ya está guardado: se avisa (Observer) y RutaService lo suma como parada pendiente
+     * si el preventista ya tiene ruta armada hoy.
+     */
     @Override
     protected void despuesDeCrear(ClienteMinorista cliente, PuntoVentaCrearDTO dto) {
         if (cliente.getPreventistaAsignado() != null) {
-            rutaService.incorporarARutaDeHoy(cliente.getPreventistaAsignado().getId(), cliente);
+            eventos.publishEvent(new PuntoVentaAltaEvento(cliente.getPreventistaAsignado().getId(), cliente));
         }
+    }
+
+    /** Para otros services (la ruta de preventa): los comercios asignados a un preventista, sin control de acceso. */
+    @Transactional(readOnly = true)
+    public List<ClienteMinorista> clientesAsignados(String preventistaId) {
+        return clienteRepository.findByPreventistaAsignadoIdAndEliminadoFalse(preventistaId);
     }
 
     // ---------- Control de propiedad en las lecturas ----------

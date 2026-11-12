@@ -24,6 +24,7 @@ import redSelection.dulceMayor.security.UsuarioActual;
 import redSelection.dulceMayor.security.UsuarioAutenticado;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
@@ -139,6 +140,24 @@ public class EntregaService {
     @Transactional(readOnly = true)
     public Optional<Entrega> buscarPorPedido(String pedidoId) {
         return entregaRepository.findByPedidoId(pedidoId).filter(e -> !e.isEliminado());
+    }
+
+    // ---------- Para RutaService: constancia de despacho y de entrega ----------
+
+    /** Despacho: deja constancia de quién lleva el pedido. Si el pedido ya tenía Entrega, la reutiliza. */
+    @Transactional
+    public Entrega registrarDespacho(Pedido pedido, Transportista transportista, LocalDateTime fechaDespacho) {
+        Entrega entrega = entregaRepository.findByPedidoId(pedido.getId())
+                .orElseGet(() -> Entrega.builder().pedido(pedido).build());
+        entrega.setTransportista(transportista);
+        entrega.setFechaDespacho(fechaDespacho);
+        return entregaRepository.save(entrega);
+    }
+
+    /** El pedido se entregó: deja la fecha en su Entrega. Si el pedido no tiene Entrega, no hace nada. */
+    @Transactional
+    public void registrarEntrega(String pedidoId, LocalDateTime fechaEntrega) {
+        entregaRepository.findByPedidoId(pedidoId).ifPresent(e -> e.setFechaEntrega(fechaEntrega));
     }
 
     // ---------- Auxiliares ----------

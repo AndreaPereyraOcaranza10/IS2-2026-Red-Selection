@@ -89,6 +89,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/configuracion-correo/**").hasRole("ADMINISTRATIVO")
                         .requestMatchers("/api/newsletter/**").hasRole("JEFE_ADMINISTRATIVO")
                         .requestMatchers(HttpMethod.PATCH, "/api/orders/*/status").hasRole("ADMINISTRATIVO")
+                        // Despacho: administración asigna pedidos FACTURADOS a un transportista (el Jefe lo hereda)
+                        .requestMatchers("/api/despachos/**").hasRole("ADMINISTRATIVO")
                         // Cada empleado ve solo su ruta
                         .requestMatchers(HttpMethod.GET, "/api/rutas/preventista/{id}/hoy").access(propia(Rol.PREVENTISTA))
                         .requestMatchers(HttpMethod.GET, "/api/rutas/transportista/{id}/hoy").access(propia(Rol.TRANSPORTISTA))
