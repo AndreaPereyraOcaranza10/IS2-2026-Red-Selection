@@ -329,6 +329,13 @@ class SeguridadEndpointsTest {
         String admin = token(Rol.ADMINISTRATIVO, false, "a1");
         esperar(403, HttpMethod.PUT, "/api/orders/o1", admin);
         esperar(403, HttpMethod.DELETE, "/api/orders/o1", admin);
+        // BK-15: el cliente cancela su pedido y paga (billetera); el cobro lo registra solo administración
+        soloRoles(HttpMethod.POST, "/api/orders/o1/cancel", Rol.CLIENTE, Rol.ADMINISTRATIVO);
+        soloRoles(HttpMethod.POST, "/api/orders/o1/pagos", Rol.CLIENTE, Rol.ADMINISTRATIVO);
+        soloRoles(HttpMethod.GET, "/api/orders/o1/pagos/vigente", Rol.CLIENTE, Rol.ADMINISTRATIVO);
+        soloRoles(HttpMethod.POST, "/api/orders/o1/pagos/verificar", Rol.CLIENTE, Rol.ADMINISTRATIVO);
+        soloRoles(HttpMethod.POST, "/api/orders/o1/pagos/simular-acreditacion", Rol.CLIENTE, Rol.ADMINISTRATIVO);
+        soloRoles(HttpMethod.POST, "/api/orders/o1/pagos/confirmar", Rol.ADMINISTRATIVO);
         esperar(200, HttpMethod.GET, "/api/profile", token(Rol.CLIENTE, false, null));
         esperar(403, HttpMethod.GET, "/api/profile", token(Rol.PREVENTISTA, false, "p1"));
     }
@@ -336,6 +343,12 @@ class SeguridadEndpointsTest {
     @Test @DisplayName("El presupuesto del chatbot es público (sitio institucional sin sesión)")
     void chatbotPublico() throws Exception {
         esperar(200, HttpMethod.POST, "/api/chatbot/presupuestos", null);
+    }
+
+    @Test @DisplayName("El webhook de Mercado Pago es público, pero ningún otro endpoint de pagos lo es")
+    void webhookMercadoPagoPublico() throws Exception {
+        esperar(200, HttpMethod.POST, "/api/pagos/webhook/mercadopago", null);
+        esperar(401, HttpMethod.POST, "/api/pagos/webhook/otro", null);
     }
 
     @Test @DisplayName("El Jefe tampoco entra con la clave inicial pendiente")

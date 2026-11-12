@@ -69,7 +69,7 @@ export function PaymentPanel({ order, onPaid }) {
   const verify = useCallback(async (silent) => {
     try {
       const current = await api.verifyOrderPayment(order.id);
-      if (current) setPayment(current);
+      setPayment(current || null);   // sin pago vigente (QR vencido o cancelado): vuelve a ofrecer "Pagar"
       if (current?.estado === "CONFIRMADO") onPaid();
       else if (!silent) setError("Todavía no vemos el pago. Si ya pagaste, esperá unos segundos y probá de nuevo.");
     } catch (cause) {
@@ -185,8 +185,9 @@ function OrderCard({ order, onCancel, cancelling, onPaid }) {
       {!canceled && (
         <div className="tracking-steps">
           {trackingSteps.map((step, index) => {
-            const done = activeIndex >= 0 && index < activeIndex;
-            const active = index === activeIndex;
+            // "Facturado" ya es un paso completo para el cliente (el pago está acreditado): sale verde aunque sea el actual.
+            const done = activeIndex >= 0 && (index < activeIndex || (index === activeIndex && step === "FACTURADO"));
+            const active = index === activeIndex && step !== "FACTURADO";
             const event = events.find((item) => item.state === step);
             return (
               <div className={"tracking-step " + (done ? "done " : "") + (active ? "active " : "") + (active && step === "ENTREGADO" ? "delivered" : "")} key={step}>
@@ -194,7 +195,7 @@ function OrderCard({ order, onCancel, cancelling, onPaid }) {
                   {done || (active && step === "ENTREGADO") ? <BadgeCheck /> : active ? <RefreshCw /> : step === "EN_REPARTO" ? <Truck /> : <Package />}
                 </span>
                 <b>{stateLabel(step)}</b>
-                <small>{event ? dateTime(event.at) : active ? "Actual" : "Pendiente"}</small>
+                <small>{event ? dateTime(event.at) : active ? "Actual" : done ? "Completado" : "Pendiente"}</small>
               </div>
             );
           })}
