@@ -16,6 +16,7 @@ import redSelection.dulceMayor.security.UsuarioActual;
 import redSelection.dulceMayor.security.UsuarioAutenticado;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * PATRÓN: Template Method (capa Service). Un punto de venta es un ClienteMinorista.
@@ -121,6 +122,27 @@ public class PuntoVentaService extends BaseService<ClienteMinorista, PuntoVentaC
     @Transactional(readOnly = true)
     public List<ClienteMinorista> clientesAsignados(String preventistaId) {
         return clienteRepository.findByPreventistaAsignadoIdAndEliminadoFalse(preventistaId);
+    }
+
+    /** Para PedidoService: el comercio, si es de ese preventista (un preventista solo carga pedidos en SUS puntos de venta). */
+    @Transactional(readOnly = true)
+    public Optional<ClienteMinorista> buscarDelPreventista(String puntoVentaId, String preventistaId) {
+        return clienteRepository.findByIdAndEliminadoFalse(puntoVentaId)
+                .filter(c -> c.getPreventistaAsignado() != null && c.getPreventistaAsignado().getId().equals(preventistaId));
+    }
+
+    /** Para PedidoService (pedidos cargados por administración): el comercio por nombre de fantasía o razón social. */
+    @Transactional(readOnly = true)
+    public Optional<ClienteMinorista> buscarPorNombre(String nombre) {
+        return clienteRepository.findByEliminadoFalse().stream()
+                .filter(c -> c.getNombreComercio().equalsIgnoreCase(nombre) || c.getRazonSocial().equalsIgnoreCase(nombre))
+                .findFirst();
+    }
+
+    /** Para PedidoService (pedidos del portal): el comercio del cliente logueado, a partir de su responsable. */
+    @Transactional(readOnly = true)
+    public Optional<ClienteMinorista> delResponsable(String responsableId) {
+        return clienteRepository.findByResponsableIdAndEliminadoFalse(responsableId).stream().findFirst();
     }
 
     // ---------- Control de propiedad en las lecturas ----------

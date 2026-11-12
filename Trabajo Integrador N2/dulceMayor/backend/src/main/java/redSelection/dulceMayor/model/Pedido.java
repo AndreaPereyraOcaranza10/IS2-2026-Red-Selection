@@ -71,6 +71,10 @@ public class Pedido extends Base {
                 .usuario(usuario).observacion("Pedido cargado").build());
     }
 
+    public void esperarPago(String usuario, String observacion) {
+        aplicar(estadoActual().esperarPago(), usuario, observacion);
+    }
+
     public void facturar(String usuario, String observacion) {
         aplicar(estadoActual().facturar(), usuario, observacion);
     }
@@ -94,6 +98,7 @@ public class Pedido extends Base {
     /** Para el endpoint genérico de cambio de estado: traduce el destino pedido a la acción correspondiente. */
     public void avanzarA(EstadoPedido destino, String usuario, String observacion) {
         switch (destino) {
+            case PENDIENTE_PAGO -> esperarPago(usuario, observacion);
             case FACTURADO -> facturar(usuario, observacion);
             case PENDIENTE_STOCK -> quedarPendienteDeStock(usuario, observacion);
             case EN_REPARTO -> despachar(usuario, observacion);

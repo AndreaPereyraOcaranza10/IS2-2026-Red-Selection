@@ -9,8 +9,9 @@ import redSelection.dulceMayor.exception.ReglaNegocioException;
  * sobrescribe solo las que admite, así una transición nueva no se puede colar sin querer.
  *
  * Transiciones permitidas:
- *   CARGADO          -> FACTURADO, PENDIENTE_STOCK, ANULADO
- *   PENDIENTE_STOCK  -> FACTURADO, ANULADO
+ *   CARGADO          -> PENDIENTE_PAGO (stock reservado), PENDIENTE_STOCK, ANULADO
+ *   PENDIENTE_STOCK  -> PENDIENTE_PAGO, ANULADO
+ *   PENDIENTE_PAGO   -> FACTURADO (se acreditó el pago o se despacha en efectivo), ANULADO
  *   FACTURADO        -> EN_REPARTO, ANULADO
  *   EN_REPARTO       -> ENTREGADO
  *   ENTREGADO, ANULADO: finales
@@ -18,6 +19,10 @@ import redSelection.dulceMayor.exception.ReglaNegocioException;
 public interface EstadoPedidoState {
 
     EstadoPedido nombre();
+
+    default EstadoPedido esperarPago() {
+        throw transicionInvalida(EstadoPedido.PENDIENTE_PAGO);
+    }
 
     default EstadoPedido facturar() {
         throw transicionInvalida(EstadoPedido.FACTURADO);

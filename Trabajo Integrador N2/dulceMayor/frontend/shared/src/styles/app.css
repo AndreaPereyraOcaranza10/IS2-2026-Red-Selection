@@ -66,6 +66,7 @@ h1,h2,h3,p{margin:0}
 .chip{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:99px;font-weight:600;font-size:14px;line-height:20px;white-space:nowrap}
 .chip::before{content:"";width:8px;height:8px;border-radius:50%;background:currentColor}
 .c-pend,.c-stock{background:var(--warn-bg);color:var(--warn)}.c-vis,.c-ent{background:var(--ok-bg);color:var(--ok)}
+.c-pago{background:var(--warn-bg);color:var(--warn)}
 .c-carg{background:var(--info-bg);color:var(--info)}.c-fact{background:var(--purple-bg);color:var(--purple)}
 .c-rep{background:var(--secondary-container);color:var(--secondary-strong)}.c-anu{background:var(--err-bg);color:var(--err)}
 .tag{display:inline-flex;align-items:center;gap:6px;padding:2px 8px;border-radius:99px;font-size:12px;line-height:16px;font-weight:700}

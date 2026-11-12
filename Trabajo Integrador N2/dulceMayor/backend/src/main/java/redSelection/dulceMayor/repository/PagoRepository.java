@@ -16,6 +16,8 @@ public interface PagoRepository extends BaseRepository<Pago> {
 
     List<Pago> findByFacturaIdAndEliminadoFalse(String facturaId);
 
+    List<Pago> findByPedidoIdAndEliminadoFalse(String pedidoId);
+
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("select p from Pago p where p.id = :id")
     Optional<Pago> buscarConBloqueo(@Param("id") String id);

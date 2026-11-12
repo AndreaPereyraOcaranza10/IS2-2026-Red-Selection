@@ -3,7 +3,7 @@ import { LoaderCircle, Truck, X } from 'lucide-react';
 import { apiAdmin as api } from '../api';
 
 /**
- * Despacho de pedidos (administración). Un pedido FACTURADO sin transportista está "pendiente de despacho":
+ * Despacho de pedidos (administración). Un pedido pago (FACTURADO) o acordado en efectivo, sin transportista, está "pendiente de despacho":
  * se elige un transportista y el backend lo pasa a EN_REPARTO y lo suma a su ruta de hoy (POST /api/despachos).
  * Se despachan todos los pedidos elegidos o ninguno.
  */
@@ -109,7 +109,7 @@ export function DispatchDialog({ orders, onClose, onDone }) {
   );
 }
 
-/** Pedidos facturados que todavía no tienen transportista. Se eligen uno o varios y se asignan juntos. */
+/** Pedidos pagos (o en efectivo) que todavía no tienen transportista. Se eligen uno o varios y se asignan juntos. */
 export function PendingDispatchCard({ orders, onAssign }) {
   const [selected, setSelected] = useState([]);
 
@@ -127,7 +127,7 @@ export function PendingDispatchCard({ orders, onAssign }) {
       <header className="table-title">
         <div>
           <h2>Pendientes de despacho</h2>
-          <p>Pedidos facturados sin transportista. Elegí uno o varios y asignalos.</p>
+          <p>Pedidos pagos o acordados en efectivo, sin transportista. Elegí uno o varios y asignalos.</p>
         </div>
         <button type="button" className="ops-primary" disabled={chosen.length === 0} onClick={() => onAssign(chosen)}>
           <Truck /> Asignar seleccionados{chosen.length > 0 ? ` (${chosen.length})` : ''}
@@ -143,7 +143,7 @@ export function PendingDispatchCard({ orders, onAssign }) {
               </th>
               <th>Pedido</th>
               <th>Cliente</th>
-              <th>Facturado</th>
+              <th>Pago</th>
               <th>Total</th>
               <th>Acción</th>
             </tr>
@@ -156,7 +156,9 @@ export function PendingDispatchCard({ orders, onAssign }) {
                 </td>
                 <td><b>{orderId(order.id)}</b><small>{order.items.length} artículos</small></td>
                 <td>{order.clientName}</td>
-                <td>{orderDate(order.invoicedAt || order.createdAt)}</td>
+                <td>{order.status === 'FACTURADO'
+                  ? <>Facturado<small>{orderDate(order.invoicedAt || order.createdAt)}</small></>
+                  : <>Efectivo<small>se factura al despachar y se cobra al entregar</small></>}</td>
                 <td><b>{currency.format(order.total)}</b></td>
                 <td>
                   <button type="button" className="row-action" onClick={() => onAssign([order])}>Asignar →</button>

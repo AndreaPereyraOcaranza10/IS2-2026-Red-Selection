@@ -8,7 +8,8 @@ import java.time.LocalDateTime;
 
 public record PagoRespuestaDTO(
         String id,
-        String facturaId,
+        String pedidoId,
+        String facturaId,   // null hasta que se emite la factura
         Long numeroFactura,
         TipoPago tipoPago,
         EstadoPago estado,

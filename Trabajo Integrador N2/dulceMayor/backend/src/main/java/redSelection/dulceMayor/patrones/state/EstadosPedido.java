@@ -17,6 +17,7 @@ public final class EstadosPedido {
     static {
         registrar(new Cargado());
         registrar(new PendienteStock());
+        registrar(new PendientePago());
         registrar(new Facturado());
         registrar(new EnReparto());
         registrar(new Entregado());

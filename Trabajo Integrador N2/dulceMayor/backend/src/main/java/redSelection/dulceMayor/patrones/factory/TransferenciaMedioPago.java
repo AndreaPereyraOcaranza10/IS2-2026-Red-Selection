@@ -5,7 +5,7 @@ import redSelection.dulceMayor.enums.TipoEmpresa;
 import redSelection.dulceMayor.enums.TipoPago;
 import redSelection.dulceMayor.exception.ReglaNegocioException;
 import redSelection.dulceMayor.model.DulceMayor;
-import redSelection.dulceMayor.model.FacturaCliente;
+import redSelection.dulceMayor.model.Pedido;
 import redSelection.dulceMayor.model.Pago;
 import redSelection.dulceMayor.repository.DulceMayorRepository;
 
@@ -27,9 +27,9 @@ public class TransferenciaMedioPago implements MedioPago {
 
     /** Falla al iniciar (422) si la empresa no tiene alias, en vez de dejar un pago sin instrucciones. */
     @Override
-    public Pago crearPago(FacturaCliente factura) {
+    public Pago crearPago(Pedido pedido) {
         aliasDeLaEmpresa();
-        return MedioPago.super.crearPago(factura);
+        return MedioPago.super.crearPago(pedido);
     }
 
     @Override

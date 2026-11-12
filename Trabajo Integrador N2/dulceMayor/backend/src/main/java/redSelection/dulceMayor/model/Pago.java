@@ -17,7 +17,12 @@ import java.util.*;
 @SuperBuilder
 public class Pago extends Base {
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false) @JoinColumn(name = "factura_id", nullable = false)
+    /** El pago nace asociado al pedido: la factura recién se emite cuando el pago se acredita (o al despachar en efectivo). */
+    @ManyToOne(fetch = FetchType.LAZY) @JoinColumn(name = "pedido_id")
+    private Pedido pedido;
+
+    /** Null hasta que se emite la factura del pedido. */
+    @ManyToOne(fetch = FetchType.LAZY) @JoinColumn(name = "factura_id")
     private FacturaCliente factura;
 
     @Enumerated(EnumType.STRING) @Column(nullable = false)

@@ -17,11 +17,12 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 /**
- * Facturación de pedidos (BK-05) y acceso a facturas para otros servicios (PagoService, EntregaService).
+ * Facturación de pedidos (BK-05/BK-15) y acceso a facturas para otros servicios (PagoService, EntregaService).
  *
- * Al cargar un pedido se intenta facturar solo: si hay stock de todas las líneas se descuenta, se emite la factura
- * con número correlativo y el pedido pasa a FACTURADO; si falta stock queda en PENDIENTE_STOCK hasta que
- * administración vuelva a facturarlo. Los cambios de estado los valida el pedido (patrón State).
+ * La factura NO se emite al cargar el pedido: se emite cuando el pago se acredita (transferencia, Mercado Pago) o
+ * cuando se despacha, si se cobra en efectivo al entregar. Al emitirla se descuenta el stock físico (el pedido ya
+ * lo tenía reservado), se genera el número correlativo y el pedido pasa a FACTURADO. Los cambios de estado los
+ * valida el pedido (patrón State).
  */
 @Service
 public class FacturaClienteService {
@@ -82,22 +83,9 @@ public class FacturaClienteService {
     // FACTURACIÓN
     // =====================================================
 
-    /** Al cargar el pedido: lo factura si hay stock; si no, lo deja en PENDIENTE_STOCK con el detalle de lo que falta. */
-    @Transactional
-    public Optional<FacturaCliente> facturarAlCargar(Pedido pedido, String usuario) {
-        Map<String, Producto> productos = bloquearProductos(pedido);
-        List<String> faltantes = faltantes(pedido, productos);
-        if (!faltantes.isEmpty()) {
-            pedido.setEstadoStock(EstadoStockPedido.INSUFICIENTE);
-            pedido.quedarPendienteDeStock(usuario, "Falta stock de " + String.join(", ", faltantes));
-            return Optional.empty();
-        }
-        return Optional.of(emitir(pedido, usuario, productos));
-    }
-
     /**
-     * Facturación pedida por administración (un pedido CARGADO o que esperaba stock). Si ya tiene factura la
-     * devuelve; si todavía falta stock, lo rechaza (422) diciendo qué falta.
+     * Emite la factura de un pedido que espera el pago (PENDIENTE_PAGO). Si ya tiene factura la devuelve. El stock
+     * ya estaba reservado, así que el chequeo físico es una red de seguridad (por ejemplo, un ajuste manual de stock).
      */
     @Transactional
     public FacturaCliente facturarPedido(Pedido pedido, String usuario) {
@@ -112,6 +100,16 @@ public class FacturaClienteService {
             throw new ReglaNegocioException("Todavía falta stock de " + String.join(", ", faltantes) + ".");
         }
         return emitir(pedido, usuario, productos);
+    }
+
+    /** Registra que la factura está paga. Una factura anulada no se puede pagar. */
+    @Transactional
+    public void marcarPagada(FacturaCliente factura) {
+        if (factura.getEstado() == EstadoFactura.ANULADA) {
+            throw new ReglaNegocioException("La factura está anulada: no se puede registrar el pago.");
+        }
+        factura.setEstado(EstadoFactura.PAGADA);
+        facturaRepository.save(factura);
     }
 
     /** Al anular un pedido facturado: la factura queda ANULADA y el stock vuelve. Con un pago confirmado no se puede. */

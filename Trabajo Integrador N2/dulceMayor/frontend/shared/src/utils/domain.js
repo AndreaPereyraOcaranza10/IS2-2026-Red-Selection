@@ -8,11 +8,12 @@ export const ROLES = {
 };
 
 /** Etapas del circuito del pedido: Preventor -> Stock -> Facturación -> Logística -> Entrega. */
-export const ORDER_STAGES = ['CARGADO', 'PENDIENTE_STOCK', 'FACTURADO', 'EN_REPARTO', 'ENTREGADO'];
+export const ORDER_STAGES = ['CARGADO', 'PENDIENTE_STOCK', 'PENDIENTE_PAGO', 'FACTURADO', 'EN_REPARTO', 'ENTREGADO'];
 
 export const ORDER_STATE = {
   CARGADO: { label: 'Cargado', kind: 'carg' },
   PENDIENTE_STOCK: { label: 'Pendiente de stock', kind: 'stock' },
+  PENDIENTE_PAGO: { label: 'Esperando pago', kind: 'pago' },
   FACTURADO: { label: 'Facturado', kind: 'fact' },
   EN_REPARTO: { label: 'En reparto', kind: 'rep' },
   ENTREGADO: { label: 'Entregado', kind: 'ent' },

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   ArrowLeft,
+  Ban,
   BadgeCheck,
   Clock3,
   Download,
@@ -23,13 +24,14 @@ const money = new Intl.NumberFormat("es-AR", {
 const statusText = {
   CARGADO: "Recibido",
   PENDIENTE_STOCK: "Pendiente de stock",
+  PENDIENTE_PAGO: "Esperando pago",
   FACTURADO: "Facturado",
   EN_REPARTO: "En reparto",
   ENTREGADO: "Entregado",
   ANULADO: "Anulado",
 };
 
-const trackingSteps = ["CARGADO", "FACTURADO", "EN_REPARTO", "ENTREGADO"];
+const trackingSteps = ["CARGADO", "PENDIENTE_PAGO", "FACTURADO", "EN_REPARTO", "ENTREGADO"];
 
 function dateTime(value) {
   if (!value) return "Sin fecha";
@@ -47,7 +49,7 @@ function stateLabel(state) {
   return statusText[state] || String(state || "Actualización").replaceAll("_", " ");
 }
 
-function OrderCard({ order }) {
+function OrderCard({ order, onCancel, cancelling }) {
   const canceled = order.status === "ANULADO";
   const delivered = order.status === "ENTREGADO";
   const events = [...(order.trace?.events || [])].sort(
@@ -79,8 +81,10 @@ function OrderCard({ order }) {
               {canceled
                 ? "Este pedido fue cancelado."
                 : order.status === "PENDIENTE_STOCK"
-                  ? "Estamos esperando disponibilidad de stock para facturarlo."
-                  : "Estado actual: " + stateLabel(order.status)}
+                  ? "Estamos esperando disponibilidad de stock para reservarlo."
+                  : order.status === "PENDIENTE_PAGO"
+                    ? "Tu pedido tiene el stock reservado y espera el pago."
+                    : "Estado actual: " + stateLabel(order.status)}
             </small>
           </div>
         </div>
@@ -95,7 +99,7 @@ function OrderCard({ order }) {
             return (
               <div className={"tracking-step " + (done ? "done " : "") + (active ? "active " : "") + (active && step === "ENTREGADO" ? "delivered" : "")} key={step}>
                 <span className="step-icon">
-                  {done || (active && step === "ENTREGADO") ? <BadgeCheck /> : active ? <RefreshCw /> : index === 3 ? <Truck /> : <Package />}
+                  {done || (active && step === "ENTREGADO") ? <BadgeCheck /> : active ? <RefreshCw /> : step === "EN_REPARTO" ? <Truck /> : <Package />}
                 </span>
                 <b>{stateLabel(step)}</b>
                 <small>{event ? dateTime(event.at) : active ? "Actual" : "Pendiente"}</small>
@@ -107,8 +111,24 @@ function OrderCard({ order }) {
 
       {order.status === "PENDIENTE_STOCK" && (
         <p className="order-stock-notice" role="status">
-          El pedido fue recibido y se facturará cuando haya stock suficiente.
+          El pedido fue recibido y se reservará cuando haya stock suficiente.
         </p>
+      )}
+
+      {order.status === "PENDIENTE_PAGO" && (
+        <p className="order-stock-notice" role="status">
+          Reservamos tu mercadería. Administración se va a comunicar para acordar el pago (efectivo, transferencia o
+          billetera virtual). Si no se paga en 48 horas, el pedido se anula solo.
+        </p>
+      )}
+
+      {onCancel && ["PENDIENTE_STOCK", "PENDIENTE_PAGO"].includes(order.status) && (
+        <div className="order-cancel">
+          <button type="button" className="order-cancel-button" onClick={() => onCancel(order)} disabled={cancelling}>
+            {cancelling ? <LoaderCircle className="spin" size={14} /> : <Ban size={14} />}
+            {cancelling ? "Cancelando…" : "Cancelar pedido"}
+          </button>
+        </div>
       )}
 
       {events.length > 0 && (
@@ -231,6 +251,7 @@ export function OrdersPage({ onBack, onProfile, account }) {
   const [invoiceError, setInvoiceError] = useState("");
   const [query, setQuery] = useState("");
   const [downloadingInvoiceId, setDownloadingInvoiceId] = useState("");
+  const [cancellingId, setCancellingId] = useState("");
 
   const loadOrders = useCallback(() => {
     setLoading(true);
@@ -251,6 +272,21 @@ export function OrdersPage({ onBack, onProfile, account }) {
     [orders, query],
   );
   const invoices = orders.filter((order) => Boolean(order.invoiceId));
+
+  const cancelOrder = async (order) => {
+    if (cancellingId) return;
+    if (!window.confirm("¿Querés cancelar este pedido? Se libera la mercadería que reservamos para vos.")) return;
+    setError("");
+    setCancellingId(order.id);
+    try {
+      await api.cancelOrder(order.id);
+      loadOrders();
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : "No pudimos cancelar el pedido.");
+    } finally {
+      setCancellingId("");
+    }
+  };
 
   const downloadInvoice = async (order) => {
     if (!order.invoiceId || downloadingInvoiceId) return;
@@ -334,7 +370,7 @@ export function OrdersPage({ onBack, onProfile, account }) {
         ) : tab === "pedidos" ? (
           filteredOrders.length ? (
             <div className="account-record-list">
-              {filteredOrders.map((order) => <OrderCard order={order} key={order.id} />)}
+              {filteredOrders.map((order) => <OrderCard order={order} key={order.id} onCancel={cancelOrder} cancelling={cancellingId === order.id} />)}
             </div>
           ) : (
             <div className="account-state">

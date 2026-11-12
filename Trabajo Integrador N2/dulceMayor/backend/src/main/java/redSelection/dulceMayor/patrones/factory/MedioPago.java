@@ -3,7 +3,7 @@ package redSelection.dulceMayor.patrones.factory;
 import redSelection.dulceMayor.enums.EstadoPago;
 import redSelection.dulceMayor.enums.Rol;
 import redSelection.dulceMayor.enums.TipoPago;
-import redSelection.dulceMayor.model.FacturaCliente;
+import redSelection.dulceMayor.model.Pedido;
 import redSelection.dulceMayor.model.Pago;
 
 /**
@@ -24,13 +24,13 @@ public interface MedioPago {
     /** Qué tiene que hacer el cliente para pagar (se le muestra en su panel). */
     String instrucciones(Pago pago);
 
-    /** Método de fábrica: el monto SIEMPRE sale de la factura, nunca de lo que mande el cliente. */
-    default Pago crearPago(FacturaCliente factura) {
+    /** Método de fábrica: el monto SIEMPRE sale del pedido, nunca de lo que mande el cliente. */
+    default Pago crearPago(Pedido pedido) {
         return Pago.builder()
-                .factura(factura)
+                .pedido(pedido)
                 .tipoPago(tipo())
                 .estado(EstadoPago.PENDIENTE)
-                .monto(factura.getTotal())
+                .monto(pedido.getTotal())
                 .build();
     }
 

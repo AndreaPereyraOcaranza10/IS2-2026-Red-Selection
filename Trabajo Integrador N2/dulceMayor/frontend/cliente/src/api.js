@@ -100,6 +100,7 @@ export const api = {
     await request("/auth/change-password", { method: "POST", body: JSON.stringify({ currentPassword, newPassword }) }),
   ),
   orders: () => request("/orders"),
+  cancelOrder: (id) => request(`/orders/${encodeURIComponent(id)}/cancel`, { method: "POST", body: JSON.stringify({}) }),
   invoicePdf: (id) => requestPdf("/facturas/" + encodeURIComponent(id) + "/pdf"),
   validatePromotion: (code) => request("/promociones/validar", { method: "POST", body: JSON.stringify({ code }) }),
   chatbotBudget: async (mensaje) => {

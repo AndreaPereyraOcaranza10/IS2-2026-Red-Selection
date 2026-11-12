@@ -23,7 +23,9 @@ export function Timeline({ order }) {
           ? formatDateTime(at)
           : st === 'PENDIENTE_STOCK' && i < idx
             ? 'Sin faltantes de stock'
-            : 'Pendiente';
+            : st === 'PENDIENTE_PAGO' && i < idx
+              ? 'Pago acordado'
+              : 'Pendiente';
         return (
           <div className="it" key={st}>
             <div className="dotc">

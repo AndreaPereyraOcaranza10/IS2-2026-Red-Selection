@@ -21,6 +21,16 @@ public interface PedidoRepository extends BaseRepository<Pedido> {
     /** Pedidos cargados en un período, del más viejo al más nuevo (base de los reportes). */
     List<Pedido> findByEliminadoFalseAndFechaHoraCargaBetweenOrderByFechaHoraCargaAsc(LocalDateTime desde, LocalDateTime hasta);
 
+    /** Pedidos en un estado cargados antes de una fecha (los que esperan el pago hace demasiado). */
+    List<Pedido> findByEstadoAndEliminadoFalseAndFechaHoraCargaBefore(EstadoPedido estado, LocalDateTime limite);
+
+    /** Unidades de un producto que hay en pedidos de un estado: con PENDIENTE_PAGO son las unidades reservadas. */
+    @Query("""
+            select coalesce(sum(i.cantidad), 0) from PedidoItem i
+            where i.producto.id = :productoId and i.pedido.estado = :estado and i.pedido.eliminado = false
+            """)
+    long cantidadEnEstado(@Param("productoId") String productoId, @Param("estado") EstadoPedido estado);
+
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("select p from Pedido p where p.id = :id")
     Optional<Pedido> buscarConBloqueo(@Param("id") String id);
@@ -40,8 +50,8 @@ public interface PedidoRepository extends BaseRepository<Pedido> {
                      p.preventista.apellido, p.preventista.nombre
             """)
     List<PedidosPorDia> pedidosPorPreventistaDia(@Param("desde") LocalDateTime desde,
-                                                   @Param("hasta") LocalDateTime hasta,
-                                                   @Param("anulado") EstadoPedido anulado);
+                                                 @Param("hasta") LocalDateTime hasta,
+                                                 @Param("anulado") EstadoPedido anulado);
 
     @Query("""
             select p.preventista.id as preventistaId,
@@ -57,8 +67,8 @@ public interface PedidoRepository extends BaseRepository<Pedido> {
                      p.preventista.apellido, p.preventista.nombre
             """)
     List<PedidosPorMes> pedidosPorPreventistaMes(@Param("desde") LocalDateTime desde,
-                                                   @Param("hasta") LocalDateTime hasta,
-                                                   @Param("anulado") EstadoPedido anulado);
+                                                 @Param("hasta") LocalDateTime hasta,
+                                                 @Param("anulado") EstadoPedido anulado);
 
     @Query("""
             select p.preventista.id as preventistaId,
@@ -70,7 +80,7 @@ public interface PedidoRepository extends BaseRepository<Pedido> {
             order by p.preventista.apellido, p.preventista.nombre
             """)
     List<PedidosPorEstadoPreventista> pedidosPorEstadoPreventista(@Param("desde") LocalDateTime desde,
-                                                                    @Param("hasta") LocalDateTime hasta);
+                                                                  @Param("hasta") LocalDateTime hasta);
 
     @Query("""
             select p.preventista.id as preventistaId, sum(p.total) as montoFacturado
@@ -80,8 +90,8 @@ public interface PedidoRepository extends BaseRepository<Pedido> {
             group by p.preventista.id
             """)
     List<VentasPreventista> ventasPorPreventista(@Param("desde") LocalDateTime desde,
-                                                  @Param("hasta") LocalDateTime hasta,
-                                                  @Param("estadosFacturados") List<EstadoPedido> estadosFacturados);
+                                                 @Param("hasta") LocalDateTime hasta,
+                                                 @Param("estadosFacturados") List<EstadoPedido> estadosFacturados);
 
     interface PedidosPorDia {
         String getPreventistaId();

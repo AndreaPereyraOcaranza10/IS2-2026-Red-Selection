@@ -114,6 +114,12 @@ public class SecurityConfig {
                         // Pedidos: el cliente ve los suyos, el preventista carga y ve los de SUS comercios
                         // (lo exige PortalOrderController) y el administrativo ve y carga los de cualquiera
                         // Un pedido no se modifica ni se borra: se anula (PATCH /status). Se cierran los PUT/DELETE heredados.
+                        // Pago y cancelación del pedido: el cliente elige billetera virtual y cancela lo suyo; administración
+                        // registra el cobro (la pertenencia del pedido la exige PedidoService). Va ANTES de la regla general.
+                        .requestMatchers(HttpMethod.POST, "/api/orders/*/pagos/confirmar").hasRole("ADMINISTRATIVO")
+                        .requestMatchers(HttpMethod.POST, "/api/orders/*/cancel", "/api/orders/*/pagos")
+                        .hasAnyRole("CLIENTE", "ADMINISTRATIVO")
+                        .requestMatchers(HttpMethod.GET, "/api/orders/*/pagos/vigente").hasAnyRole("CLIENTE", "ADMINISTRATIVO")
                         .requestMatchers(HttpMethod.PUT, "/api/orders/*").denyAll()
                         .requestMatchers(HttpMethod.DELETE, "/api/orders/*").denyAll()
                         .requestMatchers("/api/orders", "/api/orders/*")

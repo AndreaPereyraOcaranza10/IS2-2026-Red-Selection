@@ -2,7 +2,7 @@ package redSelection.dulceMayor.patrones.state;
 
 import redSelection.dulceMayor.enums.EstadoPedido;
 
-/** Pedido recién cargado: se factura si hay stock, queda esperando stock si no, o se anula. */
+/** Pedido recién cargado: si hay stock se reserva y espera el pago; si no, espera stock; o se anula. */
 final class Cargado implements EstadoPedidoState {
 
     @Override
@@ -11,8 +11,8 @@ final class Cargado implements EstadoPedidoState {
     }
 
     @Override
-    public EstadoPedido facturar() {
-        return EstadoPedido.FACTURADO;
+    public EstadoPedido esperarPago() {
+        return EstadoPedido.PENDIENTE_PAGO;
     }
 
     @Override

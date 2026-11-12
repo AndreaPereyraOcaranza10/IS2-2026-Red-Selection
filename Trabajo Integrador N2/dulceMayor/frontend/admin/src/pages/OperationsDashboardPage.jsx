@@ -45,8 +45,10 @@ const sectionPaths = {
   "Promociones": ADMIN_ROUTES.promotions,
   "Estadísticas": ADMIN_ROUTES.statistics
 };
-const stateLabels = { CARGADO: "Cargado", PENDIENTE_STOCK: "Pendiente de stock", FACTURADO: "Facturado", EN_REPARTO: "En reparto", ENTREGADO: "Entregado", ANULADO: "Anulado" };
-const nextState = { CARGADO: "FACTURADO", FACTURADO: "EN_REPARTO", EN_REPARTO: "ENTREGADO" };
+const stateLabels = { CARGADO: "Cargado", PENDIENTE_STOCK: "Pendiente de stock", PENDIENTE_PAGO: "Esperando pago", FACTURADO: "Facturado", EN_REPARTO: "En reparto", ENTREGADO: "Entregado", ANULADO: "Anulado" };
+const nextState = { PENDIENTE_STOCK: "PENDIENTE_PAGO", FACTURADO: "EN_REPARTO", EN_REPARTO: "ENTREGADO" };
+// Se despacha un pedido ya pago (FACTURADO) o uno que espera el pago pero se acordó en efectivo: se factura al despachar.
+const canDispatch = (order) => order.status === "FACTURADO" || (order.status === "PENDIENTE_PAGO" && order.paymentMethod === "EFECTIVO");
 const currency = new Intl.NumberFormat("es-AR", { style: "currency", currency: "ARS", maximumFractionDigits: 0 });
 const moneyCompact = new Intl.NumberFormat("es-AR", { style: "currency", currency: "ARS", notation: "compact", maximumFractionDigits: 2 });
 const orderId = (id) => `#DM-${String(id).slice(0, 5).toUpperCase()}`;
@@ -172,8 +174,8 @@ function OrdersTable({ orders, onAdvance }) {
             " Stock reservado"
           ] }) }),
           /* @__PURE__ */ jsx("td", { children: /* @__PURE__ */ jsx("span", { className: `table-state ${order.status === "CARGADO" ? "state-invoice" : order.status === "ANULADO" ? "state-stock" : "state-loaded"}`, children: stateLabels[order.status] || order.status }) }),
-          /* @__PURE__ */ jsx("td", { children: nextState[order.status] ? /* @__PURE__ */ jsxs("button", { className: "row-action", onClick: () => onAdvance(order), children: [
-            order.status === "CARGADO" ? "Facturar" : order.status === "FACTURADO" ? "Despachar" : "Procesar",
+          /* @__PURE__ */ jsx("td", { children: nextState[order.status] || canDispatch(order) ? /* @__PURE__ */ jsxs("button", { className: "row-action", onClick: () => onAdvance(order), children: [
+            order.status === "PENDIENTE_STOCK" ? "Reintentar reserva" : canDispatch(order) ? "Despachar" : "Procesar",
             " ",
             /* @__PURE__ */ jsx(ArrowRight, {})
           ] }) : /* @__PURE__ */ jsx("span", { className: "ops-muted", children: "\u2014" }) })
@@ -282,14 +284,14 @@ export function OperationsDashboardPage({ onBack }) {
   }, [loadData]);
   const todayOrders = orders.filter((order) => new Date(order.createdAt).toDateString() === (/* @__PURE__ */ new Date()).toDateString());
   const pendingOrders = orders.filter((order) => !["ENTREGADO", "ANULADO"].includes(order.status));
-  const toProcess = orders.filter((order) => ["CARGADO", "PENDIENTE_STOCK"].includes(order.status));
+  const toProcess = orders.filter((order) => ["CARGADO", "PENDIENTE_STOCK", "PENDIENTE_PAGO"].includes(order.status));
   const invoicedToday = orders.filter((order) => isInvoiced(order) && new Date(order.invoicedAt || order.createdAt).toDateString() === (/* @__PURE__ */ new Date()).toDateString());
   const invoicedTotal = invoicedToday.reduce((sum, order) => sum + order.total, 0);
   const lowStockProducts = inventory.filter((product) => Number(product.stock) <= (product.stockMinimum || 0));
   const inTransit = orders.filter((order) => order.status === "EN_REPARTO");
   const deliveredToday = orders.filter((order) => order.status === "ENTREGADO" && new Date(order.createdAt).toDateString() === (/* @__PURE__ */ new Date()).toDateString()).length;
   const advanceOrder = async (order, requestedStatus) => {
-    if (order.status === "FACTURADO" && (!requestedStatus || requestedStatus === "EN_REPARTO")) {
+    if (canDispatch(order) && (!requestedStatus || requestedStatus === "EN_REPARTO")) {
       setDispatchTarget([order]);
       return;
     }
@@ -321,7 +323,7 @@ export function OperationsDashboardPage({ onBack }) {
   };
   const todayLabel = new Intl.DateTimeFormat("es-AR", { weekday: "long", day: "numeric", month: "short" }).format(/* @__PURE__ */ new Date());
   const invoiceOrders = orders.filter(isInvoiced);
-  const pendingDispatch = orders.filter((order) => order.status === "FACTURADO");
+  const pendingDispatch = orders.filter(canDispatch);
   const dispatchOrders = orders.filter((order) => ["EN_REPARTO", "ENTREGADO"].includes(order.status));
   return /* @__PURE__ */ jsxs("main", { className: "ops-app", children: [
     /* @__PURE__ */ jsxs("aside", { className: "ops-sidebar", children: [
@@ -544,7 +546,7 @@ export function OperationsDashboardPage({ onBack }) {
           section === "Pedidos" && /* @__PURE__ */ jsx(OrdersAdminPage, { orders, inventory, loading, onRefresh: () => loadData(true), onStatusChange: advanceOrder }),
           section === "Productos" && /* @__PURE__ */ jsx(ProductsAdminPage, { apiAdmin: api, onStockChange: changeStock }),
           section === "Stock" && /* @__PURE__ */ jsx(ProductsAdminPage, { apiAdmin: api, onStockChange: changeStock, stockOnly: true }),
-          section === "Facturaci\xF3n y pagos" && /* @__PURE__ */ jsx(BillingPaymentsAdminPage, { orders: invoiceOrders, loading, onRefresh: () => loadData(true) }),
+          section === "Facturaci\xF3n y pagos" && /* @__PURE__ */ jsx(BillingPaymentsAdminPage, { orders, loading, onRefresh: () => loadData(true) }),
           section === "Despacho" && /* @__PURE__ */ jsxs(Fragment, { children: [
             /* @__PURE__ */ jsx(PendingDispatchCard, { orders: pendingDispatch, onAssign: setDispatchTarget }),
             /* @__PURE__ */ jsxs("section", { className: "orders-table-card ops-dispatch-table", children: [

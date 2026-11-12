@@ -2,7 +2,7 @@ package redSelection.dulceMayor.patrones.state;
 
 import redSelection.dulceMayor.enums.EstadoPedido;
 
-/** Pedido que no se pudo facturar por falta de stock: se factura cuando llega la mercadería, o se anula. */
+/** Pedido sin stock suficiente: cuando llega la mercadería se reserva y espera el pago, o se anula. */
 final class PendienteStock implements EstadoPedidoState {
 
     @Override
@@ -11,8 +11,8 @@ final class PendienteStock implements EstadoPedidoState {
     }
 
     @Override
-    public EstadoPedido facturar() {
-        return EstadoPedido.FACTURADO;
+    public EstadoPedido esperarPago() {
+        return EstadoPedido.PENDIENTE_PAGO;
     }
 
     @Override

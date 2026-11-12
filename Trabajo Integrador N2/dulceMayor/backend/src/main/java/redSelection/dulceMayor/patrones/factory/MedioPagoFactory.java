@@ -2,7 +2,7 @@ package redSelection.dulceMayor.patrones.factory;
 
 import org.springframework.stereotype.Component;
 import redSelection.dulceMayor.enums.TipoPago;
-import redSelection.dulceMayor.model.FacturaCliente;
+import redSelection.dulceMayor.model.Pedido;
 import redSelection.dulceMayor.model.Pago;
 
 import java.util.EnumMap;
@@ -36,8 +36,8 @@ public class MedioPagoFactory {
         return medios.get(tipo);
     }
 
-    /** Atajo: crea el Pago pendiente de la factura con el medio indicado. */
-    public Pago crear(TipoPago tipo, FacturaCliente factura) {
-        return obtener(tipo).crearPago(factura);
+    /** Atajo: crea el Pago pendiente del pedido con el medio indicado. */
+    public Pago crear(TipoPago tipo, Pedido pedido) {
+        return obtener(tipo).crearPago(pedido);
     }
 }
