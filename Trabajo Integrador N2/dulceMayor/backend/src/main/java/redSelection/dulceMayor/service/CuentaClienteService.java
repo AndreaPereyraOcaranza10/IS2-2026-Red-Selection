@@ -13,7 +13,6 @@ import redSelection.dulceMayor.exception.ReglaNegocioException;
 import redSelection.dulceMayor.model.ResponsableComercio;
 import redSelection.dulceMayor.model.Usuario;
 import redSelection.dulceMayor.patrones.facade.NotificacionFacade;
-import redSelection.dulceMayor.repository.UsuarioRepository;
 import redSelection.dulceMayor.security.GeneradorClaveTemporal;
 
 import java.util.Locale;
@@ -32,14 +31,14 @@ public class CuentaClienteService {
 
     private static final Logger log = LoggerFactory.getLogger(CuentaClienteService.class);
 
-    private final UsuarioRepository usuarioRepository;
+    private final UsuarioService usuarioService;
     private final PasswordEncoder passwordEncoder;
     private final NotificacionFacade notificaciones;
 
-    public CuentaClienteService(UsuarioRepository usuarioRepository,
+    public CuentaClienteService(UsuarioService usuarioService,
                                 PasswordEncoder passwordEncoder,
                                 NotificacionFacade notificaciones) {
-        this.usuarioRepository = usuarioRepository;
+        this.usuarioService = usuarioService;
         this.passwordEncoder = passwordEncoder;
         this.notificaciones = notificaciones;
     }
@@ -51,7 +50,7 @@ public class CuentaClienteService {
     public String registrar(String email, String password) {
         String correo = normalizar(email);
         exigirCorreoLibre(correo);
-        usuarioRepository.save(Usuario.builder()
+        usuarioService.guardar(Usuario.builder()
                 .nombreUsuario(correo)
                 .clave(passwordEncoder.encode(password))
                 .rol(Rol.CLIENTE)
@@ -68,7 +67,7 @@ public class CuentaClienteService {
     /** Falla (422) si ya hay una cuenta con ese correo. Se llama ANTES de guardar el responsable. */
     @Transactional(readOnly = true)
     public void exigirCorreoLibre(String correo) {
-        if (usuarioRepository.findByNombreUsuarioIgnoreCase(normalizar(correo)).isPresent()) {
+        if (usuarioService.buscarPorNombreUsuario(normalizar(correo)).isPresent()) {
             throw new ReglaNegocioException(
                     "Ya existe una cuenta del portal con ese correo. Usá otro correo o pedí ayuda a administración.");
         }
@@ -108,7 +107,7 @@ public class CuentaClienteService {
             usuario.setPrimerIngreso(true);
             usuario.revocarTokens();
             usuario.registrarAcierto();
-            usuarioRepository.save(usuario);
+            usuarioService.guardar(usuario);
         }
         if (!notificaciones.enviarClaveTemporal(correoContacto, nombreCompleto(responsable),
                 usuario.getNombreUsuario(), clave)) {
@@ -120,7 +119,7 @@ public class CuentaClienteService {
 
     @Transactional(readOnly = true)
     public Usuario obtenerUsuarioActivo(String nombreUsuario) {
-        return usuarioRepository.findByNombreUsuarioIgnoreCase(nombreUsuario == null ? "" : nombreUsuario.trim())
+        return usuarioService.buscarPorNombreUsuario(nombreUsuario == null ? "" : nombreUsuario.trim())
                 .filter(u -> u.isActivo() && !u.isEliminado())
                 .orElseThrow(() -> new ReglaNegocioException("No encontramos tu cuenta. Volvé a iniciar sesión."));
     }
@@ -128,7 +127,7 @@ public class CuentaClienteService {
     // ---------- Auxiliares ----------
 
     private Usuario guardarUsuarioTemporal(String login, String clave) {
-        return usuarioRepository.save(Usuario.builder()
+        return usuarioService.guardar(Usuario.builder()
                 .nombreUsuario(login)
                 .clave(passwordEncoder.encode(clave))   // BCrypt: la clave en claro no se guarda en ningún lado
                 .rol(Rol.CLIENTE)

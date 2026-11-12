@@ -166,4 +166,11 @@ public class ProductoService extends BaseService<Producto, ProductoCrearDTO, Pro
     public boolean existenPorSubCategoria(String subCategoriaId) {
         return !productoRepository.findBySubCategoriaIdAndEliminadoFalse(subCategoriaId).isEmpty();
     }
+
+    /** Para el newsletter: los productos marcados en oferta (entidades, uso interno entre services). */
+    @Transactional(readOnly = true)
+    public List<Producto> enOferta() {
+        return productoRepository.findByEnOfertaTrueAndEliminadoFalse();
+    }
+
 }

@@ -1,6 +1,5 @@
 package redSelection.dulceMayor.service;
 
-import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import redSelection.dulceMayor.dto.PedidosPreventistaDiaDTO;
@@ -8,15 +7,10 @@ import redSelection.dulceMayor.dto.PedidosPreventistaMesDTO;
 import redSelection.dulceMayor.dto.ProductoMasVendidoDTO;
 import redSelection.dulceMayor.dto.RendimientoPreventistaDTO;
 import redSelection.dulceMayor.dto.StockProductoEstadisticaDTO;
-import redSelection.dulceMayor.enums.EstadoFactura;
 import redSelection.dulceMayor.enums.EstadoPedido;
 import redSelection.dulceMayor.exception.ReglaNegocioException;
 import redSelection.dulceMayor.model.Preventista;
-import redSelection.dulceMayor.repository.FacturaClienteRepository;
 import redSelection.dulceMayor.repository.PedidoRepository;
-import redSelection.dulceMayor.repository.PreventistaRepository;
-import redSelection.dulceMayor.repository.StockRepository;
-import org.springframework.data.domain.Pageable;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -35,23 +29,22 @@ public class EstadisticasService {
     private static final List<EstadoPedido> ESTADOS_FACTURADOS = List.of(
             EstadoPedido.FACTURADO, EstadoPedido.EN_REPARTO, EstadoPedido.ENTREGADO);
 
-    private final PedidoRepository pedidoRepository;
-    private final StockRepository stockRepository;
-    private final FacturaClienteRepository facturaRepository;
-    private final PreventistaRepository preventistaRepository;
+    private final PedidoService pedidoService;
+    private final StockService stockService;
+    private final FacturaClienteService facturaService;
+    private final PreventistaService preventistaService;
 
-    public EstadisticasService(PedidoRepository pedidoRepository, StockRepository stockRepository,
-                               FacturaClienteRepository facturaRepository,
-                               PreventistaRepository preventistaRepository) {
-        this.pedidoRepository = pedidoRepository;
-        this.stockRepository = stockRepository;
-        this.facturaRepository = facturaRepository;
-        this.preventistaRepository = preventistaRepository;
+    public EstadisticasService(PedidoService pedidoService, StockService stockService,
+                               FacturaClienteService facturaService, PreventistaService preventistaService) {
+        this.pedidoService = pedidoService;
+        this.stockService = stockService;
+        this.facturaService = facturaService;
+        this.preventistaService = preventistaService;
     }
 
     public List<PedidosPreventistaDiaDTO> pedidosPorPreventistaDia(LocalDate desde, LocalDate hasta) {
         RangoFechas rango = rango(desde, hasta, Ventana.ULTIMOS_30_DIAS);
-        return pedidoRepository.pedidosPorPreventistaDia(rango.inicio(), rango.fin(), EstadoPedido.ANULADO)
+        return pedidoService.pedidosPorPreventistaDia(rango.inicio(), rango.fin(), EstadoPedido.ANULADO)
                 .stream()
                 .map(fila -> new PedidosPreventistaDiaDTO(fila.getPreventistaId(), fila.getNombrePreventista(),
                         "%04d-%02d-%02d".formatted(fila.getAnio(), fila.getMes(), fila.getDia()),
@@ -61,7 +54,7 @@ public class EstadisticasService {
 
     public List<PedidosPreventistaMesDTO> pedidosPorPreventistaMes(LocalDate desde, LocalDate hasta) {
         RangoFechas rango = rango(desde, hasta, Ventana.ULTIMOS_12_MESES);
-        return pedidoRepository.pedidosPorPreventistaMes(rango.inicio(), rango.fin(), EstadoPedido.ANULADO)
+        return pedidoService.pedidosPorPreventistaMes(rango.inicio(), rango.fin(), EstadoPedido.ANULADO)
                 .stream()
                 .map(fila -> new PedidosPreventistaMesDTO(fila.getPreventistaId(), fila.getNombrePreventista(),
                         "%04d-%02d".formatted(fila.getAnio(), fila.getMes()),
@@ -70,7 +63,7 @@ public class EstadisticasService {
     }
 
     public List<StockProductoEstadisticaDTO> stockPorProducto() {
-        return stockRepository.estadisticasStockPorProducto().stream()
+        return stockService.estadisticasPorProducto().stream()
                 .map(fila -> {
                     long stock = valor(fila.getStockActual());
                     int minimo = fila.getStockMinimo() == null ? 0 : fila.getStockMinimo();
@@ -84,13 +77,13 @@ public class EstadisticasService {
         RangoFechas rango = rango(desde, hasta, Ventana.MES_ACTUAL);
         Map<String, RendimientoMutable> acumulados = new LinkedHashMap<>();
 
-        for (Preventista preventista : preventistaRepository.findByEliminadoFalse()) {
+        for (Preventista preventista : preventistaService.activos()) {
             acumulados.put(preventista.getId(), new RendimientoMutable(preventista.getId(),
                     preventista.getNombre() + " " + preventista.getApellido()));
         }
 
         for (PedidoRepository.PedidosPorEstadoPreventista fila :
-                pedidoRepository.pedidosPorEstadoPreventista(rango.inicio(), rango.fin())) {
+                pedidoService.pedidosPorEstadoPreventista(rango.inicio(), rango.fin())) {
             RendimientoMutable stats = acumulados.computeIfAbsent(fila.getPreventistaId(),
                     id -> new RendimientoMutable(id, fila.getNombrePreventista()));
             long cantidad = valor(fila.getCantidad());
@@ -99,7 +92,7 @@ public class EstadisticasService {
             if (fila.getEstado() == EstadoPedido.ANULADO) stats.pedidosAnulados += cantidad;
         }
 
-        for (PedidoRepository.VentasPreventista fila : pedidoRepository.ventasPorPreventista(
+        for (PedidoRepository.VentasPreventista fila : pedidoService.ventasPorPreventista(
                 rango.inicio(), rango.fin(), ESTADOS_FACTURADOS)) {
             RendimientoMutable stats = acumulados.get(fila.getPreventistaId());
             if (stats != null) stats.montoFacturado = dinero(fila.getMontoFacturado());
@@ -117,8 +110,7 @@ public class EstadisticasService {
             throw new ReglaNegocioException("El límite debe estar entre 1 y 50 productos.");
         }
         RangoFechas rango = rango(desde, hasta, Ventana.MES_ACTUAL);
-        Pageable paginacion = PageRequest.of(0, limite);
-        return facturaRepository.productosMasVendidos(rango.inicio(), rango.fin(), EstadoFactura.ANULADA, paginacion)
+        return facturaService.productosMasVendidos(rango.inicio(), rango.fin(), limite)
                 .stream()
                 .map(fila -> new ProductoMasVendidoDTO(fila.getProductoId(), fila.getCodigo(), fila.getNombre(),
                         valor(fila.getUnidadesVendidas())))

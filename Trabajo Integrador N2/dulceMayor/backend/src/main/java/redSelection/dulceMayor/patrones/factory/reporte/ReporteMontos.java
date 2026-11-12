@@ -7,7 +7,7 @@ import redSelection.dulceMayor.dto.TablaReporteDTO;
 import redSelection.dulceMayor.enums.EstadoPedido;
 import redSelection.dulceMayor.enums.TipoReporte;
 import redSelection.dulceMayor.model.Pedido;
-import redSelection.dulceMayor.repository.PedidoRepository;
+import redSelection.dulceMayor.service.PedidoService;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -23,10 +23,10 @@ public class ReporteMontos implements ReporteGenerador {
     private static final List<String> COLUMNAS_ESTADO = List.of("Estado", "Pedidos", "Subtotal", "Descuento", "Total");
     private static final List<String> COLUMNAS_PREVENTISTA = List.of("Preventista", "Pedidos", "Total");
 
-    private final PedidoRepository pedidoRepository;
+    private final PedidoService pedidoService;
 
-    public ReporteMontos(PedidoRepository pedidoRepository) {
-        this.pedidoRepository = pedidoRepository;
+    public ReporteMontos(PedidoService pedidoService) {
+        this.pedidoService = pedidoService;
     }
 
     @Override
@@ -34,8 +34,8 @@ public class ReporteMontos implements ReporteGenerador {
 
     @Override
     public ReporteDTO generar(PeriodoReporte periodo) {
-        List<Pedido> pedidos = pedidoRepository
-                .findByEliminadoFalseAndFechaHoraCargaBetweenOrderByFechaHoraCargaAsc(periodo.inicio(), periodo.fin());
+        List<Pedido> pedidos = pedidoService
+                .cargadosEntre(periodo.inicio(), periodo.fin());
         return new ReporteDTO(tipo(), "Reporte de montos", periodo.texto(), LocalDateTime.now(),
                 List.of(porEstado(pedidos), porPreventista(pedidos)));
     }

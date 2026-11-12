@@ -58,4 +58,11 @@ public class StockService {
                         s.getTipoMovimiento(), s.getMovimiento(), s.getCantidadActual()))
                 .toList();
     }
+
+    /** Para EstadisticasService: stock actual y mínimo de cada producto. */
+    @Transactional(readOnly = true)
+    public List<StockRepository.StockProductoEstadistica> estadisticasPorProducto() {
+        return stockRepository.estadisticasStockPorProducto();
+    }
+
 }

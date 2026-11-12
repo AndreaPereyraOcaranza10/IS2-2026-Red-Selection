@@ -219,4 +219,17 @@ public class PuntoVentaService extends BaseService<ClienteMinorista, PuntoVentaC
         String d = cuit.replaceAll("\\D", "");
         return d.substring(0, 2) + "-" + d.substring(2, 10) + "-" + d.substring(10);
     }
+
+    /** Para el newsletter: todos los comercios activos. */
+    @Transactional(readOnly = true)
+    public List<ClienteMinorista> activos() {
+        return clienteRepository.findByEliminadoFalse();
+    }
+
+    /** Para los reportes: la cartera de comercios activos ordenada por nombre. */
+    @Transactional(readOnly = true)
+    public List<ClienteMinorista> activosOrdenadosPorNombre() {
+        return clienteRepository.findByEliminadoFalseOrderByNombreComercioAsc();
+    }
+
 }

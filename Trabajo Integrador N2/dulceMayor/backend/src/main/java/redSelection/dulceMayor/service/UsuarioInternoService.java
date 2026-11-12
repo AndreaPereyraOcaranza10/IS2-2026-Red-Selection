@@ -14,8 +14,6 @@ import redSelection.dulceMayor.model.Preventista;
 import redSelection.dulceMayor.model.Transportista;
 import redSelection.dulceMayor.model.Usuario;
 import redSelection.dulceMayor.repository.EmpleadoRepository;
-import redSelection.dulceMayor.repository.PersonaRepository;
-import redSelection.dulceMayor.repository.UsuarioRepository;
 
 import java.util.List;
 
@@ -24,18 +22,15 @@ import java.util.List;
 public class UsuarioInternoService extends BaseService<Empleado, UsuarioInternoCrearDTO, UsuarioInternoRespuestaDTO> {
 
     private final EmpleadoRepository empleadoRepository;
-    private final PersonaRepository personaRepository;
-    private final UsuarioRepository usuarioRepository;
+    private final UsuarioService usuarioService;
     private final PasswordEncoder passwordEncoder;
 
     public UsuarioInternoService(EmpleadoRepository empleadoRepository,
-                                 PersonaRepository personaRepository,
-                                 UsuarioRepository usuarioRepository,
+                                 UsuarioService usuarioService,
                                  PasswordEncoder passwordEncoder) {
         super(empleadoRepository);
         this.empleadoRepository = empleadoRepository;
-        this.personaRepository = personaRepository;
-        this.usuarioRepository = usuarioRepository;
+        this.usuarioService = usuarioService;
         this.passwordEncoder = passwordEncoder;
     }
 
@@ -90,10 +85,10 @@ public class UsuarioInternoService extends BaseService<Empleado, UsuarioInternoC
             throw new ReglaNegocioException(
                     "Solo se pueden crear usuarios preventistas, transportistas o administrativos.");
         }
-        if (usuarioRepository.findByNombreUsuarioIgnoreCase(dto.nombreUsuario().trim()).isPresent()) {
+        if (usuarioService.buscarPorNombreUsuario(dto.nombreUsuario().trim()).isPresent()) {
             throw new ReglaNegocioException("Ya existe una cuenta con ese nombre de usuario.");
         }
-        if (personaRepository.existsByTipoDocumentoAndNumeroDocumentoAndEliminadoFalse(
+        if (usuarioService.existePersonaConDocumento(
                 dto.tipoDocumento(), dto.numeroDocumento().trim().toUpperCase())) {
             throw new ReglaNegocioException("Ya existe una persona con ese tipo y número de documento.");
         }
@@ -132,7 +127,7 @@ public class UsuarioInternoService extends BaseService<Empleado, UsuarioInternoC
         usuario.setEliminado(true);
         usuario.setActivo(false);
         usuario.revocarTokens();
-        usuarioRepository.save(usuario);
+        usuarioService.guardar(usuario);
         empleadoRepository.save(empleado);
     }
 
@@ -166,7 +161,7 @@ public class UsuarioInternoService extends BaseService<Empleado, UsuarioInternoC
         usuario.setPrimerIngreso(true);
         usuario.registrarAcierto();
         usuario.revocarTokens();
-        usuarioRepository.save(usuario);
+        usuarioService.guardar(usuario);
         return new ClaveRestablecidaDTO(
                 "La clave volvió a la clave inicial. El usuario deberá cambiarla al ingresar.");
     }

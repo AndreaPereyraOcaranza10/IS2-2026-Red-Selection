@@ -543,4 +543,38 @@ public class PedidoService extends BaseService<Pedido, PedidoCrearDTO, PedidoRes
     private static List<Pedido> sinBorrados(List<Pedido> pedidos) {
         return pedidos.stream().filter(p -> !p.isEliminado()).toList();
     }
+
+    // ---------- Consultas agregadas para EstadisticasService y los reportes (nadie más lee PedidoRepository) ----------
+
+    @Transactional(readOnly = true)
+    public List<PedidoRepository.PedidosPorDia> pedidosPorPreventistaDia(
+            java.time.LocalDateTime desde, java.time.LocalDateTime hasta, redSelection.dulceMayor.enums.EstadoPedido anulado) {
+        return pedidoRepository.pedidosPorPreventistaDia(desde, hasta, anulado);
+    }
+
+    @Transactional(readOnly = true)
+    public List<PedidoRepository.PedidosPorMes> pedidosPorPreventistaMes(
+            java.time.LocalDateTime desde, java.time.LocalDateTime hasta, redSelection.dulceMayor.enums.EstadoPedido anulado) {
+        return pedidoRepository.pedidosPorPreventistaMes(desde, hasta, anulado);
+    }
+
+    @Transactional(readOnly = true)
+    public List<PedidoRepository.PedidosPorEstadoPreventista> pedidosPorEstadoPreventista(
+            java.time.LocalDateTime desde, java.time.LocalDateTime hasta) {
+        return pedidoRepository.pedidosPorEstadoPreventista(desde, hasta);
+    }
+
+    @Transactional(readOnly = true)
+    public List<PedidoRepository.VentasPreventista> ventasPorPreventista(
+            java.time.LocalDateTime desde, java.time.LocalDateTime hasta,
+            List<redSelection.dulceMayor.enums.EstadoPedido> estadosFacturados) {
+        return pedidoRepository.ventasPorPreventista(desde, hasta, estadosFacturados);
+    }
+
+    /** Para los reportes: pedidos activos cargados en el período, del más viejo al más nuevo. */
+    @Transactional(readOnly = true)
+    public List<Pedido> cargadosEntre(java.time.LocalDateTime desde, java.time.LocalDateTime hasta) {
+        return pedidoRepository.findByEliminadoFalseAndFechaHoraCargaBetweenOrderByFechaHoraCargaAsc(desde, hasta);
+    }
+
 }

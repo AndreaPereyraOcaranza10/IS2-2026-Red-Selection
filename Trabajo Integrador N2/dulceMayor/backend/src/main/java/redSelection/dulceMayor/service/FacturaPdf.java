@@ -5,9 +5,7 @@ import com.lowagie.text.pdf.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import redSelection.dulceMayor.enums.EstadoFactura;
-import redSelection.dulceMayor.enums.TipoEmpresa;
 import redSelection.dulceMayor.model.*;
-import redSelection.dulceMayor.repository.DulceMayorRepository;
 import redSelection.dulceMayor.security.UsuarioAutenticado;
 
 import java.awt.Color;
@@ -49,11 +47,11 @@ public class FacturaPdf {
     private static final DateTimeFormatter FECHA = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
 
     private final FacturaClienteService facturas;
-    private final DulceMayorRepository empresas;
+    private final DulceMayorService dulceMayorService;
 
-    public FacturaPdf(FacturaClienteService facturas, DulceMayorRepository empresas) {
+    public FacturaPdf(FacturaClienteService facturas, DulceMayorService dulceMayorService) {
         this.facturas = facturas;
-        this.empresas = empresas;
+        this.dulceMayorService = dulceMayorService;
     }
 
     /** Número con 8 dígitos, como en los comprobantes: 00000012. */
@@ -72,8 +70,7 @@ public class FacturaPdf {
     public byte[] generar(FacturaCliente factura) {
         Pedido pedido = factura.getPedido();
         ClienteMinorista cliente = pedido.getCliente();
-        DulceMayor sede = empresas.findByEliminadoFalse().stream()
-                .filter(e -> e.getTipoEmpresa() == TipoEmpresa.SEDE_CENTRAL).findFirst().orElse(null);
+        DulceMayor sede = dulceMayorService.sedeCentral().orElse(null);
 
         ByteArrayOutputStream salida = new ByteArrayOutputStream();
         Document doc = new Document(PageSize.A4, 40, 40, 50, 50);

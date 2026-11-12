@@ -9,6 +9,7 @@ import redSelection.dulceMayor.repository.VigenciaPrecioRepository;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -51,4 +52,11 @@ public class PrecioService {
         }
         vigenciaRepository.save(VigenciaPrecio.builder().producto(producto).precio(precio).fechaDesde(desde).build());
     }
+
+    /** Para el newsletter: las vigencias de precio de todos los productos en una fecha (la más reciente primero). */
+    @Transactional(readOnly = true)
+    public List<VigenciaPrecio> vigentesEn(LocalDate fecha) {
+        return vigenciaRepository.vigentesEn(fecha);
+    }
+
 }

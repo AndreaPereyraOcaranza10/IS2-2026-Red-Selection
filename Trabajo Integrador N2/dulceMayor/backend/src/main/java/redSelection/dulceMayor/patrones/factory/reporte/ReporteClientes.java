@@ -6,7 +6,7 @@ import redSelection.dulceMayor.dto.ReporteDTO;
 import redSelection.dulceMayor.dto.TablaReporteDTO;
 import redSelection.dulceMayor.enums.TipoReporte;
 import redSelection.dulceMayor.model.ClienteMinorista;
-import redSelection.dulceMayor.repository.ClienteMinoristaRepository;
+import redSelection.dulceMayor.service.PuntoVentaService;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -18,10 +18,10 @@ public class ReporteClientes implements ReporteGenerador {
     private static final List<String> COLUMNAS = List.of(
             "Comercio", "Razón social", "CUIT", "Departamento", "Localidad", "Responsable", "Preventista asignado");
 
-    private final ClienteMinoristaRepository clienteRepository;
+    private final PuntoVentaService puntoVentaService;
 
-    public ReporteClientes(ClienteMinoristaRepository clienteRepository) {
-        this.clienteRepository = clienteRepository;
+    public ReporteClientes(PuntoVentaService puntoVentaService) {
+        this.puntoVentaService = puntoVentaService;
     }
 
     @Override
@@ -29,7 +29,7 @@ public class ReporteClientes implements ReporteGenerador {
 
     @Override
     public ReporteDTO generar(PeriodoReporte periodo) {
-        List<List<Object>> filas = clienteRepository.findByEliminadoFalseOrderByNombreComercioAsc().stream()
+        List<List<Object>> filas = puntoVentaService.activosOrdenadosPorNombre().stream()
                 .map(this::fila).toList();
         List<Object> totales = Celdas.fila("Total: " + filas.size() + " clientes", "", "", "", "", "", "");
         return new ReporteDTO(tipo(), "Reporte de clientes", "Cartera actual", LocalDateTime.now(),

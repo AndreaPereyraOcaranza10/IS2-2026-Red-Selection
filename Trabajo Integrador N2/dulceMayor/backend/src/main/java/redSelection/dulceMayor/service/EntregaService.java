@@ -205,4 +205,11 @@ public class EntregaService {
     private static String texto(Direccion d) {
         return d.getCalle() + " " + d.getNumeracion() + ", " + d.getLocalidadNombre();
     }
+
+    /** Para los reportes: los envíos de los pedidos cargados en el período. */
+    @Transactional(readOnly = true)
+    public List<Entrega> deLosPedidosCargadosEntre(LocalDateTime desde, LocalDateTime hasta) {
+        return entregaRepository.findByEliminadoFalseAndPedidoFechaHoraCargaBetweenOrderByPedidoFechaHoraCargaAsc(desde, hasta);
+    }
+
 }

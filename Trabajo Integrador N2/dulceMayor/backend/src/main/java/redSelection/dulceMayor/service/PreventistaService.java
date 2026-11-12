@@ -28,4 +28,11 @@ public class PreventistaService {
         return preventistaRepository.findByIdAndEliminadoFalse(id)
                 .orElseThrow(() -> new RecursoNoEncontradoException("Preventista", id));
     }
+
+    /** Para EstadisticasService: todos los preventistas activos. */
+    @Transactional(readOnly = true)
+    public java.util.List<Preventista> activos() {
+        return preventistaRepository.findByEliminadoFalse();
+    }
+
 }

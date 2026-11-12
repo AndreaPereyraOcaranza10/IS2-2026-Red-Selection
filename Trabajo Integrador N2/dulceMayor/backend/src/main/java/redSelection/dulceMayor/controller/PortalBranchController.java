@@ -1,166 +1,54 @@
 package redSelection.dulceMayor.controller;
 
-import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
-import redSelection.dulceMayor.dto.UbicacionResueltaDTO;
-import redSelection.dulceMayor.enums.TipoContacto;
-import redSelection.dulceMayor.enums.TipoEmpresa;
-import redSelection.dulceMayor.enums.TipoImagen;
-import redSelection.dulceMayor.model.ContactoCorreoElectronico;
-import redSelection.dulceMayor.model.Direccion;
-import redSelection.dulceMayor.model.DulceMayor;
-import redSelection.dulceMayor.model.Imagen;
-import redSelection.dulceMayor.repository.DulceMayorRepository;
-import redSelection.dulceMayor.service.ImagenService;
-import redSelection.dulceMayor.service.UbicacionService;
+import redSelection.dulceMayor.dto.SucursalImagenSolicitudDTO;
+import redSelection.dulceMayor.dto.SucursalRespuestaDTO;
+import redSelection.dulceMayor.dto.SucursalSolicitudDTO;
+import redSelection.dulceMayor.service.DulceMayorService;
 
 import java.util.List;
 
+/** Sucursales: público (sitio institucional) y ABM de administración. Solo delega en DulceMayorService. */
 @RestController
 public class PortalBranchController {
-    private final DulceMayorRepository sucursales;
-    private final UbicacionService ubicaciones;
-    private final ImagenService imagenes;
 
-    public PortalBranchController(DulceMayorRepository sucursales, UbicacionService ubicaciones, ImagenService imagenes) {
-        this.sucursales = sucursales;
-        this.ubicaciones = ubicaciones;
-        this.imagenes = imagenes;
+    private final DulceMayorService dulceMayorService;
+
+    public PortalBranchController(DulceMayorService dulceMayorService) {
+        this.dulceMayorService = dulceMayorService;
     }
 
     @GetMapping("/api/companies/branches")
-    @Transactional
-    public List<BranchResponse> publicBranches() {
-        return sucursales.findByEliminadoFalse().stream()
-                .filter(branch -> branch.getTipoEmpresa() == TipoEmpresa.SUCURSAL)
-                .sorted((a, b) -> a.getNombre().compareToIgnoreCase(b.getNombre()))
-                .map(this::toResponse).toList();
+    public List<SucursalRespuestaDTO> publicBranches() {
+        return dulceMayorService.listarSucursales();
     }
 
     @GetMapping("/api/admin/companies/branches")
-    @Transactional
-    public List<BranchResponse> branches() {
-        return publicBranches();
+    public List<SucursalRespuestaDTO> branches() {
+        return dulceMayorService.listarSucursales();
     }
 
     @PostMapping("/api/admin/companies/branches")
     @ResponseStatus(HttpStatus.CREATED)
-    @Transactional
-    public BranchResponse create(@Valid @RequestBody BranchRequest request) {
-        UbicacionResueltaDTO location = ubicaciones.resolver(
-                request.provinciaId(), request.departamentoId(), request.localidadId());
-        ContactoCorreoElectronico contact = ContactoCorreoElectronico.builder()
-                .tipoContacto(TipoContacto.EMPRESA).observacion("Contacto de sucursal")
-                .principal(true).email(request.email().trim()).build();
-        DulceMayor branch = DulceMayor.builder()
-                .nombre(request.razonSocial().trim()).razonSocial(request.razonSocial().trim())
-                .cuit(request.cuit().trim()).tipoEmpresa(TipoEmpresa.SUCURSAL)
-                .direccion(address(request, location)).contactos(List.of(contact)).build();
-        return toResponse(sucursales.save(branch));
+    public SucursalRespuestaDTO create(@Valid @RequestBody SucursalSolicitudDTO request) {
+        return dulceMayorService.crearSucursal(request);
     }
 
     @PutMapping("/api/admin/companies/branches/{id}")
-    @Transactional
-    public BranchResponse update(@PathVariable String id, @Valid @RequestBody BranchRequest request) {
-        DulceMayor branch = findBranch(id);
-        UbicacionResueltaDTO location = ubicaciones.resolver(
-                request.provinciaId(), request.departamentoId(), request.localidadId());
-        Direccion address = branch.getDireccion();
-        address.setCalle(request.calle().trim());
-        address.setNumeracion(request.numeracion().trim());
-        address.setBarrio(clean(request.barrio()));
-        address.setReferencia(clean(request.referencia()));
-        address.setManzanaPiso(clean(request.manzanaPiso()));
-        address.setCasaDepartamento(clean(request.casaDepartamento()));
-        address.setProvinciaId(location.provincia().id());
-        address.setProvinciaNombre(location.provincia().nombre());
-        address.setDepartamentoId(location.departamento().id());
-        address.setDepartamentoNombre(location.departamento().nombre());
-        address.setLocalidadId(location.localidad().id());
-        address.setLocalidadNombre(location.localidad().nombre());
-        branch.setNombre(request.razonSocial().trim());
-        branch.setRazonSocial(request.razonSocial().trim());
-        branch.setCuit(request.cuit().trim());
-        branch.getContactos().stream().filter(c -> c instanceof ContactoCorreoElectronico)
-                .forEach(c -> c.setEliminado(true));
-        branch.getContactos().add(ContactoCorreoElectronico.builder()
-                .tipoContacto(TipoContacto.EMPRESA).observacion("Contacto de sucursal")
-                .principal(true).email(request.email().trim()).build());
-        return toResponse(sucursales.save(branch));
+    public SucursalRespuestaDTO update(@PathVariable String id, @Valid @RequestBody SucursalSolicitudDTO request) {
+        return dulceMayorService.actualizarSucursal(id, request);
     }
 
     @PostMapping("/api/admin/companies/branches/{id}/images")
-    @Transactional
-    public BranchResponse addImage(@PathVariable String id, @Valid @RequestBody BranchImageRequest request) {
-        DulceMayor branch = findBranch(id);
-        Imagen image = imagenes.obtenerEntidad(request.imagenId());
-        if (image.getTipoImagen() != TipoImagen.FOTO_SUCURSAL) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "La imagen no es una foto de sucursal.");
-        }
-        boolean alreadyAttached = branch.getImagenes().stream().anyMatch(existing -> existing.getId().equals(image.getId()));
-        long photoCount = branch.getImagenes().stream().filter(existing -> existing.getTipoImagen() == TipoImagen.FOTO_SUCURSAL).count();
-        if (!alreadyAttached && photoCount >= 5) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cada sucursal puede tener hasta 5 fotos.");
-        }
-        if (!alreadyAttached) branch.getImagenes().add(image);
-        return toResponse(branch);
+    public SucursalRespuestaDTO addImage(@PathVariable String id, @Valid @RequestBody SucursalImagenSolicitudDTO request) {
+        return dulceMayorService.agregarFoto(id, request);
     }
 
     @DeleteMapping("/api/admin/companies/branches/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    @Transactional
     public void delete(@PathVariable String id) {
-        findBranch(id).setEliminado(true);
+        dulceMayorService.eliminarSucursal(id);
     }
-
-    private DulceMayor findBranch(String id) {
-        DulceMayor branch = sucursales.findByIdAndEliminadoFalse(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Sucursal inexistente."));
-        if (branch.getTipoEmpresa() != TipoEmpresa.SUCURSAL) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Sucursal inexistente.");
-        }
-        return branch;
-    }
-
-    private Direccion address(BranchRequest request, UbicacionResueltaDTO location) {
-        return Direccion.builder().calle(request.calle().trim()).numeracion(request.numeracion().trim())
-                .barrio(clean(request.barrio())).referencia(clean(request.referencia()))
-                .manzanaPiso(clean(request.manzanaPiso())).casaDepartamento(clean(request.casaDepartamento()))
-                .provinciaId(location.provincia().id()).provinciaNombre(location.provincia().nombre())
-                .departamentoId(location.departamento().id()).departamentoNombre(location.departamento().nombre())
-                .localidadId(location.localidad().id()).localidadNombre(location.localidad().nombre())
-                .build();
-    }
-
-    private DulceMayor findBranchForRequest(String id) { return findBranch(id); }
-    private String clean(String value) { return value == null || value.isBlank() ? null : value.trim(); }
-
-    private BranchResponse toResponse(DulceMayor branch) {
-        Direccion d = branch.getDireccion();
-        String email = branch.getContactos().stream()
-                .filter(c -> !c.isEliminado() && c instanceof ContactoCorreoElectronico)
-                .map(c -> ((ContactoCorreoElectronico) c).getEmail()).findFirst().orElse("");
-        List<String> photos = branch.getImagenes().stream()
-                .filter(image -> !image.isEliminado() && image.getTipoImagen() == TipoImagen.FOTO_SUCURSAL)
-                .map(image -> "/api/imagenes/" + image.getId()).toList();
-        return new BranchResponse(branch.getId(), branch.getRazonSocial(), branch.getCuit(), d.getCalle(),
-                d.getNumeracion(), d.getBarrio(), d.getManzanaPiso(), d.getCasaDepartamento(), d.getReferencia(),
-                d.getLocalidadId(), d.getLocalidadNombre(), d.getDepartamentoId(), d.getDepartamentoNombre(), d.getProvinciaId(), d.getProvinciaNombre(), email, photos);
-    }
-
-    public record BranchRequest(@NotBlank String razonSocial, @NotBlank String cuit,
-                                @NotBlank String calle, @NotBlank String numeracion,
-                                String barrio, String manzanaPiso, String casaDepartamento, String referencia,
-                                @NotBlank String provinciaId, @NotBlank String departamentoId,
-                                @NotBlank String localidadId, @Email @NotBlank String email) {}
-    public record BranchImageRequest(@NotBlank String imagenId) {}
-    public record BranchResponse(String id, String razonSocial, String cuit, String calle, String numeracion,
-                                 String barrio, String manzanaPiso, String casaDepartamento, String referencia,
-                                 String localidadId, String localidad, String departamentoId, String departamento,
-                                 String provinciaId, String provincia, String email, List<String> photos) {}
 }

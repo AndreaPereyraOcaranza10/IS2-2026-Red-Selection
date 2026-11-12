@@ -5,13 +5,11 @@ import org.springframework.transaction.annotation.Transactional;
 import redSelection.dulceMayor.dto.ConfiguracionCorreoDTO;
 import redSelection.dulceMayor.dto.ConfiguracionCorreoRespuestaDTO;
 import redSelection.dulceMayor.enums.TipoCorreo;
-import redSelection.dulceMayor.enums.TipoEmpresa;
 import redSelection.dulceMayor.exception.ReglaNegocioException;
 import redSelection.dulceMayor.model.ConfiguracionCorreoEmpresa;
 import redSelection.dulceMayor.model.DulceMayor;
 import redSelection.dulceMayor.patrones.facade.NotificacionFacade;
 import redSelection.dulceMayor.repository.ConfiguracionCorreoEmpresaRepository;
-import redSelection.dulceMayor.repository.DulceMayorRepository;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -36,12 +34,12 @@ public class ConfiguracionCorreoService {
             "<\\s*(script|iframe|object|embed|form)\\b|\\son[a-z]+\\s*=|javascript\\s*:", Pattern.CASE_INSENSITIVE);
 
     private final ConfiguracionCorreoEmpresaRepository configuracionRepository;
-    private final DulceMayorRepository dulceMayorRepository;
+    private final DulceMayorService dulceMayorService;
 
     public ConfiguracionCorreoService(ConfiguracionCorreoEmpresaRepository configuracionRepository,
-                                      DulceMayorRepository dulceMayorRepository) {
+                                      DulceMayorService dulceMayorService) {
         this.configuracionRepository = configuracionRepository;
-        this.dulceMayorRepository = dulceMayorRepository;
+        this.dulceMayorService = dulceMayorService;
     }
 
     @Transactional(readOnly = true)
@@ -53,6 +51,14 @@ public class ConfiguracionCorreoService {
     @Transactional(readOnly = true)
     public ConfiguracionCorreoRespuestaDTO obtener(TipoCorreo tipo) {
         return aRespuesta(sedeCentral(), tipo);
+    }
+
+    /** Plantilla personalizada vigente de la casa central para ese tipo de correo (vacío = se usa el texto por defecto). */
+    @Transactional(readOnly = true)
+    public Optional<ConfiguracionCorreoEmpresa> plantillaPersonalizada(TipoCorreo tipo) {
+        return dulceMayorService.sedeCentral()
+                .flatMap(sede -> configuracionRepository.findByDulceMayorIdAndTipoCorreo(sede.getId(), tipo))
+                .filter(c -> !c.isEliminado());
     }
 
     @Transactional
@@ -133,9 +139,7 @@ public class ConfiguracionCorreoService {
     }
 
     private DulceMayor sedeCentral() {
-        return dulceMayorRepository.findByEliminadoFalse().stream()
-                .filter(d -> d.getTipoEmpresa() == TipoEmpresa.SEDE_CENTRAL)
-                .findFirst()
+        return dulceMayorService.sedeCentral()
                 .orElseThrow(() -> new ReglaNegocioException("No hay una casa central cargada."));
     }
 }

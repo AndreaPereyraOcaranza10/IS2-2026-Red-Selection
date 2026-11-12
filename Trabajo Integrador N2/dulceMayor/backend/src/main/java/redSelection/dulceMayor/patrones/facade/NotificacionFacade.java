@@ -2,12 +2,10 @@ package redSelection.dulceMayor.patrones.facade;
 
 import org.springframework.stereotype.Component;
 import redSelection.dulceMayor.enums.TipoCorreo;
-import redSelection.dulceMayor.enums.TipoEmpresa;
 import redSelection.dulceMayor.model.*;
 import redSelection.dulceMayor.patrones.adapter.EnvioCorreo;
 import redSelection.dulceMayor.patrones.builder.Notificacion;
-import redSelection.dulceMayor.repository.ConfiguracionCorreoEmpresaRepository;
-import redSelection.dulceMayor.repository.DulceMayorRepository;
+import redSelection.dulceMayor.service.ConfiguracionCorreoService;
 
 import java.util.Optional;
 
@@ -54,15 +52,11 @@ public class NotificacionFacade {
                     + "<p>Por seguridad, al ingresar por primera vez vas a tener que elegir una clave nueva. "
                     + "Si no esperabas este correo, ignoralo.</p>";
 
-    private final DulceMayorRepository dulceMayorRepository;
-    private final ConfiguracionCorreoEmpresaRepository configuracionRepository;
+    private final ConfiguracionCorreoService configuracionCorreo;
     private final EnvioCorreo envioCorreo;
 
-    public NotificacionFacade(DulceMayorRepository dulceMayorRepository,
-                              ConfiguracionCorreoEmpresaRepository configuracionRepository,
-                              EnvioCorreo envioCorreo) {
-        this.dulceMayorRepository = dulceMayorRepository;
-        this.configuracionRepository = configuracionRepository;
+    public NotificacionFacade(ConfiguracionCorreoService configuracionCorreo, EnvioCorreo envioCorreo) {
+        this.configuracionCorreo = configuracionCorreo;
         this.envioCorreo = envioCorreo;
     }
 
@@ -73,9 +67,7 @@ public class NotificacionFacade {
         if (correo.isEmpty()) {
             return false;
         }
-        Optional<ConfiguracionCorreoEmpresa> plantilla = sedeCentral()
-                .flatMap(sede -> configuracionRepository
-                        .findByDulceMayorIdAndTipoCorreo(sede.getId(), TipoCorreo.PROXIMA_ENTREGA));
+        Optional<ConfiguracionCorreoEmpresa> plantilla = configuracionCorreo.plantillaPersonalizada(TipoCorreo.PROXIMA_ENTREGA);
 
         Direccion direccion = cliente.getDireccion();
         Notificacion notificacion = Notificacion.nueva()
@@ -102,10 +94,7 @@ public class NotificacionFacade {
         if (correo.isEmpty()) {
             return false;
         }
-        Optional<ConfiguracionCorreoEmpresa> plantilla = sedeCentral()
-                .flatMap(sede -> configuracionRepository
-                        .findByDulceMayorIdAndTipoCorreo(sede.getId(), TipoCorreo.CONFIRMACION_PEDIDO))
-                .filter(c -> !c.isEliminado());
+        Optional<ConfiguracionCorreoEmpresa> plantilla = configuracionCorreo.plantillaPersonalizada(TipoCorreo.CONFIRMACION_PEDIDO);
         String productos = factura.getDetalles().stream()
                 .map(d -> d.getCantidad() + " × " + d.getProducto().getNombre())
                 .collect(java.util.stream.Collectors.joining(", "));
@@ -125,10 +114,7 @@ public class NotificacionFacade {
 
     /** BK-12: envía la plantilla newsletter (personalizada o predeterminada) al responsable de un comercio. */
     public boolean enviarNewsletter(String correo, String responsable, String fecha, String productosHtml) {
-        Optional<ConfiguracionCorreoEmpresa> plantilla = sedeCentral()
-                .flatMap(sede -> configuracionRepository
-                        .findByDulceMayorIdAndTipoCorreo(sede.getId(), TipoCorreo.NEWSLETTER))
-                .filter(c -> !c.isEliminado());
+        Optional<ConfiguracionCorreoEmpresa> plantilla = configuracionCorreo.plantillaPersonalizada(TipoCorreo.NEWSLETTER);
         Notificacion notificacion = Notificacion.nueva()
                 .para(correo)
                 .asunto(plantilla.map(ConfiguracionCorreoEmpresa::getAsunto).orElse(ASUNTO_NEWSLETTER))
@@ -162,11 +148,5 @@ public class NotificacionFacade {
                 .sorted((a, b) -> Boolean.compare(b.isPrincipal(), a.isPrincipal()))
                 .findFirst();
         return correos.map(ContactoCorreoElectronico::getEmail);
-    }
-
-    private Optional<DulceMayor> sedeCentral() {
-        return dulceMayorRepository.findByEliminadoFalse().stream()
-                .filter(d -> d.getTipoEmpresa() == TipoEmpresa.SEDE_CENTRAL)
-                .findFirst();
     }
 }

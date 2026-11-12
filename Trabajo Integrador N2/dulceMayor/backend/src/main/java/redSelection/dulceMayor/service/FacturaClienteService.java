@@ -188,4 +188,14 @@ public class FacturaClienteService {
         eventos.publishEvent(new FacturaEmitidaEvento(guardada.getId()));
         return guardada;
     }
+
+    /** Para EstadisticasService: los productos más vendidos entre dos fechas (sin contar facturas anuladas). */
+    @Transactional(readOnly = true)
+    public List<FacturaClienteRepository.ProductoMasVendido> productosMasVendidos(
+            java.time.LocalDateTime desde, java.time.LocalDateTime hasta, int limite) {
+        return facturaRepository.productosMasVendidos(desde, hasta,
+                redSelection.dulceMayor.enums.EstadoFactura.ANULADA,
+                org.springframework.data.domain.PageRequest.of(0, limite));
+    }
+
 }

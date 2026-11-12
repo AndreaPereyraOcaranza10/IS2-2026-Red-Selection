@@ -1,13 +1,12 @@
 package redSelection.dulceMayor.patrones.factory;
 
 import org.springframework.stereotype.Component;
-import redSelection.dulceMayor.enums.TipoEmpresa;
 import redSelection.dulceMayor.enums.TipoPago;
 import redSelection.dulceMayor.exception.ReglaNegocioException;
 import redSelection.dulceMayor.model.DulceMayor;
 import redSelection.dulceMayor.model.Pedido;
 import redSelection.dulceMayor.model.Pago;
-import redSelection.dulceMayor.repository.DulceMayorRepository;
+import redSelection.dulceMayor.service.DulceMayorService;
 
 /**
  Transferencia (simulada): no se mueve plata de verdad. Se le indica al cliente el alias de la casa central
@@ -16,10 +15,10 @@ import redSelection.dulceMayor.repository.DulceMayorRepository;
 @Component
 public class TransferenciaMedioPago implements MedioPago {
 
-    private final DulceMayorRepository empresaRepository;
+    private final DulceMayorService dulceMayorService;
 
-    public TransferenciaMedioPago(DulceMayorRepository empresaRepository) {
-        this.empresaRepository = empresaRepository;
+    public TransferenciaMedioPago(DulceMayorService dulceMayorService) {
+        this.dulceMayorService = dulceMayorService;
     }
 
     @Override
@@ -39,8 +38,7 @@ public class TransferenciaMedioPago implements MedioPago {
     }
 
     private String aliasDeLaEmpresa() {
-        return empresaRepository.findByEliminadoFalse().stream()
-                .filter(d -> d.getTipoEmpresa() == TipoEmpresa.SEDE_CENTRAL)
+        return dulceMayorService.sedeCentral().stream()
                 .map(DulceMayor::getAliasTransferencia)
                 .filter(alias -> alias != null && !alias.isBlank())
                 .findFirst()

@@ -3,9 +3,6 @@ package redSelection.dulceMayor.service;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import redSelection.dulceMayor.model.*;
-import redSelection.dulceMayor.repository.ClienteMinoristaRepository;
-import redSelection.dulceMayor.repository.ProductoRepository;
-import redSelection.dulceMayor.repository.VigenciaPrecioRepository;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -15,29 +12,29 @@ import java.util.*;
 @Service
 public class NewsletterConsultaService {
 
-    private final ProductoRepository productoRepository;
-    private final VigenciaPrecioRepository precioRepository;
+    private final ProductoService productoService;
+    private final PrecioService precioService;
     private final StockService stockService;
-    private final ClienteMinoristaRepository clienteRepository;
+    private final PuntoVentaService puntoVentaService;
 
-    public NewsletterConsultaService(ProductoRepository productoRepository,
-                                     VigenciaPrecioRepository precioRepository,
+    public NewsletterConsultaService(ProductoService productoService,
+                                     PrecioService precioService,
                                      StockService stockService,
-                                     ClienteMinoristaRepository clienteRepository) {
-        this.productoRepository = productoRepository;
-        this.precioRepository = precioRepository;
+                                     PuntoVentaService puntoVentaService) {
+        this.productoService = productoService;
+        this.precioService = precioService;
         this.stockService = stockService;
-        this.clienteRepository = clienteRepository;
+        this.puntoVentaService = puntoVentaService;
     }
 
     @Transactional(readOnly = true)
     public DatosNewsletter obtener(LocalDate fecha) {
-        List<Producto> productosOferta = productoRepository.findByEnOfertaTrueAndEliminadoFalse();
+        List<Producto> productosOferta = productoService.enOferta();
         Set<String> idsOferta = productosOferta.stream().map(Producto::getId).collect(java.util.stream.Collectors.toSet());
         Map<String, Long> stocks = stockService.stockPorProducto();
 
         Map<String, BigDecimal> precios = new HashMap<>();
-        for (VigenciaPrecio vigencia : precioRepository.vigentesEn(fecha)) {
+        for (VigenciaPrecio vigencia : precioService.vigentesEn(fecha)) {
             if (idsOferta.contains(vigencia.getProducto().getId())) {
                 precios.putIfAbsent(vigencia.getProducto().getId(), vigencia.getPrecio());
             }
@@ -57,7 +54,7 @@ public class NewsletterConsultaService {
 
         Map<String, Destinatario> unicos = new LinkedHashMap<>();
         int sinCorreo = 0;
-        for (ClienteMinorista cliente : clienteRepository.findByEliminadoFalse()) {
+        for (ClienteMinorista cliente : puntoVentaService.activos()) {
             ResponsableComercio responsable = cliente.getResponsable();
             Optional<ContactoCorreoElectronico> contacto = responsable == null || responsable.isEliminado()
                     ? Optional.empty()

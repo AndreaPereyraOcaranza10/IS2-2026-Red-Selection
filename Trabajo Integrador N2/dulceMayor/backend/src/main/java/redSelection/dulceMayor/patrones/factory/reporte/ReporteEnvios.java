@@ -6,7 +6,7 @@ import redSelection.dulceMayor.dto.ReporteDTO;
 import redSelection.dulceMayor.dto.TablaReporteDTO;
 import redSelection.dulceMayor.enums.TipoReporte;
 import redSelection.dulceMayor.model.Entrega;
-import redSelection.dulceMayor.repository.EntregaRepository;
+import redSelection.dulceMayor.service.EntregaService;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -18,10 +18,10 @@ public class ReporteEnvios implements ReporteGenerador {
     private static final List<String> COLUMNAS = List.of(
             "Pedido", "Comercio", "Transportista", "Despacho", "Entrega", "Estado del pedido");
 
-    private final EntregaRepository entregaRepository;
+    private final EntregaService entregaService;
 
-    public ReporteEnvios(EntregaRepository entregaRepository) {
-        this.entregaRepository = entregaRepository;
+    public ReporteEnvios(EntregaService entregaService) {
+        this.entregaService = entregaService;
     }
 
     @Override
@@ -29,9 +29,7 @@ public class ReporteEnvios implements ReporteGenerador {
 
     @Override
     public ReporteDTO generar(PeriodoReporte periodo) {
-        List<Entrega> entregas = entregaRepository
-                .findByEliminadoFalseAndPedidoFechaHoraCargaBetweenOrderByPedidoFechaHoraCargaAsc(
-                        periodo.inicio(), periodo.fin());
+        List<Entrega> entregas = entregaService.deLosPedidosCargadosEntre(periodo.inicio(), periodo.fin());
         List<List<Object>> filas = entregas.stream().map(this::fila).toList();
         long entregados = entregas.stream().filter(e -> e.getFechaEntrega() != null).count();
         List<Object> totales = Celdas.fila(
