@@ -45,17 +45,17 @@
 .resource-modal .manual-error{padding:10px 12px;border-radius:6px;background:var(--color-error-soft);color:var(--color-error);font-size:10px}
 @media(max-width:700px){.admin-resource-card{padding:13px}.admin-resource-heading{flex-direction:column}.admin-resource-actions{width:100%}.admin-resource-actions button{flex:1}.admin-resource-toolbar{align-items:flex-start;flex-wrap:wrap}.admin-resource-toolbar label{max-width:none;flex-basis:100%}.admin-resource-table{min-width:690px}.resource-modal-backdrop{padding:8px}.resource-modal form,.resource-modal>header{padding:14px}.resource-form-grid{grid-template-columns:1fr}.resource-form-full{grid-column:auto}.resource-modal form>footer button{flex:1}}
 
-/* El dashboard puede crecer m·s que la ventana; shared desactiva el scroll para las vistas mÛviles. */
+/* El dashboard puede crecer mÔøΩs que la ventana; shared desactiva el scroll para las vistas mÔøΩviles. */
 html,body,#root{height:auto;min-height:100%;overflow-x:hidden;overflow-y:auto}
 
 .ops-app{align-items:start}
 .ops-sidebar{position:sticky;top:0;align-self:start;height:100vh;height:100dvh;max-height:100vh;max-height:100dvh;overflow-y:auto;overscroll-behavior:contain}
 .ops-main{min-height:100vh;min-height:100dvh}
-/* Mantiene el encabezado y el pie del sidebar fijos; solo la navegaciÛn interna puede desplazarse si hace falta. */
+/* Mantiene el encabezado y el pie del sidebar fijos; solo la navegaciÔøΩn interna puede desplazarse si hace falta. */
 .ops-sidebar{overflow:hidden}
 .ops-sidebar>.ops-logo,.ops-sidebar>.ops-new-order,.ops-sidebar>.ops-nav-label,.ops-sidebar>.ops-side-bottom{flex:none}
 .ops-sidebar nav{flex:1 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain}
-/* El sidebar ocupa una columna reservada y permanece completo junto al scroll de la p·gina. */
+/* El sidebar ocupa una columna reservada y permanece completo junto al scroll de la pÔøΩgina. */
 .ops-app{--admin-sidebar-width:222px;grid-template-columns:var(--admin-sidebar-width) minmax(0,1fr)}
 .ops-sidebar{position:fixed;inset:0 auto 0 0;width:var(--admin-sidebar-width);height:100vh;height:100dvh;max-height:100vh;max-height:100dvh;align-self:auto;z-index:100}
 .ops-main{grid-column:2;min-width:0}
@@ -198,3 +198,37 @@ html,body,#root{height:auto;min-height:100%;overflow-x:hidden;overflow-y:auto}
   .statistics-performance-list>article>strong{grid-column:1/-1;padding-bottom:7px;border-bottom:1px solid var(--ops-border)}
   .statistics-performance-list>article>div:last-child{grid-column:1/-1}
 }
+
+
+.reports-page{display:flex;flex-direction:column;gap:16px;min-width:0}
+.report-card{min-width:0;padding:18px;border:1px solid var(--color-surface-dim);border-radius:10px;background:var(--color-surface)}
+.report-card h3{margin:0 0 12px;color:var(--color-brand-deep);font:700 17px 'Plus Jakarta Sans',sans-serif}
+.report-controls{display:flex;flex-direction:column;gap:16px}
+.report-types{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px}
+.report-type{display:flex;flex-direction:column;align-items:flex-start;gap:4px;padding:12px 14px;border:1px solid var(--color-surface-dim);border-radius:8px;background:var(--color-surface);color:var(--color-brand-deep);text-align:left;cursor:pointer;font-family:inherit}
+.report-type b{font-size:15px}
+.report-type small{color:var(--color-text-secondary);font-size:13px;line-height:1.4}
+.report-type:hover{background:var(--color-surface-low)}
+.report-type.active{border-color:var(--color-brand-primary);background:var(--color-primary-soft);box-shadow:0 0 0 1px var(--color-brand-primary) inset}
+.report-filters{display:flex;flex-wrap:wrap;align-items:flex-end;gap:14px}
+.report-filters>label{display:flex;flex-direction:column;gap:6px;color:var(--color-brand-primary);font-size:13px;font-weight:600}
+.report-filters input{height:40px;padding:0 10px;border:1px solid var(--color-surface-dim);border-radius:6px;background:var(--color-surface);color:var(--color-brand-deep);font:15px 'DM Sans',sans-serif}
+.report-filters input:disabled{background:var(--color-surface-low);color:var(--color-outline)}
+.report-actions{display:flex;flex-wrap:wrap;gap:8px;margin-left:auto}
+.report-actions .ops-primary,.report-actions .ops-secondary{height:40px;padding:0 14px;font-size:14px;white-space:nowrap}
+.report-actions button:disabled{opacity:.55;cursor:not-allowed}
+.report-actions svg{width:16px;height:16px}
+.report-heading h2{margin:0;color:var(--color-brand-deep);font:700 22px 'Plus Jakarta Sans',sans-serif}
+.report-heading p{margin:4px 0 0;color:var(--color-text-secondary);font-size:14px}
+.report-table-wrap{overflow-x:auto}
+.report-table{width:100%;border-collapse:collapse;font-size:14px}
+.report-table th{padding:10px 12px;border-bottom:2px solid var(--color-surface-dim);color:var(--color-brand-primary);font-size:13px;font-weight:700;text-align:left;white-space:nowrap}
+.report-table td{padding:10px 12px;border-bottom:1px solid var(--color-surface-dim);color:var(--color-brand-deep)}
+.report-table td.is-number{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.report-table tbody tr:hover{background:var(--color-surface-low)}
+.report-table tfoot td{border-bottom:0;border-top:2px solid var(--color-surface-dim);background:var(--color-primary-soft);font-weight:700}
+.report-empty{margin:0;padding:18px 0;color:var(--color-text-secondary);font-size:14px;text-align:center}
+@media(max-width:700px){.report-card{padding:13px}.report-actions{width:100%;margin-left:0}.report-actions button{flex:1 1 100%;justify-content:center}.report-filters>label{flex:1 1 calc(50% - 7px)}.report-filters input{width:100%}}
+
+/* Prueba para agrandar el tama√±o de la letra*/
+.ops-app{zoom:1.15}

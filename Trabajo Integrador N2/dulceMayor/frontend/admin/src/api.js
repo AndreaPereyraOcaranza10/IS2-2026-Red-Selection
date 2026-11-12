@@ -1,6 +1,20 @@
 import { api } from '@dulcemayor/shared';
 const API_BASE = import.meta.env.VITE_API_URL ?? '';
 
+/**
+ * Ruta de un reporte del backend. `ventas` es global (solo el Jefe) y vive bajo /globales.
+ * Sin `formato` devuelve JSON (la pantalla); con 'pdf' o 'excel', el archivo. Las fechas son opcionales (yyyy-MM-dd).
+ */
+export function reportPath(tipo, formato, desde, hasta) {
+  const base = tipo === 'ventas' ? '/api/reportes/globales/ventas' : `/api/reportes/${tipo}`;
+  const params = new URLSearchParams();
+  if (desde) params.set('desde', desde);
+  if (hasta) params.set('hasta', hasta);
+  const query = params.toString();
+  return `${base}${formato ? `/${formato}` : ''}${query ? `?${query}` : ''}`;
+}
+
+
 export const apiAdmin = {
   orders: () => api.get('/api/orders'),
   inventory: () => api.get('/api/admin/products'),
@@ -38,6 +52,11 @@ export const apiAdmin = {
   dailyStatistics: () => api.get('/api/estadisticas/pedidos/preventistas/dia'),
   monthlyStatistics: () => api.get('/api/estadisticas/pedidos/preventistas/mes'),
   stockStatistics: () => api.get('/api/estadisticas/stock/productos'),
+  report: (tipo, desde, hasta) => api.get(reportPath(tipo, null, desde, hasta)),
+  downloadReport: (tipo, formato, desde, hasta) => api.download(
+    reportPath(tipo, formato, desde, hasta),
+    `reporte-${tipo}-${desde || 'inicio'}_${hasta || 'hoy'}.${formato === 'excel' ? 'xlsx' : 'pdf'}`,
+  ),
   salespersonPerformance: () => api.get('/api/estadisticas/rendimiento/preventistas'),
   bestSellingProducts: () => api.get('/api/estadisticas/productos-mas-vendidos'),
   createManualOrder: (clientName, items) => api.post('/api/orders', {

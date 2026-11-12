@@ -11,4 +11,6 @@ public interface ClienteMinoristaRepository extends BaseRepository<ClienteMinori
     List<ClienteMinorista> findByPreventistaAsignadoIdAndEliminadoFalse(String preventistaId);
     List<ClienteMinorista> findByResponsableIdAndEliminadoFalse(String responsableId);
     boolean existsByCuitAndIdNotAndEliminadoFalse(String cuit, String id);
+    /** Listado de clientes para reportes, ordenado por nombre del comercio. */
+    List<ClienteMinorista> findByEliminadoFalseOrderByNombreComercioAsc();
 }
