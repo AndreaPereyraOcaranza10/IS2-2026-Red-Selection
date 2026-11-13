@@ -30,30 +30,41 @@ class EstadoPedidoStateTest {
     @Test
     @DisplayName("Circuito completo: el historial guarda cada estado con su usuario, en orden")
     void circuitoCompleto() {
+        pedido.esperarPago("sistema", "Stock reservado");
         pedido.facturar("admin.mza", null);
         pedido.despachar("transportista.mza", "Ruta del día");
         pedido.entregar("transportista.mza", null);
 
         assertEquals(EstadoPedido.ENTREGADO, pedido.getEstado());
         List<HistorialEstadoPedido> historial = pedido.getHistorial();
-        assertEquals(List.of(EstadoPedido.CARGADO, EstadoPedido.FACTURADO, EstadoPedido.EN_REPARTO,
-                EstadoPedido.ENTREGADO), historial.stream().map(HistorialEstadoPedido::getEstadoNuevo).toList());
+        assertEquals(List.of(EstadoPedido.CARGADO, EstadoPedido.PENDIENTE_PAGO, EstadoPedido.FACTURADO,
+                EstadoPedido.EN_REPARTO, EstadoPedido.ENTREGADO),
+                historial.stream().map(HistorialEstadoPedido::getEstadoNuevo).toList());
         assertNull(historial.get(0).getEstadoAnterior());
-        assertEquals(EstadoPedido.FACTURADO, historial.get(2).getEstadoAnterior());
-        assertEquals("transportista.mza", historial.get(2).getUsuario());
-        assertEquals("Ruta del día", historial.get(2).getObservacion());
+        assertEquals(EstadoPedido.FACTURADO, historial.get(3).getEstadoAnterior());
+        assertEquals("transportista.mza", historial.get(3).getUsuario());
+        assertEquals("Ruta del día", historial.get(3).getObservacion());
         historial.forEach(h -> assertSame(pedido, h.getPedido()));
         historial.forEach(h -> assertNotNull(h.getFechaHora()));
     }
 
     @Test
-    @DisplayName("Sin stock: CARGADO pasa a PENDIENTE_STOCK y después se puede facturar")
+    @DisplayName("Sin stock: CARGADO pasa a PENDIENTE_STOCK, luego espera el pago y recién ahí se factura")
     void pendienteDeStockLuegoFacturado() {
         pedido.quedarPendienteDeStock("sistema", "Falta stock de alfajores");
-        pedido.facturar("sistema", "Llegó la mercadería");
+        assertThrows(ReglaNegocioException.class, () -> pedido.facturar("sistema", null));   // sin pago, no
+        pedido.esperarPago("sistema", "Llegó la mercadería");
+        pedido.facturar("sistema", "Pago acreditado");
 
         assertEquals(EstadoPedido.FACTURADO, pedido.getEstado());
-        assertEquals(3, pedido.getHistorial().size());
+        assertEquals(4, pedido.getHistorial().size());
+    }
+
+    @Test
+    @DisplayName("Un pedido recién cargado no se factura sin pasar por la espera del pago")
+    void cargadoNoSeFactura() {
+        ReglaNegocioException error = assertThrows(ReglaNegocioException.class, () -> pedido.facturar("admin.mza", null));
+        assertEquals("No se puede pasar un pedido de CARGADO a FACTURADO.", error.getMessage());
     }
 
     @Test
@@ -70,6 +81,7 @@ class EstadoPedidoStateTest {
     @Test
     @DisplayName("Un pedido en reparto ya no se puede anular")
     void enRepartoNoSeAnula() {
+        pedido.esperarPago("sistema", null);
         pedido.facturar("admin.mza", null);
         pedido.despachar("transportista.mza", null);
 
@@ -78,7 +90,7 @@ class EstadoPedidoStateTest {
     }
 
     @ParameterizedTest
-    @EnumSource(value = EstadoPedido.class, names = {"CARGADO", "PENDIENTE_STOCK", "FACTURADO"})
+    @EnumSource(value = EstadoPedido.class, names = {"CARGADO", "PENDIENTE_STOCK", "PENDIENTE_PAGO", "FACTURADO"})
     @DisplayName("Se puede anular antes de salir a reparto")
     void anulableAntesDelReparto(EstadoPedido inicial) {
         pedido.setEstado(inicial);
@@ -100,9 +112,10 @@ class EstadoPedidoStateTest {
     @Test
     @DisplayName("avanzarA traduce el destino a la acción correcta")
     void avanzarA() {
+        pedido.avanzarA(EstadoPedido.PENDIENTE_PAGO, "admin.mza", "Stock reservado");
         pedido.avanzarA(EstadoPedido.FACTURADO, "admin.mza", "Desde el panel");
         assertEquals(EstadoPedido.FACTURADO, pedido.getEstado());
-        assertEquals("Desde el panel", pedido.getHistorial().get(1).getObservacion());
+        assertEquals("Desde el panel", pedido.getHistorial().get(2).getObservacion());
         assertThrows(ReglaNegocioException.class, () -> pedido.avanzarA(EstadoPedido.CARGADO, "admin.mza", null));
     }
 

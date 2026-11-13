@@ -6,14 +6,12 @@ import org.junit.jupiter.api.Test;
 import redSelection.dulceMayor.dto.PedidoCrearDTO;
 import redSelection.dulceMayor.dto.PedidoRespuestaDTO;
 import redSelection.dulceMayor.enums.EstadoPedido;
+import redSelection.dulceMayor.enums.EstadoStockPedido;
 import redSelection.dulceMayor.enums.Rol;
 import redSelection.dulceMayor.exception.RecursoNoEncontradoException;
 import redSelection.dulceMayor.exception.ReglaNegocioException;
 import redSelection.dulceMayor.model.*;
-import redSelection.dulceMayor.repository.ClienteMinoristaRepository;
 import redSelection.dulceMayor.repository.PedidoRepository;
-import redSelection.dulceMayor.repository.PreventistaRepository;
-import redSelection.dulceMayor.repository.ResponsableComercioRepository;
 import redSelection.dulceMayor.security.UsuarioActual;
 import redSelection.dulceMayor.security.UsuarioAutenticado;
 
@@ -29,13 +27,14 @@ import static org.mockito.Mockito.*;
 
 /**
  * Pedidos (PV-01, BK-05, BK-06): el preventista carga pedidos solo para SUS puntos de venta y ve solo los suyos;
- * el pedido se intenta facturar solo, aplica el código de promoción y su trazabilidad muestra al transportista.
+ * al cargarlo se reserva el stock (o queda esperando stock) sin facturar, aplica el código de promoción y su trazabilidad muestra al transportista.
  */
 class PedidoServiceTest {
 
     private PedidoRepository pedidos;
-    private ClienteMinoristaRepository clientes;
-    private PreventistaRepository preventistas;
+    private PuntoVentaService puntosVenta;
+    private PreventistaService preventistas;
+    private StockService stock;
     private RutaService rutas;
     private PromocionService promociones;
     private FacturaClienteService facturacion;
@@ -51,8 +50,9 @@ class PedidoServiceTest {
     @BeforeEach
     void preparar() {
         pedidos = mock(PedidoRepository.class);
-        clientes = mock(ClienteMinoristaRepository.class);
-        preventistas = mock(PreventistaRepository.class);
+        puntosVenta = mock(PuntoVentaService.class);
+        preventistas = mock(PreventistaService.class);
+        stock = mock(StockService.class);
         rutas = mock(RutaService.class);
         promociones = mock(PromocionService.class);
         facturacion = mock(FacturaClienteService.class);
@@ -60,8 +60,9 @@ class PedidoServiceTest {
         usuarioActual = mock(UsuarioActual.class);
         ProductoService productos = mock(ProductoService.class);
         PrecioService precios = mock(PrecioService.class);
-        servicio = new PedidoService(pedidos, clientes, mock(ResponsableComercioRepository.class), preventistas,
-                productos, precios, promociones, facturacion, rutas, entregas, usuarioActual);
+        servicio = new PedidoService(pedidos, puntosVenta, mock(ResponsableComercioService.class), preventistas,
+                productos, precios, promociones, facturacion, mock(PagoService.class), stock, rutas, entregas,
+                usuarioActual, 48);
 
         yo = Preventista.builder().build();
         yo.setId("prev-1");
@@ -75,12 +76,14 @@ class PedidoServiceTest {
         Producto alfajor = Producto.builder().nombre("Alfajor").build();
         alfajor.setId("prod-1");
         when(productos.obtenerEntidad("prod-1")).thenReturn(alfajor);
+        when(productos.obtenerConBloqueo("prod-1")).thenReturn(alfajor);
+        when(stock.stockActual("prod-1")).thenReturn(10L);
         when(precios.precioVigenteObligatorio(any(), any())).thenReturn(new BigDecimal("1000"));
         when(facturacion.buscarPorPedido(any())).thenReturn(Optional.empty());
         when(entregas.buscarPorPedido(any())).thenReturn(Optional.empty());
-        when(preventistas.findByIdAndEliminadoFalse("prev-1")).thenReturn(Optional.of(yo));
-        when(clientes.findByIdAndEliminadoFalse("cli-1")).thenReturn(Optional.of(miKiosco));
-        when(clientes.findByIdAndEliminadoFalse("cli-2")).thenReturn(Optional.of(kioscoAjeno));
+        when(preventistas.obtenerEntidad("prev-1")).thenReturn(yo);
+        when(puntosVenta.buscarDelPreventista("cli-1", "prev-1")).thenReturn(Optional.of(miKiosco));
+        when(puntosVenta.buscarDelPreventista("cli-2", "prev-1")).thenReturn(Optional.empty());
         when(pedidos.save(any())).thenAnswer(inv -> inv.getArgument(0));
         logueado(Rol.PREVENTISTA, "prev-1");
     }
@@ -103,17 +106,31 @@ class PedidoServiceTest {
     // ---------- alta ----------
 
     @Test
-    @DisplayName("Carga un pedido para su comercio: queda a su nombre, se intenta facturar y cuenta como visita")
+    @DisplayName("Carga un pedido para su comercio: queda a su nombre, reserva el stock, espera el pago y cuenta como visita")
     void cargaPedidoPropio() {
         PedidoRespuestaDTO r = servicio.crear(pedidoPara("cli-1", null));
 
-        assertEquals("CARGADO", r.status());   // la facturación está simulada en este test
+        assertEquals("PENDIENTE_PAGO", r.status());
         assertEquals(new BigDecimal("3000"), r.total());
         assertEquals("cli-1", r.pointOfSale().id());
         assertEquals("preventista.mza", r.trace().events().get(0).user());
-        verify(pedidos).save(argThat(p -> p.getPreventista() == yo && p.getCliente() == miKiosco));
-        verify(facturacion).facturarAlCargar(any(), eq("preventista.mza"));
+        verify(pedidos).save(argThat(p -> p.getPreventista() == yo && p.getCliente() == miKiosco
+                && p.getEstadoStock() == EstadoStockPedido.RESERVADO));
+        verify(facturacion, never()).facturarPedido(any(), any());   // la factura sale al acreditarse el pago
         verify(rutas).registrarVisitaPorPedido("prev-1", "cli-1");
+    }
+
+    @Test
+    @DisplayName("Sin stock disponible el pedido queda PENDIENTE_STOCK diciendo qué falta (los reservados no cuentan)")
+    void sinStockQuedaPendiente() {
+        when(stock.stockActual("prod-1")).thenReturn(4L);
+        when(pedidos.cantidadEnEstado("prod-1", EstadoPedido.PENDIENTE_PAGO)).thenReturn(2L);   // disponible = 2
+
+        PedidoRespuestaDTO r = servicio.crear(pedidoPara("cli-1", null));
+
+        assertEquals("PENDIENTE_STOCK", r.status());
+        assertEquals("Falta stock de Alfajor (faltan 1)",
+                r.trace().events().get(r.trace().events().size() - 1).note());
     }
 
     @Test

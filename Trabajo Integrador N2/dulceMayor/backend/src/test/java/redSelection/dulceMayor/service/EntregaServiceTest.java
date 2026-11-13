@@ -84,7 +84,8 @@ class EntregaServiceTest {
     }
 
     private static PagoRespuestaDTO pago(TipoPago tipo, EstadoPago estado) {
-        return new PagoRespuestaDTO("pg-1", "fac-1", 9L, tipo, estado, new BigDecimal("1000.00"), null, "instrucciones", null);
+        return new PagoRespuestaDTO("pg-1", "ped-1", "fac-1", 9L, tipo, estado, new BigDecimal("1000.00"), null,
+                "instrucciones", null, null, false);
     }
 
     // ---------- TR-01 ----------

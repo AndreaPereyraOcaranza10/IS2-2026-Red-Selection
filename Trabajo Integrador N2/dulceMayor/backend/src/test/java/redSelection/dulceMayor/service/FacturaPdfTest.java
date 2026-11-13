@@ -5,7 +5,6 @@ import org.junit.jupiter.api.Test;
 import redSelection.dulceMayor.enums.EstadoFactura;
 import redSelection.dulceMayor.enums.TipoEmpresa;
 import redSelection.dulceMayor.model.*;
-import redSelection.dulceMayor.repository.DulceMayorRepository;
 import redSelection.dulceMayor.security.UsuarioAutenticado;
 
 import java.math.BigDecimal;
@@ -15,6 +14,7 @@ import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -62,8 +62,8 @@ class FacturaPdfTest {
 
         FacturaClienteService facturas = mock(FacturaClienteService.class);
         when(facturas.obtenerParaDescarga(any(), any())).thenReturn(factura);
-        DulceMayorRepository empresas = mock(DulceMayorRepository.class);
-        when(empresas.findByEliminadoFalse()).thenReturn(List.of(sede));
+        DulceMayorService empresas = mock(DulceMayorService.class);
+        when(empresas.sedeCentral()).thenReturn(Optional.of(sede));
 
         return new FacturaPdf(facturas, empresas).generar("fac-1", mock(UsuarioAutenticado.class));
     }

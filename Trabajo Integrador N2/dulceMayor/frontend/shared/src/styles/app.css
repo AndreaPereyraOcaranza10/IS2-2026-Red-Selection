@@ -195,3 +195,6 @@ h2{font-size:18px;line-height:24px;font-weight:700}
 .dm-pin-dot{display:grid;place-items:center;border-radius:50%;border:3px solid #fff;box-shadow:0 2px 6px rgba(42,22,32,.35);font-weight:800;font-family:var(--font);box-sizing:border-box}
 .leaflet-container a{color:var(--primary)}
 .leaflet-control-attribution{font-size:11px}
+/* Login: un solo color de fondo en toda la ventana (sin el marco de la app ni el fondo exterior distinto). */
+html:has(.login),body:has(.login),.app-root:has(.login){background:var(--bg)}
+.app-root:has(.login){max-width:none;box-shadow:none}

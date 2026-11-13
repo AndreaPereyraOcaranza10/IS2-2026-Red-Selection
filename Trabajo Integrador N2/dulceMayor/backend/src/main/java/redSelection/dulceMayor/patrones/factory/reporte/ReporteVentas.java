@@ -44,7 +44,10 @@ public class ReporteVentas implements ReporteGenerador {
     public ReporteDTO generar(PeriodoReporte periodo) {
         List<Pedido> vendidos = pedidoRepository
                 .findByEliminadoFalseAndFechaHoraCargaBetweenOrderByFechaHoraCargaAsc(periodo.inicio(), periodo.fin())
-                .stream().filter(p -> ESTADOS_VENDIDOS.contains(p.getEstado())).toList();
+                .stream()
+                .filter(p -> ESTADOS_VENDIDOS.contains(p.getEstado()))
+                .filter(p -> periodo.incluyeDepartamento(p.getCliente().getDireccion().getDepartamentoNombre()))
+                .toList();
 
         // departamento -> preventista -> acumulado, ambos ordenados alfabéticamente sin importar mayúsculas
         Map<String, Map<String, Acumulado>> ventas = new TreeMap<>(String.CASE_INSENSITIVE_ORDER);

@@ -35,7 +35,9 @@ public class ReporteMontos implements ReporteGenerador {
     @Override
     public ReporteDTO generar(PeriodoReporte periodo) {
         List<Pedido> pedidos = pedidoService
-                .cargadosEntre(periodo.inicio(), periodo.fin());
+                .cargadosEntre(periodo.inicio(), periodo.fin()).stream()
+                .filter(p -> periodo.incluyeDepartamento(p.getCliente().getDireccion().getDepartamentoNombre()))
+                .toList();
         return new ReporteDTO(tipo(), "Reporte de montos", periodo.texto(), LocalDateTime.now(),
                 List.of(porEstado(pedidos), porPreventista(pedidos)));
     }

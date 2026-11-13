@@ -79,11 +79,30 @@ export function ReportsAdminPage({ apiAdmin, role }) {
   const available = REPORT_TYPES.filter((type) => !type.soloJefe || role === 'JEFE_ADMINISTRATIVO');
   const [tipo, setTipo] = useState(available[0].id);
   const [{ desde, hasta }, setPeriod] = useState(defaultPeriod);
+  const [departamento, setDepartamento] = useState('');
+  const [departments, setDepartments] = useState([]);
   const [report, setReport] = useState(null);
   const [loading, setLoading] = useState(false);
   const [downloading, setDownloading] = useState(null);
   const [error, setError] = useState('');
   const lastRequest = useRef(0);
+
+  // Departamentos de Mendoza desde Georef (a través del backend). Si falla, el filtro queda en "Todos".
+  useEffect(() => {
+    let active = true;
+    (async () => {
+      try {
+        const provinces = await apiAdmin.provinces();
+        const mendoza = provinces.find((p) => p.name?.toLowerCase().includes('mendoza'));
+        if (!mendoza) return;
+        const list = await apiAdmin.departments(mendoza.id);
+        if (active) setDepartments([...list].sort((a, b) => a.name.localeCompare(b.name, 'es')));
+      } catch {
+        if (active) setDepartments([]);
+      }
+    })();
+    return () => { active = false; };
+  }, [apiAdmin]);
 
   const current = available.find((type) => type.id === tipo) || available[0];
   const periodError = !current.sinPeriodo && desde && hasta && desde > hasta
@@ -95,7 +114,8 @@ export function ReportsAdminPage({ apiAdmin, role }) {
     setLoading(true);
     setError('');
     try {
-      const data = await apiAdmin.report(tipo, current.sinPeriodo ? undefined : desde, current.sinPeriodo ? undefined : hasta);
+      const data = await apiAdmin.report(
+        tipo, current.sinPeriodo ? undefined : desde, current.sinPeriodo ? undefined : hasta, departamento || undefined);
       if (request === lastRequest.current) setReport(data);
     } catch (cause) {
       if (request === lastRequest.current) {
@@ -105,9 +125,9 @@ export function ReportsAdminPage({ apiAdmin, role }) {
     } finally {
       if (request === lastRequest.current) setLoading(false);
     }
-  }, [apiAdmin, tipo, desde, hasta, current.sinPeriodo, periodError]);
+  }, [apiAdmin, tipo, desde, hasta, departamento, current.sinPeriodo, periodError]);
 
-  // Al elegir otro reporte se carga solo; las fechas se aplican con el botón "Ver reporte".
+  // Al elegir otro reporte se carga solo; las fechas y el departamento se aplican con el botón "Ver reporte".
   useEffect(() => { load(); }, [tipo]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const download = async (formato) => {
@@ -116,7 +136,7 @@ export function ReportsAdminPage({ apiAdmin, role }) {
     setError('');
     try {
       const { blob, filename } = await apiAdmin.downloadReport(
-        tipo, formato, current.sinPeriodo ? undefined : desde, current.sinPeriodo ? undefined : hasta);
+        tipo, formato, current.sinPeriodo ? undefined : desde, current.sinPeriodo ? undefined : hasta, departamento || undefined);
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
@@ -161,6 +181,13 @@ export function ReportsAdminPage({ apiAdmin, role }) {
             Hasta
             <input type="date" value={hasta} min={desde || undefined} disabled={current.sinPeriodo}
               onChange={(event) => setPeriod((p) => ({ ...p, hasta: event.target.value }))} />
+          </label>
+          <label>
+            Departamento
+            <select value={departamento} onChange={(event) => setDepartamento(event.target.value)}>
+              <option value="">Todos</option>
+              {departments.map((d) => <option key={d.id} value={d.name}>{d.name}</option>)}
+            </select>
           </label>
           <div className="report-actions">
             <button type="button" className="ops-secondary" onClick={load} disabled={loading || Boolean(periodError)}>

@@ -139,8 +139,8 @@ export function StatisticsAdminPage({ apiAdmin }) {
                 <ResponsiveContainer width="100%" height={290}>
                   <BarChart data={statistics.bestSellers} margin={{ top: 12, right: 12, left: -14, bottom: 56 }}>
                     <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                    <XAxis dataKey="nombre" angle={-28} textAnchor="end" interval={0} height={68} tick={{ fontSize: 9 }} />
-                    <YAxis allowDecimals={false} tick={{ fontSize: 9 }} />
+                    <XAxis dataKey="nombre" angle={-28} textAnchor="end" interval={0} height={86} tick={{ fontSize: 12 }} />
+                    <YAxis allowDecimals={false} tick={{ fontSize: 12 }} />
                     <Tooltip formatter={(value) => [`${Number(value).toLocaleString('es-AR')} unidades`, 'Vendidas']} />
                     <Bar dataKey="unidadesVendidas" name="Unidades vendidas" fill={chartColors[0]} radius={[5, 5, 0, 0]} />
                   </BarChart>
@@ -180,10 +180,10 @@ function OrdersChart({ title, chart, empty }) {
         <ResponsiveContainer width="100%" height={290}>
           <BarChart data={chart.rows} margin={{ top: 12, right: 12, left: -16, bottom: 26 }}>
             <CartesianGrid strokeDasharray="3 3" vertical={false} />
-            <XAxis dataKey="periodo" tick={{ fontSize: 9 }} interval="preserveStartEnd" angle={-18} textAnchor="end" height={42} />
-            <YAxis allowDecimals={false} tick={{ fontSize: 9 }} />
+            <XAxis dataKey="periodo" tick={{ fontSize: 12 }} interval="preserveStartEnd" angle={-18} textAnchor="end" height={52} />
+            <YAxis allowDecimals={false} tick={{ fontSize: 12 }} />
             <Tooltip labelFormatter={(label) => `Período: ${label}`} />
-            <Legend wrapperStyle={{ fontSize: 9 }} />
+            <Legend wrapperStyle={{ fontSize: 12 }} />
             {chart.preventistas.map(([id, name], index) => (
               <Bar key={id} dataKey={id} name={name} fill={chartColors[index % chartColors.length]} radius={[3, 3, 0, 0]} />
             ))}

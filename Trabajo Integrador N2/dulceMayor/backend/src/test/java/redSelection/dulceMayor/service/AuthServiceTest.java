@@ -40,7 +40,7 @@ class AuthServiceTest {
         usuario = Usuario.builder().nombreUsuario("prev").clave(encoder.encode("Correcta#1")).rol(Rol.PREVENTISTA).build();
         usuario.setId("u1");
         when(usuarios.findByNombreUsuarioIgnoreCase("prev")).thenReturn(Optional.of(usuario));
-        servicio = new AuthService(usuarios, personas, encoder, jwt, 3, 15);   // 3 intentos, 15 min
+        servicio = new AuthService(new UsuarioService(usuarios, personas), encoder, jwt, 3, 15);   // 3 intentos, 15 min
     }
 
     private void intentar(String clave) { servicio.login(new LoginDTO("prev", clave)); }

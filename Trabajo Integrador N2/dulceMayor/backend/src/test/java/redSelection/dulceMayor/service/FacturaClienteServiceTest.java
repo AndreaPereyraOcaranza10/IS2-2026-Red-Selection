@@ -78,14 +78,20 @@ class FacturaClienteServiceTest {
         return pedido.getHistorial().get(pedido.getHistorial().size() - 1).getObservacion();
     }
 
-    // ---------- facturación automática ----------
+    // ---------- facturación de un pedido que espera el pago ----------
+
+    /** El stock se reserva al cargar: el pedido llega a facturarse desde PENDIENTE_PAGO. */
+    private void esperaPago() {
+        pedido.esperarPago("preventista.mza", "Stock reservado");
+    }
 
     @Test
     @DisplayName("Con stock: emite la factura correlativa, descuenta cada línea y el pedido queda FACTURADO")
     void conStock() {
+        esperaPago();
         hayStock(10, 10);
 
-        FacturaCliente factura = servicio.facturarAlCargar(pedido, "preventista.mza").orElseThrow();
+        FacturaCliente factura = servicio.facturarPedido(pedido, "admin.mza");
 
         assertEquals(42L, factura.getNumeroFactura());
         assertEquals(EstadoFactura.EMITIDA, factura.getEstado());
@@ -100,15 +106,16 @@ class FacturaClienteServiceTest {
     }
 
     @Test
-    @DisplayName("Sin stock: no factura, no toca el stock y el pedido queda PENDIENTE_STOCK diciendo qué falta")
+    @DisplayName("Sin stock físico: no factura, no toca el stock y el pedido sigue esperando el pago")
     void sinStock() {
+        esperaPago();
         hayStock(10, 0);
 
-        assertTrue(servicio.facturarAlCargar(pedido, "preventista.mza").isEmpty());
+        ReglaNegocioException e = assertThrows(ReglaNegocioException.class,
+                () -> servicio.facturarPedido(pedido, "admin.mza"));
 
-        assertEquals(EstadoPedido.PENDIENTE_STOCK, pedido.getEstado());
-        assertEquals(EstadoStockPedido.INSUFICIENTE, pedido.getEstadoStock());
-        assertEquals("Falta stock de Chicles (faltan 1)", ultimaObservacion());
+        assertEquals("Todavía falta stock de Chicles (faltan 1).", e.getMessage());
+        assertEquals(EstadoPedido.PENDIENTE_PAGO, pedido.getEstado());
         verify(facturas, never()).save(any());
         verify(stock, never()).registrar(any(), any(), anyInt(), any());
         verifyNoInteractions(eventos);   // sin factura no hay correo
@@ -117,30 +124,33 @@ class FacturaClienteServiceTest {
     @Test
     @DisplayName("Si un producto aparece en dos líneas, se suman las cantidades para controlar el stock")
     void lineasRepetidas() {
+        esperaPago();
         linea(alfajor, 2, "100");   // ahora pide 4 alfajores en total
         hayStock(3, 10);
 
-        assertTrue(servicio.facturarAlCargar(pedido, "preventista.mza").isEmpty());
-        assertEquals("Falta stock de Alfajor (faltan 1)", ultimaObservacion());
-    }
-
-    // ---------- facturación pedida por administración ----------
-
-    @Test
-    @DisplayName("Un pedido que esperaba stock se factura cuando llega la mercadería; si todavía falta, se rechaza")
-    void reintentoDePendiente() {
-        hayStock(10, 0);
-        servicio.facturarAlCargar(pedido, "sistema");
-
         ReglaNegocioException e = assertThrows(ReglaNegocioException.class,
                 () -> servicio.facturarPedido(pedido, "admin.mza"));
-        assertEquals("Todavía falta stock de Chicles (faltan 1).", e.getMessage());
-        assertEquals(EstadoPedido.PENDIENTE_STOCK, pedido.getEstado());
+        assertEquals("Todavía falta stock de Alfajor (faltan 1).", e.getMessage());
+    }
+
+    @Test
+    @DisplayName("Si faltaba stock, se puede volver a intentar cuando llega la mercadería")
+    void reintentoConStock() {
+        esperaPago();
+        hayStock(10, 0);
+        assertThrows(ReglaNegocioException.class, () -> servicio.facturarPedido(pedido, "admin.mza"));
 
         hayStock(10, 5);
         FacturaCliente factura = servicio.facturarPedido(pedido, "admin.mza");
         assertEquals(42L, factura.getNumeroFactura());
         assertEquals(EstadoPedido.FACTURADO, pedido.getEstado());
+    }
+
+    @Test
+    @DisplayName("Un pedido recién cargado (sin pasar a esperar el pago) no se factura")
+    void cargadoNoSeFactura() {
+        assertThrows(ReglaNegocioException.class, () -> servicio.facturarPedido(pedido, "admin.mza"));
+        verifyNoInteractions(productos, stock);
     }
 
     @Test

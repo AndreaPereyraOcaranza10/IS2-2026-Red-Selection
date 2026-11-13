@@ -29,7 +29,9 @@ public class ReporteEnvios implements ReporteGenerador {
 
     @Override
     public ReporteDTO generar(PeriodoReporte periodo) {
-        List<Entrega> entregas = entregaService.deLosPedidosCargadosEntre(periodo.inicio(), periodo.fin());
+        List<Entrega> entregas = entregaService.deLosPedidosCargadosEntre(periodo.inicio(), periodo.fin()).stream()
+                .filter(e -> periodo.incluyeDepartamento(e.getPedido().getCliente().getDireccion().getDepartamentoNombre()))
+                .toList();
         List<List<Object>> filas = entregas.stream().map(this::fila).toList();
         long entregados = entregas.stream().filter(e -> e.getFechaEntrega() != null).count();
         List<Object> totales = Celdas.fila(

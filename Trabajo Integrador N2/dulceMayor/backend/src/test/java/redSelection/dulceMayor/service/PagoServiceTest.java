@@ -8,13 +8,14 @@ import redSelection.dulceMayor.dto.PagoCrearDTO;
 import redSelection.dulceMayor.dto.PagoRespuestaDTO;
 import redSelection.dulceMayor.enums.EstadoFactura;
 import redSelection.dulceMayor.enums.EstadoPago;
+import redSelection.dulceMayor.enums.EstadoPedido;
 import redSelection.dulceMayor.enums.Rol;
 import redSelection.dulceMayor.enums.TipoEmpresa;
 import redSelection.dulceMayor.enums.TipoPago;
 import redSelection.dulceMayor.exception.ReglaNegocioException;
 import redSelection.dulceMayor.model.*;
+import redSelection.dulceMayor.patrones.adapter.PasarelaSimulada;
 import redSelection.dulceMayor.patrones.factory.*;
-import redSelection.dulceMayor.repository.DulceMayorRepository;
 import redSelection.dulceMayor.repository.PagoRepository;
 import redSelection.dulceMayor.security.UsuarioActual;
 import redSelection.dulceMayor.security.UsuarioAutenticado;
@@ -22,12 +23,14 @@ import redSelection.dulceMayor.security.UsuarioAutenticado;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
-/** BK-07 / BK-15: reglas de PagoService con repositorios simulados (sin base de datos). */
+/** BK-07 / BK-15 / IN-04: reglas de PagoService con repositorios simulados (sin base de datos). */
 class PagoServiceTest {
 
     private PagoRepository pagos;
@@ -35,6 +38,7 @@ class PagoServiceTest {
     private UsuarioActual usuarioActual;
     private PagoService servicio;
     private FacturaCliente factura;
+    private Pedido pedido;
     private final List<Pago> enBd = new ArrayList<>();
 
     @BeforeEach
@@ -42,23 +46,32 @@ class PagoServiceTest {
         pagos = mock(PagoRepository.class);
         facturas = mock(FacturaClienteService.class);
         usuarioActual = mock(UsuarioActual.class);
-        DulceMayorRepository empresas = mock(DulceMayorRepository.class);
-        when(empresas.findByEliminadoFalse()).thenReturn(List.of(DulceMayor.builder()
+        DulceMayorService empresas = mock(DulceMayorService.class);
+        when(empresas.sedeCentral()).thenReturn(Optional.of(DulceMayor.builder()
                 .tipoEmpresa(TipoEmpresa.SEDE_CENTRAL).aliasTransferencia("ALIAS.TEST").build()));
+        PasarelaSimulada pasarela = new PasarelaSimulada();
         MedioPagoFactory factory = new MedioPagoFactory(List.of(new EfectivoMedioPago(),
-                new TransferenciaMedioPago(empresas), new BilleteraVirtualMedioPago("http://app/pagos")));
-        servicio = new PagoService(pagos, facturas, factory, usuarioActual);
+                new TransferenciaMedioPago(empresas), new BilleteraVirtualMedioPago(pasarela)));
+        QrService qr = mock(QrService.class);
+        when(qr.generarPngBase64(any())).thenReturn("data:image/png;base64,QR");
+        servicio = new PagoService(pagos, facturas, factory, usuarioActual, pasarela, qr);
 
         ResponsableComercio responsable = ResponsableComercio.builder().build();
         responsable.setId("resp-1");
         ClienteMinorista cliente = ClienteMinorista.builder().responsable(responsable).build();
-        Pedido pedido = Pedido.builder().cliente(cliente).build();
+        pedido = Pedido.builder().cliente(cliente).total(new BigDecimal("2000.00")).build();
+        pedido.setId("ped-1");
         factura = FacturaCliente.builder().numeroFactura(7L).total(new BigDecimal("2000.00"))
                 .estado(EstadoFactura.EMITIDA).pedido(pedido).build();
         factura.setId("f1");
 
         when(facturas.obtenerEntidad("f1")).thenReturn(factura);
         when(pagos.findByFacturaIdAndEliminadoFalse("f1")).thenAnswer(inv -> enBd);
+        when(pagos.findByPedidoIdAndEliminadoFalse("ped-1")).thenAnswer(inv -> enBd);
+        doAnswer(inv -> {
+            inv.<FacturaCliente>getArgument(0).setEstado(EstadoFactura.PAGADA);
+            return null;
+        }).when(facturas).marcarPagada(any());
         when(pagos.save(any(Pago.class))).thenAnswer(inv -> {
             Pago p = inv.getArgument(0);
             if (p.getId() == null) p.setId("p" + (enBd.size() + 1));
@@ -89,10 +102,46 @@ class PagoServiceTest {
         assertNull(r.codigoQr());
     }
 
-    @Test @DisplayName("La billetera virtual todavía no está habilitada y no deja nada guardado")
-    void billeteraNoDisponible() {
-        assertThrows(ReglaNegocioException.class, () -> servicio.iniciar("f1", new PagoCrearDTO(TipoPago.BILLETERA_VIRTUAL)));
+    @Test @DisplayName("Billetera virtual: genera la orden con su QR y la administración no la puede confirmar a mano")
+    void billeteraGeneraQrYNoSeConfirmaAMano() {
+        PagoRespuestaDTO r = servicio.iniciar("f1", new PagoCrearDTO(TipoPago.BILLETERA_VIRTUAL));
+        assertEquals(EstadoPago.PENDIENTE, r.estado());
+        assertNotNull(r.codigoQr());
+        assertEquals("data:image/png;base64,QR", r.imagenQr());
+        assertTrue(r.pasarelaSimulada());
+        assertThrows(AccessDeniedException.class, () -> servicio.confirmar(r.id()));
+    }
+
+    // ---------- pago por pedido (la factura se emite al acreditarse) ----------
+
+    @Test @DisplayName("Solo se paga un pedido que espera el pago")
+    void pedidoQueNoEsperaPago() {
+        pedido.setEstado(EstadoPedido.PENDIENTE_STOCK);
+        assertThrows(ReglaNegocioException.class, () -> servicio.iniciar(pedido, TipoPago.EFECTIVO));
         assertTrue(enBd.isEmpty());
+    }
+
+    @Test @DisplayName("Mercado Pago (simulado): al acreditarse se confirma el pago y se emite la factura")
+    void acreditacionEmiteFactura() {
+        pedido.setEstado(EstadoPedido.PENDIENTE_PAGO);
+        when(facturas.facturarPedido(eq(pedido), any())).thenReturn(factura);
+
+        servicio.iniciar(pedido, TipoPago.BILLETERA_VIRTUAL);
+        assertEquals(EstadoPago.PENDIENTE, servicio.verificarPorPedido("ped-1").orElseThrow().estado());
+
+        PagoRespuestaDTO r = servicio.simularAcreditacion("ped-1").orElseThrow();
+        assertEquals(EstadoPago.CONFIRMADO, r.estado());
+        assertEquals("f1", r.facturaId());
+        assertEquals(EstadoFactura.PAGADA, factura.getEstado());
+        verify(facturas).facturarPedido(eq(pedido), any());
+    }
+
+    @Test @DisplayName("Al anular el pedido, su pago pendiente queda ANULADO")
+    void anularPendientes() {
+        pedido.setEstado(EstadoPedido.PENDIENTE_PAGO);
+        servicio.iniciar(pedido, TipoPago.TRANSFERENCIA);
+        servicio.anularPendientesDe("ped-1");
+        assertEquals(EstadoPago.ANULADO, enBd.get(0).getEstado());
     }
 
     @Test @DisplayName("No se paga una factura anulada")

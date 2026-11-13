@@ -12,9 +12,13 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 import redSelection.dulceMayor.dto.CambioEstadoPedidoDTO;
+import redSelection.dulceMayor.dto.PagoCrearDTO;
+import redSelection.dulceMayor.dto.PagoRespuestaDTO;
 import redSelection.dulceMayor.dto.PedidoCrearDTO;
 import redSelection.dulceMayor.dto.PedidoRespuestaDTO;
 import redSelection.dulceMayor.enums.EstadoFactura;
+import redSelection.dulceMayor.enums.EstadoPago;
+import redSelection.dulceMayor.enums.TipoPago;
 import redSelection.dulceMayor.enums.Rol;
 import redSelection.dulceMayor.exception.ReglaNegocioException;
 import redSelection.dulceMayor.model.ClienteMinorista;
@@ -35,7 +39,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * BK-14: el circuito real pedido -> factura sobre una base vacía (H2 en memoria con los datos de demostración),
+ * BK-14 / BK-15: el circuito real pedido -> reserva de stock -> pago -> factura sobre una base vacía (H2 en memoria con los datos de demostración),
  * con todos los componentes de verdad: JPA, patrón State, promociones (Strategy), stock y facturación.
  * Cada test se revierte al terminar (@Transactional), así no se afectan entre sí.
  */
@@ -62,10 +66,17 @@ class PedidoFacturacionIntegracionTest {
         comercio = clientes.findByPreventistaAsignadoIdAndEliminadoFalse(martin.getId()).get(0);
         alfajor = productos.findByCodigoIgnoreCase("DM-001").orElseThrow();   // 120 en stock
         gomitas = productos.findByCodigoIgnoreCase("DM-005").orElseThrow();   // 9 en stock
-        UsuarioAutenticado usuario = new UsuarioAutenticado(martin.getUsuario().getId(), "preventista.mza",
-                Rol.PREVENTISTA, false, martin.getId(), 0);
+        loguear(new UsuarioAutenticado(martin.getUsuario().getId(), "preventista.mza",
+                Rol.PREVENTISTA, false, martin.getId(), 0));
+    }
+
+    private void loguear(UsuarioAutenticado usuario) {
         SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(usuario, null,
-                List.of(new SimpleGrantedAuthority("ROLE_PREVENTISTA"))));
+                List.of(new SimpleGrantedAuthority("ROLE_" + usuario.getRol().name()))));
+    }
+
+    private void loguearAdministracion() {
+        loguear(new UsuarioAutenticado("admin-test", "admin.mza", Rol.ADMINISTRATIVO, false, null, 0));
     }
 
     @AfterEach
@@ -79,57 +90,82 @@ class PedidoFacturacionIntegracionTest {
     }
 
     @Test
-    @DisplayName("Con stock: el pedido se factura solo, descuenta el stock y aplica la promoción")
-    void conStockSeFacturaSolo() {
-        long antes = stock.stockActual(alfajor.getId());
+    @DisplayName("Con stock: el pedido reserva el stock, espera el pago sin facturar y aplica la promoción")
+    void conStockReservaYEsperaPago() {
+        long fisico = stock.stockActual(alfajor.getId());
+        long reservado = pedidos.cantidadReservada(alfajor.getId());
 
         PedidoRespuestaDTO r = pedido(alfajor, 2, "ALFAJOR15");
 
-        assertEquals("FACTURADO", r.status());
-        assertNotNull(r.invoiceId());
+        assertEquals("PENDIENTE_PAGO", r.status());
+        assertNull(r.invoiceId());
         assertEquals(0, new BigDecimal("5520.00").compareTo(r.discount()));    // 15 % de 2 x $18.400
         assertEquals(0, new BigDecimal("31280.00").compareTo(r.total()));
-        assertEquals(antes - 2, stock.stockActual(alfajor.getId()));
-        assertEquals(List.of("CARGADO", "FACTURADO"), r.trace().events().stream().map(PedidoRespuestaDTO.Evento::state).toList());
+        assertEquals(fisico, stock.stockActual(alfajor.getId()));               // el stock físico no se toca
+        assertEquals(reservado + 2, pedidos.cantidadReservada(alfajor.getId()));
+        assertEquals(List.of("CARGADO", "PENDIENTE_PAGO"),
+                r.trace().events().stream().map(PedidoRespuestaDTO.Evento::state).toList());
+    }
 
+    @Test
+    @DisplayName("Al registrar el pago se emite la factura (PAGADA), se descuenta el stock y el pedido queda FACTURADO")
+    void pagoEmiteFactura() {
+        long fisico = stock.stockActual(alfajor.getId());
+        PedidoRespuestaDTO creado = pedido(alfajor, 2, null);
+
+        loguearAdministracion();
+        PagoRespuestaDTO pago = pedidos.registrarPago(creado.id(), new PagoCrearDTO(TipoPago.EFECTIVO));
+
+        assertEquals(EstadoPago.CONFIRMADO, pago.estado());
+        PedidoRespuestaDTO r = pedidos.obtener(creado.id());
+        assertEquals("FACTURADO", r.status());
+        assertEquals(pago.facturaId(), r.invoiceId());
+        assertEquals(fisico - 2, stock.stockActual(alfajor.getId()));
         FacturaCliente factura = facturas.obtenerEntidad(r.invoiceId());
-        assertEquals(EstadoFactura.EMITIDA, factura.getEstado());
+        assertEquals(EstadoFactura.PAGADA, factura.getEstado());
         assertEquals(0, r.total().compareTo(factura.getTotal()));
     }
 
     @Test
-    @DisplayName("Sin stock: el pedido queda PENDIENTE_STOCK, sin factura y sin tocar el stock")
+    @DisplayName("Sin stock disponible: el pedido queda PENDIENTE_STOCK, sin factura y sin tocar el stock")
     void sinStockQuedaPendiente() {
-        long antes = stock.stockActual(gomitas.getId());
+        long fisico = stock.stockActual(gomitas.getId());
+        long disponible = Math.max(fisico - pedidos.cantidadReservada(gomitas.getId()), 0);
 
         PedidoRespuestaDTO r = pedido(gomitas, 20, null);
 
         assertEquals("PENDIENTE_STOCK", r.status());
         assertNull(r.invoiceId());
-        assertEquals(antes, stock.stockActual(gomitas.getId()));
-        assertTrue(r.trace().events().get(1).note().contains("Gomitas ositos (faltan 11)"));
+        assertEquals(fisico, stock.stockActual(gomitas.getId()));
+        assertTrue(r.trace().events().get(1).note().contains("Gomitas ositos (faltan " + (20 - disponible) + ")"));
     }
 
     @Test
-    @DisplayName("Anular un pedido facturado anula la factura y devuelve el stock")
-    void anularDevuelveStock() {
-        long antes = stock.stockActual(alfajor.getId());
-        PedidoRespuestaDTO facturado = pedido(alfajor, 3, null);
+    @DisplayName("Anular un pedido que espera el pago libera la reserva; uno ya pagado no se puede anular")
+    void anularLiberaReserva() {
+        long reservado = pedidos.cantidadReservada(alfajor.getId());
+        PedidoRespuestaDTO esperando = pedido(alfajor, 3, null);
+        PedidoRespuestaDTO pagado = pedido(alfajor, 1, null);
 
-        PedidoRespuestaDTO anulado = pedidos.cambiarEstado(facturado.id(), new CambioEstadoPedidoDTO("ANULADO", "El comercio canceló"));
-
+        loguearAdministracion();
+        PedidoRespuestaDTO anulado = pedidos.cambiarEstado(esperando.id(), new CambioEstadoPedidoDTO("ANULADO", "El comercio canceló"));
         assertEquals("ANULADO", anulado.status());
-        assertEquals(antes, stock.stockActual(alfajor.getId()));
-        assertEquals(EstadoFactura.ANULADA, facturas.obtenerEntidad(facturado.invoiceId()).getEstado());
+
+        pedidos.registrarPago(pagado.id(), new PagoCrearDTO(TipoPago.EFECTIVO));
+        assertEquals(reservado, pedidos.cantidadReservada(alfajor.getId()));
+        assertThrows(ReglaNegocioException.class,
+                () -> pedidos.cambiarEstado(pagado.id(), new CambioEstadoPedidoDTO("ANULADO", null)));
     }
 
     @Test
-    @DisplayName("Una transición inválida se rechaza y el pedido queda como estaba")
+    @DisplayName("Una transición inválida (o facturar a mano) se rechaza y el pedido queda como estaba")
     void transicionInvalida() {
-        PedidoRespuestaDTO facturado = pedido(alfajor, 1, null);
+        PedidoRespuestaDTO creado = pedido(alfajor, 1, null);
 
         assertThrows(ReglaNegocioException.class,
-                () -> pedidos.cambiarEstado(facturado.id(), new CambioEstadoPedidoDTO("ENTREGADO", null)));
-        assertEquals("FACTURADO", pedidos.obtener(facturado.id()).status());
+                () -> pedidos.cambiarEstado(creado.id(), new CambioEstadoPedidoDTO("ENTREGADO", null)));
+        assertThrows(ReglaNegocioException.class,
+                () -> pedidos.cambiarEstado(creado.id(), new CambioEstadoPedidoDTO("FACTURADO", null)));
+        assertEquals("PENDIENTE_PAGO", pedidos.obtener(creado.id()).status());
     }
 }

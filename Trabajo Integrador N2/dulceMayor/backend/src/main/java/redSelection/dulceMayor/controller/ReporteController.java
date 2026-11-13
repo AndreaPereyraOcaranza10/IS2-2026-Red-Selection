@@ -21,7 +21,7 @@ import java.time.LocalDate;
  *  - /api/reportes/{clientes|pedidos|envios|montos}[/pdf|/excel]  -> ADMINISTRATIVO (el Jefe lo hereda)
  *  - /api/reportes/globales/ventas[/pdf|/excel]                   -> solo JEFE_ADMINISTRATIVO
  * Sin extensión devuelve JSON (la pantalla); con /pdf o /excel, la descarga. Las fechas son opcionales
- * (yyyy-MM-dd); sin ellas, los últimos 30 días.
+ * (yyyy-MM-dd); sin ellas, los últimos 30 días. "departamento" (nombre, opcional) filtra por el departamento del cliente.
  */
 @RestController
 @RequestMapping("/api/reportes")
@@ -36,28 +36,32 @@ public class ReporteController {
     @GetMapping("/{tipo}")
     public ReporteDTO ver(@PathVariable String tipo,
                           @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate desde,
-                          @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate hasta) {
-        return reporteService.operativo(tipo, desde, hasta);
+                          @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate hasta,
+                          @RequestParam(required = false) String departamento) {
+        return reporteService.operativo(tipo, desde, hasta, departamento);
     }
 
     @GetMapping("/{tipo}/{formato}")
     public ResponseEntity<byte[]> descargar(@PathVariable String tipo, @PathVariable String formato,
                                             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate desde,
-                                            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate hasta) {
-        return archivo(reporteService.operativoExportado(tipo, formato, desde, hasta));
+                                            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate hasta,
+                                            @RequestParam(required = false) String departamento) {
+        return archivo(reporteService.operativoExportado(tipo, formato, desde, hasta, departamento));
     }
 
     @GetMapping("/globales/ventas")
     public ReporteDTO ventas(@RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate desde,
-                             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate hasta) {
-        return reporteService.ventas(desde, hasta);
+                             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate hasta,
+                             @RequestParam(required = false) String departamento) {
+        return reporteService.ventas(desde, hasta, departamento);
     }
 
     @GetMapping("/globales/ventas/{formato}")
     public ResponseEntity<byte[]> descargarVentas(@PathVariable String formato,
                                                   @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate desde,
-                                                  @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate hasta) {
-        return archivo(reporteService.ventasExportado(formato, desde, hasta));
+                                                  @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate hasta,
+                                                  @RequestParam(required = false) String departamento) {
+        return archivo(reporteService.ventasExportado(formato, desde, hasta, departamento));
     }
 
     private ResponseEntity<byte[]> archivo(ArchivoReporteDTO reporte) {

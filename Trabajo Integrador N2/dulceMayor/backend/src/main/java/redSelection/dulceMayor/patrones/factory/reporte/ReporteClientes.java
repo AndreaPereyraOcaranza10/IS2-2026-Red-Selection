@@ -30,9 +30,10 @@ public class ReporteClientes implements ReporteGenerador {
     @Override
     public ReporteDTO generar(PeriodoReporte periodo) {
         List<List<Object>> filas = puntoVentaService.activosOrdenadosPorNombre().stream()
+                .filter(c -> periodo.incluyeDepartamento(c.getDireccion().getDepartamentoNombre()))
                 .map(this::fila).toList();
         List<Object> totales = Celdas.fila("Total: " + filas.size() + " clientes", "", "", "", "", "", "");
-        return new ReporteDTO(tipo(), "Reporte de clientes", "Cartera actual", LocalDateTime.now(),
+        return new ReporteDTO(tipo(), "Reporte de clientes", periodo.conDepartamento("Cartera actual"), LocalDateTime.now(),
                 List.of(new TablaReporteDTO("Clientes", COLUMNAS, filas, totales)));
     }
 

@@ -3,13 +3,14 @@ const API_BASE = import.meta.env.VITE_API_URL ?? '';
 
 /**
  * Ruta de un reporte del backend. `ventas` es global (solo el Jefe) y vive bajo /globales.
- * Sin `formato` devuelve JSON (la pantalla); con 'pdf' o 'excel', el archivo. Las fechas son opcionales (yyyy-MM-dd).
+ * Sin `formato` devuelve JSON (la pantalla); con 'pdf' o 'excel', el archivo. Fechas (yyyy-MM-dd) y departamento (nombre) son opcionales.
  */
-export function reportPath(tipo, formato, desde, hasta) {
+export function reportPath(tipo, formato, desde, hasta, departamento) {
   const base = tipo === 'ventas' ? '/api/reportes/globales/ventas' : `/api/reportes/${tipo}`;
   const params = new URLSearchParams();
   if (desde) params.set('desde', desde);
   if (hasta) params.set('hasta', hasta);
+  if (departamento) params.set('departamento', departamento);
   const query = params.toString();
   return `${base}${formato ? `/${formato}` : ''}${query ? `?${query}` : ''}`;
 }
@@ -59,9 +60,9 @@ export const apiAdmin = {
   dailyStatistics: () => api.get('/api/estadisticas/pedidos/preventistas/dia'),
   monthlyStatistics: () => api.get('/api/estadisticas/pedidos/preventistas/mes'),
   stockStatistics: () => api.get('/api/estadisticas/stock/productos'),
-  report: (tipo, desde, hasta) => api.get(reportPath(tipo, null, desde, hasta)),
-  downloadReport: (tipo, formato, desde, hasta) => api.download(
-    reportPath(tipo, formato, desde, hasta),
+  report: (tipo, desde, hasta, departamento) => api.get(reportPath(tipo, null, desde, hasta, departamento)),
+  downloadReport: (tipo, formato, desde, hasta, departamento) => api.download(
+    reportPath(tipo, formato, desde, hasta, departamento),
     `reporte-${tipo}-${desde || 'inicio'}_${hasta || 'hoy'}.${formato === 'excel' ? 'xlsx' : 'pdf'}`,
   ),
   salespersonPerformance: () => api.get('/api/estadisticas/rendimiento/preventistas'),

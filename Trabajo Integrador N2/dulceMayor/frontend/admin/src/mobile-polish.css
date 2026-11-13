@@ -25,50 +25,50 @@
   .admin-resource-table td:nth-child(5):before{content:'Estado'}
   .admin-resource-table td:nth-child(6):before{content:'Acciones'}
   .admin-resource-table .admin-role-pill,
-  .admin-resource-table .admin-active-pill{max-width:100%;padding:4px 6px;font-size:8px;line-height:1.2;white-space:normal;overflow-wrap:anywhere}
+  .admin-resource-table .admin-active-pill{max-width:100%;padding:4px 6px;font-size:12px;line-height:1.2;white-space:normal;overflow-wrap:anywhere}
   .admin-resource-table .admin-row-actions{flex-wrap:wrap}
 }
 /* AD-03: preparación de pedidos y cobranza */
 .ops-resource-page{min-width:0;overflow:hidden}
 .ops-resource-toolbar{display:flex;align-items:center;gap:10px;padding:12px 14px;border-bottom:1px solid var(--color-surface-dim)}
 .ops-resource-toolbar .table-search{height:38px;min-width:200px;max-width:420px;flex:1;display:flex;align-items:center;gap:8px;padding:0 10px;border:1px solid var(--color-surface-dim);border-radius:6px;color:var(--color-outline)}
-.ops-resource-toolbar .table-search input{width:100%;min-width:0;border:0;outline:0;color:var(--color-text-primary);font:inherit;font-size:10px}
-.ops-filter-label{display:flex;align-items:center;gap:7px;color:var(--color-text-secondary);font-size:9px}
-.ops-filter-label select{height:38px;min-width:160px;padding:0 9px;border:1px solid var(--color-surface-dim);border-radius:6px;background:white;color:var(--color-text-primary);font:inherit;font-size:10px}
-.ops-result-count{margin-left:auto;color:var(--color-outline);font-size:9px;white-space:nowrap}
+.ops-resource-toolbar .table-search input{width:100%;min-width:0;border:0;outline:0;color:var(--color-text-primary);font:inherit;font-size:14px}
+.ops-filter-label{display:flex;align-items:center;gap:7px;color:var(--color-text-secondary);font-size:13px}
+.ops-filter-label select{height:38px;min-width:160px;padding:0 9px;border:1px solid var(--color-surface-dim);border-radius:6px;background:white;color:var(--color-text-primary);font:inherit;font-size:14px}
+.ops-result-count{margin-left:auto;color:var(--color-outline);font-size:13px;white-space:nowrap}
 .ops-order-list{display:flex;flex-direction:column;gap:9px;padding:12px}
 .ops-order-card{min-width:0;padding:12px;border:1px solid var(--color-surface-dim);border-radius:7px;background:var(--color-surface)}
 .ops-order-card>header,.ops-order-card>footer{display:flex;align-items:center;justify-content:space-between;gap:10px}
 .ops-order-card>header{padding-bottom:10px;border-bottom:1px solid var(--color-surface-dim)}
 .ops-order-card>header>div{min-width:0;display:flex;flex-direction:column;gap:3px}
-.ops-order-card>header>div b{color:var(--color-brand-deep);font:700 11px 'Plus Jakarta Sans'}
-.ops-order-card>header>div span,.ops-order-card>footer>span{color:var(--color-text-muted);font-size:9px}
-.ops-order-status{flex:none;padding:5px 9px;border-radius:30px;background:var(--color-secondary-soft);color:var(--color-secondary-deep);font-size:9px;font-weight:700}
+.ops-order-card>header>div b{color:var(--color-brand-deep);font:700 14px var(--font)}
+.ops-order-card>header>div span,.ops-order-card>footer>span{color:var(--color-text-muted);font-size:13px}
+.ops-order-status{flex:none;padding:5px 9px;border-radius:30px;background:var(--color-secondary-soft);color:var(--color-secondary-deep);font-size:13px;font-weight:700}
 .ops-order-status.warning{background:var(--color-tertiary-soft);color:#9b5c00}
 .ops-order-status.paid{background:var(--color-secondary-soft);color:var(--color-secondary-deep)}
 .ops-order-info{display:grid;grid-template-columns:1.2fr 1fr .8fr;gap:10px;padding:11px 0}
 .ops-order-info>div{min-width:0;display:flex;flex-direction:column;gap:4px}
-.ops-order-info small{color:var(--color-outline);font-size:8px}
-.ops-order-info b{overflow-wrap:anywhere;color:var(--color-text-primary);font-size:10px}
-.ops-stock-check{display:flex;align-items:flex-start;gap:8px;padding:9px 10px;border-radius:6px;font-size:9px}
+.ops-order-info small{color:var(--color-outline);font-size:12px}
+.ops-order-info b{overflow-wrap:anywhere;color:var(--color-text-primary);font-size:14px}
+.ops-stock-check{display:flex;align-items:flex-start;gap:8px;padding:9px 10px;border-radius:6px;font-size:13px}
 .ops-stock-check svg{flex:none}
 .ops-stock-check>div{display:flex;flex-direction:column;gap:3px}
 .ops-stock-check small{line-height:1.4}
 .ops-stock-check.available{background:var(--color-secondary-soft);color:var(--color-secondary-deep)}
 .ops-stock-check.unavailable{background:var(--color-error-soft);color:var(--color-error)}
 .ops-order-card>footer{margin-top:10px;padding-top:10px;border-top:1px solid var(--color-surface-dim)}
-.ops-order-card .ops-primary,.ops-order-card .ops-secondary{min-height:34px;width:auto;padding:0 10px;display:inline-flex;align-items:center;justify-content:center;gap:6px;font-size:9px}
-.ops-success-note{display:inline-flex;align-items:center;gap:5px;color:var(--color-secondary-deep);font-size:9px;font-weight:700}
+.ops-order-card .ops-primary,.ops-order-card .ops-secondary{min-height:34px;width:auto;padding:0 10px;display:inline-flex;align-items:center;justify-content:center;gap:6px;font-size:13px}
+.ops-success-note{display:inline-flex;align-items:center;gap:5px;color:var(--color-secondary-deep);font-size:13px;font-weight:700}
 .ops-payment-actions{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:7px}
-.ops-resource-note{margin:0 12px 12px;padding:10px;display:flex;align-items:flex-start;gap:8px;border-radius:6px;background:var(--color-secondary-soft);color:var(--color-secondary-deep);font-size:9px;line-height:1.45}
+.ops-resource-note{margin:0 12px 12px;padding:10px;display:flex;align-items:flex-start;gap:8px;border-radius:6px;background:var(--color-secondary-soft);color:var(--color-secondary-deep);font-size:13px;line-height:1.45}
 .ops-resource-note svg{flex:none}
-.ops-action-error,.ops-payment-notice{margin:10px 12px 0;padding:9px 10px;border-radius:6px;font-size:9px}
+.ops-action-error,.ops-payment-notice{margin:10px 12px 0;padding:9px 10px;border-radius:6px;font-size:13px}
 .ops-action-error{background:var(--color-error-soft);color:var(--color-error)}
 .ops-payment-notice{background:var(--color-secondary-soft);color:var(--color-secondary-deep)}
 .ops-confirm-payment{width:min(460px,100%)}
-.ops-confirm-payment>p{padding:5px 0;color:var(--color-text-secondary);font-size:11px;line-height:1.6}
+.ops-confirm-payment>p{padding:5px 0;color:var(--color-text-secondary);font-size:14px;line-height:1.6}
 .ops-confirm-payment>footer{display:flex;justify-content:flex-end;gap:8px}
-.ops-confirm-payment>footer button{width:auto;min-height:38px;padding:0 13px;font-size:10px}
+.ops-confirm-payment>footer button{width:auto;min-height:38px;padding:0 13px;font-size:14px}
 @media(max-width:650px){
   .ops-resource-toolbar{align-items:stretch;flex-wrap:wrap;padding:9px;gap:7px}
   .ops-resource-toolbar .table-search{order:0;flex-basis:100%;max-width:none;height:38px}
@@ -81,7 +81,7 @@
   .ops-order-info>div:last-child{grid-column:1/-1;padding-top:7px;border-top:1px solid var(--color-surface-dim)}
   .ops-order-card>footer{align-items:flex-start;flex-direction:column}
   .ops-order-card>footer>span{line-height:1.4}
-  .ops-order-card .ops-primary,.ops-order-card .ops-secondary{min-height:36px;font-size:9px}
+  .ops-order-card .ops-primary,.ops-order-card .ops-secondary{min-height:36px;font-size:13px}
   .ops-payment-actions{width:100%;justify-content:stretch}
   .ops-payment-actions button{flex:1}
   .ops-resource-note{margin:0 8px 8px}

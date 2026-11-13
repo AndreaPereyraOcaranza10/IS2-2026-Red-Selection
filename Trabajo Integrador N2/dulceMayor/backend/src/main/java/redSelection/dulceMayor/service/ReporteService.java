@@ -21,7 +21,7 @@ import java.util.Map;
  * Reportes (BK-10): pantalla, PDF y Excel a partir de la misma tabla de datos.
  *  - QUÉ reporte se arma lo decide ReporteFactory (Factory Method);
  *  - EN QUÉ formato sale lo decide el ExportadorReporte elegido (Strategy).
- * Este service solo orquesta: valida el período, pide el reporte y, si corresponde, lo exporta.
+ * Este service solo orquesta: valida los filtros (período y departamento opcional), pide el reporte y, si corresponde, lo exporta.
  * No extiende BaseService: no es un CRUD, es un caso de uso de consulta.
  */
 @Service
@@ -40,34 +40,34 @@ public class ReporteService {
 
     // ---------- Reportes operativos (administración) ----------
 
-    public ReporteDTO operativo(String tipo, LocalDate desde, LocalDate hasta) {
-        return generar(tipoOperativo(tipo), desde, hasta);
+    public ReporteDTO operativo(String tipo, LocalDate desde, LocalDate hasta, String departamento) {
+        return generar(tipoOperativo(tipo), desde, hasta, departamento);
     }
 
-    public ArchivoReporteDTO operativoExportado(String tipo, String formato, LocalDate desde, LocalDate hasta) {
-        return exportar(tipoOperativo(tipo), formato, desde, hasta);
+    public ArchivoReporteDTO operativoExportado(String tipo, String formato, LocalDate desde, LocalDate hasta, String departamento) {
+        return exportar(tipoOperativo(tipo), formato, desde, hasta, departamento);
     }
 
     // ---------- Reportes globales (solo Jefe Administrativo) ----------
 
-    public ReporteDTO ventas(LocalDate desde, LocalDate hasta) {
-        return generar(TipoReporte.VENTAS, desde, hasta);
+    public ReporteDTO ventas(LocalDate desde, LocalDate hasta, String departamento) {
+        return generar(TipoReporte.VENTAS, desde, hasta, departamento);
     }
 
-    public ArchivoReporteDTO ventasExportado(String formato, LocalDate desde, LocalDate hasta) {
-        return exportar(TipoReporte.VENTAS, formato, desde, hasta);
+    public ArchivoReporteDTO ventasExportado(String formato, LocalDate desde, LocalDate hasta, String departamento) {
+        return exportar(TipoReporte.VENTAS, formato, desde, hasta, departamento);
     }
 
     // ---------- Núcleo ----------
 
-    private ReporteDTO generar(TipoReporte tipo, LocalDate desde, LocalDate hasta) {
-        return factory.crear(tipo).generar(PeriodoReporte.de(desde, hasta));
+    private ReporteDTO generar(TipoReporte tipo, LocalDate desde, LocalDate hasta, String departamento) {
+        return factory.crear(tipo).generar(PeriodoReporte.de(desde, hasta, departamento));
     }
 
-    private ArchivoReporteDTO exportar(TipoReporte tipo, String textoFormato, LocalDate desde, LocalDate hasta) {
+    private ArchivoReporteDTO exportar(TipoReporte tipo, String textoFormato, LocalDate desde, LocalDate hasta, String departamento) {
         FormatoReporte formato = FormatoReporte.desdeTexto(textoFormato)
                 .orElseThrow(() -> new ReglaNegocioException("Formato no soportado. Usá pdf o excel."));
-        PeriodoReporte periodo = PeriodoReporte.de(desde, hasta);   // valida antes de armar el reporte
+        PeriodoReporte periodo = PeriodoReporte.de(desde, hasta, departamento);   // valida antes de armar el reporte
         ReporteDTO reporte = factory.crear(tipo).generar(periodo);
         byte[] contenido = exportadores.get(formato).exportar(reporte);
         String nombre = "reporte-" + tipo.name().toLowerCase() + "-" + periodo.sufijoArchivo() + "." + formato.extension();

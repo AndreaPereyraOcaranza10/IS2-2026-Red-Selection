@@ -12,8 +12,9 @@ import redSelection.dulceMayor.patrones.adapter.EnvioCorreo;
 import redSelection.dulceMayor.patrones.builder.Notificacion;
 import redSelection.dulceMayor.patrones.facade.NotificacionFacade;
 import redSelection.dulceMayor.repository.ConfiguracionCorreoEmpresaRepository;
-import redSelection.dulceMayor.repository.DulceMayorRepository;
+import redSelection.dulceMayor.service.ConfiguracionCorreoService;
 import redSelection.dulceMayor.service.CorreoFacturaService;
+import redSelection.dulceMayor.service.DulceMayorService;
 import redSelection.dulceMayor.service.FacturaClienteService;
 import redSelection.dulceMayor.service.FacturaPdf;
 
@@ -43,11 +44,11 @@ class CorreoFacturaTest {
         envio = mock(EnvioCorreo.class);
         when(envio.enviar(any())).thenReturn(true);
         plantillas = mock(ConfiguracionCorreoEmpresaRepository.class);
-        DulceMayorRepository empresas = mock(DulceMayorRepository.class);
+        DulceMayorService empresas = mock(DulceMayorService.class);
         sede = DulceMayor.builder().tipoEmpresa(TipoEmpresa.SEDE_CENTRAL).build();
         sede.setId("sede");
-        when(empresas.findByEliminadoFalse()).thenReturn(List.of(sede));
-        facade = new NotificacionFacade(empresas, plantillas, envio);
+        when(empresas.sedeCentral()).thenReturn(Optional.of(sede));
+        facade = new NotificacionFacade(new ConfiguracionCorreoService(plantillas, empresas), envio);
 
         responsable = ResponsableComercio.builder().nombre("María").apellido("Gómez").contactos(new ArrayList<>()).build();
         responsable.getContactos().add(ContactoCorreoElectronico.builder().tipoContacto(TipoContacto.LABORAL)

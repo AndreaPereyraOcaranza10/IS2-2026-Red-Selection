@@ -31,7 +31,10 @@ public class ReportePedidos implements ReporteGenerador {
     @Override
     public ReporteDTO generar(PeriodoReporte periodo) {
         List<Pedido> pedidos = pedidoRepository
-                .findByEliminadoFalseAndFechaHoraCargaBetweenOrderByFechaHoraCargaAsc(periodo.inicio(), periodo.fin());
+                .findByEliminadoFalseAndFechaHoraCargaBetweenOrderByFechaHoraCargaAsc(periodo.inicio(), periodo.fin())
+                .stream()
+                .filter(p -> periodo.incluyeDepartamento(p.getCliente().getDireccion().getDepartamentoNombre()))
+                .toList();
         List<List<Object>> filas = pedidos.stream().map(this::fila).toList();
         BigDecimal total = pedidos.stream()
                 .filter(p -> p.getEstado() != EstadoPedido.ANULADO)
