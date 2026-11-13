@@ -1,2 +1,5 @@
 # Variables de docker-compose con secretos (la plantilla es .env.example)
 .env
+# Variantes por entorno (por ejemplo .env.donweb para el servidor): también tienen secretos
+.env.*
+!.env.example

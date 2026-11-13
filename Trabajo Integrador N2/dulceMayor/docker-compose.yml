@@ -16,6 +16,8 @@
 # Los puertos no chocan con el entorno de desarrollo (Vite 5173-5176, backend 8080, XAMPP 3306).
 # Cada app reenvía /api al backend por la red interna de Docker (ver frontend/nginx.conf).
 # Variables opcionales (claves, correo, Auth0, Mercado Pago): copiar .env.example a .env y completar.
+# En un servidor (Donweb) definir también CLIENT_URL, ADMIN_URL y CORS_ORIGENES con el dominio/IP real;
+# sin ellas se usan las direcciones de localhost de arriba. Cambiar CLIENT_URL/ADMIN_URL requiere --build.
 
 name: dulcemayor
 
@@ -32,7 +34,9 @@ services:
     volumes:
       - db_data:/var/lib/mysql
     ports:
-      - "3307:3306"   # opcional: para conectarse desde HeidiSQL/DBeaver; dentro de Docker se usa db:3306
+      # Solo desde la propia máquina (HeidiSQL/DBeaver o un túnel SSH): en un servidor la base no queda expuesta
+      # a internet (Docker publica puertos salteando el firewall de Ubuntu). Dentro de Docker se usa db:3306.
+      - "127.0.0.1:3307:3306"
     healthcheck:
       test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
       interval: 10s
@@ -54,7 +58,7 @@ services:
       DB_PASSWORD: ${DB_PASSWORD:-dulcemayor-db}
       JWT_SECRET: ${JWT_SECRET:-dulce-mayor-docker-cambiar-este-secreto-en-un-despliegue-real}
       DEMO_DATA: ${DEMO_DATA:-true}
-      CORS_ORIGENES: http://localhost:8081,http://localhost:8082,http://localhost:8083,http://localhost:8084
+      CORS_ORIGENES: ${CORS_ORIGENES:-http://localhost:8081,http://localhost:8082,http://localhost:8083,http://localhost:8084}
       PAGOS_PASARELA: ${PAGOS_PASARELA:-simulada}
       MERCADOPAGO_ACCESS_TOKEN: ${MERCADOPAGO_ACCESS_TOKEN:-}
       MERCADOPAGO_POS_ID: ${MERCADOPAGO_POS_ID:-}
@@ -96,7 +100,7 @@ services:
       context: ./frontend
       args:
         APP: cliente
-        VITE_ADMIN_URL: http://localhost:8084
+        VITE_ADMIN_URL: ${ADMIN_URL:-http://localhost:8084}
         VITE_AUTH0_DOMAIN: ${AUTH0_DOMAIN:-}
         VITE_AUTH0_CLIENT_ID: ${AUTH0_CLIENT_ID:-}
     image: dulcemayor-cliente
@@ -109,7 +113,7 @@ services:
       context: ./frontend
       args:
         APP: admin
-        VITE_CLIENT_URL: http://localhost:8083
+        VITE_CLIENT_URL: ${CLIENT_URL:-http://localhost:8083}
     image: dulcemayor-admin
     restart: unless-stopped
     depends_on: [backend]
