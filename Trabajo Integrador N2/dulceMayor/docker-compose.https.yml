@@ -1,0 +1,33 @@
+# Agrega HTTPS (Caddy en los puertos 80 y 443) encima de docker-compose.yml. Solo para el servidor.
+#
+# Se activa desde el .env del servidor, sin cambiar los comandos de siempre:
+#   COMPOSE_FILE=docker-compose.yml:docker-compose.https.yml
+#   DOMINIO=138-219-42-126.sslip.io
+#
+# Direcciones resultantes:
+#   https://DOMINIO                 sitio cliente
+#   https://preventista.DOMINIO     preventista
+#   https://transportista.DOMINIO   transportista
+#   https://admin.DOMINIO           administración
+#
+# En la PC no se usa: sin COMPOSE_FILE en el .env, docker compose levanta solo docker-compose.yml (puertos 8081-8084).
+
+services:
+  caddy:
+    image: caddy:2.8-alpine
+    restart: unless-stopped
+    depends_on: [cliente, preventista, transportista, admin]
+    environment:
+      DOMINIO: ${DOMINIO:?Definir DOMINIO en el .env (por ejemplo 138-219-42-126.sslip.io)}
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"   # HTTP/3
+    volumes:
+      - ./caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data       # certificados: si se borra, Caddy los vuelve a pedir
+      - caddy_config:/config
+
+volumes:
+  caddy_data:
+  caddy_config:

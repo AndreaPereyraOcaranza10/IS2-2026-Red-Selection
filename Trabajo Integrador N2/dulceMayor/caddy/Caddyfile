@@ -1,0 +1,24 @@
+# Entrada HTTPS del servidor (lo usa docker-compose.https.yml).
+# Caddy pide y renueva solo los certificados de Let's Encrypt para cada nombre, y redirige http -> https.
+# DOMINIO viene del .env, por ejemplo 138-219-42-126.sslip.io (sslip.io resuelve cualquier nombre a la IP que contiene).
+# Cada app es un nginx que ya reenvía /api al backend, así que acá solo se elige la app según el nombre.
+
+{$DOMINIO} {
+	encode gzip
+	reverse_proxy cliente:80
+}
+
+preventista.{$DOMINIO} {
+	encode gzip
+	reverse_proxy preventista:80
+}
+
+transportista.{$DOMINIO} {
+	encode gzip
+	reverse_proxy transportista:80
+}
+
+admin.{$DOMINIO} {
+	encode gzip
+	reverse_proxy admin:80
+}
