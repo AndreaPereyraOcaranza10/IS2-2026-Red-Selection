@@ -1,0 +1,90 @@
+// Integración continua y despliegue de Dulce Mayor.
+//
+// Configuración en Jenkins: un "Pipeline" (o "Multibranch Pipeline") apuntando a este repositorio,
+// con "Script Path" = Trabajo Integrador N2/dulceMayor/Jenkinsfile
+// Requisitos del agente: Docker (con el plugin "Docker Pipeline" de Jenkins) y "docker compose".
+// Las herramientas (Java 21, Maven, Node 20) corren dentro de contenedores: no hay que instalarlas en Jenkins.
+//
+// Etapas:
+//   1. Backend: compila y corre los tests (JUnit; usan H2, no necesitan MySQL).
+//   2. Frontend: instala dependencias, corre los tests (Vitest) y compila las 4 apps.
+//   3. Imágenes Docker: construye backend + 4 apps con el docker-compose.yml.
+//   4. Despliegue: solo en la rama main, levanta (o actualiza) todo con docker compose.
+
+pipeline {
+    agent any
+
+    options {
+        timestamps()
+        timeout(time: 45, unit: 'MINUTES')
+        disableConcurrentBuilds()
+        buildDiscarder(logRotator(numToKeepStr: '15'))
+    }
+
+    environment {
+        PROYECTO = 'Trabajo Integrador N2/dulceMayor'
+    }
+
+    stages {
+        stage('Backend: compilar y testear') {
+            agent {
+                docker {
+                    image 'maven:3.9-eclipse-temurin-21'
+                    // Cache de dependencias de Maven entre builds
+                    args '-v maven-repo:/root/.m2'
+                    reuseNode true
+                }
+            }
+            steps {
+                dir("${PROYECTO}/backend") {
+                    sh 'mvn -B test'
+                }
+            }
+            post {
+                always {
+                    junit allowEmptyResults: true, testResults: "${PROYECTO}/backend/target/surefire-reports/*.xml"
+                }
+            }
+        }
+
+        stage('Frontend: testear y compilar') {
+            agent {
+                docker {
+                    image 'node:20-alpine'
+                    reuseNode true
+                }
+            }
+            steps {
+                dir("${PROYECTO}/frontend") {
+                    sh 'npm ci --no-audit --no-fund'
+                    sh 'npm test'
+                    sh 'npm run build'
+                }
+            }
+        }
+
+        stage('Imágenes Docker') {
+            steps {
+                dir(PROYECTO) {
+                    sh 'docker compose build'
+                }
+            }
+        }
+
+        stage('Despliegue') {
+            // Multibranch: solo main. Pipeline simple (una sola rama, sin BRANCH_NAME): siempre.
+            when { anyOf { branch 'main'; expression { env.BRANCH_NAME == null } } }
+            steps {
+                dir(PROYECTO) {
+                    sh 'docker compose up -d --remove-orphans'
+                    sh 'docker compose ps'
+                }
+            }
+        }
+    }
+
+    post {
+        success { echo 'Build OK: tests en verde e imágenes construidas.' }
+        failure { echo 'Build con errores: revisar la etapa que falló.' }
+    }
+}

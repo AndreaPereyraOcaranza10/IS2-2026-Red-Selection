@@ -244,3 +244,7 @@ html,body,#root{height:auto;min-height:100%;overflow-x:hidden;overflow-y:auto}
 .dispatch-orders li{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 12px;border-bottom:1px solid var(--color-surface-dim);color:var(--color-brand-deep);font-size:17px}
 .dispatch-orders li:last-child{border-bottom:0}
 .dispatch-orders small{color:var(--color-text-secondary);font-size:16px;font-weight:700;white-space:nowrap}
+
+/* Avatar de la barra superior: botón que abre "Mi cuenta" (mantiene el aspecto circular, no el de los botones cuadrados de la barra). */
+.ops-app .ops-top-actions>button.ops-user-avatar{width:29px;height:29px;padding:0;border:0;border-radius:50%;background:var(--color-surface-dim);color:var(--color-brand-primary);cursor:pointer}
+.ops-app .ops-top-actions>button.ops-user-avatar:hover,.ops-app .ops-top-actions>button.ops-user-avatar:focus-visible{background:var(--color-surface-dim);box-shadow:0 0 0 2px var(--color-brand-primary);outline:0}

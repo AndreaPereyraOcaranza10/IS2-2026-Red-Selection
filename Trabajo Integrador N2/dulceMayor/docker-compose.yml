@@ -1,0 +1,119 @@
+# Despliegue completo de Dulce Mayor: base de datos + backend + las 4 apps web.
+#
+#   docker compose up -d --build        levanta todo (la primera vez tarda: compila backend y fronts)
+#   docker compose ps                   estado de cada servicio
+#   docker compose logs -f backend      logs del backend
+#   docker compose down                 apaga todo (los datos quedan en el volumen db_data)
+#   docker compose down -v              apaga todo y BORRA la base
+#
+# Direcciones:
+#   Preventista    http://localhost:8081
+#   Transportista  http://localhost:8082
+#   Sitio cliente  http://localhost:8083
+#   Admin          http://localhost:8084
+#   API (directo)  http://localhost:8090/api
+#
+# Los puertos no chocan con el entorno de desarrollo (Vite 5173-5176, backend 8080, XAMPP 3306).
+# Cada app reenvía /api al backend por la red interna de Docker (ver frontend/nginx.conf).
+# Variables opcionales (claves, correo, Auth0, Mercado Pago): copiar .env.example a .env y completar.
+
+name: dulcemayor
+
+services:
+  db:
+    image: mariadb:10.11
+    restart: unless-stopped
+    environment:
+      MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-dulcemayor-root}
+      MARIADB_DATABASE: dulce_mayor
+      MARIADB_USER: ${DB_USER:-dulcemayor}
+      MARIADB_PASSWORD: ${DB_PASSWORD:-dulcemayor-db}
+      TZ: America/Argentina/Mendoza
+    volumes:
+      - db_data:/var/lib/mysql
+    ports:
+      - "3307:3306"   # opcional: para conectarse desde HeidiSQL/DBeaver; dentro de Docker se usa db:3306
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build: ./backend
+    image: dulcemayor-backend
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_NAME: dulce_mayor
+      DB_USER: ${DB_USER:-dulcemayor}
+      DB_PASSWORD: ${DB_PASSWORD:-dulcemayor-db}
+      JWT_SECRET: ${JWT_SECRET:-dulce-mayor-docker-cambiar-este-secreto-en-un-despliegue-real}
+      DEMO_DATA: ${DEMO_DATA:-true}
+      CORS_ORIGENES: http://localhost:8081,http://localhost:8082,http://localhost:8083,http://localhost:8084
+      PAGOS_PASARELA: ${PAGOS_PASARELA:-simulada}
+      MERCADOPAGO_ACCESS_TOKEN: ${MERCADOPAGO_ACCESS_TOKEN:-}
+      MERCADOPAGO_POS_ID: ${MERCADOPAGO_POS_ID:-}
+      MERCADOPAGO_WEBHOOK_SECRET: ${MERCADOPAGO_WEBHOOK_SECRET:-}
+      AUTH0_DOMAIN: ${AUTH0_DOMAIN:-}
+      AUTH0_CLIENT_ID: ${AUTH0_CLIENT_ID:-}
+      MAIL_HOST: ${MAIL_HOST:-}
+      MAIL_PORT: ${MAIL_PORT:-587}
+      MAIL_USER: ${MAIL_USER:-}
+      MAIL_PASSWORD: ${MAIL_PASSWORD:-}
+      # Asistente de presupuestos: usa el Ollama instalado en la PC (fuera de Docker)
+      CHATBOT_OLLAMA_URL: ${CHATBOT_OLLAMA_URL:-http://host.docker.internal:11434}
+      TZ: America/Argentina/Mendoza
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    ports:
+      - "8090:8080"
+
+  preventista:
+    build:
+      context: ./frontend
+      args: { APP: preventista }
+    image: dulcemayor-preventista
+    restart: unless-stopped
+    depends_on: [backend]
+    ports: ["8081:80"]
+
+  transportista:
+    build:
+      context: ./frontend
+      args: { APP: transportista }
+    image: dulcemayor-transportista
+    restart: unless-stopped
+    depends_on: [backend]
+    ports: ["8082:80"]
+
+  cliente:
+    build:
+      context: ./frontend
+      args:
+        APP: cliente
+        VITE_ADMIN_URL: http://localhost:8084
+        VITE_AUTH0_DOMAIN: ${AUTH0_DOMAIN:-}
+        VITE_AUTH0_CLIENT_ID: ${AUTH0_CLIENT_ID:-}
+    image: dulcemayor-cliente
+    restart: unless-stopped
+    depends_on: [backend]
+    ports: ["8083:80"]
+
+  admin:
+    build:
+      context: ./frontend
+      args:
+        APP: admin
+        VITE_CLIENT_URL: http://localhost:8083
+    image: dulcemayor-admin
+    restart: unless-stopped
+    depends_on: [backend]
+    ports: ["8084:80"]
+
+volumes:
+  db_data:

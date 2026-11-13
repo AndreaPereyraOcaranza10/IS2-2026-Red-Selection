@@ -4,16 +4,14 @@ Monorepo con un front **por rol**, separados entre sí y con una librería compa
 
 | Front | Carpeta | Rol del backend | Puerto dev | Estado |
 |---|---|---|---|---|
-| Preventista (mobile-first) | `preventista/` | `PREVENTOR` | 5173 | ✅ completo |
-| Transportista / reparto | `transportista/` | `ALMACENERO` (ver nota) | 5174 | ✅ completo |
+| Preventista (mobile-first) | `preventista/` | `PREVENTISTA` | 5173 | ✅ completo |
+| Transportista / reparto | `transportista/` | `TRANSPORTISTA` | 5174 | ✅ completo |
 | Sitio público + portal del cliente | `cliente/` | `CLIENTE` | 5175 | ✅ completo |
-| Centro de mando administrativo | `admin/` | `ADMIN`, `JEFE_ADMINISTRATIVO`, `ALMACENERO` | 5176 | ✅ completo |
+| Centro de mando administrativo | `admin/` | `ADMINISTRATIVO`, `JEFE_ADMINISTRATIVO` | 5176 | ✅ completo |
 
-> **Nota de roles:** la consigna no define el rol "transportista"; asigna el reparto al equipo de despacho/logística. Hoy se mapea a `ALMACENERO` en `transportista/src/config.js`. Si el equipo crea un rol propio, se cambia esa línea y el enum del backend.
+> **Roles:** son los del enum `Rol` del backend. El jefe administrativo ve además Usuarios internos, Promociones, Estadísticas y el reporte de ventas por departamento y preventista. La consigna no define un rol para el reparto; el equipo creó `TRANSPORTISTA`.
 >
-> `cliente/` y `admin/` nacieron de un front en TypeScript de una sola app, que se migró a este formato: JSX, tokens de diseño compartidos (`shared/src/styles/tokens.css`: paleta, fuente Nunito, radios), sesión JWT compartida y los mismos estados de pedido que el resto. Los datos que ese front inventaba (reseñas, CBU/titular, CUIT del pie, horario de corte) se quitaron: deben salir del backend o cargarse en la sucursal.
->
-> `ALMACENERO` lo usan `transportista` y `admin`: confirmar con la cátedra si el reparto necesita un rol propio.
+> `cliente/` y `admin/` nacieron de un front en TypeScript de una sola app, que se migró a este formato: JSX, la paleta y la fuente Nunito compartidas (variables CSS de `shared/src/styles/app.css`), sesión JWT compartida y los mismos estados de pedido que el resto. Los datos que ese front inventaba (reseñas, CBU/titular, CUIT del pie, horario de corte) se quitaron: deben salir del backend o cargarse en la sucursal.
 
 ## 1. Estructura de carpetas
 
@@ -23,16 +21,16 @@ frontend/
 ├── Dockerfile                # multi-stage; una imagen por app (ARG APP)
 ├── nginx.conf                # estáticos + fallback SPA
 ├── docker-compose.frontend.yml
-├── .env.development          # VITE_USE_MOCK=true (demo sin backend)
+├── .env.development          # VITE_USE_MOCK (true = demo sin backend) y credenciales públicas de Auth0
 ├── tests/smoke.test.jsx      # flujos de preventista y transportista (vitest + Testing Library)
-├── tests/web.test.jsx        # portal cliente y centro de mando
+├── tests/pagos.test.jsx · pagoQr.test.jsx   # pagos del pedido y QR de Mercado Pago (cliente)
+├── tests/Despacho.test.jsx   # despacho de pedidos (admin) y aviso de pago (transportista)
+├── tests/pointOfSale.test.js # alta de puntos de venta
 ├── tests/routes.test.js      # adapter de rutas y contrato con el backend
 │
 ├── shared/src/               # @dulcemayor/shared  (lo usan TODOS los fronts)
-│   ├── core.js               # @dulcemayor/core: entrada de los fronts web (sin estilos móviles)
-│   ├── styles/tokens.css     # paleta, fuente y radios: ÚNICA fuente de diseño de los 4 fronts
-│   ├── styles/app.css        # estilos de componentes móviles (importa tokens.css)
-│   ├── styles/web-base.css   # estilos web comunes de cliente y admin
+│   ├── styles/app.css        # variables de diseño (paleta, fuente, radios) y estilos de las apps móviles
+│   ├── styles/products-admin.css # pantalla de productos del centro de mando
 │   ├── web/StaffAuth.jsx     # login y cambio de clave del personal (admin)
 │   ├── components/           # Layout, BottomNav, Fab, Sheet, Dialog, Toast, MapView,
 │   │                         # SwipeRow, StopCard, Timeline, QtyControl, Field, States, Chip, Icon
@@ -124,7 +122,7 @@ Todas las rutas (salvo login) exigen `Authorization: Bearer <JWT>`. Errores: `{ 
 El empleado va en la URL por `user.employeeId` (o `user.id`) de la sesión. Errores del backend: `ProblemDetail` (`detail`, `errores`); `http.js` los traduce a `ApiError`.
 
 
-**Preventista (`PREVENTOR`)**
+**Preventista (`PREVENTISTA`)**
 
 | Método y ruta | Request | Response | Status |
 |---|---|---|---|
@@ -138,7 +136,7 @@ El empleado va en la URL por `user.employeeId` (o `user.id`) de la sesión. Erro
 | `GET /api/ubicacion/provincias` · `/departamentos?provinciaId=` · `/localidades?departamentoId=` | — | `{ id, nombre }[]` (API Georef, públicos) | 200 · 422 · 503 |
 | `GET /api/ubicacion/inversa?lat=&lon=` ("Usar mi ubicación") | — | `{ provincia, departamento }` · sin cuerpo si Georef no la ubica | 200 · 204 · 422 |
 
-**Transportista (`ALMACENERO`)**
+**Transportista (`TRANSPORTISTA`)**
 
 | Método y ruta | Request | Response | Status |
 |---|---|---|---|
@@ -157,7 +155,7 @@ El empleado va en la URL por `user.employeeId` (o `user.id`) de la sesión. Erro
 | `GET /api/profile` · `PUT /api/profile` | datos del perfil | `ProfileDTO` | 200 · 400 |
 | `GET /api/orders` · `POST /api/orders` | como preventista; el cliente solo ve y crea los de su punto de venta | `OrderDTO` | 200 · 201 |
 
-**Centro de mando (`ADMIN`, `JEFE_ADMINISTRATIVO`, `ALMACENERO`)**
+**Centro de mando (`ADMINISTRATIVO`, `JEFE_ADMINISTRATIVO`)**
 
 | Método y ruta | Request | Response | Status |
 |---|---|---|---|
@@ -167,7 +165,7 @@ El empleado va en la URL por `user.employeeId` (o `user.id`) de la sesión. Erro
 | `PATCH /api/orders/{id}/status` | `{ state }` | `OrderDTO` | 200 · 409 `INVALID_TRANSITION` / `INSUFFICIENT_STOCK` |
 | `GET/POST /api/admin/companies/branches` · `PUT/DELETE /api/admin/companies/branches/{id}` | `BranchDTO` | `BranchDTO` | 200 · 201 · 204 · 404 |
 
-Circuito de estados: `CARGADO → FACTURADO | PENDIENTE_STOCK | ANULADO`, `PENDIENTE_STOCK → FACTURADO | ANULADO`, `FACTURADO → EN_REPARTO | ANULADO`, `EN_REPARTO → ENTREGADO`. Facturar descuenta stock; si no alcanza, el backend responde 409.
+Circuito de estados (patrón State en el backend): `CARGADO → PENDIENTE_PAGO | PENDIENTE_STOCK | ANULADO`, `PENDIENTE_STOCK → PENDIENTE_PAGO | ANULADO`, `PENDIENTE_PAGO → FACTURADO | ANULADO`, `FACTURADO → EN_REPARTO | ANULADO`, `EN_REPARTO → ENTREGADO`. Al cargar el pedido se **reserva** el stock (si alcanza); la factura se emite cuando se registra el pago (o al despachar, si se cobra en efectivo) y ahí se descuenta el stock.
 
 **DTOs principales**
 
@@ -214,38 +212,14 @@ docker build --build-arg APP=preventista   -t dulcemayor-preventista .
 docker build --build-arg APP=transportista -t dulcemayor-transportista .
 docker build --build-arg APP=cliente       -t dulcemayor-cliente .
 docker build --build-arg APP=admin         -t dulcemayor-admin .
-docker compose -f docker-compose.frontend.yml up --build   # prueba local con mock: :8081 a :8084
+docker compose -f docker-compose.frontend.yml up --build   # preventista y transportista con la API simulada: :8081 y :8082
 ```
 
-**Integración al `docker-compose.yml` productivo (DonWeb VPS)** — servicios a sumar junto a PostgreSQL y backend:
-
-```yaml
-  preventista:
-    build: { context: ./frontend, args: { APP: preventista } }
-    restart: unless-stopped
-  transportista:
-    build: { context: ./frontend, args: { APP: transportista } }
-    restart: unless-stopped
-  cliente:
-    build: { context: ./frontend, args: { APP: cliente } }
-    restart: unless-stopped
-  admin:
-    build: { context: ./frontend, args: { APP: admin } }
-    restart: unless-stopped
-```
-
-Caddyfile del reverse proxy (un subdominio por front, HTTPS automático):
-
-```
-preventista.dulcemayor.com.ar   { handle /api/* { reverse_proxy backend:8080 }  handle { reverse_proxy preventista:80 } }
-reparto.dulcemayor.com.ar       { handle /api/* { reverse_proxy backend:8080 }  handle { reverse_proxy transportista:80 } }
-www.dulcemayor.com.ar           { handle /api/* { reverse_proxy backend:8080 }  handle { reverse_proxy cliente:80 } }
-admin.dulcemayor.com.ar         { handle /api/* { reverse_proxy backend:8080 }  handle { reverse_proxy admin:80 } }
-```
+**Sistema completo** (base de datos, backend y las 4 apps): `docker-compose.yml` en la carpeta `dulceMayor`, explicado en [`../DESPLIEGUE.md`](../DESPLIEGUE.md) junto con el pipeline de Jenkins. Cada imagen es un nginx que sirve la app y reenvía `/api` al backend (`nginx.conf`).
 
 ## Decisiones a tener en cuenta
 
-- **Login con Google (cliente)**: el botón redirige al flujo OAuth2 del backend; en modo demo no funciona. El texto comercial del Hero ("+2.000 productos", "Envío gratis desde $150.000") es de ese front original: validarlo con el negocio.
+- **Login con Google (cliente)**: usa Auth0 (`VITE_AUTH0_DOMAIN` y `VITE_AUTH0_CLIENT_ID`); el backend valida el token con `AUTH0_DOMAIN` y `AUTH0_CLIENT_ID`. En modo demo no funciona. El texto comercial del Hero ("+2.000 productos", "Envío gratis desde $150.000") es de ese front original: validarlo con el negocio.
 
 - **JWT en `sessionStorage`**: simple y sin CSRF, pero expuesto a XSS. Para producción endurecida, el backend puede emitir una cookie `HttpOnly; Secure; SameSite=Strict` y se elimina el manejo del token en `http.js`.
 - **Mapa y rutas**: `MapView.jsx` usa Leaflet con teselas de OpenStreetMap, dentro de la app (pines numerados, ruta punteada, atribución obligatoria de OSM); las teselas las pide el navegador (`VITE_TILE_URL` para otro proveedor). **Todo el ruteo lo hace el backend**: "Cómo llegar" (`Directions.jsx`) pide el trayecto a `GET /api/ruteo/trayecto`; "Optimizar mi ruta" (preventista) y "Optimizar mi reparto" (transportista) envían la ubicación actual a `POST /api/rutas/{id}/optimizar`, y el backend ordena por calles con OSRM (respaldo en línea recta), guarda el orden y devuelve el recorrido para dibujarlo. Al confirmar un pedido, `OrderDonePage.jsx` pide lo mismo desde el comercio recién visitado y propone el siguiente punto más eficiente. El orden del transportista no cambia solo tras cada entrega, porque el aviso por correo al próximo comercio depende de él. El servidor OSRM se configura en el backend (`APP_OSRM_URL`; el público es solo para desarrollo). Con `VITE_USE_MOCK=true` el mock simula esos endpoints con una estimación en línea recta (el plan sale como `estimada`). Sin permiso de ubicación se usa un origen de demo. Los datos de detalle de entrega, pedidos y puntos de venta siguen contra el mock hasta que el backend los exponga.

@@ -379,7 +379,7 @@ export function OperationsDashboardPage({ onBack }) {
             /* @__PURE__ */ jsx(Bell, {}),
             pendingOrders.length > 0 && /* @__PURE__ */ jsx("i", {})
           ] }),
-          /* @__PURE__ */ jsx("span", { className: "ops-user-avatar", children: "DM" })
+          /* @__PURE__ */ jsx("button", { type: "button", className: "ops-user-avatar", onClick: () => setSection("Mi cuenta"), "aria-label": "Abrir Mi cuenta", title: "Mi cuenta", children: "DM" })
         ] })
       ] }),
       /* @__PURE__ */ jsxs("div", { className: "ops-content", children: [
